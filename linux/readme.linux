@@ -1,0 +1,73 @@
+Running the game
+
+   In order to run the game on Linux you must have the following libraries 
+   installed on your system:   
+   
+      - Qt >= 4.8.0
+         libqt4-core
+         libqt4-gui
+         libqt4-opengl
+         libqt4-network
+         
+      - SDL >= 2.0.2
+         libsdl2
+      
+      - ALSA >= 2.0
+         libasound2
+
+   On apt-based systems you can install all these packages as follows:  
+   
+      sudo apt-get install libqt4-core libqt4-gui libqt4-opengl libqt4-network
+      sudo apt-get install libsdl2
+      sudo apt-get install libasound2    
+
+
+   In case there's no SDL 2.0.2 or greater available for your distribution, you 
+   can just compile your own:
+    
+      wget http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
+      tar xzf SDL2-2.0.3.tar.gz
+      cd SDL2-2.0.3
+      ./configure
+      make
+      sudo make install 
+
+      
+   Moreover, you should ensure the game binaries are still executable after
+   extracting them; for example by calling 'chmod +x dynablaster_linux_x64'. 
+
+   
+   
+Running the server
+
+   If you like to host a server you can pick between server_linux_x86 and 
+   server_linux_x64. 
+   Moreover, you might want to use the script like the one below which 
+   automatically restarts whenever the server process is killed.
+   
+      #!/bin/bash
+      while true
+      do
+         if pgrep server[y] 1>/dev/null; then 
+            sleep 1
+         else
+            ./server_linux_x64
+         fi
+      done
+   
+   If a window manager is detected a GUI will be shown; otherwise the server
+   will run in your console.
+   
+   
+   
+Troubleshooting
+
+   - On one system we noticed some performance issues which were resolved by
+     disabling vsync. You can do that by editing data/game.ini; there's a
+     section 'video' with an entry named 'vsync'. You may set its value
+     to 'false'.
+   
+   - In case you have any dependency issues, it is always a good idea to export 
+     the LD_LIBRARY_PATH to "." and copy all required libs to the current
+     directory.
+   

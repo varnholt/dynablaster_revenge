@@ -1,0 +1,55 @@
+Release 1.0.2
+
+Modifications
+- Sound hasn't been working on various linux distributions; that's fixed.
+- The client used to crash when joining a running game; fixed as well.
+- The 42 char limit for lounge messages has been removed.
+- The in-game clock is now reset on every game start.
+- The peer's IP is shown in the server log.
+- A minimum bomb kicking distance between two players has been introduced.
+- The position interpolation is now limited to the playfield dimensions.
+- Button 'b0' is now working on joysticks that do not have any axes.
+- Changing input fields using the tab button in the main menu has been fixed.
+- A typo in one of the track names has been fixed.
+- A Qt version check (>= 4.8.0 and < 5.0) has been added.
+
+
+Release 1.0.1 
+
+Modifications:
+- Support for optional OpenGL extentions has been added.
+- A button has been added to the lounge to add local players without hotkey.
+- Bombs are now initiated when they're kicked into another detonation.
+- If a player joins a running game he/she is told the maximum game duration.
+- All keys are released when the window focus is lost.
+- Space level performance improved for slow hardware.
+- Screensaver and screen dimming is disabled while the game is running.
+- An initial check if render-to-texture is functional has been added.
+- A skull face is now active half a second before it points perfectly upwards.
+- The setting 'development/camerafollowsplayer' in game.ini is functional again.
+- The space lensflare now shifts with the camera x translation.
+- The animation of the invincible effect is now resolution independent.
+- Pouet, facebook and web buttons have been added to the main menu.
+- The server dynablaster.titan-sucks.net has been added to the history.dr file.
+- Added support for SuperJoyBox9 (connects XBox1 pads to PC).
+- Added support for PS3/XBox360 Adapter (connects PS1/2/3, Xbox360 pads to PC).
+
+Thanks:
+- The Competition Pro fanatics Barto and RufUsul who spotted a joystick
+  initialization bug using their insane reversing skills
+- Jaret Frappier of unfuddle.com for his great support
+- Arvenius^titan for hosting the game files as well as the public game server
+- Oerg866^titan who spent hours and hours with "testing" :)
+- XXX^haujobb for public relations
+- Fabian for borrowing me his gamepads for a couple of months :)
+- Stefan for spreading the word!
+- James Monkman from indiegames.com for his article about our game, for revising
+  and publishing the multiplayer guide and granting us permission to add it to
+  our documentation
+- Bobic for publishing an article about our game only two hours after its
+  release - that was really impressive!
+
+
+Release 1.0 
+
+Initial release at Revision 2014
