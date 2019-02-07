@@ -1,0 +1,1 @@
+%QTDIR%\bin\qmake.exe -t vcapp -spec %QTDIR%\mkspecs\win32-msvc2010

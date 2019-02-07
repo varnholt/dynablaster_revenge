@@ -1,0 +1,38 @@
+
+#ifdef DEBUG
+#include <stdio.h>
+#define debug(s) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__)
+#define debug1(s, a) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a)
+#define debug2(s, a, b) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b)
+#define debug3(s, a, b, c) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c)
+#define debug4(s, a, b, c, d) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d)
+#define debug5(s, a, b, c, d, e) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e)
+#define debug6(s, a, b, c, d, e, f) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f)
+#define debug7(s, a, b, c, d, e, f, g) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g)
+#define debug8(s, a, b, c, d, e, f, g, h) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h)
+#define debug9(s, a, b, c, d, e, f, g, h, i) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i)
+#define debug10(s, a, b, c, d, e, f, g, h, i, j) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j)
+#define debug11(s, a, b, c, d, e, f, g, h, i, j, k) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k)
+#define debug12(s, a, b, c, d, e, f, g, h, i, j, k, l) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l)
+#define debug13(s, a, b, c, d, e, f, g, h, i, j, k, l, m) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m)
+#define debug14(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+#define debug15(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) fprintf(stderr, "[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+#else
+#define debug(s) 
+#define debug1(s, a) 
+#define debug2(s, a, b) 
+#define debug3(s, a, b, c) 
+#define debug4(s, a, b, c, d) 
+#define debug5(s, a, b, c, d, e) 
+#define debug6(s, a, b, c, d, e, f) 
+#define debug7(s, a, b, c, d, e, f, g) 
+#define debug8(s, a, b, c, d, e, f, g, h) 
+#define debug9(s, a, b, c, d, e, f, g, h, i) 
+#define debug10(s, a, b, c, d, e, f, g, h, i, j) 
+#define debug11(s, a, b, c, d, e, f, g, h, i, j, k) 
+#define debug12(s, a, b, c, d, e, f, g, h, i, j, k, l) 
+#define debug13(s, a, b, c, d, e, f, g, h, i, j, k, l, m) 
+#define debug14(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n) 
+#define debug15(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) 
+#endif
+
