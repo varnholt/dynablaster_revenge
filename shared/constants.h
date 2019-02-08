@@ -74,11 +74,14 @@ class Constants
       //! key enum
       enum Key
       {
-         KeyUp    = 0x01,
-         KeyDown  = 0x02,
-         KeyLeft  = 0x04,
-         KeyRight = 0x08,
-         KeyBomb  = 0x10
+         KeyUp      = 0x01,
+         KeyDown    = 0x02,
+         KeyLeft    = 0x04,
+         KeyRight   = 0x08,
+         KeyBomb    = 0x10,
+         KeyZoomIn  = 0x20,
+         KeyZoomOut = 0x40,
+         KeyStart   = 0x80
       };
 
       //! directions

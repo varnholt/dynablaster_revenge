@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "displacementmaterial.h"
-#include "textureslot.h"
+#include "materials/textureslot.h"
 #include "tools/stream.h"
 #include "tools/profiling.h"
 #include "nodes/mesh.h"

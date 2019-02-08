@@ -168,6 +168,8 @@ public slots:
    //! display player names
    void displayPlayerNames();
 
+   //! set zoom factor of camera. default is 1.0f
+   void setCameraZoom(float zoom);
 
 signals:
 
@@ -279,6 +281,7 @@ private:
    QList<ExtraRevealAnimation*> mExtraRevealAnimations;
 
    float mCameraAnim;
+   float mCameraZoom;
 
    bool mTimeReset;
 

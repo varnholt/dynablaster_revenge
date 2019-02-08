@@ -118,6 +118,18 @@ BombermanClientGui::BombermanClientGui(QObject* parent, float fps)
       Qt::QueuedConnection
    );
 
+   connect(
+      mClient, SIGNAL( zoomIn(bool) ),
+      mGameView, SLOT( zoomIn(bool) ),
+      Qt::QueuedConnection
+   );
+
+   connect(
+      mClient, SIGNAL( zoomOut(bool) ),
+      mGameView, SLOT( zoomOut(bool) ),
+      Qt::QueuedConnection
+   );
+
    qRegisterMetaType< QList<GameInformation> >("QList<GameInformation>");
    qRegisterMetaType<Constants::Color>("Constants::Color");
    qRegisterMetaType<Constants::ExtraType>("Constants::ExtraType");
@@ -1098,8 +1110,14 @@ void BombermanClientGui::toggleFullscreen()
 */
 void BombermanClientGui::addHeadlessPlayer()
 {
-   int joystickCount =
-      GameJoystickIntegration::getInstance(0)->getJoystickInterface()->getJoystickCount();
+   GameJoystickIntegration* ji= GameJoystickIntegration::getInstance(0);
+
+   int joystickCount = 0;
+   
+   if (ji)
+   {
+      joystickCount= ji->getJoystickInterface()->getJoystickCount();
+   }
 
    int instanceCount = HeadlessIntegration::getInstanceCount();
 

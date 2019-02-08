@@ -214,7 +214,7 @@ void PSD::Layer::load(Stream *stream)
    while (totalsize - (stream->pos() - curpos) > 4)
    {
       blockHeader= (blockHeader << 8) | stream->getByte();
-      char* test= (char*)&blockHeader;
+//      char* test= (char*)&blockHeader;
       if (blockHeader == '8BIM')
       {
          int blockId= stream->getInt();
@@ -225,7 +225,7 @@ void PSD::Layer::load(Stream *stream)
             delete[] mName;
             unsigned int length= stream->getInt();
             mName= new char[length+1];
-            for (int i=0; i<length; i++)
+            for (unsigned int i=0; i<length; i++)
             {
                mName[i]= stream->getWord() & 255;
             }

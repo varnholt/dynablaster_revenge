@@ -311,7 +311,6 @@ void FrameBuffer::unbind()
    }
 
    glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-   activeDevice->resize( activeDevice->getWidth(), activeDevice->getHeight() );
 }
 
 
@@ -334,7 +333,7 @@ void FrameBuffer::pop()
       {
          mInstance= 0;
          glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-         glViewport(0,0, activeDevice->getWidth(), activeDevice->getHeight());
+         glViewport(activeDevice->getBorderLeft(), activeDevice->getBorderBottom(), activeDevice->getWidth(), activeDevice->getHeight());
       }
    }
 }

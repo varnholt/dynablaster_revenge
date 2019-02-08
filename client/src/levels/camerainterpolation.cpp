@@ -119,7 +119,7 @@ void CameraInterpolation::endPlayerPositionUpdate()
    }
 }
 
-Matrix CameraInterpolation::getCameraMatrix(float time)
+Matrix CameraInterpolation::getCameraMatrix(float time, float scale)
 {
    float fov= 1.0f;
    Matrix cam;
@@ -160,6 +160,7 @@ Matrix CameraInterpolation::getCameraMatrix(float time)
       }
    }
 
+   fov*=scale;
    cam= cam.getView() * Matrix::scale(fov, fov, 1.0f);
 
    return cam;

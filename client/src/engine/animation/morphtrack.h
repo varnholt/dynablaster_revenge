@@ -12,10 +12,9 @@ public:
    MorphTrack();
 
    void load(Stream *stream);
-   const List<Vector>& get(float time);
+   void get(List<Vector>& vtx, List<Vector>& nrm, float time);
 
-   void add(int time, const List<Vector>& list);
+   void calculateNormals(const Array<unsigned short>& indices);
 
 private:
-   List<Vector> mVertices;
 };

@@ -159,6 +159,21 @@ void DetonationManager::init()
 */
 
    Image palette("detonationpalette");
+/*
+   Image palette("palette");
+   unsigned int* dst= (unsigned int*)palette.getData();
+   for (int i=0; i<palette.getWidth(); i++)
+   {
+      unsigned char a= dst[i] >> 24 & 255;
+      unsigned char r= dst[i] >> 16 & 255;
+      unsigned char g= dst[i] >> 8 & 255;
+      unsigned char b= dst[i] & 255;
+      dst[i]= (a<<24)|(b<<16)|(g<<8)|r;
+   }
+
+   palette.save("palette.tga");
+*/
+
    glGenTextures(1, &mGradientMap);
    glBindTexture(GL_TEXTURE_1D, mGradientMap);
    glTexImage1D(

@@ -229,7 +229,7 @@ void PlayerDeathEffect::render()
    float sizeFactor= 1.0f;
    FrameBuffer* fb= FrameBuffer::Instance();
    if (fb)
-      sizeFactor= fb->width() * 1.25f / 1920.0f;
+      sizeFactor= fb->getSizeFactor(1920.0f);
 
    foreach (DeathFlowFieldAnimation* flow, mFlowAnimations)
    {

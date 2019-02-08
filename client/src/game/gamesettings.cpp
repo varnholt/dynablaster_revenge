@@ -17,6 +17,11 @@
 #define DEFAULT_VIDEO_BRIGHTNESS     0.5
 #define DEFAULT_VIDEO_VSYNC          1
 #define DEFAULT_VIDEO_SHOWFPS        false
+#define DEFAULT_VIDEO_ZOOM           1
+#define DEFAULT_VIDEO_BORDERLEFT     0
+#define DEFAULT_VIDEO_BORDERTOP      0
+#define DEFAULT_VIDEO_BORDERRIGHT    0
+#define DEFAULT_VIDEO_BORDERBOTTOM   0
 
 // control
 #define KEYMAP_NOMINAL_SIZE          5
@@ -1039,11 +1044,14 @@ QMap<Constants::Key, int> GameSettings::ControllerSettings::getKeyMap() const
 
 void GameSettings::ControllerSettings::initializeDefaultMap()
 {
-   mKeyMap.insert(Constants::KeyUp,    Qt::Key_Up);
-   mKeyMap.insert(Constants::KeyDown,  Qt::Key_Down);
-   mKeyMap.insert(Constants::KeyLeft,  Qt::Key_Left);
-   mKeyMap.insert(Constants::KeyRight, Qt::Key_Right);
-   mKeyMap.insert(Constants::KeyBomb,  Qt::Key_Space);
+   mKeyMap.insert(Constants::KeyUp,     Qt::Key_Up);
+   mKeyMap.insert(Constants::KeyDown,   Qt::Key_Down);
+   mKeyMap.insert(Constants::KeyLeft,   Qt::Key_Left);
+   mKeyMap.insert(Constants::KeyRight,  Qt::Key_Right);
+   mKeyMap.insert(Constants::KeyBomb,   Qt::Key_Space);
+   mKeyMap.insert(Constants::KeyZoomIn, Qt::Key_BracketRight);
+   mKeyMap.insert(Constants::KeyZoomOut,Qt::Key_BracketLeft);
+   mKeyMap.insert(Constants::KeyStart,  Qt::Key_F10);
 }
 
 
@@ -1076,6 +1084,20 @@ Qt::Key GameSettings::ControllerSettings::getBombKey() const
    return (Qt::Key)mKeyMap[Constants::KeyBomb];
 }
 
+Qt::Key GameSettings::ControllerSettings::getZoomInKey() const
+{
+   return (Qt::Key)mKeyMap[Constants::KeyZoomIn];
+}
+
+Qt::Key GameSettings::ControllerSettings::getZoomOutKey() const
+{
+   return (Qt::Key)mKeyMap[Constants::KeyZoomOut];
+}
+
+Qt::Key GameSettings::ControllerSettings::getStartKey() const
+{
+   return (Qt::Key)mKeyMap[Constants::KeyStart];
+}
 
 void GameSettings::ControllerSettings::setAnalogueAxis1(int axis1)
 {
@@ -1360,7 +1382,12 @@ GameSettings::VideoSettings::VideoSettings()
    mFullscreen(false),
    mBrightness(2.2f),
    mVSync(1),
-   mShowFps(true)
+   mShowFps(true),
+   mZoom(1.0f),
+   mBorderLeft(0),
+   mBorderTop(0),
+   mBorderRight(0),
+   mBorderBottom(0)
 {
 }
 
@@ -1375,19 +1402,29 @@ void GameSettings::VideoSettings::serialize()
    setValue("video/brightness", QString::number(getBrightness()));
    setValue("video/vsync", getVSync());
    setValue("video/showfps", isFpsShown());
+   setValue("video/zoom", QString::number(getZoom()));
+   setValue("video/borderleft", getBorderLeft());
+   setValue("video/bordertop", getBorderTop());
+   setValue("video/borderright", getBorderRight());
+   setValue("video/borderbottom", getBorderBottom());
 }
 
 
 void GameSettings::VideoSettings::deserialize()
 {
-   setWidth(value("video/width",           DEFAULT_VIDEO_WIDTH).toInt());
-   setHeight(value("video/height",         DEFAULT_VIDEO_HEIGHT).toInt());
-   setResolution(value("video/resolution", DEFAULT_VIDEO_RESOLUTION).toInt());
-   setAntialias(value("video/antialias",   DEFAULT_VIDEO_ANTIALIAS).toInt());
-   setFullscreen(value("video/fullscreen", DEFAULT_VIDEO_FULLSCREEN).toBool());
-   setBrightness(value("video/brightness", DEFAULT_VIDEO_BRIGHTNESS).toFloat());
-   setVSync(value("video/vsync",           DEFAULT_VIDEO_VSYNC).toInt());
-   setShowFps(value("video/showfps",       DEFAULT_VIDEO_SHOWFPS).toBool());
+   setWidth(value("video/width",               DEFAULT_VIDEO_WIDTH).toInt());
+   setHeight(value("video/height",             DEFAULT_VIDEO_HEIGHT).toInt());
+   setResolution(value("video/resolution",     DEFAULT_VIDEO_RESOLUTION).toInt());
+   setAntialias(value("video/antialias",       DEFAULT_VIDEO_ANTIALIAS).toInt());
+   setFullscreen(value("video/fullscreen",     DEFAULT_VIDEO_FULLSCREEN).toBool());
+   setBrightness(value("video/brightness",     DEFAULT_VIDEO_BRIGHTNESS).toFloat());
+   setVSync(value("video/vsync",               DEFAULT_VIDEO_VSYNC).toInt());
+   setShowFps(value("video/showfps",           DEFAULT_VIDEO_SHOWFPS).toBool());
+   setZoom(value("video/zoom",                 DEFAULT_VIDEO_ZOOM).toFloat());
+   setBorderLeft(value("video/borderleft",     DEFAULT_VIDEO_BORDERLEFT).toInt());
+   setBorderTop(value("video/bordertop",       DEFAULT_VIDEO_BORDERTOP).toInt());
+   setBorderRight(value("video/borderright",   DEFAULT_VIDEO_BORDERRIGHT).toInt());
+   setBorderBottom(value("video/borderbottom", DEFAULT_VIDEO_BORDERBOTTOM).toInt());
 }
 
 
@@ -1404,6 +1441,11 @@ void GameSettings::VideoSettings::duplicate(
    dest->setBrightness(src->getBrightness());
    dest->setVSync(src->getVSync());
    dest->setShowFps(src->isFpsShown());
+   dest->setZoom(src->getZoom());
+   dest->setBorderLeft(src->getBorderLeft());
+   dest->setBorderTop(src->getBorderTop());
+   dest->setBorderRight(src->getBorderRight());
+   dest->setBorderBottom(src->getBorderBottom());
 }
 
 
@@ -1419,6 +1461,11 @@ void GameSettings::VideoSettings::restoreDefaults()
    setBrightness(DEFAULT_VIDEO_BRIGHTNESS);
    setVSync(DEFAULT_VIDEO_VSYNC);
    setShowFps(DEFAULT_VIDEO_SHOWFPS);
+   setZoom(DEFAULT_VIDEO_ZOOM);
+   setBorderLeft(DEFAULT_VIDEO_BORDERLEFT);
+   setBorderTop(DEFAULT_VIDEO_BORDERTOP);
+   setBorderRight(DEFAULT_VIDEO_BORDERRIGHT);
+   setBorderBottom(DEFAULT_VIDEO_BORDERBOTTOM);
 }
 
 
@@ -1520,6 +1567,56 @@ bool GameSettings::VideoSettings::isFpsShown() const
 void GameSettings::VideoSettings::setShowFps(bool value)
 {
    mShowFps = value;
+}
+
+float GameSettings::VideoSettings::getZoom() const
+{
+   return mZoom;
+}
+
+void GameSettings::VideoSettings::setZoom(float zoom)
+{
+   mZoom= zoom;
+}
+
+int GameSettings::VideoSettings::getBorderLeft() const
+{
+   return mBorderLeft;
+}
+
+void GameSettings::VideoSettings::setBorderLeft(int left)
+{
+   mBorderLeft= left;
+}
+
+int GameSettings::VideoSettings::getBorderTop() const
+{
+   return mBorderTop;
+}
+
+void GameSettings::VideoSettings::setBorderTop(int top)
+{
+   mBorderTop= top;
+}
+
+int GameSettings::VideoSettings::getBorderRight() const
+{
+   return mBorderRight;
+}
+
+void GameSettings::VideoSettings::setBorderRight(int right)
+{
+   mBorderRight= right;
+}
+
+int GameSettings::VideoSettings::getBorderBottom() const
+{
+   return mBorderBottom;
+}
+
+void GameSettings::VideoSettings::setBorderBottom(int bottom)
+{
+   mBorderBottom= bottom;
 }
 
 

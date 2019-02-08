@@ -104,6 +104,7 @@ GameDrawable::GameDrawable(RenderDevice* device)
    mPlayfieldScaleX(1.0),
    mPlayfieldScaleY(1.0),
    mCameraAnim(0.0f),
+   mCameraZoom(1.0f),
    mTimeReset(true),
    mFlowFieldAnimDebug(false),
    mWinAnimationStarted(false),
@@ -1019,6 +1020,9 @@ void GameDrawable::playerInfected(
 */
 void GameDrawable::createMapItem(MapItem *item)
 {
+   if (!mPlayfield) // wtf?!
+      return;
+
    if (!mMapItems.contains(item))
    {
       Mesh *mesh= 0;
@@ -1441,6 +1445,17 @@ void GameDrawable::setPlayerPosition(int id, float x, float y, float angle)
       player->setRotation(angle + (float)M_PI * 0.5f);
       player->setPosition(x, y);
    }
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+   set zoom factor
+   \param zoom zoom factor
+*/
+void GameDrawable::setCameraZoom(float zoom)
+{
+   mCameraZoom= zoom;
 }
 
 
@@ -2111,7 +2126,7 @@ void GameDrawable::paintGL()
 
       mLevel->endPlayerPositionUpdate();
 
-      view= mLevel->getCameraMatrix(mCameraAnim);
+      view= mLevel->getCameraMatrix(mCameraAnim, mCameraZoom);
    }
 
 
@@ -2195,6 +2210,7 @@ void GameDrawable::paintGL()
    // particle effects (don't need multisampling)
    if (gameFb->samples()>1)
       glDisable(GL_MULTISAMPLE);
+
    mPlayerDeathEffect->render();
    mPlayerInfectedEffect->render();
    mPlayerInvincibleEffect->render();

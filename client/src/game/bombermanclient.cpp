@@ -1621,7 +1621,10 @@ void BombermanClient::keyPressed(QKeyEvent* event)
       || event->key() == controllerSettings->getDownKey()
       || event->key() == controllerSettings->getLeftKey()
       || event->key() == controllerSettings->getRightKey()
-      || event->key() == controllerSettings->getBombKey();
+      || event->key() == controllerSettings->getBombKey()
+      || event->key() == controllerSettings->getZoomInKey()
+      || event->key() == controllerSettings->getZoomOutKey()
+      || event->key() == controllerSettings->getStartKey();
 
    if ((controlKey && !event->isAutoRepeat()) || !controlKey)
    {
@@ -1803,6 +1806,23 @@ void BombermanClient::processKeyPressed(int key)
       emit showMainMenu();
    }
 
+   // zoom camera
+   else if (key == Qt::Key_BracketLeft)
+   {
+      qDebug("start zoom out");
+      emit zoomOut(true);
+   }
+   else if (key == Qt::Key_BracketRight)
+   {
+      emit zoomIn(true);
+   }
+
+   // abort game (F10/Start)
+   else if (key == Qt::Key_F10)
+   {
+      stopGame();
+   }
+
    // care about movement
    else
    {
@@ -1884,6 +1904,15 @@ void BombermanClient::processKeyReleased(int key)
    else if (key == controllerSettings->getRightKey())
    {
       mKeysPressed &= ~Constants::KeyRight;
+   }
+   // zoom camera
+   else if (key == Qt::Key_BracketLeft)
+   {
+      emit zoomOut(false);
+   }
+   else if (key == Qt::Key_BracketRight)
+   {
+      emit zoomIn(false);
    }
    else if (
          key == controllerSettings->getBombKey()

@@ -147,6 +147,9 @@ class BombermanClient : public QObject
 
       // visualization
 
+      void zoomIn(bool state);
+      void zoomOut(bool state);
+
       //! signal player position
       void setPlayerPosition(int id, float x, float y, float ang);
 

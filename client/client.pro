@@ -209,11 +209,13 @@ HEADERS += \
     src/engine/materials/shadowbillboard.h \
     src/engine/materials/skullmaterial.h \
     src/engine/materials/texturematerial.h \
+    src/engine/materials/textureslot.h \
     src/engine/nodes/animatedmesh.h \
     src/engine/nodes/camera.h \
     src/engine/nodes/dummy.h \
     src/engine/nodes/light.h \
     src/engine/nodes/mesh.h \
+    src/engine/nodes/shape.h \
     src/engine/nodes/node.h \
     src/engine/nodes/omni.h \
     src/engine/nodes/scenegraph.h \
@@ -565,6 +567,7 @@ SOURCES += \
     src/engine/nodes/dummy.cpp \
     src/engine/nodes/light.cpp \
     src/engine/nodes/mesh.cpp \
+    src/engine/nodes/shape.cpp \
     src/engine/nodes/node.cpp \
     src/engine/nodes/omni.cpp \
     src/engine/nodes/scenegraph.cpp \

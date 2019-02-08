@@ -114,6 +114,10 @@ public slots:
    //! setter for swap interval (vsync), default is 0 (off)
    void setSwapInterval(int interval);
 
+   //! user presses/released zoom key
+   void zoomIn(bool state);
+   void zoomOut(bool state);
+
 
 protected slots:
 
@@ -209,6 +213,7 @@ private:
    float                    mFrameTime;                   //!< frame time
 
    QTime                    mCurrentTime;
+   float                    mDelta;                       //! delta time
 
    // idle processing
    QTimer                   mIdleTimer;                   //!< idle timer
@@ -221,6 +226,8 @@ private:
    bool                     mError;
    Qt::KeyboardModifiers    mMousePressKeyboardModifiers; //!< last mouse press event's keyboard modifiers
    int                      mSwapInterval;
+   bool                     mZoomIn, mZoomOut;
+   float                    mZoom;
 };
 
 #endif

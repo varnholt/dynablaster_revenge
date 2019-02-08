@@ -76,7 +76,7 @@ GameJoystickIntegration::~GameJoystickIntegration()
 */
 void GameJoystickIntegration::initialize(int id)
 {
-   mJoystickHandler->setUpdateInterval(40);
+   mJoystickHandler->setUpdateInterval(16);
    mJoystickHandler->initialize(id);
 
    // automatically select first in list

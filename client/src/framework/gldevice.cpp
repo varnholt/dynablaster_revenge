@@ -312,21 +312,7 @@ void GLDevice::resize(int width, int height)
 {
    mWidth= width;
    mHeight= height;
-   int w= (int) (height * mAspect);
-
-   if (width > w)
-   {
-      // pillar box
-      int left= (width-w) >> 1;
-      setViewPort(left,0,w,height);
-   }
-   else
-   {
-      // letter box
-      int h= (int) (width / mAspect);
-      int top= (height - h) >> 1;
-      setViewPort(0,top,width,h);
-   }
+   setViewPort(0,0,width,height);
 }
 
 

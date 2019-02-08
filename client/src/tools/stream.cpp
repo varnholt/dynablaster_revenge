@@ -30,9 +30,21 @@ const String& Stream::getPath() const
    return dummy;
 }
 
+Stream& operator << (Stream& stream, float& v)
+{
+   v= stream.getFloat();
+   return stream;
+}
+
 void operator << (float& v, Stream& stream)
 {
    v= stream.getFloat();
+}
+
+Stream& operator << (Stream& stream, int& i)
+{
+   i= stream.getInt();
+   return stream;
 }
 
 void operator >> (float& f, Stream& stream)

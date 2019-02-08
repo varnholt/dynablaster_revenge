@@ -47,6 +47,7 @@
 // cmath
 #include <math.h>
 
+#define CAMERA_ZOOM_SPEED 0.15f
 
 //-----------------------------------------------------------------------------
 /*!
@@ -78,6 +79,7 @@ GameView::GameView(QWidget *parent, const QGLFormat& format)
    mDevicePixelRatio(1),
    mFrames(0),
    mFrameTime(0.0f),
+   mDelta(0.0f),
    mIdle(false),
    mVideoExport(false),
    mVideoTimeDelta(0.0),
@@ -85,7 +87,10 @@ GameView::GameView(QWidget *parent, const QGLFormat& format)
    mShowFps(0),
    mError(false),
    mMousePressKeyboardModifiers(Qt::ShiftModifier), // leave this so gamepads get a chance
-   mSwapInterval(0)
+   mSwapInterval(0),
+   mZoomIn(false),
+   mZoomOut(false),
+   mZoom(1.0f)
 {
    // enable mouse tracking
    setMouseTracking(true);
@@ -107,6 +112,10 @@ GameView::GameView(QWidget *parent, const QGLFormat& format)
    {
       mDevicePixelRatio = 2;
    }
+
+   GameSettings::VideoSettings* video=
+      GameSettings::getInstance()->getVideoSettings();
+   mZoom= video->getZoom();
 }
 
 
@@ -172,6 +181,7 @@ void GameView::initializeGL()
       mError= true;
       return;
    }
+
 
    mDevice->setSwapInterval( mSwapInterval );
 
@@ -336,16 +346,17 @@ RoundsDrawable *GameView::getRoundsDrawable() const
 void GameView::animate()
 {
    float time;
+   float prevTime= getTime();
    if ( mVideoTimeDelta > 0.0f )
    {
       time= getTime() + mVideoTimeDelta;
-      setTime( time );
    }
    else
    {
       time= mCurrentTime.elapsed() / 1000.0;
-      setTime( time );
    }
+   mDelta= time - prevTime;
+   setTime( time );
 
    float t= time * 62.5;
 
@@ -354,6 +365,24 @@ void GameView::animate()
    foreach (Drawable *drawable, mDrawables)
       if (drawable->isVisible())
          drawable->animate(t);
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+*/
+void GameView::zoomIn(bool state)
+{
+   mZoomIn= state;
+   if (mZoomIn && mZoomOut)
+      mZoomOut= false;
+}
+
+void GameView::zoomOut(bool state)
+{
+   mZoomOut= state;
+   if (mZoomOut && mZoomIn)
+      mZoomIn= false;
 }
 
 
@@ -486,14 +515,16 @@ void GameView::updateFrameBufferSettings()
 
    int samples= videoSettings->getAntialias();
    int res= videoSettings->getResolution();
-   int w= (width() + res-1 ) / res;
-   int h= (height() + res - 1) / res;
+   int width= activeDevice->getWidth();
+   int height= activeDevice->getHeight();
+   int w= (width + res-1 ) / res;
+   int h= (height + res - 1) / res;
 
    // fix to match 16:9
-   if ( (w*9>>4) > h )
+   if ( (w*9>>4) >= h )
       w= (h<<4)/9;
    else
-      h= w*9>>4;
+      h= (w*9)>>4;
 
    bool changed= resizeFrameBuffer(mRenderBuffer, w, h, samples);
    resizeFrameBuffer(mFrameBuffer, w, h);
@@ -533,6 +564,36 @@ void GameView::paintGL()
       return;
    }
 
+   GameSettings::VideoSettings* video=
+      GameSettings::getInstance()->getVideoSettings();
+
+   // handle camera zoom
+   if (mZoomIn)
+   {
+      qDebug("zoom in");
+      mZoom+= mDelta*CAMERA_ZOOM_SPEED;
+      if (mZoom > 1.3f) mZoom= 1.3f;
+      video->setZoom(mZoom);
+   }
+
+   if (mZoomOut)
+   {
+      qDebug("zoom out");
+      mZoom-= mDelta*CAMERA_ZOOM_SPEED;
+      if (mZoom < 0.7f) mZoom= 0.7f;
+      video->setZoom(mZoom);
+   }
+
+   // set border
+   mDevice->setBorder(
+      video->getBorderLeft(),
+      video->getBorderTop(),
+      video->getBorderRight(),
+      video->getBorderBottom() );
+
+   if (mGameDrawable)
+      mGameDrawable->setCameraZoom( mZoom );
+
    animate();
 
    updateFrameBufferSettings();
@@ -569,10 +630,29 @@ void GameView::paintGL()
    // clear screen
    mDevice->clear();
 
-   float level= GameSettings::getInstance()->getVideoSettings()->getBrightness();
+   float level= video->getBrightness();
+   int left= activeDevice->getBorderLeft();
+   int bottom= activeDevice->getBorderBottom();
+   int width= activeDevice->getWidth();
+   int height= activeDevice->getHeight();
 
-   int width, height;
-   activeDevice->getViewPort(0,0, &width, &height);
+   int w= (height<<4) / 9;
+   if (width > w)
+   {
+      // pillar box
+      left += (width-w) >> 1;
+      activeDevice->setViewPort(left,bottom,w,height);
+      width= w;
+   }
+   else
+   {
+      // letter box
+      int h= (width * 9) >> 4;
+      bottom += (height - h) >> 1;
+      activeDevice->setViewPort(left,bottom,width,h);
+      height= h;
+   }
+
    int scaleX= (int)floor((float)width / mFrameBuffer->width() + 0.5);
    int scaleY= (int)floor((float)height / mFrameBuffer->height() + 0.5);
 

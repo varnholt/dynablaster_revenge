@@ -484,6 +484,19 @@ class GameSettings
             //! setter for fps visibility
             void setShowFps(bool value);
 
+            //! get/set zoom factor (0.8..1.2  default: 1.0)
+            float getZoom() const;
+            void setZoom(float zoom);
+
+            //! get/set border compensation (in pixels  default: 0)
+            int getBorderLeft() const;
+            void setBorderLeft(int left);
+            int getBorderTop() const;
+            void setBorderTop(int top);
+            int getBorderRight() const;
+            void setBorderRight(int right);
+            int getBorderBottom() const;
+            void setBorderBottom(int bottom);
 
          protected:
 
@@ -510,6 +523,15 @@ class GameSettings
 
             //! show fps
             bool mShowFps;
+
+            //! camera zoom factor
+            float mZoom;
+
+            //! screen border compensation
+            int mBorderLeft;
+            int mBorderTop;
+            int mBorderRight;
+            int mBorderBottom;
       };
 
 
@@ -540,6 +562,9 @@ class GameSettings
             Qt::Key getLeftKey() const;
             Qt::Key getRightKey() const;
             Qt::Key getBombKey() const;
+            Qt::Key getZoomOutKey() const;
+            Qt::Key getZoomInKey() const;
+            Qt::Key getStartKey() const;
 
             //! setter for analogue axis 1
             void setAnalogueAxis1(int axis1);

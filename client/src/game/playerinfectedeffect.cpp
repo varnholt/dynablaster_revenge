@@ -303,7 +303,7 @@ void PlayerInfectedEffect::render()
    float sizeFactor= 1.0f;
    FrameBuffer* fb= FrameBuffer::Instance();
    if (fb)
-      sizeFactor= fb->width() * 1.25f / 1920.0f;
+      sizeFactor= fb->getSizeFactor(1920.0f);
 
    for (QMap<InfectedFlowFieldAnimation*, Material*>::ConstIterator it= mFlowAnimations.constBegin(); it!= mFlowAnimations.constEnd(); it++)
    {

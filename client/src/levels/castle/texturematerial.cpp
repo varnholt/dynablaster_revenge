@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "texturematerial.h"
-#include "textureslot.h"
+#include "materials/textureslot.h"
 #include "nodes/mesh.h"
 #include "gldevice.h"
 #include "render/renderbuffer.h"
@@ -11,7 +11,7 @@
 #include "image/image.h"
 #include "tools/stream.h"
 #include "tools/profiling.h"
-#include "textureslot.h"
+#include "materials/textureslot.h"
 
 TextureMaterial::TextureMaterial(SceneGraph *scene)
 : Material(scene, MAP_DIFFUSE),

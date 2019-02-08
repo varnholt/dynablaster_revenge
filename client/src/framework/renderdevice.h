@@ -75,6 +75,9 @@ public:
    virtual float getWidth() const;
    virtual float getHeight() const;
 
+   void setBorder(int left, int top, int right, int bottom);
+   int getBorderLeft() const;
+   int getBorderBottom() const;
 
 protected:
    int        mWidth, mHeight;
@@ -85,7 +88,7 @@ protected:
    Matrix     mCamera;
    unsigned int mCurShader;
    int        keys[256]; // keyboard state
-
+   int        mBorderLeft, mBorderTop,mBorderRight, mBorderBottom;
 };
 
 extern RenderDevice *activeDevice;

@@ -85,6 +85,17 @@ void Geometry::setVisible(bool visible)
    mVisible= visible;
 }
 
+bool Geometry::isMorphing() const
+{
+   return (mMorphTrack.size() > 0);
+}
+
+void Geometry::setMorphFrame(float frame)
+{
+   if (mMorphTrack.size()>0)
+      mMorphTrack.get(mVertice, mNormal, frame);
+}
+
 void Geometry::calcBoundingBox(Vector &min, Vector &max)
 {
    min= max= mVertice[0];
@@ -461,6 +472,13 @@ void Geometry::load(Stream *stream)
    mBones << chunk;
 
 //   printf(" - bones: %d \n", mBones.size());
+
+   int rest= chunk.dataLeft();
+   if (rest>4)
+   {
+      mMorphTrack << chunk;
+      mMorphTrack.calculateNormals(mIndices);
+   }
 
    chunk.skip();
 //   createEdges();

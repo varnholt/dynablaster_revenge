@@ -202,10 +202,10 @@ bool Level::isPlayerMapEmpty() const
 //-----------------------------------------------------------------------------
 /*!
 */
-Matrix Level::getCameraMatrix(float time)
+Matrix Level::getCameraMatrix(float time, float scale)
 {
    if (mCamInterp)
-      return mCamInterp->getCameraMatrix(time);
+      return mCamInterp->getCameraMatrix(time, scale);
    else
       return Matrix();
 }

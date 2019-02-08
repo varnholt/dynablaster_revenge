@@ -491,7 +491,10 @@ void GameWinDrawable::drawScene()
       mPlayerMaterial->setColorMap(mPlayerTextures[getColorEnum()-1]);
 
       // render scene
-      mScene->render(mRenderTime);
+      // after the fov was fixed to match the 3dsmax settings,
+      // it's too narrow in this scene. compensate manually.
+      Matrix scale= Matrix::scale(0.75f, 0.75f, 1.0f);
+      mScene->render(mRenderTime, scale);
    }
 }
 

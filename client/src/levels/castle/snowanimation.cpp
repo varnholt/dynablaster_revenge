@@ -246,7 +246,7 @@ void SnowAnimation::drawPointSprites()
     float sizeFactor= 1.0f;
     FrameBuffer* fb= FrameBuffer::Instance();
     if (fb)
-       sizeFactor= fb->width() / 1920.0f;
+       sizeFactor= fb->getSizeFactor(1920.0f);
 
     activeDevice->setShader( mShader );
     activeDevice->setParameter(mParamSizeFactor, sizeFactor );

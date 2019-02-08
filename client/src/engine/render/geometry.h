@@ -41,8 +41,10 @@ public:
 	const int*              getVertexMap() const;
 
    int                     getID() const;                //! get unique id
-   bool                    isVisible() const;           //! get visibility
+   bool                    isVisible() const;            //! get visibility
    void                    setVisible(bool visible);     //! set visibility
+   bool                    isMorphing() const;           //! get morph status
+   void                    setMorphFrame(float frame);   //! interpolate vertex/normal data to given frame
 
    void                    load(Stream *stream);         //! load geometry from stream
    void                    write(Stream *stream);

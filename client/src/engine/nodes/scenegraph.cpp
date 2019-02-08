@@ -3,6 +3,7 @@
 #include "node.h"
 #include "mesh.h"
 #include "dummy.h"
+#include "shape.h"
 #include "camera.h"
 #include "omni.h"
 
@@ -296,6 +297,7 @@ void SceneGraph::loadNode(Stream *stream, Node *parent)
          {
             case Node::idMesh:      node= new Mesh(parent);   break;
             case Node::idDummy:     node= new Dummy(parent);  break;
+            case Node::idShape:     node= new Shape(parent);  break;
             case Node::idCamera:    node= new Camera(parent); break;
             case Node::idOmni:      node= new Omni(parent); break;
             default:                node= new Node(Node::idNone, parent); break;
@@ -312,6 +314,11 @@ void SceneGraph::loadNode(Stream *stream, Node *parent)
          if (id==Node::idMesh)
          {
             linkMaterials((Mesh*)node);
+         }
+
+         if (id==Node::idShape)
+         {
+            mShapes.add(node);
          }
 
          chunk->skip();           // skip to next chunk
@@ -608,9 +615,12 @@ Matrix SceneGraph::setupCamera(const Matrix& shake)
    bool persp= true;
    if (mCamera)
    {
-      cam= mCamera->getTransform().getView();
+      const Matrix& obj= mCamera->getTransform();
+//      cam= obj.getView();
+      cam= obj.invert();
+
       fov= mCamera->getFOV();
-      fov= tan(fov*0.5)*0.75;
+      fov= tanf(fov*0.5f)*9.0f/16.0f;
       znear= mCamera->getNear();
       zfar= mCamera->getFar();
       cam= mGlobalTransform * cam * shake;
@@ -669,7 +679,27 @@ void SceneGraph::render(float frame, const Matrix& shake)
 //   double t2= getCpuTick();
 
    for (i=0;i<num;i++) mMaterials[i]->renderDiffuse();
+/*
+   for (i=0; i<mShapes.size(); i++)
+   {
+      Shape* shape= (Shape*)mShapes[i];
+      const Matrix& tm= shape->getTransform();
+      for (int j=0; j<shape->getPolyCount(); j++)
+      {
+         Shape::PolyLine* poly= shape->getPoly(j);
+         const int numVerts= poly->getVertexCount();
+         glColor4f(1,1,1,1);
+         glBegin(GL_LINE_STRIP);
+         for (int k=0; k<numVerts-1; k++)
+         {
+            Vector v= tm * poly->getVertex(k);
+            glVertex3fv(v);
+         }
+         glEnd();
+      }
 
+   }
+*/
 //   glFinish();
 
 //   double t3= getCpuTick();

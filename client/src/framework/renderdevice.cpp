@@ -11,7 +11,11 @@ RenderDevice::RenderDevice()
   mActive(0),
   mAbort(0),
   mTime(0),
-  mCurShader(0)
+  mCurShader(0),
+  mBorderLeft(0),
+  mBorderTop(0),
+  mBorderRight(0),
+  mBorderBottom(0)
 {
    for (int i = 0; i < 256; i++)
       keys[i] = 0;
@@ -22,6 +26,16 @@ RenderDevice::RenderDevice()
 
 RenderDevice::~RenderDevice()
 {
+}
+
+int RenderDevice::getBorderLeft() const
+{
+   return mBorderLeft;
+}
+
+int RenderDevice::getBorderBottom() const
+{
+   return mBorderBottom;
 }
 
 void RenderDevice::setKey(int num, int state)
@@ -59,14 +73,22 @@ Matrix RenderDevice::getCameraMatrix() const
    return mCamera;
 }
 
+void RenderDevice::setBorder(int left, int top, int right, int bottom)
+{
+   mBorderLeft= left;
+   mBorderTop= top;
+   mBorderRight= right;
+   mBorderBottom= bottom;
+}
+
 float RenderDevice::getWidth() const
 {
-   return (float)mWidth;
+   return (float)mWidth - mBorderLeft - mBorderRight;
 }
 
 
 float RenderDevice::getHeight() const
 {
-   return (float)mHeight;
+   return (float)mHeight - mBorderTop - mBorderBottom;
 }
 

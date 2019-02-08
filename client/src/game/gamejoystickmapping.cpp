@@ -242,6 +242,24 @@ void GameJoystickMapping::updateKeysPressed()
    {
       emit keyReleased(controllerSettings->getBombKey());
    }
+
+   // zoomIn
+   if ( (getKeysPressedPrevious() & Constants::KeyZoomIn) != (getKeysPressed() & Constants::KeyZoomIn) )
+   {
+      if (getKeysPressed() & Constants::KeyZoomIn)
+         emit keyPressed(controllerSettings->getZoomInKey());
+      else
+         emit keyReleased(controllerSettings->getZoomInKey());
+   }
+
+   // zoomOut
+   if ( (getKeysPressedPrevious() & Constants::KeyZoomOut) != (getKeysPressed() & Constants::KeyZoomOut) )
+   {
+      if (getKeysPressed() & Constants::KeyZoomOut)
+         emit keyPressed(controllerSettings->getZoomOutKey());
+      else
+         emit keyReleased(controllerSettings->getZoomOutKey());
+   }
 }
 
 
@@ -328,13 +346,26 @@ bool GameJoystickMapping::processButtons()
    bool changed = false;
    int buttons = 0;
 
+   int bombMask= (1<<JoystickConstants::ControllerButtonA)
+               | (1<<JoystickConstants::ControllerButtonB)
+               | (1<<JoystickConstants::ControllerButtonX)
+               | (1<<JoystickConstants::ControllerButtonY);
+
    if (mJoystickInfo.getButtonValues().size() > 0)
    {
       int keysPressed = getKeysPressed();
 
-      // there's only one thing to do by triggering a button
-      // => drop a bomb
-      bool bombdropped = false;
+      // a,b,x,y drop a bomb
+      // a= 10
+      // b= 11
+      // x= 12
+      // y= 13
+      // left shoulder= 8
+      // right shoulder= 9
+      // start= 15
+      // select= 5
+      // left stick= 6
+      // right stick= 7
 
       int buttonId = 0;
       foreach(bool val, mJoystickInfo.getButtonValues())
@@ -342,25 +373,32 @@ bool GameJoystickMapping::processButtons()
          if (val)
          {
             buttons |= 1 << buttonId;
-
-            bombdropped = true;
-
-            // this is not perfect for the controller options part,
-            // but the number of shits given is 0
-            break;
          }
 
          buttonId++;
       }
 
-      if (bombdropped)
-      {
+      // bomb dropped
+      if (buttons & bombMask)
          setKeysPressed(getKeysPressed() | Constants::KeyBomb);
-      }
       else
-      {
          setKeysPressed(getKeysPressed() & ~Constants::KeyBomb);
-      }
+
+      // zoom in/out
+      if (buttons & (1<<JoystickConstants::ControllerButtonLeftShoulder))
+         setKeysPressed(getKeysPressed() | Constants::KeyZoomOut);
+      else
+         setKeysPressed(getKeysPressed() & ~Constants::KeyZoomOut);
+
+      if (buttons & (1<<JoystickConstants::ControllerButtonRightShoulder))
+         setKeysPressed(getKeysPressed() | Constants::KeyZoomIn);
+      else
+         setKeysPressed(getKeysPressed() & ~Constants::KeyZoomIn);
+
+      if (buttons & (1<<JoystickConstants::ControllerButtonStart))
+         setKeysPressed(getKeysPressed() | Constants::KeyStart);
+      else
+         setKeysPressed(getKeysPressed() & ~Constants::KeyStart);
 
       changed = (keysPressed != getKeysPressed());
    }

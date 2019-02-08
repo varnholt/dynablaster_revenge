@@ -82,6 +82,7 @@ private:
    int              mMaterialStartIndex;
    int              mNodeStartIndex;
    Matrix           mGlobalTransform;
+   Array<Node*>     mShapes;
 
    static SceneGraph* mInstance;
 };

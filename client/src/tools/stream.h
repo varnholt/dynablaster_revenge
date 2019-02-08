@@ -48,6 +48,9 @@ protected:
    int        mPosition;
 };
 
+Stream& operator << (Stream& stream, float&);
 void operator << (float&, Stream& stream);
+Stream& operator << (Stream& stream, int&);
 
 void operator >> (float&, Stream& stream);
+

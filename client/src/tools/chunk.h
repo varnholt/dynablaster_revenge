@@ -30,7 +30,8 @@ public:
 
    int         id() const;
 
-   void       skip();
+   int         dataLeft() const;
+   void        skip();
 
 private:
    Stream*          mStream;

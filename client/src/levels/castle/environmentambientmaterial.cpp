@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "environmentambientmaterial.h"
-#include "textureslot.h"
+#include "materials/textureslot.h"
 #include "nodes/mesh.h"
 #include "gldevice.h"
 #include "render/renderbuffer.h"

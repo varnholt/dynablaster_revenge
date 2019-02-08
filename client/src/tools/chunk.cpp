@@ -79,6 +79,11 @@ int Chunk::id() const
   return mID;
 }
 
+int Chunk::dataLeft() const
+{
+   return mSize - mStream->pos() + mChunkPos;
+}
+
 void Chunk::skip()
 {
   mStream->skip(mSize - mStream->pos() + mChunkPos);
