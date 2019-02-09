@@ -1,7 +1,7 @@
 //
 // C++ Interface: constants
 //
-// Description: 
+// Description:
 //
 //
 // Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
@@ -65,7 +65,7 @@
 
 
 /**
-	@author Matthias Varnholt <matto@gmx.de>
+   @author Matthias Varnholt <matto@gmx.de>
 */
 class Constants
 {

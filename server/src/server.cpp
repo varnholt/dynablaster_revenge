@@ -52,7 +52,7 @@
 #include <math.h>
 
 // static variables
-Server* Server::sInstance = 0;
+Server* Server::sInstance = nullptr;
 
 
 //-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ Server* Server::sInstance = 0;
    constructor
 */
 Server::Server()
-   : mTcpServer(0),
+   : mTcpServer(nullptr),
      mPlayerId(0)
 {
    sInstance = this;
@@ -150,7 +150,7 @@ QTcpSocket* Server::getPlayerSocket( int playerId )
       if (player && player->getId() == playerId)
          return it.key();
    }
-   return 0;
+   return nullptr;
 }
 
 
@@ -261,7 +261,7 @@ void Server::sendPacket(QTcpSocket* socket, Packet* packet)
 */
 void Server::processStartGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 {
-   StartGameRequestPacket* request = (StartGameRequestPacket*)packet;
+   StartGameRequestPacket* request = dynamic_cast<StartGameRequestPacket*>(packet);
 
    // TODO:
    // game needs "isRunning"
@@ -292,7 +292,7 @@ void Server::processStartGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 */
 void Server::processJoinGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 {
-   JoinGameRequestPacket* request = (JoinGameRequestPacket*)packet;
+   JoinGameRequestPacket* request = dynamic_cast<JoinGameRequestPacket*>(packet);
 
    QMap<int, Game*>::const_iterator iter = mGames.constFind(request->getId());
 
@@ -354,7 +354,7 @@ void Server::processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet)
       8) start game
    */
 
-   PlayerSynchronizePacket* request = (PlayerSynchronizePacket*)packet;
+   PlayerSynchronizePacket* request = dynamic_cast<PlayerSynchronizePacket*>(packet);
 
    if (request->getSynchronizeProcess() == PlayerSynchronizePacket::LevelLoaded)
    {
@@ -387,7 +387,7 @@ void Server::processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet)
 
 void Server::processLoginRequest(QTcpSocket* tcpSocket, Packet* packet)
 {
-   LoginRequestPacket* request = (LoginRequestPacket*)packet;
+   LoginRequestPacket* request = dynamic_cast<LoginRequestPacket*>(packet);
 
    qDebug("Server::processLoginRequest: login request packet received");
 
@@ -464,7 +464,7 @@ void Server::processCreateGameRequest(QTcpSocket* tcpSocket, Packet* packet)
    // if this ought to be implemented, we need to return a gameinformation
    // object countaining a gameid of -1.
 
-   CreateGameRequestPacket* request = (CreateGameRequestPacket*)packet;
+   CreateGameRequestPacket* request = dynamic_cast<CreateGameRequestPacket*>(packet);
 
    // create game
    Game* game = new Game();
@@ -537,7 +537,7 @@ void Server::data()
 {
    // qDebug("Server::data(): packet received");
 
-   QTcpSocket* tcpSocket = (QTcpSocket*)sender();
+   QTcpSocket* tcpSocket = dynamic_cast<QTcpSocket*>(sender());
 
    // check if player is known
    if (!mPlayerSockets.contains(tcpSocket))
@@ -556,7 +556,7 @@ void Server::data()
       // blocksize not initialized yet
       if (blockSize == 0)
       {
-         if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
+         if (tcpSocket->bytesAvailable() < static_cast<int32_t>(sizeof(quint16)))
          {
             // qDebug("Server::data(): cannot read packet size, packet too small");
             return;
@@ -572,7 +572,7 @@ void Server::data()
          qDebug(
             "Server::data: waiting for packet to complete [2] "
             "(actually: %d < expected: %d)",
-            (int)tcpSocket->bytesAvailable(),
+            static_cast<int32_t>(tcpSocket->bytesAvailable()),
             blockSize
          );
 
@@ -666,7 +666,7 @@ void Server::disconnect()
    qDebug("Server::disconnect");
 
    // remove player from list of sockets
-   QTcpSocket* tcpSocket = (QTcpSocket*)sender();
+   QTcpSocket* tcpSocket = dynamic_cast<QTcpSocket*>(sender());
    // Player* player = mPlayerSockets[tcpSocket];
 
    // notify other players
@@ -764,7 +764,7 @@ void Server::processPlayerLeavesGame(
             {
                if (!tmpPlayer->isBot())
                {
-                  game->setCreator(tmpPlayer);                  
+                  game->setCreator(tmpPlayer);
                   game->broadcastMessage(
                      tr("%1 is the new game owner").arg(tmpPlayer->getNick())
                   );
@@ -818,8 +818,8 @@ void Server::processRemoveGame(
 */
 void Server::processRemoveAllBots(int gameId)
 {
-   Game* game = 0;
-   QTcpSocket* tcpSocket = 0;
+   Game* game = nullptr;
+   QTcpSocket* tcpSocket = nullptr;
 
    QMap<int, Game*>::const_iterator it = mGames.find(gameId);
 

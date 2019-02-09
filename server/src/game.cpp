@@ -77,16 +77,16 @@ int Game::sGameId = 0;
    constructor
 */
 Game::Game()
-   : mUpdateTimer(0),
-     mMap(0),
+   : mUpdateTimer(nullptr),
+     mMap(nullptr),
      mGameId(++sGameId),
      mRunning(false),
      mIdlePacketSent(false),
-     mGameTimeUpdateTimer(0),
+     mGameTimeUpdateTimer(nullptr),
      mDuration(0),
-     mCreator(0),
+     mCreator(nullptr),
      mState(Constants::GameStopped),
-     mPreparationTimer(0),
+     mPreparationTimer(nullptr),
      mPreparationCounter(0),
      mCheckGameOver(false),
      mSkipCountdown(false),
@@ -95,12 +95,12 @@ Game::Game()
      mSynchronizationActive(false),
      mMaxSpeed(0.0),
      mSyncMaxTime(0),
-     mCollisionDetection(0),
-     mImmuneTimes(0),
+     mCollisionDetection(nullptr),
+     mImmuneTimes(nullptr),
      mPlayerLeftTheGameCount(0),
      mStartPositionsInitialized(false),
      mGameOnlyPopulatedByBotsMessageShown(false),
-     mExtraSpawn(0),
+     mExtraSpawn(nullptr),
      mExtraSpawnEnabled(false)
 {
    qDebug("Game::Game: initializing");
@@ -185,8 +185,8 @@ Game::~Game()
    delete mMap;
    delete mImmuneTimes;
 
-   mMap = 0;
-   mImmuneTimes = 0;
+   mMap = nullptr;
+   mImmuneTimes = nullptr;
 }
 
 
@@ -356,11 +356,11 @@ void Game::initializeMap()
    int stones = 0;
 
    float extraCount = 0.0f;
-   int extraBombs    = (int)mCreateGameData.mExtraBombEnabled;
-   int extraFlames   = (int)mCreateGameData.mExtraFlameEnabled;
-   int extraKicks    = (int)mCreateGameData.mExtraKickEnabled;
-   int extraSpeedUps = (int)mCreateGameData.mExtraSpeedupEnabled;
-   int extraSkulls   = (int)mCreateGameData.mExtraSkullsEnabled;
+   int extraBombs    = static_cast<int32_t>(mCreateGameData.mExtraBombEnabled);
+   int extraFlames   = static_cast<int32_t>(mCreateGameData.mExtraFlameEnabled);
+   int extraKicks    = static_cast<int32_t>(mCreateGameData.mExtraKickEnabled);
+   int extraSpeedUps = static_cast<int32_t>(mCreateGameData.mExtraSpeedupEnabled);
+   int extraSkulls   = static_cast<int32_t>(mCreateGameData.mExtraSkullsEnabled);
 
    float extraSum =
         (extraBombs    * SERVER_WEIGHT_BOMBS)
@@ -392,7 +392,7 @@ void Game::initializeMap()
    }
 
    else if (mCreateGameData.mDimension == Constants::Dimension19x17)
-   {    
+   {
       extraCount = 32.0f;
 
       width = 19;
@@ -454,11 +454,11 @@ void Game::initializeMap()
    if (extraSkulls > 0)
       valSkulls = extraCount * (SERVER_WEIGHT_SKULLS / extraSum);
 
-   extraBombs    = valBombs;
-   extraFlames   = valFlames;
-   extraKicks    = valKicks;
-   extraSpeedUps = valSpeedUps;
-   extraSkulls   = valSkulls;
+   extraBombs    = static_cast<int32_t>(valBombs);
+   extraFlames   = static_cast<int32_t>(valFlames);
+   extraKicks    = static_cast<int32_t>(valKicks);
+   extraSpeedUps = static_cast<int32_t>(valSpeedUps);
+   extraSkulls   = static_cast<int32_t>(valSkulls);
 
    int loop = 0;
    while ((
@@ -472,15 +472,15 @@ void Game::initializeMap()
    )
    {
       if (loop == 0)
-         extraBombs = (float)ceil(valBombs);
+         extraBombs = static_cast<int32_t>(ceil(valBombs));
       if (loop == 1)
-         extraFlames = (float)ceil(valFlames);
+         extraFlames = static_cast<int32_t>(ceil(valFlames));
       if (loop == 2)
-         extraKicks = (float)ceil(valKicks);
+         extraKicks = static_cast<int32_t>(ceil(valKicks));
       if (loop == 3)
-         extraSpeedUps = (float)ceil(valSpeedUps);
+         extraSpeedUps = static_cast<int32_t>(ceil(valSpeedUps));
       if (loop == 4)
-         extraSkulls = (float)ceil(valSkulls);
+         extraSkulls = static_cast<int32_t>(ceil(valSkulls));
 
       loop++;
    }
@@ -501,7 +501,7 @@ void Game::initializeMap()
    delete mImmuneTimes;
    int fieldCount = width * height;
    mImmuneTimes = new int[fieldCount];
-   memset(mImmuneTimes, 0, fieldCount*sizeof(int));
+   memset(mImmuneTimes, 0, fieldCount * sizeof(int));
 }
 
 
@@ -557,7 +557,7 @@ void Game::broadcastStartPositions()
          Constants::KeyDown,
          currentPlayer->getX(),
          currentPlayer->getY(),
-         (float)M_PI * 1.5f
+         static_cast<float>(M_PI * 1.5f)
       );
 
       mOutgoingPackets.append(positionPacket);
@@ -1242,7 +1242,7 @@ void Game::createInfection(
       disease.data()->setType(infectingPlayer->getDisease()->getType());
    }
    else
-   {            
+   {
       // find out which side the rotating cube is showing right now
       int sideStep = ((int)floor(extraElapsedTime + 0.5f) ) % 6;
       Constants::SkullType skullType = faces[sideStep];
@@ -1305,8 +1305,8 @@ void Game::updateExtras()
       Player* player = p.value();
 
       // init player position
-      int x = floor(player->getX());
-      int y = floor(player->getY());
+      int x = static_cast<int32_t>(floor(player->getX()));
+      int y = static_cast<int32_t>(floor(player->getY()));
 
       MapItem* mapItem = mMap->getItem(x, y);
 
@@ -1319,7 +1319,7 @@ void Game::updateExtras()
          player->increaseExtrasCollected();
 
          // evaluate extra and pass it to the player
-         ExtraMapItem* extra = (ExtraMapItem*)mapItem;
+         ExtraMapItem* extra = dynamic_cast<ExtraMapItem*>(mapItem);
 
          switch (extra->getExtraType())
          {
@@ -1356,12 +1356,7 @@ void Game::updateExtras()
             case Constants::ExtraSkull:
             {
                QList<Constants::SkullType> faces = extra->getSkullFaces();
-               createInfection(player, 0, extra, faces);
-               break;
-            }
-
-            default:
-            {
+               createInfection(player, nullptr, extra, faces);
                break;
             }
          }
@@ -1432,7 +1427,7 @@ void Game::updateInfections()
                      vec = pos1 - pos2;
 
                      // if they are near enough to each other
-                     if (vec.length() < 0.3)
+                     if (vec.length() < 0.3f)
                      {
                         // player2: the player who is now infected
                         // player1: the one who was already infected
@@ -1463,8 +1458,8 @@ void Game::updateBombs()
       // check if player wants to drop a bomb
       if (player->isBombKeyLocked())
       {
-         int x = floor(player->getX());
-         int y = floor(player->getY());
+         int x = static_cast<int32_t>(floor(player->getX()));
+         int y = static_cast<int32_t>(floor(player->getY()));
          MapItem* item = mMap->getItem(x, y);
 
          if (!item)
@@ -1687,7 +1682,7 @@ void Game::rotateDeadPlayerTowardsBomb(
       int checkX = x;
       int checkY = y;
       hitSomething = false;
-      MapItem* checkItem = 0;
+      MapItem* checkItem = nullptr;
 
       // check if "fall direction" is blocked
       switch (dir)
@@ -1773,10 +1768,10 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       QList<Packet*> removeItems;
 
       // init
-      MapItem* mapItem = 0;
+      MapItem* mapItem = nullptr;
 
       // player may drop one more bomb
-      Player* player = mPlayers.value(bomb->getPlayerId(), 0);
+      Player* player = mPlayers.value(bomb->getPlayerId(), nullptr);
 
       // player may already be killed :)
       if (player)
@@ -1982,8 +1977,8 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                      pY += 0.001f;
                   */
 
-                  int currentPlayerX = floor(pX);
-                  int currentPlayerY = floor(pY);
+                  int currentPlayerX = static_cast<int32_t>(floor(pX));
+                  int currentPlayerY = static_cast<int32_t>(floor(pY));
 
                   if (
                         currentPlayerX == xDist
@@ -2015,7 +2010,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                               && bomb->getIgniterId() != player->getId()
                            )
                            {
-                              killer = mPlayers.value(bomb->getIgniterId(), 0);
+                              killer = mPlayers.value(bomb->getIgniterId(), nullptr);
                            }
 
                            // update stats
@@ -2119,7 +2114,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                   )
                   {
                      // neighboured bombs explode from another bomb's explosion
-                     BombMapItem* neighbourBomb = (BombMapItem*)mapItem;
+                     BombMapItem* neighbourBomb = dynamic_cast<BombMapItem*>(mapItem);
 
                      // origin: left
                      if (neighbourBomb->getX() > mapItem->getX())
@@ -2229,7 +2224,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
          mMap->setItem(
             destroyedItem->getX(),
             destroyedItem->getY(),
-            0
+            nullptr
          );
 
          if (destroyedItem->getType() == MapItem::Stone)
@@ -2239,7 +2234,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                destroyedItem->getY()
             );
 
-            StoneMapItem* stone = (StoneMapItem*)destroyedItem;
+            StoneMapItem* stone = dynamic_cast<StoneMapItem*>(destroyedItem);
             ExtraMapItem* extra = stone->getExtraMapItem();
 
             if (extra)
@@ -2276,7 +2271,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
          + detonationLeft
          + detonationRight;
 
-      intensity *= 0.03125;
+      intensity *= 0.03125f;
 
       mOutgoingPackets.append(
          new GameEventPacket(
@@ -2307,7 +2302,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       mMap->setItem(
          bomb->getX(),
          bomb->getY(),
-         0
+         nullptr
       );
 
       bomb->deleteLater();
@@ -2326,7 +2321,7 @@ bool Game::isGamePopulatedByBots() const
 {
    bool botsOnly = true;
 
-   Player* currentPlayer = 0;
+   Player* currentPlayer = nullptr;
    QMapIterator<qint8, Player*> p(mPlayers);
    while (p.hasNext())
    {
@@ -2354,8 +2349,8 @@ bool Game::isGamePopulatedByBots() const
 void Game::updateGameoverCondition()
 {
    int alivePlayerCount = 0;
-   Player* currentPlayer = 0;
-   Player* potentialWinner = 0;
+   Player* currentPlayer = nullptr;
+   Player* potentialWinner = nullptr;
 
    // check for players that are eventually killed
    QMapIterator<qint8, Player*> p(mPlayers);
@@ -2723,7 +2718,7 @@ void Game::sendBroadcastPackets()
       QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
 
       bool synced = false;
-      Packet* packet = 0;
+      Packet* packet = nullptr;
       Packet::TYPE pType = Packet::INVALID;
 
       while (p.hasNext())
@@ -2778,7 +2773,7 @@ void Game::processPacket(
    {
       case Packet::MESSAGE:
       {
-         MessagePacket* senderPacket = (MessagePacket*)packet;
+         MessagePacket* senderPacket = dynamic_cast<MessagePacket*>(packet);
 
          // during the game we don't care if any of the players is currently
          // typing something. this is just relevant for the lounge
@@ -2823,7 +2818,7 @@ void Game::processPacket(
 
       case Packet::KEY:
       {
-         KeyPacket* keyPacket = (KeyPacket*)packet;
+         KeyPacket* keyPacket = dynamic_cast<KeyPacket*>(packet);
 
          Player* player = mPlayerSockets[tcpSocket];
 
@@ -2837,7 +2832,7 @@ void Game::processPacket(
             // any way (the player may to go to the left and to
             // the right at the same time for example)
             qint8 keys = keyPacket->getKeys();
-            qint8 previousKeys = player->getKeysPressed();
+            qint8 previousKeys = static_cast<qint8>(player->getKeysPressed());
 
             if (
                   (previousKeys & Constants::KeyRight)
@@ -3382,7 +3377,7 @@ void Game::addOutgoingPacket(Packet *packet)
 */
 int Game::getTimeLeft()
 {
-   return mCreateGameData.mDuration - (mGameTime.elapsed() * 0.001f);;
+   return static_cast<int32_t>(mCreateGameData.mDuration - (mGameTime.elapsed() * 0.001f));
 }
 
 
@@ -3486,7 +3481,7 @@ Constants::Color Game::getColorForNextPlayer() const
 
    QSet<Constants::Color> colors;
    for (int i = 1; i <= 10; i++)
-      colors.insert((Constants::Color)i);
+      colors.insert(static_cast<Constants::Color>(i));
 
    foreach (Player* p, mPlayers.values())
       colors.remove(p->getColor());
@@ -3639,7 +3634,7 @@ void Game::spawn()
       int px = 0;
       int py = 0;
       bool done = false;
-      MapItem* item = 0;
+      MapItem* item = nullptr;
       Map* map = getMap();
       int width = map->getWidth();
       int height = map->getHeight();
@@ -3662,8 +3657,8 @@ void Game::spawn()
             {
                if (!p->isKilled())
                {
-                  px = (int)floor(p->getX());
-                  py = (int)floor(p->getY());
+                  px = static_cast<int32_t>(floor(p->getX()));
+                  py = static_cast<int32_t>(floor(p->getY()));
 
                   if (
                         px == x

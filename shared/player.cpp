@@ -37,12 +37,12 @@ Player::Player(int id)
      mKilled(false),
      mKickEnabled(false),
      mPositionSkippedCounter(0),
-     mOverallStats(0),
-     mRoundStats(0),
+     mOverallStats(nullptr),
+     mRoundStats(nullptr),
      mColor(Constants::ColorWhite),
      mLoadingSynchronized(false),
      mBot(false),
-     mDisease(0)
+     mDisease(nullptr)
 {
    mOverallStats = new PlayerStats();
    mRoundStats = new PlayerStats();
@@ -509,7 +509,7 @@ void Player::infect(QPointer<PlayerDisease> disease)
 */
 bool Player::isInfected() const
 {
-   return (mDisease != 0);
+   return (mDisease != nullptr);
 }
 
 
