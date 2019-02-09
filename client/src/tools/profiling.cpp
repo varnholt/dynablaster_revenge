@@ -3,19 +3,19 @@
 
 double getCpuTick()
 {
-	double t=0;
+   double t=0;
 
 #ifdef _MSC_VER
-   #ifdef WIN32
-      _asm {
-         lea edi,t
-         rdtsc
-         mov [edi],eax
-         mov [edi+4],edx
-         fild qword ptr [edi]
-         fstp qword ptr [edi]
-      };
-   #endif
+//   #ifdef WIN32
+//      _asm {
+//         lea edi,t
+//         rdtsc
+//         mov [edi],eax
+//         mov [edi+4],edx
+//         fild qword ptr [edi]
+//         fstp qword ptr [edi]
+//      };
+//   #endif
 #endif
 
 #ifdef _LINUX_
@@ -31,6 +31,6 @@ double getCpuTick()
    t= count;
 #endif
 
-	return t;
+   return t;
 }
 
