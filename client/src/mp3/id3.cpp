@@ -57,7 +57,7 @@ char* Id3Tag::album() const
    return mAlbum;
 }
 
-unsigned int Id3Tag::headerId(char id[5]) const
+unsigned int Id3Tag::headerId(const char id[5]) const
 {
    unsigned int tag= 0;
    for (int i=0;i<4;i++)

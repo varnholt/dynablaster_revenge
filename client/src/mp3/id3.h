@@ -16,7 +16,7 @@ public:
    int  parse(MpegStream *fr);
 
 private:
-   unsigned int headerId(char id[5]) const;
+   unsigned int headerId(const char id[]) const;
 
    char* mArtist;
    char* mTitle;
