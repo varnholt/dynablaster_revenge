@@ -39,15 +39,15 @@ int main( int argc, char ** argv )
    // make xlib and glx thread safe under x11
    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
 
-   QString version;
-   if (!checkQtVersion(4,8, &version))
-   {
-      qWarning(
-            "The installed Qt version (%s) is invalid!\nRequired is version 4.8.x.",
-            qPrintable( version )
-      );
-      return 0;
-   }
+//   QString version;
+//   if (!checkQtVersion(5,8, &version))
+//   {
+//      qWarning(
+//            "The installed Qt version (%s) is invalid!\nRequired is version 4.8.x.",
+//            qPrintable( version )
+//      );
+//      return 0;
+//   }
 
    // tell windows that we need a screen for our thread execution
    #ifdef WIN32
