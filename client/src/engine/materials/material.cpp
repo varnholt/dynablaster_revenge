@@ -17,12 +17,12 @@
 #include "gldevice.h"
 
 
-QFileSystemWatcher* Material::mWatcher= 0;
+QFileSystemWatcher* Material::mWatcher= nullptr;
 QMultiMap<QString,QPair<Texture*,QString> > Material::mWatchers;
 
 Material::Buffer::Buffer()
-: geo(0)
-, vb(0)
+: geo(nullptr)
+, vb(nullptr)
 {
 }
 
@@ -35,7 +35,7 @@ Material::Buffer::Buffer(Geometry *g, VertexBuffer *v)
 Material::Material(SceneGraph *scene, int id)
 : mId(id)
 , mInitialized(false)
-, mPool(0)
+, mPool(nullptr)
 , mDebug(0)
 {
    mPool= new VertexBufferPool();
@@ -70,7 +70,7 @@ Geometry* Material::getGeometry(int index) const
    if (index>=0 && index<mVB.size())
       return mVB[index].geo;
    else
-      return 0;
+      return nullptr;
 }
 
 int Material::getDebug() const
@@ -122,8 +122,8 @@ void Material::addWatcher(Texture* texture, Image* image)
       }
    }
 
-   QString path( (const char*)image->path() );
-   QString filename( (const char*)image->filename() );
+   QString path(static_cast<const char*>(image->path()));
+   QString filename(static_cast<const char*>(image->filename()));
    mWatcher->addPath( path );
    mWatchers.insert(
       path,
@@ -134,7 +134,7 @@ void Material::addWatcher(Texture* texture, Image* image)
 void Material::fileChanged(const QString& path)
 {
    delete mWatcher;
-   mWatcher= 0;
+   mWatcher= nullptr;
 
    QMultiMap<QString,QPair<Texture*,QString> >::Iterator it;
    it= mWatchers.find( path );
@@ -201,85 +201,85 @@ void Material::updateMap(unsigned int texture, const Image& image, int flags)
 
 unsigned int Material::uploadCubeMap(const Image& image)
 {
-	unsigned int tex;
+   unsigned int tex;
 
    int x= image.getWidth();
    int y= image.getHeight();
 
-	if (x/3 != y/4)
-	{
-		printf("expected cubemap as vertical cross!\n");
-		return 0;
-	}
+   if (x/3 != y/4)
+   {
+      printf("expected cubemap as vertical cross!\n");
+      return 0;
+   }
 
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+   glGenTextures(1, &tex);
+   glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
+   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	int size= y >> 2;
+   int size= y >> 2;
 
-	unsigned int target[6]={
-		GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-		GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-		GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-		GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-		GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-		GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-	};
+   unsigned int target[6]={
+      GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+   };
 
-	unsigned char pos[6]={0x12, 0x10, 0x01, 0x21, 0x11, 0x31};
+   unsigned char pos[6]={0x12, 0x10, 0x01, 0x21, 0x11, 0x31};
 
    for (int s=0;s<6;s++)
-	{
-		int yp= (pos[s]>>4&3)*size;
-		int xp= (pos[s]&3)*size;
+   {
+      int yp= (pos[s]>>4&3)*size;
+      int xp= (pos[s]&3)*size;
 
       Image temp(size, size);
 
-		for (int i=0;i<size;i++)
-		{
-			unsigned int *src= image.getScanline(yp+i) + xp;
+      for (int i=0;i<size;i++)
+      {
+         unsigned int *src= image.getScanline(yp+i) + xp;
          unsigned int *dst;
-			if (s==5) // back-side must be flipped
+         if (s==5) // back-side must be flipped
          {
             dst= temp.getScanline(size-i-1);
-				for (int j=0;j<size;j++) dst[j]= src[size-1-j];
+            for (int j=0;j<size;j++) dst[j]= src[size-1-j];
          }
-			else
+         else
          {
             dst= temp.getScanline(i);
-				for (int j=0;j<size;j++) dst[j]= src[j];
+            for (int j=0;j<size;j++) dst[j]= src[j];
          }
-		}
+      }
 
       int level=0;
       do {
-		   glTexImage2D(
-            target[s], 
-            level, 
-            GL_RGBA, 
-            temp.getWidth(), 
+         glTexImage2D(
+            target[s],
+            level,
+            GL_RGBA,
+            temp.getWidth(),
             temp.getHeight(),
-            0, 
-            GL_BGRA, 
-            GL_UNSIGNED_BYTE, 
+            0,
+            GL_BGRA,
+            GL_UNSIGNED_BYTE,
             temp.getData()
          );
          temp= temp.downsample();
          level++;
       } while (temp.getWidth()>0 && temp.getHeight()>0);
-	}
+   }
 
-	return (unsigned int)tex;
+   return static_cast<unsigned int>(tex);
 }
 
 
 bool Material::getCulling()
 {
-   return (bool) ((mFlags & 1)==0);
+   return static_cast<bool>(((mFlags & 1)==0));
 }
 
 
@@ -296,7 +296,7 @@ void Material::load(Stream *stream)
    mIOR= stream->getFloat();
    mOpacity= stream->getFloat();
    mFlags= stream->getInt();
-   
+
    int numMaps= stream->getInt();
    mSlots.init(numMaps);
    for (int i=0;i<numMaps;i++)
@@ -335,7 +335,7 @@ TextureSlot* Material::getTextureSlot(int index) const
    if (index>=0 && index<mSlots.size())
       return mSlots[index];
    else
-      return 0;
+      return nullptr;
 }
 
 void Material::addMesh(Mesh *mesh)
@@ -361,15 +361,15 @@ void Material::removeMesh(Mesh *mesh)
       mGeometryQueue.remove(geo);
    }
 
-	for (int i=0;i<mVB.size();)
-	{
+   for (int i=0;i<mVB.size();)
+   {
 //		VertexBuffer *vb= mVB[i].vb;
-		Geometry *geo= mVB[i].geo;
-		if (geo->getParent() == mesh)
-			mVB.erase(i);
-		else
-			i++;
-	}
+      Geometry *geo= mVB[i].geo;
+      if (geo->getParent() == mesh)
+         mVB.erase(i);
+      else
+         i++;
+   }
 }
 
 void Material::update(float /*frame*/, Node **nodelist, const Matrix&)
@@ -411,15 +411,15 @@ void Material::exportGeo(
    char tmp[256];
    // write object info comment
    if (!name.isEmpty())
-      sprintf(tmp, "# object: %s\n", (const char*)name);
+      sprintf(tmp, "# object: %s\n", static_cast<const char*>(name));
    else
       sprintf(tmp, "# object: dummy-%d\n", dummyCounter++);
 
-   stream->writeData(tmp, strlen(tmp));
+   stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    sprintf(tmp, "# vertices: %d\n", vertexCount);
-   stream->writeData(tmp, strlen(tmp));
+   stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    sprintf(tmp, "# triangles: %d\n", indexCount/3);
-   stream->writeData(tmp, strlen(tmp));
+   stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
 
       // write vertices
    stream->writeChar('\n');
@@ -427,7 +427,7 @@ void Material::exportGeo(
    {
       Vector v= tm * vtx[i];
       sprintf(tmp, "v %.09f %.09f %.09f\n", -v.x, v.z, v.y); // flip y/z !
-      stream->writeData(tmp, strlen(tmp));
+      stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    }
 
    // write normals
@@ -436,7 +436,7 @@ void Material::exportGeo(
    {
       const Vector& n= nrm[i];
       sprintf(tmp, "vn %f %f %f\n", -n.x, n.z, n.y);
-      stream->writeData(tmp, strlen(tmp));
+      stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    }
 
    // write uv channel
@@ -447,15 +447,15 @@ void Material::exportGeo(
          sprintf(tmp, "vt %f %f 0.0\n", texcoords[i].u, 1.0f-texcoords[i].v);
       else
          sprintf(tmp, "vt 0.0 0.0 0.0\n");
-      stream->writeData(tmp, strlen(tmp));
+      stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    }
 
    // write triangles - indices start with 1 (not 0)
    stream->writeChar('\n');
-   sprintf(tmp, "g %s \n", (const char*)name);
-   stream->writeData(tmp, strlen(tmp));
+   sprintf(tmp, "g %s \n", static_cast<const char*>(name));
+   stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    sprintf(tmp, "s off \n");
-   stream->writeData(tmp, strlen(tmp));
+   stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
    for (int i=0; i<indexCount; i+=3)
    {
       bool valid= true;
@@ -479,7 +479,7 @@ void Material::exportGeo(
             i3+indexOffset,
             i3+indexOffset
          );
-         stream->writeData(tmp, strlen(tmp));
+         stream->writeData(tmp, static_cast<int32_t>(strlen(tmp)));
       }
    }
    stream->writeChar('\n');

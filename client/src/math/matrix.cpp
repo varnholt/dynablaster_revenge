@@ -28,7 +28,7 @@ Matrix::Matrix(const Vector& v)
 {
    xx= v.x;  xy= 0.0f; xz= 0.0f; xw= 0.0f;
    yx= 0.0f; yy= v.y;  yz= 0.0f; yw= 0.0f;
-   zx= 0.0f; zy= 0.0f; zz= v.z;  zw= 0.0f; 
+   zx= 0.0f; zy= 0.0f; zz= v.z;  zw= 0.0f;
    wx= 0.0f; wy= 0.0f; wz= 0.0f; ww= 1.0f;
 }
 
@@ -36,7 +36,7 @@ Matrix::Matrix(const Vector& x, const Vector& y, const Vector& z)
 {
    xx= x.x;  xy= y.x;  xz= z.x;  xw= 0.0f;
    yx= x.y;  yy= y.y;  yz= z.y;  yw= 0.0f;
-   zx= x.z;  zy= y.z;  zz= z.z;  zw= 0.0f; 
+   zx= x.z;  zy= y.z;  zz= z.z;  zw= 0.0f;
    wx= 0.0f; wy= 0.0f; wz= 0.0f; ww= 1.0f;
 }
 
@@ -75,41 +75,41 @@ Matrix::Matrix(const Quat& q)
 
 void Matrix::load(Stream *stream)
 {
-   xx= stream->getFloat(); 
-   yx= stream->getFloat(); 
-   zx= stream->getFloat(); 
+   xx= stream->getFloat();
+   yx= stream->getFloat();
+   zx= stream->getFloat();
    wx= stream->getFloat();
-   xy= stream->getFloat(); 
-   yy= stream->getFloat(); 
-   zy= stream->getFloat(); 
+   xy= stream->getFloat();
+   yy= stream->getFloat();
+   zy= stream->getFloat();
    wy= stream->getFloat();
-   xz= stream->getFloat(); 
-   yz= stream->getFloat(); 
-   zz= stream->getFloat(); 
+   xz= stream->getFloat();
+   yz= stream->getFloat();
+   zz= stream->getFloat();
    wz= stream->getFloat();
-   xw= stream->getFloat(); 
-   yw= stream->getFloat(); 
-   zw= stream->getFloat(); 
+   xw= stream->getFloat();
+   yw= stream->getFloat();
+   zw= stream->getFloat();
    ww= stream->getFloat();
 }
 
 void Matrix::write(Stream *stream)
 {
-   stream->writeFloat(xx); 
-   stream->writeFloat(yx); 
-   stream->writeFloat(zx); 
+   stream->writeFloat(xx);
+   stream->writeFloat(yx);
+   stream->writeFloat(zx);
    stream->writeFloat(wx);
-   stream->writeFloat(xy); 
-   stream->writeFloat(yy); 
-   stream->writeFloat(zy); 
+   stream->writeFloat(xy);
+   stream->writeFloat(yy);
+   stream->writeFloat(zy);
    stream->writeFloat(wy);
-   stream->writeFloat(xz); 
-   stream->writeFloat(yz); 
-   stream->writeFloat(zz); 
+   stream->writeFloat(xz);
+   stream->writeFloat(yz);
+   stream->writeFloat(zz);
    stream->writeFloat(wz);
-   stream->writeFloat(xw); 
-   stream->writeFloat(yw); 
-   stream->writeFloat(zw); 
+   stream->writeFloat(xw);
+   stream->writeFloat(yw);
+   stream->writeFloat(zw);
    stream->writeFloat(ww);
 }
 
@@ -142,7 +142,7 @@ Matrix Matrix::ortho(float l, float r, float b, float t, float n, float f)
 //! creates look-at matrix compatible to gluLookAt
 //! up vector must be normalized
 Matrix Matrix::lookAt(const Vector& eye, const Vector& center, const Vector& up)
-{   
+{
    Vector z= (eye - center);
    z.normalize();
 
@@ -232,7 +232,7 @@ Vector4 Matrix::operator * (const Vector4& v) const
 Matrix Matrix::operator * (const float s) const
 {
    Matrix m;
-   
+
    m.xx= xx*s; m.xy= xy*s; m.xz= xz*s; m.xw= xw*s;
    m.yx= yx*s; m.yy= yy*s; m.yz= yz*s; m.yw= yw*s;
    m.zx= zx*s; m.zy= zy*s; m.zz= zz*s; m.zw= zw*s;
@@ -357,7 +357,7 @@ Matrix Matrix::normalized() const
 {
    Matrix n;
    float t,m;
-   
+
    t= 1.0f / sqrtf( xx*xx + xy*xy + xz*xz );
    n.xx = xx * t;
    n.xy = xy * t;
@@ -403,28 +403,28 @@ void Matrix::normalizeZ()
 
 Matrix Matrix::get3x3() const
 {
-	Matrix n;
-	n.xx = xx;
-	n.xy = xy;
-	n.xz = xz;
-	n.xw = 0.0f;
+   Matrix n;
+   n.xx = xx;
+   n.xy = xy;
+   n.xz = xz;
+   n.xw = 0.0f;
 
-	n.yx = yx;
-	n.yy = yy;
-	n.yz = yz;
-	n.yw = 0.0f;
+   n.yx = yx;
+   n.yy = yy;
+   n.yz = yz;
+   n.yw = 0.0f;
 
-	n.zx = zx;
-	n.zy = zy;
-	n.zz = zz;
-	n.zw = 0.0f;
+   n.zx = zx;
+   n.zy = zy;
+   n.zz = zz;
+   n.zw = 0.0f;
 
-	n.wx = 0.0f;
-	n.wy = 0.0f;
-	n.wz = 0.0f;
-	n.ww = 1.0f;
+   n.wx = 0.0f;
+   n.wy = 0.0f;
+   n.wz = 0.0f;
+   n.ww = 1.0f;
 
-	return n;
+   return n;
 }
 
 
@@ -504,38 +504,38 @@ Vector Matrix::translation() const
 
 Matrix Matrix::invert() const
 {
-	Matrix n;
+   Matrix n;
 
-	float det= xx*(yy*zz - yz*zy) + xy*(yz*zx - yx*zz) + xz*(yx*zy - yy*zx);
+   float det= xx*(yy*zz - yz*zy) + xy*(yz*zx - yx*zz) + xz*(yx*zy - yy*zx);
 
-	// matrix not invertible?
-	//   if (det==0) return ::identity();
+   // matrix not invertible?
+   //   if (det==0) return ::identity();
 
-	float inv= 1.0f / det;
+   float inv= 1.0f / det;
 
-	// generate adjoint matrix
-	n.xx= (yy*zz - yz*zy)*inv;
-	n.yx= (yz*zx - yx*zz)*inv;
-	n.zx= (yx*zy - yy*zx)*inv;
-	n.wx= 0.0f;
+   // generate adjoint matrix
+   n.xx= (yy*zz - yz*zy)*inv;
+   n.yx= (yz*zx - yx*zz)*inv;
+   n.zx= (yx*zy - yy*zx)*inv;
+   n.wx= 0.0f;
 
-	n.xy= (xz*zy - xy*zz)*inv;
-	n.yy= (xx*zz - xz*zx)*inv;
-	n.zy= (xy*zx - xx*zy)*inv;
-	n.wy= 0.0f;
+   n.xy= (xz*zy - xy*zz)*inv;
+   n.yy= (xx*zz - xz*zx)*inv;
+   n.zy= (xy*zx - xx*zy)*inv;
+   n.wy= 0.0f;
 
-	n.xz= (xy*yz - xz*yy)*inv;
-	n.yz= (xz*yx - xx*yz)*inv;
-	n.zz= (xx*yy - xy*yx)*inv;
-	n.wz= 0.0f;
+   n.xz= (xy*yz - xz*yy)*inv;
+   n.yz= (xz*yx - xx*yz)*inv;
+   n.zz= (xx*yy - xy*yx)*inv;
+   n.wz= 0.0f;
 
-	// new translation vector = negative transposed rot/scale mat *  old translation vector
-	n.xw = -(n.xx*xw) - (n.xy*yw) - (n.xz*zw);
-	n.yw = -(n.yx*xw) - (n.yy*yw) - (n.yz*zw);
-	n.zw = -(n.zx*xw) - (n.zy*yw) - (n.zz*zw);
-	n.ww= 1.0f;
+   // new translation vector = negative transposed rot/scale mat *  old translation vector
+   n.xw = -(n.xx*xw) - (n.xy*yw) - (n.xz*zw);
+   n.yw = -(n.yx*xw) - (n.yy*yw) - (n.yz*zw);
+   n.zw = -(n.zx*xw) - (n.zy*yw) - (n.zz*zw);
+   n.ww= 1.0f;
 
-	return n;
+   return n;
 }
 
 Matrix Matrix::invert4x4() const
@@ -582,14 +582,14 @@ Matrix Matrix::invert4x4() const
    det = 1.0 / det;
 
    for (int i = 0; i < 16; i++)
-       inv[i] = (float)(inv[i] * det);
+       inv[i] = static_cast<float>((inv[i] * det));
 
    return n;
 }
 
 float* Matrix::data() const
 {
-   return (float*)&xx;
+   return const_cast<float*>(&xx);
 }
 
 
@@ -606,22 +606,22 @@ Matrix Matrix::blend(const Matrix& m1, const Matrix& m2, float t)
 {
    Matrix n;
    float it= 1.0f - t;
-   n.xx= m1.xx * it + m2.xx * t;  
-   n.xy= m1.xy * it + m2.xy * t;  
-   n.xz= m1.xz * it + m2.xz * t;  
-   n.xw= m1.xw * it + m2.xw * t;  
-   n.yx= m1.yx * it + m2.yx * t;  
-   n.yy= m1.yy * it + m2.yy * t;  
-   n.yz= m1.yz * it + m2.yz * t;  
-   n.yw= m1.yw * it + m2.yw * t;  
-   n.zx= m1.zx * it + m2.zx * t;  
-   n.zy= m1.zy * it + m2.zy * t;  
-   n.zz= m1.zz * it + m2.zz * t;  
-   n.zw= m1.zw * it + m2.zw * t;  
-   n.wx= m1.wx * it + m2.wx * t;  
-   n.wy= m1.wy * it + m2.wy * t;  
-   n.wz= m1.wz * it + m2.wz * t;  
-   n.ww= m1.ww * it + m2.ww * t;  
+   n.xx= m1.xx * it + m2.xx * t;
+   n.xy= m1.xy * it + m2.xy * t;
+   n.xz= m1.xz * it + m2.xz * t;
+   n.xw= m1.xw * it + m2.xw * t;
+   n.yx= m1.yx * it + m2.yx * t;
+   n.yy= m1.yy * it + m2.yy * t;
+   n.yz= m1.yz * it + m2.yz * t;
+   n.yw= m1.yw * it + m2.yw * t;
+   n.zx= m1.zx * it + m2.zx * t;
+   n.zy= m1.zy * it + m2.zy * t;
+   n.zz= m1.zz * it + m2.zz * t;
+   n.zw= m1.zw * it + m2.zw * t;
+   n.wx= m1.wx * it + m2.wx * t;
+   n.wy= m1.wy * it + m2.wy * t;
+   n.wz= m1.wz * it + m2.wz * t;
+   n.ww= m1.ww * it + m2.ww * t;
    return n;
 }
 
@@ -629,8 +629,8 @@ Matrix Matrix::rotateX(const float f)
 {
    Matrix m;
 
-   float c = (float) cosf(f);
-   float s = (float) sinf(f);
+   float c = static_cast<float>(cosf(f));
+   float s = static_cast<float>(sinf(f));
 
    m.xx = 1; m.xy = 0; m.xz =  0; m.xw = 0;
    m.yx = 0; m.yy = c; m.yz =  s; m.yw = 0;
@@ -644,8 +644,8 @@ Matrix Matrix::rotateY(const float f)
 {
    Matrix m;
 
-   float c = (float) cosf(f);
-   float s = (float) sinf(f);
+   float c = static_cast<float>(cosf(f));
+   float s = static_cast<float>(sinf(f));
 
    m.xx =  c; m.xy = 0; m.xz = s; m.xw = 0;
    m.yx =  0; m.yy = 1; m.yz = 0; m.yw = 0;
@@ -659,8 +659,8 @@ Matrix Matrix::rotateZ(const float f)
 {
    Matrix m;
 
-   float c = (float) cosf(f);
-   float s = (float) sinf(f);
+   float c = static_cast<float>(cosf(f));
+   float s = static_cast<float>(sinf(f));
 
    m.xx = c;  m.xy =-s; m.xz = 0; m.xw = 0;
    m.yx = s;  m.yy = c; m.yz = 0; m.yw = 0;
@@ -743,19 +743,19 @@ float Matrix::polarDecompose(Matrix& Q, Matrix& S) const
 {
    #define TOL 1.0e-6
    float det, E_one;
-   
+
    Matrix Mk= get3x3().transpose3x3();
-   float M_one = norm();  
+   float M_one = norm();
    float M_inf = Mk.norm();
    do {
       Matrix MadjTk= Mk.adjointTranspose();
       det = Mk.x() * MadjTk.x();
       if (det==0.0)
       {
-//         do_rank2(Mk, MadjTk, Mk); 
+//         do_rank2(Mk, MadjTk, Mk);
          break;
       }
-      float MadjT_one = MadjTk.norm(); 
+      float MadjT_one = MadjTk.norm();
       float MadjT_inf = MadjTk.transpose3x3().norm();
       float gamma = sqrt(sqrt((MadjT_one*MadjT_inf)/(M_one*M_inf))/fabs(det));
       float g1 = gamma*0.5f;
@@ -764,17 +764,17 @@ float Matrix::polarDecompose(Matrix& Q, Matrix& S) const
       Mk= Mk*g1 + MadjTk*g2;
       Ek= Ek-Mk;
       E_one = Ek.norm();
-      M_one = Mk.transpose3x3().norm();  
+      M_one = Mk.transpose3x3().norm();
       M_inf = Mk.norm();
    } while (E_one > (M_one*TOL));
 
-   Q= Mk;//.transpose3x3(); 
+   Q= Mk;//.transpose3x3();
    S= Mk * get3x3();
 
    // unify 3x3
-   S.yx= S.xy= (S.xy+S.yx)*0.5f; 
-   S.zx= S.xz= (S.xz+S.zx)*0.5f; 
-   S.zy= S.yz= (S.yz+S.zy)*0.5f; 
+   S.yx= S.xy= (S.xy+S.yx)*0.5f;
+   S.zx= S.xz= (S.xz+S.zx)*0.5f;
+   S.zy= S.yz= (S.yz+S.zy)*0.5f;
 
    return det;
 }
@@ -788,12 +788,12 @@ void Matrix::affineDecompose(Quat& q, Vector& pos, float& flip, Scale& scale) co
    pos = Vector(xw, yw, zw);
    float det = polarDecompose(Q, S);
 
-   if (det<0.0) 
+   if (det<0.0)
    {
       Q= Q * -1.0f;
       flip = -1.0f;
-   } 
-   else 
+   }
+   else
       flip= 1.0f;
 
    q = Quat(Q.get3x3());
@@ -804,78 +804,82 @@ void Matrix::affineDecompose(Quat& q, Vector& pos, float& flip, Scale& scale) co
    scale= Scale(u * p, sv);
 }
 
-/* 
+/*
 Compute the spectral decomposition of symmetric positive semi-definite matrix
 Returns rotation in U and scale factors in result, so that if K is a diagonal
 matrix of the scale factors, then S = U K (U transpose). Uses Jacobi method.
 */
 Vector Matrix::spectralDecompose(Matrix& U) const
 {
-	double Diag[3],OffD[3];
-	double g,h,fabsh,t,theta,c,s,tau,ta,OffDq,a,b;
+   double Diag[3],OffD[3];
+   double g,h,fabsh,t,theta,c,s,tau,ta,OffDq,a,b;
 
    static char nxt[] = { 1,2,0 };
 
    U.identity();
 
-	Diag[0] = xx; 
-	Diag[1] = yy; 
-	Diag[2] = zz;
+   Diag[0] = xx;
+   Diag[1] = yy;
+   Diag[2] = zz;
 
-	OffD[0] = yz; 
-	OffD[1] = zx; 
-	OffD[2] = xy;
-	
+   OffD[0] = yz;
+   OffD[1] = zx;
+   OffD[2] = xy;
+
    for (int sweep=20; sweep>0; sweep--)
    {
-		float sm = (float) (fabs(OffD[0])+fabs(OffD[1])+fabs(OffD[2]));
-		if (sm==0.0) break;
+      float sm = static_cast<float>(fabs(OffD[0])+fabs(OffD[1])+fabs(OffD[2]));
+      if (sm==0.0) break;
 
-		for (int i=2; i>=0; i--)
+      for (int i=2; i>=0; i--)
       {
-			int p = nxt[i]; 
-			int q = nxt[p];
+         int p = nxt[i];
+         int q = nxt[p];
 
-			double fabsOffDi = fabs(OffD[i]);
-			g = 100.0*fabsOffDi;
-			if (fabsOffDi>0.0) 
+         double fabsOffDi = fabs(OffD[i]);
+         g = 100.0*fabsOffDi;
+         if (fabsOffDi>0.0)
          {
-				h = Diag[q] - Diag[p];
-				fabsh = fabs(h);
-				if (fabsh+g==fabsh) 
+            h = Diag[q] - Diag[p];
+            fabsh = fabs(h);
+            if (fabsh+g==fabsh)
             {
-					t = OffD[i]/h;
-				} 
-            else 
+               t = OffD[i]/h;
+            }
+            else
             {
-					theta = 0.5*h/OffD[i];
-					t = 1.0/(fabs(theta)+sqrt(theta*theta+1.0));
-					if (theta<0.0) t = -t;
-				}
-				c = 1.0/sqrt(t*t+1.0); 
-				s = t*c;
-				tau = s/(c+1.0);
-				ta = t*OffD[i]; 
-				OffD[i] = 0.0;
-				Diag[p] -= ta; 
-				Diag[q] += ta;
-				OffDq = OffD[q];
-				OffD[q] -= s*(OffD[p] + tau*OffD[q]);
-				OffD[p] += s*(OffDq   - tau*OffD[p]);
+               theta = 0.5*h/OffD[i];
+               t = 1.0/(fabs(theta)+sqrt(theta*theta+1.0));
+               if (theta<0.0) t = -t;
+            }
+            c = 1.0/sqrt(t*t+1.0);
+            s = t*c;
+            tau = s/(c+1.0);
+            ta = t*OffD[i];
+            OffD[i] = 0.0;
+            Diag[p] -= ta;
+            Diag[q] += ta;
+            OffDq = OffD[q];
+            OffD[q] -= s*(OffD[p] + tau*OffD[q]);
+            OffD[p] += s*(OffDq   - tau*OffD[p]);
 
-				for (int j=2; j>=0; j--) 
+            for (int j=2; j>=0; j--)
             {
-               float *mat= (float*)&U.xx + j*4;
-					a = mat[p]; 
-					b = mat[q];
-					mat[p] -= (float) (s*(b + tau*a));
-					mat[q] += (float) (s*(a - tau*b));
-				}
-			}
-		}
-	}
-   
-   return Vector( (float)Diag[0], (float)Diag[1], (float)Diag[2] );
+               float *mat= static_cast<float*>(&U.xx + j*4);
+               a = mat[p];
+               b = mat[q];
+               mat[p] -= static_cast<float>(s*(b + tau*a));
+               mat[q] += static_cast<float>(s*(a - tau*b));
+            }
+         }
+      }
+   }
+
+   return Vector(
+      static_cast<float>(Diag[0]),
+      static_cast<float>(Diag[1]),
+      static_cast<float>(Diag[2])
+   );
 }
 
 
