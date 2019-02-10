@@ -1,23 +1,10 @@
-//
-// C++ Interface: packet
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef PACKET_H
 #define PACKET_H
 
 #include <QByteArray>
 #include <QTime>
 
-/**
-   @author Matthias Varnholt <matto@gmx.de>
-*/
+
 class Packet : public QByteArray
 {
 

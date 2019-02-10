@@ -1,15 +1,3 @@
-//
-// C++ Implementation: loginrequestpacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "loginrequestpacket.h"
 
@@ -22,7 +10,7 @@
 
 /*!----------------------------------------------------------------------------
    write constructor
-   
+
    \param nickName player's nick
    \param col player's color
 */

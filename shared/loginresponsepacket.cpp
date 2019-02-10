@@ -1,15 +1,3 @@
-//
-// C++ Implementation: loginresponsepacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "loginresponsepacket.h"
 
@@ -23,7 +11,7 @@
 //-----------------------------------------------------------------------------
 /*!
    write constructor
-   
+
    \param nickName player's nick
    \param col player's color
 */

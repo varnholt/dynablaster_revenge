@@ -1,14 +1,3 @@
-/***************************************************************************
-                                 pointsprite
- ---------------------------------------------------------------------------
-    project              : fireflies
-    begin                : june 2011
-    copyright            : (C) 2011 by mueslee
-    author               : mueslee
-    email                : nope
-***************************************************************************/
-
-
 #ifndef SNOWANIMATION_H
 #define SNOWANIMATION_H
 

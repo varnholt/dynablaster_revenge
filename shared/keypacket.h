@@ -1,14 +1,3 @@
-//
-// C++ Interface: keypacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef KEYPACKET_H
 #define KEYPACKET_H
 
@@ -19,14 +8,11 @@
 #include "constants.h"
 
 
-/**
-	@author Matthias Varnholt <matto@gmx.de>
-*/
 class KeyPacket : public Packet
 {
 
 public:
-   
+
    //! read constructor
    KeyPacket();
 

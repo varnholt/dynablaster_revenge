@@ -1,14 +1,3 @@
-//
-// C++ Interface: player
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -23,9 +12,7 @@
 class PlayerDisease;
 class PlayerStats;
 
-/**
-   @author Matthias Varnholt <matto@gmx.de>
-*/
+
 class Player{
 
 public:

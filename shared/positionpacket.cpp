@@ -1,15 +1,3 @@
-//
-// C++ Implementation: positionpacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "positionpacket.h"
 
@@ -22,7 +10,7 @@
 
 /*!----------------------------------------------------------------------------
    write constructor
-   
+
    \param pId player id
    \param xPos player x position
    \param yPos player y position
@@ -209,7 +197,7 @@ void PositionPacket::enqueue(QDataStream & out)
    // write deltas and speed
    out << mDx;
    out << mDy;
-   out << mAngleDelta;   
+   out << mAngleDelta;
    out << mSpeed;
 
    // debug();

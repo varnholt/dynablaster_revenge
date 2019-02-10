@@ -1,15 +1,3 @@
-//
-// C++ Implementation: CreateGameResponsePacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "creategameresponsepacket.h"
 

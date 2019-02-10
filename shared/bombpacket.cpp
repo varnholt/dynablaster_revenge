@@ -1,15 +1,3 @@
-//
-// C++ Implementation: bombpacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "bombpacket.h"
 
@@ -21,7 +9,7 @@
 
 /*!----------------------------------------------------------------------------
    write constructor
-   
+
    \param pId player id
    \param xPos player x position
    \param yPos player y position

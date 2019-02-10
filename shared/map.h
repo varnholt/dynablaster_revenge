@@ -1,14 +1,3 @@
-//
-// C++ Interface: map
-//
-// Description: 
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef MAP_H
 #define MAP_H
 
@@ -24,9 +13,7 @@ class MapItem;
 class MapItemCreatedPacket;
 class MapItemRemovedPacket;
 
-/**
-	@author Matthias Varnholt <matto@gmx.de>
-*/
+
 class Map
 {
 

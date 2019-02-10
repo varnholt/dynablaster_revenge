@@ -1,13 +1,3 @@
-/***************************************************************************
-                                 extrarevealanimation
- ---------------------------------------------------------------------------
-    project              : dynablaster revenge client
-    begin                : january 2013
-    copyright            : (C) 2013 by mueslee
-    author               : mueslee
-    email                : nope
-***************************************************************************/
-
 // header
 #include "extrarevealanimation.h"
 

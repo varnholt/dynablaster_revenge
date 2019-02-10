@@ -1,14 +1,3 @@
-/***************************************************************************
-                              startalersfactory
- ---------------------------------------------------------------------------
-    project              : startalers
-    begin                : dec 2013
-    copyright            : (C) 2013 by mueslee
-    author               : mueslee
-    email                : nope
-***************************************************************************/
-
-
 #pragma once
 
 // Qt
@@ -34,7 +23,7 @@ class StarTalers;
 class StarTalersFactory : public QObject
 {
     Q_OBJECT
-    
+
 public:
 
    //! constructor

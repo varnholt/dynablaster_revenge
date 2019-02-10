@@ -1,14 +1,3 @@
-/***************************************************************************
-                                 startalers
- ---------------------------------------------------------------------------
-    project              : startalers
-    begin                : dec 2013
-    copyright            : (C) 2013 by mueslee
-    author               : mueslee
-    email                : nope
-***************************************************************************/
-
-
 #pragma once
 
 // Qt
@@ -166,7 +155,7 @@ protected:
       static int sRotationParam;
 
       //! field position shader param
-      static int sFieldParam;      
+      static int sFieldParam;
 
       //! heightmap parameter
       static int sHeightmapParam;

@@ -1,22 +1,8 @@
-//
-// C++ Interface: bombpacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef BOMBPACKET_H
 #define BOMBPACKET_H
 
 #include "packet.h"
 
-/**
-	@author Matthias Varnholt <matto@gmx.de>
-*/
 class BombPacket : public Packet
 {
 

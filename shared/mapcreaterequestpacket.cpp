@@ -1,15 +1,3 @@
-//
-// C++ Implementation: MapCreateRequestPacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 // header
 #include "mapcreaterequestpacket.h"
 

@@ -1,14 +1,3 @@
-//
-// C++ Interface: loginresponsepacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef JOINGAMERESPONSEPACKET_H
 #define JOINGAMERESPONSEPACKET_H
 
@@ -18,9 +7,6 @@
 // shared
 #include "constants.h"
 
-/**
-   @author Matthias Varnholt <matto@gmx.de>
-*/
 class JoinGameResponsePacket : public Packet
 {
 

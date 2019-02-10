@@ -1,14 +1,3 @@
-//
-// C++ Interface: constants
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
@@ -63,10 +52,6 @@
                                     + SHOW_WINNER_SHOW_MENU_TIME
 #define ITEM_INTERPOLATION_EPS      0.3f
 
-
-/**
-   @author Matthias Varnholt <matto@gmx.de>
-*/
 class Constants
 {
    public:

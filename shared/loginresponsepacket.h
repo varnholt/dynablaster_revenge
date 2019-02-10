@@ -1,14 +1,3 @@
-//
-// C++ Interface: loginresponsepacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef LOGINRESPONSEPACKET_H
 #define LOGINRESPONSEPACKET_H
 
@@ -18,9 +7,6 @@
 // shared
 #include "serverconfiguration.h"
 
-/**
-	@author Matthias Varnholt <matto@gmx.de>
-*/
 class LoginResponsePacket : public Packet
 {
 

@@ -1,23 +1,10 @@
-//
-// C++ Interface: playerrotation
-//
-// Description: 
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2008
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef PLAYERROTATION_H
 #define PLAYERROTATION_H
 
 // Qt
 #include <QVector2D>
 
-/**
-	@author Matthias Varnholt <matto@gmx.de>
-*/
+
 class PlayerRotation
 {
 

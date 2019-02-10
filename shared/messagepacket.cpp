@@ -1,14 +1,3 @@
-//
-// C++ Implementation: messagepacket
-//
-// Description:
-//
-//
-// Author: Matthias Varnholt <matto@gmx.de>, (C) 2011
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-
 // header
 #include "messagepacket.h"
 

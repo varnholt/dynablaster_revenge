@@ -1,13 +1,3 @@
-/***************************************************************************
-                                 lensflare
- ---------------------------------------------------------------------------
-    project              : lensflare
-    begin                : june 2014
-    copyright            : (C) 2014 by mueslee
-    author               : mueslee
-    email                : nope
-***************************************************************************/
-
 // header
 #include "lensflare.h"
 
@@ -93,7 +83,7 @@ void LensFlare::setInitialized(bool initialized)
 /*!
 */
 void LensFlare::initializeInstance()
-{   
+{
    FileStream::addPath("data/effects/lensflare/flares");
    TexturePool* pool= TexturePool::Instance();
    mTexture = pool->getTexture(qPrintable(getTextureFileName()));
