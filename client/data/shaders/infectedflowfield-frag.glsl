@@ -1,3 +1,5 @@
+#version 120
+
 // move particle positions along flow field and create
 // new particle at random position when a particle faded out
 

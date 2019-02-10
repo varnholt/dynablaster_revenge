@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D specularmap;
 uniform sampler2D diffusemap;
 uniform sampler2D shadowmap;
@@ -17,7 +19,7 @@ vec4 textureSphere(sampler2D map, vec3 dir)
    vec2 uv= vec2(0.5 + t.x * m, 0.5 - t.y * m);
    return texture2D(map, uv);
 }
-   
+
 void main()
 {
    // reflection vector

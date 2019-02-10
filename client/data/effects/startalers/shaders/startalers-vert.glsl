@@ -1,3 +1,5 @@
+#version 120
+
 uniform vec3 field;
 uniform vec3 color;
 uniform float heightmap[49];

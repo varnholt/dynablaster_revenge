@@ -8,6 +8,6 @@ const float alpha = 0.35;
 void main()
 {
    vec4 tex= texture2D(texturemap, gl_PointCoord);
-   
+
    gl_FragColor = tex * alpha;
 }

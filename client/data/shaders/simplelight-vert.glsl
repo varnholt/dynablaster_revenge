@@ -1,3 +1,5 @@
+#version 120
+
 varying vec3 normal;
 varying vec4 color;
 varying vec2 uv;
@@ -5,7 +7,7 @@ varying vec3 lightDir;
 varying vec3 position;
 
 void main()
-{	
+{
    vec3 lightPosition = vec3(-10.0, 10.0, -100.0);
 
    position= vec3(gl_ModelViewMatrix * gl_Vertex);

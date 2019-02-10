@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D depthmap;
 uniform mat4 invProj;
 uniform vec4 boundingRect; // minx,miny, maxx, maxy

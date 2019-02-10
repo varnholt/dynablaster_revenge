@@ -1,3 +1,5 @@
+#version 120
+
 // varying vec3 normal;
 varying vec4 color;
 varying vec2 uv;

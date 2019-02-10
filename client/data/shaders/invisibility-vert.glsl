@@ -1,3 +1,5 @@
+#version 120
+
 // shader constants
 uniform vec3 camera;
 uniform mat4 bones[8];
@@ -9,7 +11,7 @@ varying vec3 nrm;
 varying vec4 pos;
 
 void main()
-{	
+{
    uv = gl_MultiTexCoord0.xy;
 
    // blend matrix

@@ -1,3 +1,5 @@
+#version 120
+
 varying vec2 uv;
 varying vec4 vertexColor;
 void main(void)

@@ -1,3 +1,5 @@
+#version 120
+
 varying vec4 color;
 varying vec2 uvClamp;
 varying vec2 uvHighlight;
@@ -11,8 +13,8 @@ void main()
 
    // texture of the current row
    vec4 highlightTextureColor = texture2D(textureHighlight, uvHighlight);
-   
-   gl_FragColor = 
+
+   gl_FragColor =
       vec4(
          highlightTextureColor.r,
          highlightTextureColor.g,

@@ -1,3 +1,4 @@
+#version 120
 
 uniform sampler2D texturemap;
 uniform sampler2D gradientmap;

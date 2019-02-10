@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D vertexPosTexture;
 uniform sampler2D vertexColTexture;
 uniform sampler2D flowfieldTexture;

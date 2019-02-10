@@ -1,3 +1,5 @@
+#version 120
+
 uniform float particleSize;
 
 varying vec2 uv;

@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D positionmap;
 uniform sampler2D colormap;
 

@@ -1814,7 +1814,6 @@ void BombermanClient::processKeyPressed(int key)
    // zoom camera
    else if (key == Qt::Key_BracketLeft)
    {
-      qDebug("start zoom out");
       emit zoomOut(true);
    }
    else if (key == Qt::Key_BracketRight)

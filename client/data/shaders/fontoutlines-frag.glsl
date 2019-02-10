@@ -1,3 +1,5 @@
+#version 120
+
 varying vec4 color;
 varying vec2 uv;
 uniform sampler2D distanceMap;
@@ -24,7 +26,7 @@ void sample(vec2 uv)
       text += 1.0;
       outline += 1.0;
    }
-   else 
+   else
    if (dist < threshold+aaRadius)
    {
       float alpha= 1.0 - (dist - threshold) / aaRadius;
@@ -51,7 +53,7 @@ void main()
 
    text *= 0.25;
    outline *= 0.25;
-   
+
    float alpha= (text + outline * outlineColor.w) * color.w;
 
    alpha= min(alpha, 1.0);

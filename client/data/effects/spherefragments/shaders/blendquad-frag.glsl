@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D texturemap;
 uniform vec4 color;
 

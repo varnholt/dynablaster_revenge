@@ -1,3 +1,5 @@
+#version 120
+
 uniform float sizeFactor;
 
 varying vec4 color;

@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D depthmap;
 uniform vec2 center;
 uniform mat4 invProj;

@@ -1,3 +1,5 @@
+#version 120
+
 // gauss filter with variable radius
 
 uniform float texelOffsetX;

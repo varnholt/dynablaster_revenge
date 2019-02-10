@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D texturemap; // color + specular (in alpha)
 uniform sampler2D normalmap;  // normal + clouds (in alpha)
 

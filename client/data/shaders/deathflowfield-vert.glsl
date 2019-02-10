@@ -1,3 +1,5 @@
+#version 120
+
 varying vec2 currentPos;
 
 void main()

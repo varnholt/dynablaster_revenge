@@ -1,3 +1,5 @@
+#version 120
+
 uniform vec2 sun;
 uniform float time;
 uniform float normalizedlength;

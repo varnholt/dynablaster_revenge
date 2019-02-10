@@ -1,3 +1,5 @@
+#version 120
+
 uniform float time;
 varying vec2 uv;
 varying vec3 nrm;
@@ -12,14 +14,14 @@ float wave(float x, float y, float t)
 }
 
 void main()
-{	
+{
    const float eps= 0.02;
    float t= time + gl_ModelViewMatrix[3].x + gl_ModelViewMatrix[3].y + gl_ModelViewMatrix[3].z;
 
    // untransformed flag mesh is [0..1] in xz
    // front side is y>0, back side is y<0 (circa 0.05)
    vec3 pos= gl_Vertex.xyz;
-   
+
    vec2 tex= gl_MultiTexCoord0.xy;
 
    // flagge ist am mast (u=0) fest -> amplitude=0

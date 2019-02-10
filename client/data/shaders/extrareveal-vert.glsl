@@ -1,3 +1,5 @@
+#version 120
+
 uniform vec3 textureScroll;
 
 varying vec2 uv1;

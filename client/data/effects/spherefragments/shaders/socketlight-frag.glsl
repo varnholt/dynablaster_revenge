@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D texturemap;
 uniform vec2 fresnelFactor;
 
@@ -8,12 +10,12 @@ varying vec3 lightDir;
 varying vec3 position;
 
 void main()
-{	
+{
    vec3 col = vec3(0.0, 0.0, 0.0);
 
    // diffuse intensity
    float intensity = dot(normal, lightDir);
-   if (intensity > 0.0) 
+   if (intensity > 0.0)
    {
       vec4 texColor= texture2D(texturemap, uv);
       col = /*color.xyz * */ texColor.xyz * intensity;

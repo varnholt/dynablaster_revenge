@@ -1,3 +1,5 @@
+#version 120
+
 // simple downsampling filter as pre-pass for gauss filter
 uniform float texelOffsetX;
 uniform float texelOffsetY;

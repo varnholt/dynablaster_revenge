@@ -1,3 +1,5 @@
+#version 120
+
 uniform float time;
 uniform sampler2D texture;
 uniform vec3 color;

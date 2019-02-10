@@ -25,7 +25,7 @@ QQueue<LevelLoadingThread*> LevelLoadingThread::sQueue;
 LevelLoadingThread::LevelLoadingThread(const QString& path)
  : QThread(),
    mPath(path),
-   mLevel(0)
+   mLevel(nullptr)
 {
    abortAll();
    add(this);

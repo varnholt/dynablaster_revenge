@@ -1,3 +1,5 @@
+#version 120
+
 uniform float alpha;
 varying vec4 vertexColor;
 varying vec2 uv;

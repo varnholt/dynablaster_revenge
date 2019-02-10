@@ -1,3 +1,5 @@
+#version 120
+
 uniform float intensity;
 uniform vec3 motionDir;
 varying vec2 uv;
