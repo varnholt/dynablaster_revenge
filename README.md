@@ -2,26 +2,6 @@
 
 Dynablaster Revenge is a remake of the game Dynablaster, released by Hudson Soft in 1991. The goal of this remake is to keep the original game-play as untouched as possible while adding some new features such as networked multiplayer and real-time 3D rendering. In case you're not yet familiar with the original game goal, it's quite simple: Bomb all other players from the screen. Either by collecting flame extras to increase the bomb radius or by picking up bomb extras in order to have more bombs to drop you're able to surround your enemies with your bombs, or blow them away with clever bomb chain reactions.
 
-# Requirements
-
-To run the game you need a video-card with OpenGL 3.0 support and at least
-512MB of video memory.
-
-It works properly with the following cards:
-- Nvidia Geforce GTX 560 Ti
-- Nvidia Geforce 8800 GTS
-- Nvidia Geforce 9600 GT
-- AMD Radeon HD 6540
-- AMD Radeon HD 6850
-- AMD Radeon HD 7750
-- Intel HD Graphics 4000
-
-If the required OpenGL features are not available, the game will not start 
-and you'll just see a message box. In this case it can help to update the 
-video driver. Also make sure you're using a driver from the video card 
-vendor and not, for example, Microsoft's default driver.
-
-
 # Credits
 
 ## Core team
@@ -80,6 +60,25 @@ Therefore compiling the game should be as easy as this:
 qmake
 jom
 ```
+
+# Requirements
+
+To run the game you need a video-card with OpenGL 3.0 support and at least
+512MB of video memory.
+
+It works properly with the following cards:
+- Nvidia Geforce GTX 560 Ti
+- Nvidia Geforce 8800 GTS
+- Nvidia Geforce 9600 GT
+- AMD Radeon HD 6540
+- AMD Radeon HD 6850
+- AMD Radeon HD 7750
+- Intel HD Graphics 4000
+
+If the required OpenGL features are not available, the game will not start 
+and you'll just see a message box. In this case it can help to update the 
+video driver. Also make sure you're using a driver from the video card 
+vendor and not, for example, Microsoft's default driver.
 
 # Help
 
