@@ -26,17 +26,18 @@ QList<BombKickAnimation*> BombKickAnimation::sAnimations;
 */
 BombKickAnimation::BombKickAnimation(QObject *parent)
   : QObject(parent),
-    mTimer(0),
+    mTimer(nullptr),
     mFactor(BOMB_MOVE_SPEED),
     mDirection(Constants::DirectionUnknown),
     mX(0.0f),
     mY(0.0f),
     mReadyToExplode(false),
-    mMap(0),
-    mBombMapItem(0),
+    mMap(nullptr),
+    mBombMapItem(nullptr),
     mColliding(false)
 {
    mTimer = new QTimer(this);
+   mTimer->setTimerType(Qt::PreciseTimer);
    mTimer->setInterval(1000 / SERVER_HEARTBEAT_IN_HZ);
 
    connect(
@@ -73,7 +74,7 @@ void BombKickAnimation::deleteAll()
 /*!
 */
 void BombKickAnimation::start()
-{   
+{
    reset();
 
    unmapBomb();
@@ -187,8 +188,8 @@ void BombKickAnimation::ignite(int x, int y)
 {
    foreach (BombKickAnimation* anim, sAnimations)
    {
-      int ax = (int)floor(anim->getX());
-      int ay = (int)floor(anim->getY());
+      int ax = static_cast<int32_t>(floor(anim->getX()));
+      int ay = static_cast<int32_t>(floor(anim->getY()));
 
       if (ax == x && ay == y)
       {
@@ -211,8 +212,8 @@ void BombKickAnimation::unmapBomb()
    int x = 0;
    int y = 0;
 
-   x = (int)floor(mX);
-   y = (int)floor(mY);
+   x = static_cast<int32_t>(floor(mX));
+   y = static_cast<int32_t>(floor(mY));
 
    mBombMapItem = dynamic_cast<BombMapItem*>(getMap()->getItem(x, y));
 
@@ -242,8 +243,8 @@ void BombKickAnimation::remapBomb()
    int x = 0;
    int y = 0;
 
-   x = (int)floor(mX);
-   y = (int)floor(mY);
+   x = static_cast<int32_t>(floor(mX));
+   y = static_cast<int32_t>(floor(mY));
 
    mBombMapItem->setX(x);
    mBombMapItem->setY(y);
@@ -438,7 +439,7 @@ void BombKickAnimation::readyToExplode()
 */
 void BombKickAnimation::updatePlayerPosition(int id, float x, float y)
 {
-   mPlayerPositions[id] = QPoint((int)floor(x), (int)floor(y));
+   mPlayerPositions[id] = QPoint(static_cast<int32_t>(floor(x)), static_cast<int32_t>(floor(y)));
 }
 
 
@@ -461,8 +462,8 @@ bool BombKickAnimation::isMoveAllowed()
    bool allowed = true;
 
    // make field position of x and y
-   int fieldXPos = floor(getX());
-   int fieldYPos = floor(getY());
+   int fieldXPos = static_cast<int32_t>(floor(getX()));
+   int fieldYPos = static_cast<int32_t>(floor(getY()));
 
    int checkFieldX = 0;
    int checkFieldY = 0;
@@ -470,20 +471,20 @@ bool BombKickAnimation::isMoveAllowed()
    switch (getDirection())
    {
       case Constants::DirectionLeft:
-         checkFieldX = (int)floor(getX() - 0.5f - getStepSize());
+         checkFieldX = static_cast<int32_t>(floor(getX() - 0.5f - getStepSize()));
          checkFieldY = fieldYPos;
          break;
       case Constants::DirectionRight:
-         checkFieldX = (int)floor(getX() + 0.5f + getStepSize());
+         checkFieldX = static_cast<int32_t>(floor(getX() + 0.5f + getStepSize()));
          checkFieldY = fieldYPos;
          break;
       case Constants::DirectionUp:
          checkFieldX = fieldXPos;
-         checkFieldY = (int)floor(getY() - 0.5f - getStepSize());
+         checkFieldY = static_cast<int32_t>(floor(getY() - 0.5f - getStepSize()));
          break;
       case Constants::DirectionDown:
          checkFieldX = fieldXPos;
-         checkFieldY = (int)floor(getY() + 0.5f + getStepSize());
+         checkFieldY = static_cast<int32_t>(floor(getY() + 0.5f + getStepSize()));
          break;
       default:
          break;
@@ -603,7 +604,7 @@ void BombKickAnimation::removeAnimation(BombKickAnimation *animation)
 */
 bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
 {
-   bool colliding = false;   
+   bool colliding = false;
 
    float eps = 1.0f + 2.0f * getStepSize();
    bool checkVertical = false;
@@ -638,7 +639,7 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
 
    if (checkVertical)
    {
-      if ( (int)floor(getX()) == (int)floor(animation->getX()) )
+      if (static_cast<int32_t>(floor(getX())) == static_cast<int32_t>(floor(animation->getX())))
       {
          if ( fabs( getY() - animation->getY() ) < eps )
             colliding = true;
@@ -647,7 +648,7 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
 
    else if (checkHorizontal)
    {
-      if ( (int)floor(getY()) == (int)floor(animation->getY()) )
+      if (static_cast<int32_t>(floor(getY())) == static_cast<int32_t>(floor(animation->getY())))
       {
          if ( fabs( getX() - animation->getX() ) < eps )
             colliding = true;
@@ -701,10 +702,10 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
       float x2 = animation->getX();
       float y2 = animation->getY();
 
-      int xField1 = floor(getX());
-      int yField1 = floor(getY());
-      int xField2 = floor(animation->getX());
-      int yField2 = floor(animation->getY());
+      int xField1 = static_cast<int32_t>(floor(getX()));
+      int yField1 = static_cast<int32_t>(floor(getY()));
+      int xField2 = static_cast<int32_t>(floor(animation->getX()));
+      int yField2 = static_cast<int32_t>(floor(animation->getY()));
 
       int xFieldShifted1 = -1;
       int yFieldShifted1 = -1;
@@ -807,10 +808,10 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
       y2 += y2add;
 
       // init fields
-      xFieldShifted1 = floor(x1);
-      yFieldShifted1 = floor(y1);
-      xFieldShifted2 = floor(x2);
-      yFieldShifted2 = floor(y2);
+      xFieldShifted1 = static_cast<int32_t>(floor(x1));
+      yFieldShifted1 = static_cast<int32_t>(floor(y1));
+      xFieldShifted2 = static_cast<int32_t>(floor(x2));
+      yFieldShifted2 = static_cast<int32_t>(floor(y2));
 
       // check if fields are in collision range
       colliding =

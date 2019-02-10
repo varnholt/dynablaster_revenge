@@ -13,11 +13,12 @@
 */
 JoystickHandler::JoystickHandler(QObject* parent)
    : QObject(parent),
-     mJoystickInterface(0),
-     mUpdateTimer(0)
+     mJoystickInterface(nullptr),
+     mUpdateTimer(nullptr)
 {
    // init timer
    mUpdateTimer = new QTimer(this);
+   mUpdateTimer->setTimerType(Qt::PreciseTimer);
 
    connect(
       mUpdateTimer,

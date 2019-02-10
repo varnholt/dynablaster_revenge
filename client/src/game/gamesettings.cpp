@@ -31,23 +31,23 @@
 
 // gameplay
 #define DEFAULT_GAMEPLAY_CAMERA_SHAKE_INTENSITY 1.0f
-#define DEFAULT_GAMEPLAY_CAMERA_FOLLOWS_PLAYER true
+#define DEFAULT_GAMEPLAY_CAMERA_FOLLOWS_PLAYER  true
 
 
-GameSettings* GameSettings::sSettings = 0;
+GameSettings* GameSettings::sSettings = nullptr;
 
 
 GameSettings::GameSettings()
- : mDevelopmentSettings(0),
-   mAudioSettings(0),
-   mGameplaySettings(0),
-   mLoginSettings(0),
-   mVideoSettings(0),
-   mVideoSettingsBackup(0),
-   mControllerSettings(0),
-   mCreateGameSettingsSingle(0),
-   mCreateGameSettingsMulti(0),
-   mStyleSettings(0)
+ : mDevelopmentSettings(nullptr),
+   mAudioSettings(nullptr),
+   mGameplaySettings(nullptr),
+   mLoginSettings(nullptr),
+   mVideoSettings(nullptr),
+   mVideoSettingsBackup(nullptr),
+   mControllerSettings(nullptr),
+   mCreateGameSettingsSingle(nullptr),
+   mCreateGameSettingsMulti(nullptr),
+   mStyleSettings(nullptr)
 {
    sSettings = this;
 
@@ -94,15 +94,15 @@ GameSettings::~GameSettings()
    delete mCreateGameSettingsMulti;
    delete mStyleSettings;
 
-   mDevelopmentSettings = 0;
-   mAudioSettings = 0;
-   mGameplaySettings = 0;
-   mLoginSettings = 0;
-   mVideoSettings = 0;
-   mControllerSettings = 0;
-   mCreateGameSettingsSingle = 0;
-   mCreateGameSettingsMulti = 0;
-   mStyleSettings = 0;
+   mDevelopmentSettings = nullptr;
+   mAudioSettings = nullptr;
+   mGameplaySettings = nullptr;
+   mLoginSettings = nullptr;
+   mVideoSettings = nullptr;
+   mControllerSettings = nullptr;
+   mCreateGameSettingsSingle = nullptr;
+   mCreateGameSettingsMulti = nullptr;
+   mStyleSettings = nullptr;
 }
 
 
@@ -227,8 +227,8 @@ GameSettings::AudioSettings::AudioSettings()
 
 void GameSettings::AudioSettings::serialize()
 {
-   setValue("audio/volume_music", QString::number(getVolumeMusic()));
-   setValue("audio/volume_sfx", QString::number(getVolumeSfx()));
+   setValue("audio/volume_music", getVolumeMusic());
+   setValue("audio/volume_sfx", getVolumeSfx());
 }
 
 
@@ -743,11 +743,10 @@ void GameSettings::CreateGameSettings::deserialize()
       setExtraSkullsEnabled(value("creategamesingle/extraskulls", false).toBool());
 
       setDimensions(
-         (Constants::Dimension)value(
+         static_cast<Constants::Dimension>(value(
             "creategamesingle/dimension",
-            (int)Constants::Dimension13x11
-         ).toInt()
-      );
+            static_cast<int32_t>(Constants::Dimension13x11)
+         ).toInt()));
    }
    else
    {
@@ -765,11 +764,10 @@ void GameSettings::CreateGameSettings::deserialize()
       setExtraSkullsEnabled(value("creategamemulti/extraskulls", false).toBool());
 
       setDimensions(
-         (Constants::Dimension)value(
+         static_cast<Constants::Dimension>(value(
             "creategamemulti/dimension",
-            (int)Constants::Dimension13x11
-         ).toInt()
-      );
+            static_cast<int32_t>(Constants::Dimension13x11)
+         ).toInt()));
    }
 }
 
@@ -979,7 +977,7 @@ void GameSettings::ControllerSettings::deserialize()
    {
       i.next();
 
-      Constants::Key key = (Constants::Key)i.key().toInt(&keyOk);
+      Constants::Key key = static_cast<Constants::Key>(i.key().toInt(&keyOk));
       int keyVal = i.value().toInt(&keyValOk);
 
       if (keyOk && keyValOk)
@@ -1057,47 +1055,51 @@ void GameSettings::ControllerSettings::initializeDefaultMap()
 
 Qt::Key GameSettings::ControllerSettings::getUpKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyUp];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyUp]);
 }
 
 
 Qt::Key GameSettings::ControllerSettings::getDownKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyDown];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyDown]);
 }
 
 
 Qt::Key GameSettings::ControllerSettings::getLeftKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyLeft];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyLeft]);
 }
 
 
 Qt::Key GameSettings::ControllerSettings::getRightKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyRight];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyRight]);
 }
 
 
 Qt::Key GameSettings::ControllerSettings::getBombKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyBomb];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyBomb]);
 }
+
 
 Qt::Key GameSettings::ControllerSettings::getZoomInKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyZoomIn];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyZoomIn]);
 }
+
 
 Qt::Key GameSettings::ControllerSettings::getZoomOutKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyZoomOut];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyZoomOut]);
 }
+
 
 Qt::Key GameSettings::ControllerSettings::getStartKey() const
 {
-   return (Qt::Key)mKeyMap[Constants::KeyStart];
+   return static_cast<Qt::Key>(mKeyMap[Constants::KeyStart]);
 }
+
 
 void GameSettings::ControllerSettings::setAnalogueAxis1(int axis1)
 {
@@ -1163,7 +1165,7 @@ void GameSettings::StyleSettings::deserialize()
       {
          i.next();
 
-         Constants::Color key = (Constants::Color)i.key().toInt(&keyOk);
+         Constants::Color key = static_cast<Constants::Color>(i.key().toInt(&keyOk));
          QColor value = i.value().toString();
 
          if (keyOk)
@@ -1332,9 +1334,6 @@ QRgb GameSettings::StyleSettings::getRgb(Constants::Color playerColor) const
       case Constants::ColorOrange:
          rgb = mColorOrange;
          break;
-      default:
-         rgb = mColorWhite;
-         break;
    }
 
    return rgb;
@@ -1399,10 +1398,10 @@ void GameSettings::VideoSettings::serialize()
    setValue("video/resolution", getResolution());
    setValue("video/antialias", getAntialias());
    setValue("video/fullscreen", isFullscreen());
-   setValue("video/brightness", QString::number(getBrightness()));
+   setValue("video/brightness", getBrightness());
    setValue("video/vsync", getVSync());
    setValue("video/showfps", isFpsShown());
-   setValue("video/zoom", QString::number(getZoom()));
+   setValue("video/zoom", getZoom());
    setValue("video/borderleft", getBorderLeft());
    setValue("video/bordertop", getBorderTop());
    setValue("video/borderright", getBorderRight());
@@ -1620,12 +1619,10 @@ void GameSettings::VideoSettings::setBorderBottom(int bottom)
 }
 
 
-
 GameSettings::GameplaySettings::GameplaySettings()
  : mCameraShakeIntensity(1.0f),
    mCameraFollowsPlayer(true)
 {
-
 }
 
 

@@ -67,7 +67,7 @@
 
 
 // static variables
-BombermanClient* BombermanClient::mInstance = 0;
+BombermanClient* BombermanClient::mInstance = nullptr;
 
 
 //-----------------------------------------------------------------------------
@@ -76,20 +76,20 @@ BombermanClient* BombermanClient::mInstance = 0;
 BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
    : mKeysPressed(0),
      mBombReleased(true),
-     mSocket(0),
+     mSocket(nullptr),
      mBlockSize(0),
      mId(-1),
      mGameId(-1),
      mDead(true),
      mConnected(false),
      mLoginAfterConnect(false),
-     mServer(0),
-     mPositionInterpolation(0),
+     mServer(nullptr),
+     mPositionInterpolation(nullptr),
      mIngameMessagingActive(false),
      mMainMenuActive(false),
-     mBotFactory(0)
+     mBotFactory(nullptr)
 {
-   mInstance = this;   
+   mInstance = this;
 
    mPositionInterpolation = new PositionInterpolation(this);
 
@@ -172,8 +172,13 @@ void BombermanClient::initialize()
 */
 BombermanClient::~BombermanClient()
 {
-   mInstance= 0;
+   mInstance= nullptr;
    clearPlayerInfoMap();
+
+   if (mServer)
+   {
+      mServer->thread()->exit(0);
+   }
 }
 
 
@@ -233,7 +238,7 @@ bool BombermanClient::isGameIdValid() const
 */
 GameInformation *BombermanClient::getGameInformation(int id) const
 {
-   GameInformation* gameInfo = 0;
+   GameInformation* gameInfo = nullptr;
 
    for (int i = 0; i < mGames.size(); i++)
    {
@@ -467,7 +472,7 @@ bool BombermanClient::packetAvailable(QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mSocket->bytesAvailable() < (int)sizeof(quint16))
+      if (mSocket->bytesAvailable() < static_cast<int32_t>(sizeof(quint16)))
         return false;
 
      // read blocksize
@@ -515,7 +520,7 @@ void BombermanClient::toggleIngameMessaging()
 */
 MapItem* BombermanClient::getMapItem(int id) const
 {
-   MapItem* item = 0;
+   MapItem* item = nullptr;
 
    QMap<int,MapItem*>::ConstIterator it= mMapItems.constFind(id);
    if (it != mMapItems.constEnd())
@@ -531,7 +536,7 @@ MapItem* BombermanClient::getMapItem(int id) const
 */
 void BombermanClient::processCreateGameResponse(Packet* packet)
 {
-   CreateGameResponsePacket* response = (CreateGameResponsePacket*)packet;
+   CreateGameResponsePacket* response = dynamic_cast<CreateGameResponsePacket*>(packet);
 
    // extract game information
    GameInformation gameInformation = response->getGameInformation();
@@ -589,11 +594,11 @@ void BombermanClient::addPlayerInfo(int id, PlayerInfo* info)
 */
 void BombermanClient::processJoinGameResponse(Packet* packet)
 {
-   JoinGameResponsePacket* response = (JoinGameResponsePacket*)packet;
+   JoinGameResponsePacket* response = dynamic_cast<JoinGameResponsePacket*>(packet);
 
    if (response->isSuccessful())
    {
-      PlayerInfo* info = 0;
+      PlayerInfo* info = nullptr;
 
       int id = response->getPlayerId();
 
@@ -688,7 +693,7 @@ void BombermanClient::levelLoaded(const QString& /*path*/)
 */
 void BombermanClient::processListGameResponse(Packet* packet)
 {
-   ListGamesResponsePacket* list = (ListGamesResponsePacket*)packet;
+   ListGamesResponsePacket* list = dynamic_cast<ListGamesResponsePacket*>(packet);
 
    // only update game(s) included in list
    if (list->isUpdate())
@@ -715,7 +720,7 @@ void BombermanClient::processListGameResponse(Packet* packet)
 */
 void BombermanClient::processLoginResponse(Packet* packet)
 {
-   LoginResponsePacket *login= (LoginResponsePacket*)packet;
+   LoginResponsePacket *login= dynamic_cast<LoginResponsePacket*>(packet);
 
    setPlayerId(login->getId());
 
@@ -731,7 +736,7 @@ void BombermanClient::processLoginResponse(Packet* packet)
 */
 void BombermanClient::processPlayerKilled(Packet* packet)
 {
-   PlayerKilledPacket *kill= (PlayerKilledPacket*)packet;
+   PlayerKilledPacket *kill= dynamic_cast<PlayerKilledPacket*>(packet);
 
    // inform game drawable about death
    emit removePlayer(kill->getPlayerId());
@@ -758,7 +763,7 @@ void BombermanClient::processPlayerKilled(Packet* packet)
 */
 void BombermanClient::processPlayerInfected(Packet* packet)
 {
-   PlayerInfectedPacket* infectedPacket = (PlayerInfectedPacket*)packet;
+   PlayerInfectedPacket* infectedPacket = dynamic_cast<PlayerInfectedPacket*>(packet);
 
    PlayerInfo* player = getPlayerInfo(infectedPacket->getPlayerId());
 
@@ -794,7 +799,7 @@ void BombermanClient::processPlayerInfected(Packet* packet)
 */
 void BombermanClient::processDetonation(Packet* packet)
 {
-   DetonationPacket *det= (DetonationPacket*)packet;
+   DetonationPacket *det= dynamic_cast<DetonationPacket*>(packet);
 
    // Vector pos = Vector(det->getX(), det->getY(), 0.0);
    //
@@ -814,7 +819,7 @@ void BombermanClient::processDetonation(Packet* packet)
       det->getDown(),
       det->getLeft(),
       det->getRight(),
-      (float)intense
+      static_cast<float>(intense)
    );
 }
 
@@ -825,7 +830,7 @@ void BombermanClient::processDetonation(Packet* packet)
 */
 void BombermanClient::processError(Packet* packet)
 {
-   ErrorPacket* errorPacket= (ErrorPacket*)packet;
+   ErrorPacket* errorPacket= dynamic_cast<ErrorPacket*>(packet);
 
    // show error received from server
    HelpManager::getInstance()->addMessage(
@@ -861,7 +866,7 @@ void BombermanClient::processError(Packet* packet)
 */
 PlayerInfo* BombermanClient::getPlayerInfo(int id) const
 {
-   PlayerInfo* pInfo = 0;
+   PlayerInfo* pInfo = nullptr;
 
    QMap<int, PlayerInfo*>::const_iterator iter = mPlayerInfo.constFind(id);
 
@@ -977,7 +982,7 @@ bool BombermanClient::isHosting() const
 */
 void BombermanClient::processPosition(Packet* packet)
 {
-   PositionPacket* posPacket = (PositionPacket*)packet;
+   PositionPacket* posPacket = dynamic_cast<PositionPacket*>(packet);
 
    PlayerInfo* playerInfo= getPlayerInfo( posPacket->getPlayerId() );
 
@@ -1020,7 +1025,7 @@ void BombermanClient::processPosition(Packet* packet)
 */
 void BombermanClient::processMapItemCreated(Packet* packet)
 {
-   MapItem *item = new MapItem( (MapItemCreatedPacket*)packet );
+   MapItem *item = new MapItem(dynamic_cast<MapItemCreatedPacket*>(packet));
    mMapItems.insert(item->getUniqueId(), item);
    emit createMapItem(item);
 }
@@ -1032,7 +1037,7 @@ void BombermanClient::processMapItemCreated(Packet* packet)
 */
 void BombermanClient::processMapItemMove(Packet* packet)
 {
-   MapItemMovePacket* movePacket = (MapItemMovePacket*)packet;
+   MapItemMovePacket* movePacket = dynamic_cast<MapItemMovePacket*>(packet);
    MapItem *item = getMapItem(movePacket->getMapItemId());
 
    if (item)
@@ -1046,7 +1051,7 @@ void BombermanClient::processMapItemMove(Packet* packet)
       );
 
       // play kick sound
-      if (movePacket->getSpeed() > 0.0)
+      if (movePacket->getSpeed() > 0.0f)
          SoundManager::getInstance()->playSoundKick();
    }
 }
@@ -1058,7 +1063,7 @@ void BombermanClient::processMapItemMove(Packet* packet)
 */
 void BombermanClient::processExtraMapItemCreated(Packet* packet)
 {
-   ExtraMapItem *extra = new ExtraMapItem( (ExtraMapItemCreatedPacket*)packet );
+   ExtraMapItem *extra = new ExtraMapItem(dynamic_cast<ExtraMapItemCreatedPacket*>(packet));
    mMapItems.insert(extra->getUniqueId(), extra);
    emit createMapItem(extra);
 
@@ -1072,14 +1077,14 @@ void BombermanClient::processExtraMapItemCreated(Packet* packet)
 */
 void BombermanClient::processGameStats(Packet* packet)
 {
-   GameStatsPacket* statsPacket = (GameStatsPacket*)packet;
+   GameStatsPacket* statsPacket = dynamic_cast<GameStatsPacket*>(packet);
 
    // stats are copied
    QList<int> ids = statsPacket->getPlayerIds();
    QList<PlayerStats> overallStats = statsPacket->getOverallStats();
    QList<PlayerStats> roundStats = statsPacket->getRoundStats();
 
-   PlayerInfo* info = 0;
+   PlayerInfo* info = nullptr;
 
    int i = 0;
    foreach(int id, ids)
@@ -1118,9 +1123,9 @@ void BombermanClient::processGameStats(Packet* packet)
 */
 void BombermanClient::processExtraMapItemDestroyed(Packet* packet)
 {
-   MapItemDestroyedPacket *remove = (MapItemDestroyedPacket*)packet;
+   MapItemDestroyedPacket *remove = dynamic_cast<MapItemDestroyedPacket*>(packet);
    MapItem *item = getMapItem(remove->getUniqueId());
-   
+
    if (item)
    {
       item->setDestroyDirection(remove->getDirection());
@@ -1138,7 +1143,7 @@ void BombermanClient::processExtraMapItemDestroyed(Packet* packet)
 */
 void BombermanClient::processMapItemRemoved(Packet* packet)
 {
-   MapItemRemovedPacket *remove= (MapItemRemovedPacket*)packet;
+   MapItemRemovedPacket *remove= dynamic_cast<MapItemRemovedPacket*>(packet);
    MapItem *item= getMapItem(remove->getUniqueId());
 
    if (item)
@@ -1194,7 +1199,7 @@ void BombermanClient::broadcastPlayerStartPositions()
 */
 void BombermanClient::processStartGameResponse(Packet* packet)
 {
-   StartGameResponsePacket* response = (StartGameResponsePacket*)packet;
+   StartGameResponsePacket* response = dynamic_cast<StartGameResponsePacket*>(packet);
 
    qDebug(
       "BombermanClient::data: game %d started",
@@ -1226,7 +1231,7 @@ void BombermanClient::processStartGameResponse(Packet* packet)
 */
 void BombermanClient::processStopGameResponse(Packet* packet)
 {
-   StopGameResponsePacket* response = (StopGameResponsePacket*)packet;
+   StopGameResponsePacket* response = dynamic_cast<StopGameResponsePacket*>(packet);
 
    qDebug(
       "BombermanClient::data: game %d stopped, all rounds finished: %d",
@@ -1255,7 +1260,7 @@ void BombermanClient::processStopGameResponse(Packet* packet)
 */
 void BombermanClient::processGameEvent(Packet* packet)
 {
-   GameEventPacket* response = (GameEventPacket*)packet;
+   GameEventPacket* response = dynamic_cast<GameEventPacket*>(packet);
 
    switch (response->getGameEvent())
    {
@@ -1303,7 +1308,7 @@ void BombermanClient::processGameEvent(Packet* packet)
 */
 void BombermanClient::processMessage(Packet* packet)
 {
-   MessagePacket* messagePacket = (MessagePacket*)packet;
+   MessagePacket* messagePacket = dynamic_cast<MessagePacket*>(packet);
 
    emit messageReceived(
       messagePacket->getSenderId(),
@@ -1331,7 +1336,7 @@ void BombermanClient::processMessage(Packet* packet)
 */
 void BombermanClient::processTime(Packet* packet)
 {
-   TimePacket* timePacket = (TimePacket*)packet;
+   TimePacket* timePacket = dynamic_cast<TimePacket*>(packet);
 
 /*
    qDebug(
@@ -1369,7 +1374,7 @@ void BombermanClient::processCountdown(Packet* packet)
 {
    GameStateMachine::getInstance()->setState(Constants::GamePreparing);
 
-   CountdownPacket* countdownPacket = (CountdownPacket*)packet;
+   CountdownPacket* countdownPacket = dynamic_cast<CountdownPacket*>(packet);
 
    int timeLeft = countdownPacket->getTimeLeft();
 
@@ -1686,7 +1691,7 @@ void BombermanClient::removePlayerInfo(int id)
 */
 void BombermanClient::processLeaveGameResponse(Packet* packet)
 {
-   LeaveGameResponsePacket* leavePacket = (LeaveGameResponsePacket*)packet;
+   LeaveGameResponsePacket* leavePacket = dynamic_cast<LeaveGameResponsePacket*>(packet);
 
    // either we left the game, so we have to clear the player info map
    // completely, or it was just one player, so the player map keeps intact
@@ -1718,13 +1723,13 @@ void BombermanClient::processLeaveGameResponse(Packet* packet)
 */
 void BombermanClient::processExtraShake(Packet *packet)
 {
-   ExtraShakePacket* shakePacket = (ExtraShakePacket*)packet;
+   ExtraShakePacket* shakePacket = dynamic_cast<ExtraShakePacket*>(packet);
 
    MapItem* item = getMapItem(shakePacket->getMapItemUniqueId());
 
    if (item)
    {
-      emit shakeBlock(item);      
+      emit shakeBlock(item);
       SoundManager::getInstance()->playSoundBoxShake();
    }
 }
@@ -2313,7 +2318,7 @@ void BombermanClient::host()
 
          delete thread;
          delete mServer;
-         mServer = 0;
+         mServer = nullptr;
       }
    }
 }
