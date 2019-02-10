@@ -57,6 +57,29 @@ vendor and not, for example, Microsoft's default driver.
 - fuxx, development infrastructure
 - neoman Development infrastructure
 
+# How to build
+
+## Dependencies
+- Qt5
+- SDL2
+
+## Supported compilers
+- MSVC 2013
+- MSVC 2015
+- MSVC 2017
+- gcc 5
+- gcc 6
+- gcc 7
+- gcc 8
+- clang 7
+
+## Compiling
+Dynablaster Revenge uses Qt's qmake build system.
+Therefore compiling the game should be as easy as this:
+```
+qmake
+jom
+```
 
 # Help
 
