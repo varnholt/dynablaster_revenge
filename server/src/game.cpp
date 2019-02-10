@@ -126,6 +126,7 @@ Game::Game()
 
    // create timers
    mUpdateTimer = new QTimer(this);
+   mUpdateTimer->setTimerType(Qt::PreciseTimer);
    mGameTimeUpdateTimer = new QTimer(this);
    mPreparationTimer = new QTimer(this);
 
@@ -499,7 +500,7 @@ void Game::initializeMap()
 
 
    delete mImmuneTimes;
-   int fieldCount = width * height;
+   uint32_t fieldCount = static_cast<uint32_t>(width * height);
    mImmuneTimes = new int[fieldCount];
    memset(mImmuneTimes, 0, fieldCount * sizeof(int));
 }
@@ -557,7 +558,7 @@ void Game::broadcastStartPositions()
          Constants::KeyDown,
          currentPlayer->getX(),
          currentPlayer->getY(),
-         static_cast<float>(M_PI * 1.5f)
+         static_cast<float>(M_PI) * 1.5f
       );
 
       mOutgoingPackets.append(positionPacket);
@@ -890,8 +891,8 @@ bool Game::isKickPossible(
          {
             if (!p->isKilled())
             {
-               px = (int)floor(p->getX());
-               py = (int)floor(p->getY());
+               px = static_cast<int32_t>(floor(p->getX()));
+               py = static_cast<int32_t>(floor(p->getY()));
 
                // there is an obstructing player
                if (
@@ -1244,7 +1245,7 @@ void Game::createInfection(
    else
    {
       // find out which side the rotating cube is showing right now
-      int sideStep = ((int)floor(extraElapsedTime + 0.5f) ) % 6;
+      int sideStep = (static_cast<int32_t>(floor(extraElapsedTime + 0.5f))) % 6;
       Constants::SkullType skullType = faces[sideStep];
       disease.data()->setType(skullType);
    }
@@ -1383,7 +1384,7 @@ void Game::updateExtras()
          mMap->setItem(
             x,
             y,
-            0
+            nullptr
          );
 
          delete extra;
@@ -1431,7 +1432,7 @@ void Game::updateInfections()
                      {
                         // player2: the player who is now infected
                         // player1: the one who was already infected
-                        createInfection(player2, player1, 0);
+                        createInfection(player2, player1, nullptr);
                      }
                   }
                }

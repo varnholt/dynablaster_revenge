@@ -79,26 +79,26 @@
 GameDrawable::GameDrawable(RenderDevice* device)
  : QObject(),
    Drawable(device),
-   mLevel(0),
-   mPlayfield(0),
-   mLevelSceneGraph(0),
-   mPlayers(0),
+   mLevel(nullptr),
+   mPlayfield(nullptr),
+   mLevelSceneGraph(nullptr),
+   mPlayers(nullptr),
    mDestructAnim(),
-   mDetonations(0),
+   mDetonations(nullptr),
    mTime(0.0f),
    mTimePrev(0.0f),
-   mStones(0),
-   mBlocks(0),
-   mSkulls(0),
-   mDestruction(0),
-   mExtraFlame(0),
-   mExtraBomb(0),
-   mExtraSpeedup(0),
-   mExtraKick(0),
-   mOutlines(0),
-   mBombs(0),
-   mShadowBillboards(0),
-   mShadowBlocks(0),
+   mStones(nullptr),
+   mBlocks(nullptr),
+   mSkulls(nullptr),
+   mDestruction(nullptr),
+   mExtraFlame(nullptr),
+   mExtraBomb(nullptr),
+   mExtraSpeedup(nullptr),
+   mExtraKick(nullptr),
+   mOutlines(nullptr),
+   mBombs(nullptr),
+   mShadowBillboards(nullptr),
+   mShadowBlocks(nullptr),
    mPlayerId(-1),
    mBounce(0.0),
    mPlayfieldScaleX(1.0),
@@ -108,19 +108,19 @@ GameDrawable::GameDrawable(RenderDevice* device)
    mTimeReset(true),
    mFlowFieldAnimDebug(false),
    mWinAnimationStarted(false),
-   mPlayerNameDisplay(0),
-   mGamePlaybackDisplay(0),
-   mCameraFollowsPlayer(false),
-   mCameraShakeIntensity(false),
-   mShroomFilter(0),
-   mBlendQuad(0),
-   mMushroomAnimation(0),
-   mInvisiblePlayers(0),
-   mPlayerDeathEffect(0),
-   mPlayerInfectedEffect(0),
-   mPlayerInvincibleEffect(0),
-   mRibbonAnimationFactory(0),
-   mStarTalersFactory(0),
+   mPlayerNameDisplay(nullptr),
+   mGamePlaybackDisplay(nullptr),
+   mCameraFollowsPlayer(true),
+   mCameraShakeIntensity(1.0),
+   mShroomFilter(nullptr),
+   mBlendQuad(nullptr),
+   mMushroomAnimation(nullptr),
+   mInvisiblePlayers(nullptr),
+   mPlayerDeathEffect(nullptr),
+   mPlayerInfectedEffect(nullptr),
+   mPlayerInvincibleEffect(nullptr),
+   mRibbonAnimationFactory(nullptr),
+   mStarTalersFactory(nullptr),
    mExportScene(false)
 {
 #ifdef INSPECT_SCENE
@@ -189,12 +189,12 @@ void GameDrawable::deleteLevelData()
    if (mLevel)
    {
       delete mLevel;
-      mLevel= 0;
+      mLevel= nullptr;
    }
 
-   mPlayfield= 0;
-   mLevelSceneGraph= 0;
-   mPlayers= 0;
+   mPlayfield= nullptr;
+   mLevelSceneGraph= nullptr;
+   mPlayers= nullptr;
 
    for (int i=0;i<mDestructAnim.size(); i++)
       delete mDestructAnim[i];
@@ -525,35 +525,34 @@ void GameDrawable::loadLevel(const QString& levelPath)
 */
 void GameDrawable::levelFinished(const QString&)
 {
-   LevelLoadingThread *loader= (LevelLoadingThread*)sender();
-
+   LevelLoadingThread *loader= dynamic_cast<LevelLoadingThread*>(sender());
 
    if (mLevel)
    {
       clear();
       delete mLevel;
-      mLevel= 0;
+      mLevel= nullptr;
    }
 
    mLevel= loader->getLevel();
    if (!mLevel)
    {
-      mLevelSceneGraph= 0;
-      mPlayfield= 0;
-      mPlayers= 0;
-      mExtraFlame   = 0;
-      mExtraBomb    = 0;
-      mExtraSpeedup = 0;
-      mExtraKick    = 0;
-      mExtraSkull   = 0;
+      mLevelSceneGraph= nullptr;
+      mPlayfield= nullptr;
+      mPlayers= nullptr;
+      mExtraFlame   = nullptr;
+      mExtraBomb    = nullptr;
+      mExtraSpeedup = nullptr;
+      mExtraKick    = nullptr;
+      mExtraSkull   = nullptr;
       mDestructAnim = 0;
-      mShadowBillboards= 0;
-      mShadowBlocks= 0;
-      mBombs= 0;
-      mStones= 0;
-      mBlocks= 0;
-      mSkulls= 0;
-      mDestruction= 0;
+      mShadowBillboards= nullptr;
+      mShadowBlocks= nullptr;
+      mBombs= nullptr;
+      mStones= nullptr;
+      mBlocks= nullptr;
+      mSkulls= nullptr;
+      mDestruction= nullptr;
       return;
    }
 
@@ -679,7 +678,7 @@ Mesh* GameDrawable::getMesh(MapItem* item) const
    if (it != mMeshes.constEnd())
       return it.value();
    else
-      return 0;
+      return nullptr;
 }
 
 
@@ -692,7 +691,7 @@ Mesh* GameDrawable::getSkullMesh(MapItem* item) const
    if (it != mSkullMap.constEnd())
       return it.value();
    else
-      return 0;
+      return nullptr;
 }
 
 
@@ -718,7 +717,7 @@ void GameDrawable::updateBlock(int itemX, int itemY)
             bitpos<<=1;
          }
       }
-      mesh->setRenderFlags(flags);
+      mesh->setRenderFlags(static_cast<uint32_t>(flags));
    }
 }
 
@@ -749,7 +748,7 @@ void GameDrawable::addBlock(MapItem *item)
 */
 void GameDrawable::removeBlock(MapItem *item)
 {
-   mMap.set(item->getX(), item->getY(), 0);
+   mMap.set(item->getX(), item->getY(), nullptr);
    updateNeighbouringBlocks(item->getX(), item->getY());
 }
 
@@ -764,7 +763,7 @@ Mesh* GameDrawable::createBlock(SceneGraph* scene, Material* mat, float x, float
    pos.translate( Vector(x+0.5f, -y-0.5f) );
    scale= Matrix::scale(size, size, size);
 
-   Mesh *ref= (Mesh*)scene->getNode("Block");
+   Mesh *ref= dynamic_cast<Mesh*>(scene->getNode("Block"));
    Mesh *mesh= new Mesh(*ref);
    mesh->setTransform(scale * pos);
    mPlayfield->addNode(mesh);
@@ -783,8 +782,8 @@ Mesh* GameDrawable::createBlock(SceneGraph* scene, Material* mat, float x, float
 */
 Mesh* GameDrawable::createExtra(ExtraMapItem *extra)
 {
-   Mesh* mesh = 0;
-   Mesh *extraMesh= (Mesh*)mPlayfield->getNode("Extra");
+   Mesh* mesh = nullptr;
+   Mesh *extraMesh= dynamic_cast<Mesh*>(mPlayfield->getNode("Extra"));
    mesh= new Extra(extra->getExtraType(), extraMesh->getPart(0), extra->getX(), extra->getY());
    mExtraMaterials[extra->getExtraType()]->addMesh(mesh);
    ExtraRevealAnimation* anim = new ExtraRevealAnimation();
@@ -799,9 +798,9 @@ Mesh* GameDrawable::createExtra(ExtraMapItem *extra)
 */
 Mesh* GameDrawable::createBomb(MapItem *item)
 {
-   Mesh* mesh = 0;
+   Mesh* mesh = nullptr;
 
-   Mesh *obj= (Mesh*)mPlayfield->getNode("lunte");
+   Mesh *obj= dynamic_cast<Mesh*>(mPlayfield->getNode("lunte"));
 
    if (obj)
    {
@@ -810,7 +809,7 @@ Mesh* GameDrawable::createBomb(MapItem *item)
 
       Matrix translationMatrix;
       Vector itemPosition =
-         Vector(item->getX()+0.4, -item->getY()-0.5, 0.0f);
+         Vector(item->getX()+0.4f, -item->getY()-0.5f, 0.0f);
       translationMatrix.identity();
       translationMatrix.translate( itemPosition );
 
@@ -837,7 +836,7 @@ Mesh* GameDrawable::createBomb(MapItem *item)
 */
 Mesh *GameDrawable::createSkull(MapItem *item)
 {
-   Mesh* skullMesh = ((Mesh*)mPlayfield->getNode("skull"));
+   Mesh* skullMesh = dynamic_cast<Mesh*>(mPlayfield->getNode("skull"));
 
    Skull* mesh = new Skull(skullMesh, item->getX(), item->getY());
 
@@ -893,7 +892,7 @@ void GameDrawable::animateSkulls(float time)
       frame *= 3200.0f;
 
       // restart animation after 1 loop of 19200 ticks
-      float f = (float)fmod((double)frame, 19200.0);
+      float f = static_cast<float>(fmod(static_cast<double>(frame), 19200.0));
 
       // animate reference
       Mesh* ref = skull->getReference();
@@ -1025,7 +1024,7 @@ void GameDrawable::createMapItem(MapItem *item)
 
    if (!mMapItems.contains(item))
    {
-      Mesh *mesh= 0;
+      Mesh *mesh= nullptr;
 
       switch (item->getType())
       {
@@ -1050,12 +1049,12 @@ void GameDrawable::createMapItem(MapItem *item)
 
          case MapItem::Extra:
          {
-            ExtraMapItem *extra= (ExtraMapItem*)item;
+            ExtraMapItem *extra= dynamic_cast<ExtraMapItem*>(item);
 
             if (extra->getExtraType() == Constants::ExtraSkull)
             {
                mesh = createSkull(item);
-               mesh = 0; // TODO: nicer.
+               mesh = nullptr; // TODO: nicer.
             }
             else
                mesh = createExtra(extra);
@@ -1064,7 +1063,7 @@ void GameDrawable::createMapItem(MapItem *item)
          }
 
          default:
-            item= 0;
+            item= nullptr;
             break;
       }
 
@@ -1165,10 +1164,10 @@ void GameDrawable::removeMapItem(MapItem *item)
 */
 Node* GameDrawable::createDestruction(SceneGraph *scene, float x, float y, Constants::Direction direction, float flameCount)
 {
-   Dummy *dummy= 0;
+   Dummy *dummy= nullptr;
 
    // create destruction animation
-   Node *root= 0;
+   Node *root= nullptr;
    if (flameCount < 3)
       root= mDestructAnim[0];
    else if (flameCount < 5)
@@ -1194,7 +1193,7 @@ Node* GameDrawable::createDestruction(SceneGraph *scene, float x, float y, Const
       dummy= new Dummy(scene);
       dummy->setUserTransformable(true);
       Matrix pos;
-      pos= Matrix::rotateZ( rot * M_PI * 0.5f );
+      pos= Matrix::rotateZ( rot * static_cast<float>(M_PI) * 0.5f );
       pos.translate( Vector(x+0.5f, -y-0.5f) );
       dummy->setUserTransformable(true);
       Matrix scale= Matrix::scale(0.8f, 0.8f, 0.8f);
@@ -1205,7 +1204,7 @@ Node* GameDrawable::createDestruction(SceneGraph *scene, float x, float y, Const
          Node* child= destruct->getChild(i);
          if (child->id() == Node::idMesh)
          {
-            Mesh *ref= (Mesh*)child;
+            Mesh *ref= dynamic_cast<Mesh*>(child);
             Mesh *mesh= new Mesh(*ref, dummy);
             mesh->setUserTransformable(false);
             mDestruction->addMesh(mesh);
@@ -1370,7 +1369,7 @@ void GameDrawable::setMapItemPosition(
 
       pos.translate(
          Vector(
-            x + 0.5,
+            x + 0.5f,
            -y - 0.5f,
             z
          )
@@ -1442,7 +1441,7 @@ void GameDrawable::setPlayerPosition(int id, float x, float y, float angle)
 
    if (player)
    {
-      player->setRotation(angle + (float)M_PI * 0.5f);
+      player->setRotation(angle + static_cast<float>(M_PI) * 0.5f);
       player->setPosition(x, y);
    }
 }
@@ -1529,7 +1528,7 @@ PlayerItem* GameDrawable::getPlayer(int id) const
    if (it != mPlayerList.constEnd())
       return it.value();
    else
-      return 0;
+      return nullptr;
 }
 
 
@@ -1562,7 +1561,7 @@ void GameDrawable::addPlayer(int id, const QString& nick, Constants::Color color
    p->setVisible(true);
 
    player->setMesh(p);
-   Material* playerMaterial= mPlayers->getMaterial((int)color-1);
+   Material* playerMaterial= mPlayers->getMaterial(static_cast<int32_t>(color-1));
    playerMaterial->addMesh(p);
    player->setMaterial( playerMaterial );
 
@@ -1686,7 +1685,7 @@ void GameDrawable::gameStateChanged()
 void GameDrawable::animate(float time)
 {
    if (mDetonations)
-      mDetonations->update(time / 62.5);
+      mDetonations->update(time / 62.5f);
 
    if (mTimeReset)
    {
@@ -1697,7 +1696,7 @@ void GameDrawable::animate(float time)
    float delta= time - mTime;
    mTime= time;
 
-   mCameraAnim+=delta*60.0;
+   mCameraAnim+=delta*60.0f;
 //   mCameraAnim= 200*160;
 
    if (mBounce > delta*0.01f)
@@ -1716,7 +1715,7 @@ void GameDrawable::animate(float time)
       {
          case MapItem::Extra:
          {
-            Extra *extra= (Extra*)it.value();
+            Extra *extra= dynamic_cast<Extra*>(it.value());
             extra->animate(time);
          }
          break;
@@ -1724,20 +1723,20 @@ void GameDrawable::animate(float time)
          case MapItem::Bomb:
          {
             Mesh *mesh= it.value();
-            float t= time * 0.1 + mesh->getAnimationFrame();
+            float t= time * 0.1f + mesh->getAnimationFrame();
 
             Vector pos= mesh->getTransform().translation();
 
-            float sx= 1.0 + sin(t)*0.2f;
-            float sy= 1.0 - sin(t)*0.3f;
+            float sx= 1.0f + sin(t)*0.2f;
+            float sy= 1.0f - sin(t)*0.3f;
 
             Matrix mat= Matrix::scale(sx,sx,sy);
             mat.translate(pos);
             mesh->setTransform(mat);
 
             // update particle emitter position
-            sx= 1.0 + sin(t+0.1f)*0.2f;
-            sy= 1.0 - sin(t+0.1f)*0.3f;
+            sx= 1.0f + sin(t+0.1f)*0.2f;
+            sy= 1.0f - sin(t+0.1f)*0.3f;
             Matrix particleScaleMat= Matrix::scale(sx,sx,sy);
             particleScaleMat.translate(pos);
             Vector emitterPos = particleScaleMat * FuseParticle::getBombOffset();
@@ -1768,7 +1767,7 @@ void GameDrawable::animate(float time)
       bool remove= false;
       for (int i=0; i<destr->getChildCount(); i++)
       {
-         Mesh *mesh= (Mesh*)destr->getChild(i);
+         Mesh *mesh= dynamic_cast<Mesh*>(destr->getChild(i));
          float frame= mesh->getFrame() + delta * 30.0f;
          if (frame > 4000)
             remove= true;
@@ -1780,7 +1779,7 @@ void GameDrawable::animate(float time)
          it= mDestructions.erase(it);
          for (int i=0; i<destr->getChildCount(); i++)
          {
-            Mesh *mesh= (Mesh*)destr->getChild(i);
+            Mesh *mesh= dynamic_cast<Mesh*>(destr->getChild(i));
             mDestruction->removeMesh(mesh);
             deleteMesh(mesh);
          }
@@ -1966,9 +1965,9 @@ void GameDrawable::shakeBoxes(float delta)
          const Matrix& cur= mesh->getTransform();
 
          Matrix scale;
-         float x= 0.8 + sin((1.0f-time) * 14.0) * 0.1f * intense;
-         float y= 0.8 - sin((1.0f-time) * 12.0) * 0.1f * intense;
-         float z= 0.6 + cos((1.0f-time) * 16.0) * 0.2f * intense + 0.2*(1.0f - intense);
+         float x= 0.8f + sin((1.0f-time) * 14.0f) * 0.1f * intense;
+         float y= 0.8f - sin((1.0f-time) * 12.0f) * 0.1f * intense;
+         float z= 0.6f + cos((1.0f-time) * 16.0f) * 0.2f * intense + 0.2f *(1.0f - intense);
 
          scale= Matrix::scale(x, y, z);
          scale.translate( cur.translation() );
@@ -2014,7 +2013,7 @@ void GameDrawable::paintGL()
 */
 
    // smaller screen -> smaller blur radius
-   mPlayerInvincibleEffect->setRadius( 30.0f * gameFb->width() / 1920.0 );
+   mPlayerInvincibleEffect->setRadius( 30.0f * gameFb->width() / 1920.0f );
 
    gameFb->bind();
 
@@ -2149,7 +2148,7 @@ void GameDrawable::paintGL()
 
    if (mPlayers)
    {
-      InvisibilityMaterial* invisible= (InvisibilityMaterial*)mPlayers->getMaterial(10);
+      InvisibilityMaterial* invisible= dynamic_cast<InvisibilityMaterial*>(mPlayers->getMaterial(10));
       if (invisible->size() > 0)
       {
          // TODO: check if any player is invisible in the first place!
@@ -2183,8 +2182,8 @@ void GameDrawable::paintGL()
 */
 
    // start flow fields when player got killed (and kill anim is over)
-   Mesh* playerMesh = 0;
-   Geometry* playerGeometry = 0;
+   Mesh* playerMesh = nullptr;
+   Geometry* playerGeometry = nullptr;
    foreach(PlayerItem* player, mPlayerList)
    {
       if (player->isKilled())
@@ -2197,7 +2196,7 @@ void GameDrawable::paintGL()
 
             if (playerGeometry->isVisible())
             {
-               Material* material = mPlayers->getMaterial( (int)player->getColor()-1 );
+               Material* material = mPlayers->getMaterial(static_cast<int32_t>(player->getColor()-1));
                mPlayerDeathEffect->add( material );
                // make player invisible
                playerGeometry->setVisible(false);
@@ -2248,11 +2247,11 @@ void GameDrawable::paintGL()
    {
       int width = 0;
       int height = 0;
-      activeDevice->getViewPort(0,0, &width, &height);
-      int scaleX = (int)floor((float)width / gameFb->width() + 0.5);
-      int scaleY = (int)floor((float)height / gameFb->height() + 0.5);
-      float u = (float) width / (gameFb->width() * scaleX);
-      float v = (float) height / (gameFb->height() * scaleY);
+      activeDevice->getViewPort(nullptr, nullptr, &width, &height);
+      int scaleX = static_cast<int32_t>(floor(static_cast<float>(width / gameFb->width() + 0.5f)));
+      int scaleY = static_cast<int32_t>(floor(static_cast<float>(height / gameFb->height() + 0.5f)));
+      float u = static_cast<float>(width / (gameFb->width() * scaleX));
+      float v = static_cast<float>(height / (gameFb->height() * scaleY));
 
 //      glClear(GL_DEPTH_BUFFER_BIT);
       mMushroomAnimation->update();
@@ -2321,9 +2320,9 @@ void GameDrawable::resetPlayers()
       PlayerItem* player= *it;
       it= mPlayerList.erase(it);
 
-      int color= (int)player->getColor();
+      int color= static_cast<int32_t>(player->getColor());
       Mesh *mesh= player->getMesh();
-      Material* playerMaterial= mPlayers->getMaterial((int)color-1);
+      Material* playerMaterial= mPlayers->getMaterial(static_cast<int32_t>(color-1));
       playerMaterial->removeMesh(mesh);
       mShadowBillboards->removeMesh(mesh);
 
