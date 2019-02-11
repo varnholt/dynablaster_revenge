@@ -54,6 +54,9 @@ void botDebugHandler(QtMsgType type, const char *msg)
 {
    switch (type)
    {
+      case QtInfoMsg:
+         fprintf(stdout, "Info: %s\n", msg);
+         abort();
       case QtDebugMsg:
          fprintf(stderr, "Debug: %s\n", msg);
          break;

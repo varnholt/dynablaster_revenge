@@ -1300,7 +1300,7 @@ QColor GameSettings::StyleSettings::getColor(Constants::Color playerColor) const
 
 QRgb GameSettings::StyleSettings::getRgb(Constants::Color playerColor) const
 {
-   QRgb rgb;
+   QRgb rgb = Constants::ColorBlack;
 
    switch (playerColor)
    {

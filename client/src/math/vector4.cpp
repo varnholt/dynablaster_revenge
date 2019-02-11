@@ -2,6 +2,7 @@
 
 #include "vector4.h"
 #include "tools/stream.h"
+#include <cstdint>
 #include <math.h>
 
 // default constructor: uninitialized(!) vector
@@ -141,14 +142,23 @@ float* Vector4::data() const
 
 unsigned int Vector4::rgba() const
 {
-   int r= (int) (x * 255.0);
-   int g= (int) (y * 255.0);
-   int b= (int) (z * 255.0);
-   int a= (int) (w * 255.0);
-   if (r<0) r=0; if (r>255) r= 255;
-   if (g<0) g=0; if (g>255) g= 255;
-   if (b<0) b=0; if (b>255) b= 255;
-   if (a<0) a=0; if (a>255) a= 255;
+   int r= static_cast<int32_t>(x * 255.0);
+   int g= static_cast<int32_t>(y * 255.0);
+   int b= static_cast<int32_t>(z * 255.0);
+   int a= static_cast<int32_t>(w * 255.0);
+
+   if (r<0) r=0;
+   if (r>255) r= 255;
+
+   if (g<0) g=0;
+   if (g>255) g= 255;
+
+   if (b<0) b=0;
+   if (b>255) b= 255;
+
+   if (a<0) a=0;
+   if (a>255) a= 255;
+
    return (a<<24)|(b<<16)|(g<<8)|r;
 }
 

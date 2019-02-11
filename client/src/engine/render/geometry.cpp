@@ -327,25 +327,28 @@ int Geometry::createEdges()
 //               if ( flags==0 && nrm[i]*nrm[faceid] < 0.9999f ) continue;
 
                // get "unused" vertex from each triangle
-               int vc;
+               int vc = -1;
                if (vmap[edge[0]]!=vmap[va1] && vmap[edge[1]]!=vmap[va1]) vc= va1;
                if (vmap[edge[0]]!=vmap[va2] && vmap[edge[1]]!=vmap[va2]) vc= va2;
                if (vmap[edge[0]]!=vmap[va3] && vmap[edge[1]]!=vmap[va3]) vc= va3;
 
-               int vd;
+               int vd = -1;
                if (vmap[edge[0]]!=vmap[vb1] && vmap[edge[1]]!=vmap[vb1]) vd= vb1;
                if (vmap[edge[0]]!=vmap[vb2] && vmap[edge[1]]!=vmap[vb2]) vd= vb2;
                if (vmap[edge[0]]!=vmap[vb3] && vmap[edge[1]]!=vmap[vb3]) vd= vb3;
 
-               Edge e;
-               e.i1= edge[0];
-               e.i2= edge[1];
-               e.i3= vc;
-               e.i4= vd;
-               e.f1= i;
-               e.f2= faceid;
-               e.flags= flags;
-               mEdge.add(e);
+               if (vc != -1 && vd != -1)
+               {
+                  Edge e;
+                  e.i1= edge[0];
+                  e.i2= edge[1];
+                  e.i3= vc;
+                  e.i4= vd;
+                  e.f1= i;
+                  e.f2= faceid;
+                  e.flags= flags;
+                  mEdge.add(e);
+               }
             }
          }
       }
