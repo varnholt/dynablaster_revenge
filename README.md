@@ -40,8 +40,8 @@ Dynablaster Revenge is a remake of the game Dynablaster, released by Hudson Soft
 # How to build
 
 ## Dependencies
-- Qt5
-- SDL2
+- Qt5, [License](https://doc.qt.io/qt-5/opensourcelicense.html)
+- SDL2, [License](https://www.libsdl.org/license.php)
 
 ## Supported compilers
 - MSVC 2013
