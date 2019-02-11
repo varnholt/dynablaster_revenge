@@ -86,7 +86,7 @@ void CountdownDrawable::drawCountdown()
 {
    for (int layerIndex = 0; layerIndex < mPsdLayers.size(); layerIndex++)
    {
-      if (mLayerAlphas[layerIndex] > 0.0)
+      if (mLayerAlphas[layerIndex] > 0.0f)
       {
          PSDLayer* layer= mPsdLayers[layerIndex];
          layer->render(0,0, mLayerAlphas[layerIndex]);
