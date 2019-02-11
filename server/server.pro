@@ -152,6 +152,6 @@ SOURCES += \
    src/extrashakepackethandler.cpp \
    src/extraspawn.cpp \
    src/game.cpp \
-   src/main.cpp \
+   src/servermain.cpp \
    src/server.cpp \
    src/servergui.cpp

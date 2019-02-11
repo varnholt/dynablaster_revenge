@@ -34,7 +34,7 @@ INCLUDEPATH += $$(QTDIR)/include/QtCore
 INCLUDEPATH += $$(QTDIR)/include/QtNetwork
 
 
-SOURCES += main.cpp \
+SOURCES += aimain.cpp \
     ../shared/blockmapitem.cpp \
     ../shared/bombkickanimation.cpp \
     ../shared/bombmapitem.cpp \
