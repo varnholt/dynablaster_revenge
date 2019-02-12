@@ -29,7 +29,12 @@ unix {
 #QMAKE_CXXFLAGS_RELEASE += -Zi
 #QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF
 
-LIBS += -L./lib64
+contains(QMAKE_TARGET.arch, x86_64) {
+   LIBS += -L$${PWD}/lib64
+} else {
+   LIBS += -L$${PWD}/lib
+}
+
 LIBS += -lSDL2
 
 DEPENDPATH += \

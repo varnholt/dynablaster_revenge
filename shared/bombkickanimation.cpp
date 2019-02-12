@@ -9,6 +9,7 @@
 
 // math
 #include <math.h>
+#include <cstdint>
 
 // Qt
 #include <QTimer>
@@ -37,7 +38,9 @@ BombKickAnimation::BombKickAnimation(QObject *parent)
     mColliding(false)
 {
    mTimer = new QTimer(this);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
    mTimer->setTimerType(Qt::PreciseTimer);
+#endif
    mTimer->setInterval(1000 / SERVER_HEARTBEAT_IN_HZ);
 
    connect(

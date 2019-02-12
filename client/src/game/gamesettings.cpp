@@ -1,5 +1,7 @@
 #include "gamesettings.h"
 
+#include <cstdint>
+
 #define SETTINGS_FILE "data/game.ini"
 
 // defaults

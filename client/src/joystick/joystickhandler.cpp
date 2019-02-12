@@ -18,7 +18,9 @@ JoystickHandler::JoystickHandler(QObject* parent)
 {
    // init timer
    mUpdateTimer = new QTimer(this);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
    mUpdateTimer->setTimerType(Qt::PreciseTimer);
+#endif
 
    connect(
       mUpdateTimer,

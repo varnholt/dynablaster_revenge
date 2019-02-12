@@ -47,6 +47,7 @@
 
 // c
 #include <math.h>
+#include <cstdint>
 
 // static variables
 int Game::sGameId = 0;
@@ -106,7 +107,9 @@ Game::Game()
 
    // create timers
    mUpdateTimer = new QTimer(this);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
    mUpdateTimer->setTimerType(Qt::PreciseTimer);
+#endif
    mGameTimeUpdateTimer = new QTimer(this);
    mPreparationTimer = new QTimer(this);
 

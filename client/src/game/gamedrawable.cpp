@@ -64,6 +64,7 @@
 
 // std
 #include <math.h>
+#include <cstdint>
 
 // qt
 #include <QApplication>

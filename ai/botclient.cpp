@@ -54,9 +54,11 @@ void botDebugHandler(QtMsgType type, const char *msg)
 {
    switch (type)
    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
       case QtInfoMsg:
          fprintf(stdout, "Info: %s\n", msg);
          abort();
+#endif
       case QtDebugMsg:
          fprintf(stderr, "Debug: %s\n", msg);
          break;

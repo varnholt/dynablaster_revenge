@@ -30,6 +30,7 @@
 
 // c
 #include <math.h>
+#include <cstdint>
 
 // static variables
 Server* Server::sInstance = nullptr;

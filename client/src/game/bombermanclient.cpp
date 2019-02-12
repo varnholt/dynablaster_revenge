@@ -65,6 +65,7 @@
 #include <QTcpSocket>
 #include <QThread>
 
+#include <cstdint>
 
 // static variables
 BombermanClient* BombermanClient::mInstance = nullptr;
