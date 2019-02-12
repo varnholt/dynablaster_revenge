@@ -30,6 +30,7 @@
 #include "materials/environmentambientdiffusematerial.h"
 
 // cmath
+#include <cstdint>
 #include <math.h>
 
 // defines
@@ -45,7 +46,7 @@ class CupMaterialFactory : public MaterialFactory
 public:
    Material* createMaterial(SceneGraph* scene, int id) const
    {
-      Material* mat= 0;
+      Material* mat= nullptr;
       switch(id)
       {
          case (MAP_AMBIENT | MAP_REFLECT):
@@ -70,18 +71,18 @@ GameWinDrawable::GameWinDrawable(RenderDevice *dev, bool visible)
  : QObject(),
    Drawable(dev, visible),
    mColorEnum(Constants::ColorWhite),
-   mLargeFont(0),
-   mScene(0),
+   mLargeFont(nullptr),
+   mScene(nullptr),
    mRenderTime(0.0f),
    mTime(0.0f),
    mDeltaTime(0.0f),
    mStartTime(0.0f),
-   mBlur(0),
-   mGameInformation(0),
-   mPlayerItem(0),
-   mMotionMixer(0),
-   mPlayerMesh(0),
-   mPlayerMaterial(0)
+   mBlur(nullptr),
+   mGameInformation(nullptr),
+   mPlayerItem(nullptr),
+   mMotionMixer(nullptr),
+   mPlayerMesh(nullptr),
+   mPlayerMaterial(nullptr)
 {
    mFilename = "data/game/results.psd";
 
@@ -162,7 +163,7 @@ float GameWinDrawable::getContentsAlpha() const
 
    if (elapsed < SHOW_WINNER_FADE_IN_TIME)
    {
-      alpha = elapsed / (float)SHOW_WINNER_FADE_IN_TIME;
+      alpha = elapsed / static_cast<float>(SHOW_WINNER_FADE_IN_TIME);
    }
    else if (elapsed > (SHOW_WINNER_FADE_IN_TIME + SHOW_WINNER_DISPLAY_TIME + SHOW_WINNER_ADDITIONAL_TIME) )
    {
@@ -170,7 +171,7 @@ float GameWinDrawable::getContentsAlpha() const
          qMax(
             1.0f - (
                  (elapsed - SHOW_WINNER_FADE_IN_TIME - SHOW_WINNER_DISPLAY_TIME - SHOW_WINNER_ADDITIONAL_TIME)
-               / (float)SHOW_WINNER_FADE_OUT_TIME
+               / static_cast<float>(SHOW_WINNER_FADE_OUT_TIME)
             ),
             0.0f
          );
@@ -204,7 +205,7 @@ float GameWinDrawable::getDrawableAlpha() const
    {
       alpha =
          qMax(
-            1.0f - ( (elapsed - duration) / (float)SHOW_WINNER_SHOW_MENU_TIME),
+            1.0f - ( (elapsed - duration) / static_cast<float>(SHOW_WINNER_SHOW_MENU_TIME)),
             0.0f
          );
    }
@@ -235,7 +236,7 @@ void GameWinDrawable::hideLayers()
 void GameWinDrawable::drawWinnerText()
 {
    float alpha = getContentsAlpha();
-   float yOffset = sin(mRenderTime * 0.05f) * 1080.0 * 0.015f;
+   float yOffset = sin(mRenderTime * 0.05f) * 1080.0f * 0.015f;
 
    const float fontSize = 0.7f;
 
@@ -244,7 +245,7 @@ void GameWinDrawable::drawWinnerText()
       glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
       glPushMatrix();
-         glTranslatef(0.0f, 0.15f * 1080.0 + yOffset, 0.0f);
+         glTranslatef(0.0f, 0.15f * 1080.0f + yOffset, 0.0f);
          mLargeFont->buildVertices(fontSize, qPrintable(tr("draw game")), 0.0f, 0.0f, 1920.0f);
          mLargeFont->draw(mLargeFont->getVertices());
       glPopMatrix();
@@ -252,13 +253,18 @@ void GameWinDrawable::drawWinnerText()
    else
    {
       QRgb rgb = getColor().rgb();
-      glColor4ub(qRed(rgb), qGreen(rgb), qBlue(rgb), alpha * 255);
+      glColor4ub(
+         static_cast<GLubyte>(qRed(rgb)),
+         static_cast<GLubyte>(qGreen(rgb)),
+         static_cast<GLubyte>(qBlue(rgb)),
+         static_cast<GLubyte>(alpha * 255)
+      );
 
       QString winText = tr("%1 wins!").arg(getWinnerName());
 
       glColor4f(1.0f, 1.0f, 1.0f, alpha);
       glPushMatrix();
-         glTranslatef(0.0f, 0.15f * 1080.0 + yOffset, 0.0f);
+         glTranslatef(0.0f, 0.15f * 1080.0f + yOffset, 0.0f);
          mLargeFont->buildVertices(fontSize, qPrintable(winText), 0.0f, 0.0f, 1920.0f);
          mLargeFont->draw(mLargeFont->getVertices());
       glPopMatrix();
@@ -292,7 +298,7 @@ void GameWinDrawable::initGameData()
 
    // then just make those visible that are actually used
    int row = 0;
-   PlayerInfo* info = 0;
+   PlayerInfo* info = nullptr;
    Weighted<PlayerInfo*, int> w;
    foreach (w, mPlayerScores)
    {
@@ -343,7 +349,7 @@ int GameWinDrawable::computeScore(PlayerInfo* info) const
 
    score *= 0.1f;
 
-   return (int)score;
+   return static_cast<int32_t>(score);
 }
 
 
@@ -365,7 +371,7 @@ void GameWinDrawable::drawGameData()
 
    int score = 0;
    int row = 0;
-   PlayerInfo* info = 0;
+   PlayerInfo* info = nullptr;
    Weighted<PlayerInfo*, int> w;
    foreach (w, mPlayerScores)
    {
@@ -384,9 +390,14 @@ void GameWinDrawable::drawGameData()
 
       mDefaultFont->draw(mDefaultFont->getVertices());
 
-      // draw score      
-      mPlayerScoresAnimated[info->getColor()-1] += mDeltaTime;
-      score = qMin(mPlayerScoresAnimated[info->getColor()-1], (float)computeScore(info));
+      // draw score
+      mPlayerScoresAnimated[static_cast<int32_t>(info->getColor()) - 1] += mDeltaTime;
+      score = static_cast<int32_t>(
+         qMin(
+            mPlayerScoresAnimated[static_cast<int32_t>(info->getColor()) - 1],
+            static_cast<float>(computeScore(info))
+         )
+      );
 
       mDefaultFont->buildVertices(
          0.27f,
@@ -428,12 +439,12 @@ void GameWinDrawable::drawLayers(float alpha)
 float GameWinDrawable::getRadius() const
 {
    // increase blur radius
-   float radius = mRenderTime * 0.5;
+   float radius = mRenderTime * 0.5f;
 
    if (radius > RADIUS_MAX)
       radius = RADIUS_MAX;
 
-   float fadeOutStart = (float)(
+   float fadeOutStart = static_cast<float>(
          SHOW_WINNER_FADE_IN_TIME
        + SHOW_WINNER_DISPLAY_TIME
        + SHOW_WINNER_ADDITIONAL_TIME
@@ -445,7 +456,7 @@ float GameWinDrawable::getRadius() const
       // 1..0
       radius =
          qMax(
-            1.0f - ((mTime - fadeOutStart) / (float)SHOW_WINNER_SHOW_MENU_TIME ),
+            1.0f - ((mTime - fadeOutStart) / static_cast<float>(SHOW_WINNER_SHOW_MENU_TIME)),
             0.0f
          );
 
@@ -622,7 +633,7 @@ void GameWinDrawable::animate(float time)
    playerMatrix.zw = -40.0f; //baseTransform.zw;
    playerMatrix.ww = 1.0f;   //baseTransform.ww;
 
-   Matrix rotz = Matrix::rotateZ((float)M_PI);
+   Matrix rotz = Matrix::rotateZ(static_cast<float>(M_PI));
    Matrix rotx = Matrix::rotateY(0.11f);
    playerMatrix = playerMatrix*rotz*rotx;
 
@@ -639,10 +650,10 @@ void GameWinDrawable::animate(float time)
 void GameWinDrawable::debugMatrix(const Matrix& m, const char* name)
 {
    qDebug("%s = {", name);
-   qDebug("   %f, %f, %f, %f", m.xx, m.yx, m.zx, m.wx);
-   qDebug("   %f, %f, %f, %f", m.xy, m.yy, m.zy, m.wy);
-   qDebug("   %f, %f, %f, %f", m.xz, m.yz, m.zz, m.wz);
-   qDebug("   %f, %f, %f, %f", m.xw, m.yw, m.zw, m.ww);
+   qDebug("   %f, %f, %f, %f", static_cast<double>(m.xx), static_cast<double>(m.yx), static_cast<double>(m.zx), static_cast<double>(m.wx));
+   qDebug("   %f, %f, %f, %f", static_cast<double>(m.xy), static_cast<double>(m.yy), static_cast<double>(m.zy), static_cast<double>(m.wy));
+   qDebug("   %f, %f, %f, %f", static_cast<double>(m.xz), static_cast<double>(m.yz), static_cast<double>(m.zz), static_cast<double>(m.wz));
+   qDebug("   %f, %f, %f, %f", static_cast<double>(m.xw), static_cast<double>(m.yw), static_cast<double>(m.zw), static_cast<double>(m.ww));
    qDebug("}");
 }
 
@@ -1007,7 +1018,7 @@ void GameWinDrawable::initializeWinnerScene()
 void GameWinDrawable::initializePlayerMaterial()
 {
    delete mPlayerMaterial;
-   mPlayerMaterial = 0;
+   mPlayerMaterial = nullptr;
 
    // todo: use current level path
    FileStream::addPath( "data/winner" );

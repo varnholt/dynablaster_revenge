@@ -22,6 +22,7 @@
 #include <QGLContext>
 #include <QImage>
 
+#include <cstdint>
 #include <math.h>
 
 // various defines
@@ -67,15 +68,15 @@
 GameStatsDrawable::GameStatsDrawable(RenderDevice* dev)
  : QObject(),
    Drawable(dev),
-   mTimeFont(0),
-   mOutline(0),
+   mTimeFont(nullptr),
+   mOutline(nullptr),
    mScaleFactor(0.0f),
-   mLayerOrb(0),
-   mLayerPanelOrb(0),
-   mLayerMuteMusic(0),
-   mLayerMuteSfx(0),
-   mLayerSkullProgressStart(0),
-   mLayerSkullProgressMiddle(0),
+   mLayerOrb(nullptr),
+   mLayerPanelOrb(nullptr),
+   mLayerMuteMusic(nullptr),
+   mLayerMuteSfx(nullptr),
+   mLayerSkullProgressStart(nullptr),
+   mLayerSkullProgressMiddle(nullptr),
    mPlayerScore(0),
    mTimeLeft(0),
    mDuration(0),
@@ -97,14 +98,14 @@ GameStatsDrawable::GameStatsDrawable(RenderDevice* dev)
    mProgressShader(0),
    mParamProgress(0),
    mProgressBarWidth(0)
-{   
+{
    memset(mGrayscales, 0.0f, 11 * sizeof(float));
 
    for (int i=0; i < 10; i++)
-      mLayersPlayer[i]=0;
+      mLayersPlayer[i]=nullptr;
 
    for (int i=0; i < Constants::SkullReset + 1; i++)
-      mLayersSkulls[i]=0;
+      mLayersSkulls[i]=nullptr;
 
    mFilename = "data/game/gameui.psd";
 }
@@ -140,7 +141,7 @@ void GameStatsDrawable::initializeGL()
    initializeOrb();
 
    // init grayscale shader
-   GLDevice* dev = (GLDevice*)activeDevice;
+   GLDevice* dev = dynamic_cast<GLDevice*>(activeDevice);
 
    // grayscale shader
    mGrayscaleShader = dev->loadShader("grayscale-vert.glsl", "grayscale-frag.glsl");
@@ -317,7 +318,7 @@ void GameStatsDrawable::animateDeathGrayScales(float dt)
 */
 void GameStatsDrawable::animate(float globalTime)
 {
-   if (mLastGlobalTime != globalTime)
+   if (fabs(mLastGlobalTime - globalTime) > 0.0001f)
    {
       if (mLastGlobalTime != 0.0f)
       {
@@ -354,7 +355,7 @@ void GameStatsDrawable::drawOverlay()
 */
 void GameStatsDrawable::drawPlayerIcons()
 {
-   GLDevice* dev= (GLDevice*)activeDevice;
+   GLDevice* dev= dynamic_cast<GLDevice*>(activeDevice);
 
    glPushMatrix();
 
@@ -362,8 +363,8 @@ void GameStatsDrawable::drawPlayerIcons()
       BombermanClient::getInstance()->getPlayerInfoList();
 
    foreach(PlayerInfo* info, playerInfoList)
-   {      
-      int color = (int)info->getColor() - 1;
+   {
+      int color = static_cast<int32_t>(info->getColor()) - 1;
       if (color > -1 && color < 10)
       {
          if (info->isKilled())
@@ -525,20 +526,21 @@ void GameStatsDrawable::drawOrb()
 {
    mLayerPanelOrb->render();
 
-   float duration = qMax((float)mDuration, 1.0f);
+   float duration = qMax(static_cast<float>(mDuration), 1.0f);
 
    QRgb pixel =
       mOrbPalette.pixel(
          qMin(
-            mOrbPalette.width() - 1.0f,
-            ( (mDuration - (float)mTimeLeft) / duration) * 255),
+            mOrbPalette.width() - 1,
+            static_cast<int32_t>(((mDuration - mTimeLeft) / duration) * 255.0f)
+         ),
          0
       );
 
    mLayerOrb->setColor(
-      qRed(pixel) / 255.0,
-      qGreen(pixel) / 255.0,
-      qBlue(pixel) / 255.0
+      qRed(pixel)   / 255.0f,
+      qGreen(pixel) / 255.0f,
+      qBlue(pixel)  / 255.0f
    );
 
    mLayerOrb->render();
@@ -653,7 +655,7 @@ void GameStatsDrawable::unitTest1()
 void GameStatsDrawable::animateSkulls(float dt)
 {
    if (mSkullAborted)
-      mSkullAlpha -= dt * 0.01;
+      mSkullAlpha -= dt * 0.01f;
 }
 
 
