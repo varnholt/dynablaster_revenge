@@ -21,15 +21,14 @@
 // framework
 #include "framework/timerhandler.h"
 
+#include <cstdint>
 #include <math.h>
 
 #ifdef Q_OS_MAC
 #include "stdlib.h"
 #endif
 
-GamePlayback* GamePlayback::sInstance = 0;
-
-double msPerServerTick= 1000.0 / SERVER_HEARTBEAT_IN_HZ;
+GamePlayback* GamePlayback::sInstance = nullptr;
 
 
 /*
@@ -253,8 +252,8 @@ void GamePlayback::save(const QString &givenName)
 */
 void GamePlayback::smoothInterpolationData(Packet* packet)
 {
-   PositionPacket* prevPos= 0;
-   PositionPacket* pos= (PositionPacket*)packet;
+   PositionPacket* prevPos= nullptr;
+   PositionPacket* pos= dynamic_cast<PositionPacket*>(packet);
 
    int playerId= pos->getPlayerId();
    QMap<int, PositionPacket*>::Iterator it;
@@ -266,7 +265,7 @@ void GamePlayback::smoothInterpolationData(Packet* packet)
    }
    else
    {
-      prevPos= 0;
+      prevPos= nullptr;
       mPrevPositions.insert( playerId, pos );
    }
 
@@ -276,13 +275,13 @@ void GamePlayback::smoothInterpolationData(Packet* packet)
       int time= prevPos->getTimestamp().msecsTo( pos->getTimestamp() );
       double serverTicks = time * SERVER_HEARTBEAT_IN_HZ / 1000.0;
 
-      double pdx = prevPos->getDeltaX();
-      double pdy = prevPos->getDeltaY();
-      double pdr = prevPos->getAngleDelta();
+      double pdx = static_cast<double>(prevPos->getDeltaX());
+      double pdy = static_cast<double>(prevPos->getDeltaY());
+      double pdr = static_cast<double>(prevPos->getAngleDelta());
 
-      double dx = pos->getX() - prevPos->getX();
-      double dy = pos->getY() - prevPos->getY();
-      double dr = pos->getAngle() - prevPos->getAngle();
+      double dx = static_cast<double>(pos->getX() - prevPos->getX());
+      double dy = static_cast<double>(pos->getY() - prevPos->getY());
+      double dr = static_cast<double>(pos->getAngle() - prevPos->getAngle());
 
       // fix rotation delta direction
       if (dr > M_PI)
@@ -293,7 +292,7 @@ void GamePlayback::smoothInterpolationData(Packet* packet)
 
       if (dr > 0.5 || dr <- 0.5)
       {
-         dr = 0.0f;
+         dr = 0.0;
       }
 
       dx *= serverTicks;
@@ -319,7 +318,7 @@ void GamePlayback::smoothInterpolationData(Packet* packet)
       {
          prevPos->setDeltaX( dx );
          prevPos->setDeltaY( dy );
-         prevPos->setAngleDelta( dr );
+         prevPos->setAngleDelta( static_cast<float>(dr) );
       }
    }
 }
@@ -384,7 +383,7 @@ bool GamePlayback::packetAvailable(const QFile& file, QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (file.bytesAvailable() < (int)sizeof(quint16))
+      if (file.bytesAvailable() < static_cast<int32_t>(sizeof(quint16))) // yeah, yeah, yeah... '2' is probably more concise.
         return false;
 
      // read blocksize
@@ -423,8 +422,7 @@ void GamePlayback::processPacket(Packet* packet)
    {
       case Packet::JOINGAMERESPONSE:
       {
-         JoinGameResponsePacket* joinResponse
-            = (JoinGameResponsePacket*)packet;
+         JoinGameResponsePacket* joinResponse = dynamic_cast<JoinGameResponsePacket*>(packet);
 
          // only do the loading stuff for ourself
          if (joinResponse->getPlayerId() == getPlayerId())
@@ -497,8 +495,8 @@ void GamePlayback::update()
    */
 
    int event = 0;
-   int now = mElapsed.elapsed();
-   Packet* packet = 0;
+   int now = static_cast<int32_t>(mElapsed.elapsed());
+   Packet* packet = nullptr;
    bool packetFiltered = false;
 
    // shift the current time by the checkpoint time in case a filter is used
@@ -588,7 +586,10 @@ void GamePlayback::levelLoadingFinished()
 {
    if (!isRecording())
    {
-      int elapsed = mLevelLoadingTime.elapsed();
+      int elapsed = static_cast<int32_t>(mLevelLoadingTime.elapsed());
+
+      // add a second, you never know ;)
+      // elapsed += 1000;
 
       qDebug(
          "GamePlayback::levelLoadingFinished(): %dms",
@@ -685,14 +686,14 @@ void GamePlayback::analyze()
          {
             case Packet::LOGINRESPONSE:
             {
-               LoginResponsePacket* lrp = (LoginResponsePacket*)packet;
+               LoginResponsePacket* lrp = dynamic_cast<LoginResponsePacket*>(packet);
                ourPlayerId = lrp->getId();
                break;
             }
 
             case Packet::JOINGAMERESPONSE:
             {
-               JoinGameResponsePacket* jgrp = (JoinGameResponsePacket*)packet;
+               JoinGameResponsePacket* jgrp = dynamic_cast<JoinGameResponsePacket*>(packet);
                if (jgrp->getPlayerId() == ourPlayerId)
                   gamesAvailable << jgrp->getGameId();
                break;
@@ -723,7 +724,7 @@ void GamePlayback::analyze()
          {
             case Packet::CREATEGAMERESPONSE:
             {
-               CreateGameResponsePacket* cgrp = (CreateGameResponsePacket*)packet;
+               CreateGameResponsePacket* cgrp = dynamic_cast<CreateGameResponsePacket*>(packet);
 
                qDebug(
                   "[%s] Game created: %d",
@@ -736,7 +737,7 @@ void GamePlayback::analyze()
 
             case Packet::JOINGAMERESPONSE:
             {
-               JoinGameResponsePacket* jgrp = (JoinGameResponsePacket*)packet;
+               JoinGameResponsePacket* jgrp = dynamic_cast<JoinGameResponsePacket*>(packet);
 
                qDebug(
                   "[%s] Player '%s' joined game %d",
@@ -750,7 +751,7 @@ void GamePlayback::analyze()
 
             case Packet::STARTGAMERESPONSE:
             {
-               StartGameResponsePacket* sgrp = (StartGameResponsePacket*)packet;
+               StartGameResponsePacket* sgrp = dynamic_cast<StartGameResponsePacket*>(packet);
 
                int round = startedRoundMap[sgrp->getId()];
 
@@ -793,7 +794,7 @@ void GamePlayback::analyze()
 
             case Packet::STOPGAMERESPONSE:
             {
-               StopGameResponsePacket* sgrp = (StopGameResponsePacket*)packet;
+               StopGameResponsePacket* sgrp = dynamic_cast<StopGameResponsePacket*>(packet);
 
                int gameId = sgrp->getId();
 
@@ -805,7 +806,7 @@ void GamePlayback::analyze()
                   it.value()++;
                }
                else
-               {                  
+               {
                   mRoundMap.insert(gameId, 0);
                }
 
@@ -815,6 +816,8 @@ void GamePlayback::analyze()
                   round,
                   gameId
                );
+
+               break;
             }
 
             default:
@@ -869,7 +872,7 @@ void GamePlayback::updatePacketFilter(Packet* packet)
    {
       mPacketFilter.setRunning(true);
 
-      CountdownPacket* cp = (CountdownPacket*)packet;
+      CountdownPacket* cp = dynamic_cast<CountdownPacket*>(packet);
 
       int timeLeft = cp->getTimeLeft();
 

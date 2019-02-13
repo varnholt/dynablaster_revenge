@@ -25,7 +25,7 @@ class GamePlayback : public QObject
    public:
 
       //! constructor
-      GamePlayback(QObject* parent = 0);
+      GamePlayback(QObject* parent = nullptr);
 
       //! static instance getter
       static GamePlayback* getInstance();

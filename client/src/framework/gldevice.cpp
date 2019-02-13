@@ -254,8 +254,8 @@ bool GLDevice::init()
    }
 
 
-	int texunits;
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &texunits);
+   int texunits;
+   glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &texunits);
    PRINTF("max texture units: %d \n", texunits);
 
     int fragUniforms;
@@ -271,8 +271,8 @@ bool GLDevice::init()
    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureImageUnits);
    PRINTF("combined texture units: %d \n", maxCombinedTextureImageUnits);
 
-	int texsize;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texsize);
+   int texsize;
+   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texsize);
    PRINTF("max texture size: %d \n", texsize);
 
    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -374,10 +374,10 @@ bool GLDevice::initExtensions()
 
    missingExtensions= false;
 
-	// multi-texturing
+   // multi-texturing
 #ifdef WIN32
-	glClientActiveTexture= (PFNGLCLIENTACTIVETEXTUREPROC)getProcAddress("glClientActiveTextureARB");
-	glActiveTexture =      (PFNGLACTIVETEXTUREARBPROC)   getProcAddress("glActiveTextureARB");
+   glClientActiveTexture= (PFNGLCLIENTACTIVETEXTUREPROC)getProcAddress("glClientActiveTextureARB");
+   glActiveTexture =      (PFNGLACTIVETEXTUREARBPROC)   getProcAddress("glActiveTextureARB");
    glMultiTexCoord2f =    (PFNGLMULTITEXCOORD2FARBPROC) getProcAddress("glMultiTexCoord2fARB");
    glTexImage3D =         (PFNGLTEXIMAGE3DPROC)         getProcAddress("glTexImage3DEXT");
    glDrawRangeElements =  (PFNGLDRAWRANGEELEMENTSPROC)  getProcAddress("glDrawRangeElementsEXT");
@@ -386,7 +386,7 @@ bool GLDevice::initExtensions()
 
 //   glBlendFuncSeparate= (PFNGLBLENDFUNCSEPARATEPROC)getProcAddress("glBlendFuncSeparateEXT");
 #ifndef Q_OS_MAC
-	// vertex buffer objects
+   // vertex buffer objects
    glGenBuffers =    (PFNGLGENBUFFERSARBPROC)    getProcAddress("glGenBuffersARB");
    glBindBuffer =    (PFNGLBINDBUFFERPROC)    getProcAddress("glBindBufferARB");
    glBufferData =    (PFNGLBUFFERDATAPROC)    getProcAddress("glBufferDataARB");
@@ -394,7 +394,7 @@ bool GLDevice::initExtensions()
    glMapBuffer =     (PFNGLMAPBUFFERPROC)        getProcAddress("glMapBufferARB");
    glUnmapBuffer =   (PFNGLUNMAPBUFFERPROC)      getProcAddress("glUnmapBufferARB");
 
-	// shader stuff
+   // shader stuff
    glCreateShaderObject =   (PFNGLCREATESHADEROBJECTARBPROC)  getProcAddress("glCreateShaderObjectARB");
    glShaderSource =         (PFNGLSHADERSOURCEARBPROC)        getProcAddress("glShaderSourceARB");
    glCompileShader =        (PFNGLCOMPILESHADERARBPROC)       getProcAddress("glCompileShaderARB");
@@ -550,27 +550,27 @@ void GLDevice::updateTexture(void *data, int x, int y, int flags)
 
 unsigned int GLDevice::uploadTexture1D(void *data, int x, int flags)
 {
-	GLuint tex;
+   GLuint tex;
 
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_1D, tex);
+   glGenTextures(1, &tex);
+   glBindTexture(GL_TEXTURE_1D, tex);
 
-	if (flags & 1)
-		glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	else
-		glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+   if (flags & 1)
+      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+   else
+      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 
-	if (flags & 2)
-		glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	else
-		glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+   if (flags & 2)
+      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+   else
+      glTexParameteri(GL_TEXTURE_1D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, x, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+   glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, x, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
 
-	return (unsigned int)tex;
+   return (unsigned int)tex;
 }
 
 
@@ -589,7 +589,7 @@ void GLDevice::setPerspective(float scale, float aspect, float zNear, float zFar
 void GLDevice::setCamera(const Matrix& mat, float fov, float zNear, float zFar, bool perspective)
 {
    glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();   
+   glLoadIdentity();
 //   glScalef(0.25,0.25,0.25);
 
 //   gluOrtho2D(0.0, 800.0, 0.0, 600.0) ;
@@ -790,7 +790,7 @@ glUseProgramObject(p);
 bool GLDevice::checkShaderError(const char *filename, GLhandleARB shader)
 {
    GLcharARB* infoLog;
-	GLint      infoLogLength;
+   GLint      infoLogLength;
    GLint      compileStatus;
    bool       error= false;
 
@@ -818,52 +818,52 @@ unsigned int GLDevice::loadShader(const char *vname, const char *pname)
    bool fileNotFound= false;
 
    FileStream* stream= new FileStream();
-	
+
    ShaderProgramHandle prog= glCreateProgramObject();
 
    if (stream->open(vname))
-	{
-		int size= stream->size();
-		char* source= new char[size];
-		stream->getData(source, size);
+   {
+      int size= stream->size();
+      char* source= new char[size];
+      stream->getData(source, size);
       stream->close();
-		GLhandleARB shader = glCreateShaderObject( GL_VERTEX_SHADER_ARB );
-		glShaderSource( shader, 1, (const char**)&source, &size);
-		glCompileShader(shader);
+      GLhandleARB shader = glCreateShaderObject( GL_VERTEX_SHADER_ARB );
+      glShaderSource( shader, 1, (const char**)&source, &size);
+      glCompileShader(shader);
 
       if (checkShaderError(vname, shader))
          return 0;
 
-		glAttachObject(prog,shader);
-	}
+      glAttachObject(prog,shader);
+   }
    else
    {
       fileNotFound= true;
    }
 
-	if (stream->open(pname))
-	{
-		int size= stream->size();
-		char* source= new char[size];
-		stream->getData(source, size);
+   if (stream->open(pname))
+   {
+      int size= stream->size();
+      char* source= new char[size];
+      stream->getData(source, size);
       stream->close();
-		GLhandleARB shader = glCreateShaderObject( GL_FRAGMENT_SHADER_ARB );
-		glShaderSource( shader, 1, (const char**)&source, &size);
-		glCompileShader(shader);
+      GLhandleARB shader = glCreateShaderObject( GL_FRAGMENT_SHADER_ARB );
+      glShaderSource( shader, 1, (const char**)&source, &size);
+      glCompileShader(shader);
 
       if (checkShaderError(pname, shader))
          return 0;
 
-		glAttachObject(prog,shader);
+      glAttachObject(prog,shader);
    }
    else
    {
       fileNotFound= true;
    }
 
-	glLinkProgram(prog);
+   glLinkProgram(prog);
 
-	delete stream;
+   delete stream;
 
    if (fileNotFound)
    {
@@ -888,19 +888,19 @@ void GLDevice::setShader(unsigned int shader)
 
 int GLDevice::getParameterIndex(const char *name)
 {
-	int pos= glGetUniformLocation(mCurShader, name);
-	GLenum error = glGetError();
-	if (error!=GL_NO_ERROR)
-	{
+   int pos= glGetUniformLocation(mCurShader, name);
+   GLenum error = glGetError();
+   if (error!=GL_NO_ERROR)
+   {
       PRINTF("fail [%d]: get '%s' in shader %d \n", error, name, mCurShader);
-	}
+   }
 
-	return pos;
+   return pos;
 }
 
 void GLDevice::bindSampler(int pos, int unit)
 {
-	glUniform1i(pos, unit);
+   glUniform1i(pos, unit);
 }
 
 void GLDevice::setParameter(int pos, float* data, int size)
@@ -915,7 +915,7 @@ void GLDevice::setParameter(int pos, const Vector4& vector)
 
 void GLDevice::setParameter(int pos, const Vector& vector)
 {
-	glUniform3fv(pos, 1, vector.data());
+   glUniform3fv(pos, 1, vector.data());
 }
 
 void GLDevice::setParameter(int pos, const Vector2& vector)

@@ -1,8 +1,10 @@
 #include "framebuffer.h"
 #include "gldevice.h"
+
+#include <cstdint>
 #include <math.h>
 
-FrameBuffer* FrameBuffer::mInstance = 0;
+FrameBuffer* FrameBuffer::mInstance = nullptr;
 Array<FrameBuffer*> FrameBuffer::mStack;
 
 FrameBuffer::FrameBuffer(int width, int height, int samples, int formatFlags)
@@ -49,7 +51,9 @@ FrameBuffer* FrameBuffer::Instance()
 
 float FrameBuffer::getSizeFactor(float refWidth) const
 {
-   return (float) (mWidth * (float)sqrt( (double)mSamples ) / refWidth);
+   return static_cast<float>(
+      mWidth * static_cast<float>(sqrt( static_cast<double>(mSamples))) / refWidth
+   );
 }
 
 void FrameBuffer::discard()
@@ -90,7 +94,7 @@ unsigned int FrameBuffer::copyTexture()
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
       glBindTexture(GL_TEXTURE_2D, 0);
       mTempWidth= mWidth;
       mTempHeight= mHeight;
@@ -143,9 +147,9 @@ bool FrameBuffer::setResolution(int width, int height)
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    if (mFormatFlags & FloatColor)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
    else
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
    glBindTexture(GL_TEXTURE_2D, 0);
 
    glGenFramebuffers(1, &mTarget);
@@ -224,7 +228,7 @@ bool FrameBuffer::setResolution(int width, int height)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glBindTexture(GL_TEXTURE_2D, 0);
             glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, mDepthTexture, 0);
          }
@@ -280,7 +284,7 @@ void FrameBuffer::bind(int width, int height)
 
 void FrameBuffer::unbind()
 {
-   mInstance= 0;
+   mInstance= nullptr;
 
    if (mSamples>1)
    {
@@ -305,7 +309,7 @@ void FrameBuffer::unbind()
          status= glGetError();
          if (status != GL_NO_ERROR)
          {
-            printf("error: %4x \n", (int)status);
+            printf("error: %4x \n", static_cast<int32_t>(status));
          }
       }
    }
@@ -331,7 +335,7 @@ void FrameBuffer::pop()
          prev->bind();
       else
       {
-         mInstance= 0;
+         mInstance= nullptr;
          glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
          glViewport(activeDevice->getBorderLeft(), activeDevice->getBorderBottom(), activeDevice->getWidth(), activeDevice->getHeight());
       }
