@@ -589,7 +589,7 @@ void GamePlayback::levelLoadingFinished()
       int elapsed = static_cast<int32_t>(mLevelLoadingTime.elapsed());
 
       // add a second, you never know ;)
-      // elapsed += 1000;
+      elapsed += 1000;
 
       qDebug(
          "GamePlayback::levelLoadingFinished(): %dms",

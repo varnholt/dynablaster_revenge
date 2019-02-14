@@ -75,7 +75,7 @@ LevelSpace::~LevelSpace()
 */
 void LevelSpace::initialize()
 {
-   // activate castle lens flare
+   // activate lens flare
    LensFlareFactory::getInstance()->activate("space");
 }
 
