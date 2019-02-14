@@ -7,10 +7,10 @@ Dynablaster Revenge is a remake of the game Dynablaster, released by Hudson Soft
 ## Core team
 - mueslee (Matthias Varnholt), code & team lead
 - hellfire (Christoph Grote), code
-- deathstar, artwork
+- dstar, artwork
 
 ## Level design
-- deathstar, Mansion concept & design
+- dstar, Mansion concept & design
 - Christopher Aldridge, space concept & design
 - Sebastian Meckelmann, castle concept & design
 
@@ -162,5 +162,5 @@ In order to contact us, please send a mail to:
 
 - matthias`[dot]`varnholt`[at]`gmail`[dot]`com or
 - hellfire`[at]`untergrund`[dot]`net or
-- deathstar`[dot]`gfx`[at]`gmail`[dot]`com
+- dstarx64`[at]`gmail`[dot]`com
 
