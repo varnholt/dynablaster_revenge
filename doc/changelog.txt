@@ -1,6 +1,10 @@
-Release 1.0.2
+Unreleased changes since 1.0.2
+- The bomb shake effect can be disabled via in-game menu
+- The camera-follows-player feature can be disabled via in-game menu
+- Added zoom-in/zoom-out
+- Added support for Qt5
 
-Modifications
+Changes in release 1.0.2
 - Sound hasn't been working on various linux distributions; that's fixed.
 - The client used to crash when joining a running game; fixed as well.
 - The 42 char limit for lounge messages has been removed.
@@ -14,9 +18,7 @@ Modifications
 - A Qt version check (>= 4.8.0 and < 5.0) has been added.
 
 
-Release 1.0.1 
-
-Modifications:
+Changes in release 1.0.1 
 - Support for optional OpenGL extentions has been added.
 - A button has been added to the lounge to add local players without hotkey.
 - Bombs are now initiated when they're kicked into another detonation.
