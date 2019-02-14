@@ -44,6 +44,7 @@ Dynablaster Revenge is a remake of the game Dynablaster, released by Hudson Soft
 - SDL2, [License](https://www.libsdl.org/license.php)
 
 ## Supported compilers
+- MSVC 2010
 - MSVC 2013
 - MSVC 2015
 - MSVC 2017
@@ -143,7 +144,7 @@ If you just want to use your own connection in order to play over the internet, 
 
 - Q: Why am I having trouble placing bombs and moving the player at
 the same time?  
-A: This can be related to keyboard ghosting. Have a look at http://www.microsoft.com/appliedsciences/antighostingexplained.mspx
+A: This can be related to keyboard ghosting. Have a look at https://web.archive.org/web/20140608171426/http://www.microsoft.com/appliedsciences/antighostingexplained.mspx
 in order to see which keys work fine for you.
 
 - Q: Your bots could be improved in so many ways. Why don't you make
