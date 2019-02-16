@@ -121,7 +121,7 @@ void* getProcAddress(const char *name, bool optional = false)
 #endif
 
 #ifdef Q_OS_MAC
-   ptr=(void*)glutGetProcAddress(name);
+//   ptr=(void*)glutGetProcAddress(name);
 #endif
 
 
