@@ -871,7 +871,7 @@ unsigned int GLDevice::loadShader(const char *vname, const char *pname)
       qDebug("shader file not found!");
    }
 
-   unsigned int shader = mShaderAllocIndex++;
+   unsigned int shader = ++mShaderAllocIndex;
    mShaderTable[shader] = prog;
    setShader(shader);
 
