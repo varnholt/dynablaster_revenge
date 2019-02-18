@@ -112,6 +112,10 @@ GameView::GameView(QWidget *parent, const QGLFormat& format)
    {
       mDevicePixelRatio = 2;
    }
+#ifdef Q_OS_MAC
+   // TODO: hardcoded to support Retina displays
+   mDevicePixelRatio = 2;
+#endif
 
    GameSettings::VideoSettings* video=
       GameSettings::getInstance()->getVideoSettings();

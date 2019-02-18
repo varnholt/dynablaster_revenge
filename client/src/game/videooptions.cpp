@@ -89,6 +89,7 @@ void VideoOptions::initializeSamples()
    GLenum internalFormat = GL_RGBA;
    GLint samplesLength = 0;
 
+#ifndef Q_OS_MAC
    // check if extension is available
    if (glGetInternalformativ)
    {
@@ -126,6 +127,7 @@ void VideoOptions::initializeSamples()
          delete[] samples;
       }
    }
+#endif
 
    if (samplesLength == 0)
    {

@@ -74,6 +74,9 @@ private:
    bool       initExtensions();
    unsigned int mTexture;
 
+   std::map<unsigned int, GLhandleARB>  mShaderTable;
+   unsigned int                         mShaderAllocIndex;
+
 public:
    bool init();
 

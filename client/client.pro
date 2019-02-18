@@ -20,9 +20,14 @@ win32 {
    RC_FILE = dynablaster.rc
 }
 
-unix {
+unix:!macx {
    LIBS += -lasound
    DEFINES += _LINUX_
+}
+
+macx {
+   LIBS += -L/usr/local/opt/sdl2/lib -framework CoreAudio -framework AudioToolbox
+   DEFINES += __APPLE__
 }
 
 #QMAKE_CFLAGS_RELEASE += -Zi

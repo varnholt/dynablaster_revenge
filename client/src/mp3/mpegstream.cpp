@@ -1086,7 +1086,7 @@ read_again:
       This is essential to prevent endless looping, always going back to the beginning when feeder buffer is exhausted. */
    forget();
 
-   debug2("trying to get frame %"OFF_P" at %"OFF_P, (off_p)mFrameNum+1, (off_p)tell());
+   debug2("trying to get frame %" OFF_P " at %" OFF_P, (off_p)mFrameNum+1, (off_p)tell());
    if (!head_read(&newhead))
    {
       ret= MP3_DONE;
@@ -1274,7 +1274,7 @@ int MpegStream::skip_junk(unsigned long *newheadp, long *headcount)
    }
    else
    {
-      debug1("hopefully found one at %"OFF_P, (off_p)tell());
+      debug1("hopefully found one at %" OFF_P, (off_p)tell());
    }
 
    /* If the new header ist good, it is already decoded. */

@@ -62,6 +62,28 @@ qmake
 jom
 ```
 
+### Building on OSX
+
+First ensure Xcode (10.1 was used) and command line build tools are installed.
+
+Install dependencies (using Homebrew):
+```
+brew install qt5
+brew install sdl2
+```
+
+Add Qt5 to `~/.bash_profile` so qmake can be found:
+```
+export PATH="$(brew --prefix qt5)/bin:$PATH"
+```
+
+Build client:
+```
+cd client
+qmake
+make -j8
+```
+
 # Requirements
 
 To run the game you need a video-card with OpenGL 3.0 support and at least

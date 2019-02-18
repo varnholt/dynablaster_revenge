@@ -1,0 +1,12 @@
+.obj
+.moc
+.qmake.stash
+.vs
+dynablaster.vcxproj*
+dynablaster.sln
+dynablaster.app
+Makefile
+Makefile.Debug
+Makefile.Release
+debug
+release

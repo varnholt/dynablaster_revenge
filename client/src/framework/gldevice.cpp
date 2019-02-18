@@ -121,7 +121,7 @@ void* getProcAddress(const char *name, bool optional = false)
 #endif
 
 #ifdef Q_OS_MAC
-   ptr=(void*)glutGetProcAddress(name);
+//   ptr=(void*)glutGetProcAddress(name);
 #endif
 
 
@@ -239,6 +239,7 @@ bool GLDevice::init()
    mTotalTextureMemory= 0;
    mTotalVertexMemory= 0;
    for (int i=0;i<256;i++) keys[i]=0;
+   mShaderAllocIndex= 0;
 
    if (!initExtensions())
    {
@@ -870,7 +871,8 @@ unsigned int GLDevice::loadShader(const char *vname, const char *pname)
       qDebug("shader file not found!");
    }
 
-   unsigned int shader= (unsigned int)prog;
+   unsigned int shader = ++mShaderAllocIndex;
+   mShaderTable[shader] = prog;
    setShader(shader);
 
    return shader;
@@ -882,13 +884,15 @@ void GLDevice::setShader(unsigned int shader)
    if (mCurShader != shader)
    {
       mCurShader= shader;
-      glUseProgramObject( (ShaderProgramHandle)mCurShader );
+      ShaderProgramHandle prog = mShaderTable[mCurShader];
+      glUseProgramObject(prog);
    }
 }
 
 int GLDevice::getParameterIndex(const char *name)
 {
-   int pos= glGetUniformLocation(mCurShader, name);
+   ShaderProgramHandle prog = mShaderTable[mCurShader];
+   int pos= glGetUniformLocation(prog, name);
    GLenum error = glGetError();
    if (error!=GL_NO_ERROR)
    {
