@@ -173,9 +173,6 @@ in order to see which keys work fine for you.
 them better?  
 A: They're not perfect by intention. It makes them more amiable :)
 
-- Q: Why isn't there a Mac port?  
-A: We don't have a Mac.
-
 
 # Contact
 
