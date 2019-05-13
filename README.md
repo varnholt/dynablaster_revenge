@@ -1,6 +1,14 @@
 # About
 
-Dynablaster Revenge is a remake of the game Dynablaster, released by Hudson Soft in 1991. The goal of this remake is to keep the original game-play as untouched as possible while adding some new features such as networked multiplayer and real-time 3D rendering. In case you're not yet familiar with the original game goal, it's quite simple: Bomb all other players from the screen. Either by collecting flame extras to increase the bomb radius or by picking up bomb extras in order to have more bombs to drop you're able to surround your enemies with your bombs, or blow them away with clever bomb chain reactions.
+<img width="800" alt="screenshot 1" src="doc/screenshot_1.jpg">
+
+_Dynablaster Revenge_ is a remake of the game Dynablaster, released by Hudson Soft in 1991. The goal of this remake is to keep the original game-play as untouched as possible while adding some new features such as networked multiplayer and real-time 3D rendering. In case you're not yet familiar with the original game goal, it's quite simple: Bomb all other players from the screen. Either by collecting flame extras to increase the bomb radius or by picking up bomb extras in order to have more bombs to drop you're able to surround your enemies with your bombs, or blow them away with clever bomb chain reactions.
+
+|Screenshots||
+|-|-|
+|<img width="400" alt="screenshot 1" src="doc/screenshot_2.jpg">|<img width="400" alt="screenshot 1" src="doc/screenshot_3.jpg">|  
+|<img width="400" alt="screenshot 1" src="doc/screenshot_4.jpg">|<img width="400" alt="screenshot 1" src="doc/screenshot_5.jpg">|
+
 
 # Credits
 
