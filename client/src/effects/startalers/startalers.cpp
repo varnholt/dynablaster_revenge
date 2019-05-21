@@ -54,7 +54,7 @@ StarTalers::~StarTalers()
    activeDevice->deleteBuffer(mBufferVertices);
    activeDevice->deleteBuffer(mBufferIndices);
 
-   delete mHeightmap;
+   delete [] mHeightmap;
 }
 
 
