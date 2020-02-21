@@ -43,7 +43,7 @@ _Dynablaster Revenge_ is a remake of the game Dynablaster, released by Hudson So
 - alk, testing & feedback
 - jan, testing & feedback
 - fuxx, development infrastructure
-- neoman Development infrastructure
+- neoman, development infrastructure
 
 # How to build
 
