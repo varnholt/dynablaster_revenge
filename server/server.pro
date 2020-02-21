@@ -8,11 +8,8 @@ MOC_DIR=.moc
 
 QT += core
 QT += gui
+QT += widgets
 QT += network
-
-LIBS += -lQtCore
-LIBS += -lQtGui
-LIBS += -lQtNetwork
 
 DEPENDPATH += . src
 

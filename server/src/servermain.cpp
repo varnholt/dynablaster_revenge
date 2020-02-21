@@ -29,9 +29,9 @@
 // shared
 #include "systemtools.h"
 
-ServerGui* gui = 0;
+ServerGui* gui = nullptr;
 
-void debugHandler(QtMsgType type, const char *msg)
+void debugHandler(QtMsgType type, const QMessageLogContext& /*context*/, const QString &msg)
 {
    if (gui)
    {
@@ -52,7 +52,7 @@ int main( int argc, char ** argv )
 
    // check qt version
    QString version;
-   if (!checkQtVersion(4,8, &version))
+   if (!checkQtVersion(5,0, &version))
    {
       qWarning(
             "The installed Qt version (%s) is invalid!\nRequired is version 4.8.x.",
@@ -61,8 +61,10 @@ int main( int argc, char ** argv )
       return 0;
    }
 
-
-   new QApplication(argc, argv, useGui);
+   if (useGui)
+      new QApplication(argc, argv, useGui);
+   else
+      new QCoreApplication(argc, argv, useGui);
 
    // install debug msg handler before the server is initialized
    if (useGui)
@@ -75,7 +77,7 @@ int main( int argc, char ** argv )
             .arg(SERVER_VERSION)
             .arg(SERVER_REVISION)
       );
-      qInstallMsgHandler(debugHandler);
+      qInstallMessageHandler(debugHandler);
    }
 
    Server *server = new Server();
