@@ -13,11 +13,8 @@ class Gui : public QGLWidget, public GlobalTime
 
 public:
 
-   //! constructor
    Gui(const QGLFormat& format);
-
-   //! destructor
-   ~Gui();
+   ~Gui() = default;
 
    float getTime() const;
 
@@ -38,12 +35,12 @@ protected:
    void resizeGL(int width, int height);
 
 
-   RenderDevice*           mDevice;                      //!< render device
-   SceneGraph*             mScene;
+   RenderDevice* mDevice = nullptr; //!< render device
+   SceneGraph* mScene = nullptr;
 
    // fps
-   int                     mFrames;                      //!< number of rendered frames
-   float                   mFrameTime;                   //!< frame time
-   QTime                   mTimer;
-   float                   mTime;
+   int mFrames = 0;           //!< number of rendered frames
+   float mFrameTime = 0.0f;   //!< frame time
+   QTime mTimer;
+   float mTime = 0.0f;
 };

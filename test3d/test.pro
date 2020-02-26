@@ -15,6 +15,7 @@ MOC_DIR=.moc
 
 win32 {
    DEFINES += _USE_MATH_DEFINES=1
+   LIBS += -lopengl32
 }
 
 LIBS += -L./lib
@@ -67,12 +68,14 @@ HEADERS += \
     ../client/src/engine/materials/blockmaterial.h \
     ../client/src/engine/materials/environmentambientmaterial.h \
     ../client/src/engine/materials/destructionmaterial.h \
+    ../client/src/engine/materials/playermaterialbase.h \
     ../client/src/engine/materials/playermaterial.h \
     ../client/src/engine/nodes/animatedmesh.h \
     ../client/src/engine/nodes/camera.h \
     ../client/src/engine/nodes/dummy.h \
     ../client/src/engine/nodes/light.h \
     ../client/src/engine/nodes/mesh.h \
+    ../client/src/engine/nodes/shape.h \
     ../client/src/engine/nodes/node.h \
     ../client/src/engine/nodes/omni.h \
     ../client/src/engine/nodes/scenegraph.h \
@@ -105,6 +108,7 @@ HEADERS += \
     ../client/src/math/matrix.h \
     ../client/src/math/quat.h \
     ../client/src/math/vector.h \
+    ../client/src/math/vector2.h \
     ../client/src/math/vector4.h \
     ../client/src/tools/array.h \
     ../client/src/tools/bitstream.h \
@@ -150,12 +154,14 @@ SOURCES += \
     ../client/src/engine/materials/blockmaterial.cpp \
     ../client/src/engine/materials/environmentambientmaterial.cpp \
     ../client/src/engine/materials/destructionmaterial.cpp \
+    ../client/src/engine/materials/playermaterialbase.cpp \
     ../client/src/engine/materials/playermaterial.cpp \
     ../client/src/engine/nodes/animatedmesh.cpp \
     ../client/src/engine/nodes/camera.cpp \
     ../client/src/engine/nodes/dummy.cpp \
     ../client/src/engine/nodes/light.cpp \
     ../client/src/engine/nodes/mesh.cpp \
+    ../client/src/engine/nodes/shape.cpp \
     ../client/src/engine/nodes/node.cpp \
     ../client/src/engine/nodes/omni.cpp \
     ../client/src/engine/nodes/scenegraph.cpp \
@@ -185,6 +191,7 @@ SOURCES += \
     ../client/src/math/quat.cpp \
     ../client/src/math/scale.cpp \
     ../client/src/math/vector.cpp \
+    ../client/src/math/vector2.cpp \
     ../client/src/math/vector4.cpp \
     ../client/src/tools/bitstream.cpp \
     ../client/src/tools/chunk.cpp \
