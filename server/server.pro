@@ -16,6 +16,7 @@ DEPENDPATH += . src
 INCLUDEPATH += .
 INCLUDEPATH += ../shared
 INCLUDEPATH += $$(QTDIR)/include/QtCore
+INCLUDEPATH += $$(QTDIR)/include/QtGui
 INCLUDEPATH += $$(QTDIR)/include/QtNetwork
 
 win32 {
