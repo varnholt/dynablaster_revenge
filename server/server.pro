@@ -4,11 +4,10 @@ TARGET = server
 OBJECTS_DIR=.obj
 MOC_DIR=.moc
 
-# DEFINES += CODER
+# comment out if intended to run on a remote linux shell or similar
+DEFINES += USE_GUI
 
 QT += core
-QT += gui
-QT += widgets
 QT += network
 
 DEPENDPATH += . src
@@ -17,6 +16,11 @@ INCLUDEPATH += .
 INCLUDEPATH += ../shared
 INCLUDEPATH += $$(QTDIR)/include/QtCore
 INCLUDEPATH += $$(QTDIR)/include/QtNetwork
+
+contains(DEFINES, USE_GUI) {
+   QT += widgets
+   INCLUDEPATH += $$(QTDIR)/include/QtWidgets
+}
 
 win32 {
    DEFINES += _USE_MATH_DEFINES=1

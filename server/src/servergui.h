@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#pragma once
 
-#ifndef SERVERGUI_H
-#define SERVERGUI_H
+#ifdef USE_GUI
 
 #include <QMainWindow>
 
@@ -68,7 +68,7 @@ private slots:
    //! stop server
    void stopServer();
 
-   //! exit 
+   //! exit
    void exitServer();
 
    //! add player
@@ -92,7 +92,7 @@ private:
    QPushButton* mAddPlayer;      //!< add player button
    QPushButton* mRemovePlayer;   //!< remove player button
    QPushButton* mExit;           //!< exit button
-   
+
    QString      mSelectedPlayer; //!< nick name of currently selected player
 
    QColor       mDebugColor;
