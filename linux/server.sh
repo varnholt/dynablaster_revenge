@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 while true
 do
    if pgrep server[y] 1>/dev/null; then 
