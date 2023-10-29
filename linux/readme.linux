@@ -45,7 +45,7 @@ Running the server
    Moreover, you might want to use the script like the one below which 
    automatically restarts whenever the server process is killed.
    
-      #!/bin/bash
+      #!/usr/bin/env bash
       while true
       do
          if pgrep server[y] 1>/dev/null; then 
