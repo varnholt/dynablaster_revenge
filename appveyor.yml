@@ -22,12 +22,12 @@ before_build:
 build_script:
   - cd client
   - qmake
-  - jom /J 4
+  - nmake
   - cd ..
 
   - cd server
   - qmake
-  - jom /J 4
+  - nmake
   - cd ..
 
 after_build:
