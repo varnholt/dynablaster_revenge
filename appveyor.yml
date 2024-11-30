@@ -1,0 +1,41 @@
+# appveyor.yml
+version: 1.0.{build}
+image: Visual Studio 2019
+
+platform:
+  - x64
+
+environment:
+  APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  CONFIGURATION: Release
+  ARTIFACTS_DIR: artifacts
+
+clone_depth: 1
+
+install:
+  - ps: Install-Product qt qt5
+  - set PATH=C:\Qt\5.15.2\msvc2019_64\bin;%PATH%
+
+build_script:
+  - cd client
+  - qmake
+  - jom /J 4
+  - cd ..
+
+  - cd server
+  - qmake
+  - jom /J 4
+  - cd ..
+
+after_build:
+  - mkdir %ARTIFACTS_DIR%
+  - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\
+  - copy server\release\server.exe %ARTIFACTS_DIR%\
+  - copy client\lib64\*.dll %ARTIFACTS_DIR%\
+  - for %I in (Qt5Core Qt5Gui Qt5Network Qt5Widgets) do copy C:\Qt\5.15.2\msvc2019_64\bin\%I.dll %ARTIFACTS_DIR%\
+  - xcopy client\data %ARTIFACTS_DIR%\data\ /E /I /Q /Y
+
+artifacts:
+  - path: artifacts
+    name: Dynablaster Revenge
+    type: auto
