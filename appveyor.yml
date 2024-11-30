@@ -37,8 +37,8 @@ after_build:
   - copy client\lib64\*.dll %ARTIFACTS_DIR%\
   - xcopy client\data %ARTIFACTS_DIR%\data\ /E /I /Q /Y
   - cd %ARTIFACTS_DIR%
-  - %QT_DIR%\bin\windeployqt.exe dynablaster.exe
-  - %QT_DIR%\bin\windeployqt.exe server.exe
+  - "%QT_DIR%\\bin\\windeployqt.exe" dynablaster.exe
+  - "%QT_DIR%\\bin\\windeployqt.exe" server.exe
 
 artifacts:
   - path: artifacts
