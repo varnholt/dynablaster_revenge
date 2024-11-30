@@ -9,12 +9,12 @@ environment:
   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
   CONFIGURATION: Release
   ARTIFACTS_DIR: artifacts
+  QT_DIR: C:\Qt\5.15.2\msvc2019_64
 
 clone_depth: 1
 
 install:
-  - ps: Install-Product qt qt5
-  - set PATH=C:\Qt\5.15.2\msvc2019_64\bin;%PATH%
+  - set PATH=%QT_DIR%\bin;%PATH%
 
 build_script:
   - cd client
@@ -29,10 +29,10 @@ build_script:
 
 after_build:
   - mkdir %ARTIFACTS_DIR%
-  - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\
-  - copy server\release\server.exe %ARTIFACTS_DIR%\
+  - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\dynablaster.exe
+  - copy server\release\dynablaster_server.exe %ARTIFACTS_DIR%\server.exe
   - copy client\lib64\*.dll %ARTIFACTS_DIR%\
-  - for %I in (Qt5Core Qt5Gui Qt5Network Qt5Widgets) do copy C:\Qt\5.15.2\msvc2019_64\bin\%I.dll %ARTIFACTS_DIR%\
+  - for %I in (Qt5Core Qt5Gui Qt5Network Qt5Widgets) do copy %QT_DIR%\bin\%I.dll %ARTIFACTS_DIR%\
   - xcopy client\data %ARTIFACTS_DIR%\data\ /E /I /Q /Y
 
 artifacts:
