@@ -16,6 +16,9 @@ clone_depth: 1
 install:
   - set PATH=%QT_DIR%\bin;%PATH%
 
+before_build:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+
 build_script:
   - cd client
   - qmake
