@@ -35,8 +35,10 @@ after_build:
   - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\
   - copy server\release\server.exe %ARTIFACTS_DIR%\
   - copy client\lib64\*.dll %ARTIFACTS_DIR%\
-  - for %I in (Qt5Core Qt5Gui Qt5Network Qt5Widgets) do copy %QT_DIR%\bin\%I.dll %ARTIFACTS_DIR%\
   - xcopy client\data %ARTIFACTS_DIR%\data\ /E /I /Q /Y
+  - cd %ARTIFACTS_DIR%
+  - "%QT_DIR%\bin\windeployqt.exe" dynablaster.exe
+  - "%QT_DIR%\bin\windeployqt.exe" server.exe
 
 artifacts:
   - path: artifacts
