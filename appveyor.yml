@@ -32,8 +32,8 @@ build_script:
 
 after_build:
   - mkdir %ARTIFACTS_DIR%
-  - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\dynablaster.exe
-  - copy server\release\dynablaster_server.exe %ARTIFACTS_DIR%\server.exe
+  - copy client\release\dynablaster.exe %ARTIFACTS_DIR%\
+  - copy server\release\server.exe %ARTIFACTS_DIR%\
   - copy client\lib64\*.dll %ARTIFACTS_DIR%\
   - for %I in (Qt5Core Qt5Gui Qt5Network Qt5Widgets) do copy %QT_DIR%\bin\%I.dll %ARTIFACTS_DIR%\
   - xcopy client\data %ARTIFACTS_DIR%\data\ /E /I /Q /Y
