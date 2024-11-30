@@ -42,5 +42,5 @@ after_build:
 
 artifacts:
   - path: artifacts
-    name: Dynablaster Revenge
+    name: dynablaster_revenge
     type: auto
