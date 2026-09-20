@@ -1,0 +1,4 @@
+build/
+selftest.png
+__pycache__/
+*.pyc
