@@ -6,7 +6,7 @@
 #include "array.h"
 
 template <class KeyType, class ValueType>
-class Map
+class RbTreeMap
 {
 public:
    class Node
@@ -126,12 +126,12 @@ public:
    };
 
    // constructor
-   Map() : mRoot(0)
+   RbTreeMap() : mRoot(0)
    {
    }
 
    // destructor
-   ~Map()
+   ~RbTreeMap()
    {
       postOrderDelete(mRoot);
    }

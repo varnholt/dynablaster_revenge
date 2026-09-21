@@ -48,17 +48,10 @@ file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     src/image/*.cpp src/image/*.h
 )
 
-# shared/ (sibling directory, the real client<->server wire protocol) was retried as a source set
-# here (2026-09-21) after fixing its Qt6-removed-API usage (QTime::start/elapsed -> QElapsedTimer,
-# QDateTime::toTime_t/qrand/qsrand -> QRandomGenerator, a couple of missing Qt6-modularized
-# includes - all verified real and applied directly to shared/, independent of this build, and
-# confirmed not to regress the existing Qt5 server/ build either). One problem remains: shared/
-# map.h's real `class Map` collides with tools/map.h's `template<KeyType,ValueType> class Map` (an
-# unrelated generic container) - `error C2990/C2955` inside shared/bombkickanimation.h itself, even
-# though its own .cpp's quote-include of "map.h" correctly resolves to shared/map.h. The exact leak
-# path from tools/map.h's template declaration into that translation unit wasn't found yet - next
-# step is a raw preprocessed dump (cl /P or /E) of the failing .cpp to see the real include order,
-# rather than guessing further. Left out of the build for now so client-sdl stays green.
+# shared/ (sibling directory, the real client<->server wire protocol). The shared/map.h vs
+# tools/map.h `Map` collision that blocked this before is gone - tools/map.h's unused generic
+# container was renamed to RbTreeMap (had zero real callers in client-sdl).
+file(GLOB DYNABLASTER_SHARED_SOURCES CONFIGURE_DEPENDS ../shared/*.cpp ../shared/*.h)
 
 # engine/helper/chunk.{cpp,h} is a second, unrelated Chunk class that collides by name with
 # tools/chunk.{cpp,h} - a genuine pre-existing duplicate in the legacy tree. Only tools/chunk.cpp
@@ -190,6 +183,7 @@ add_library(dynablaster_core STATIC
     src/game/gamelogodrawable.h
 
     ${DYNABLASTER_ENGINE_SOURCES}
+    ${DYNABLASTER_SHARED_SOURCES}
 )
 
 # NOTE: do not add src/tools (or similar) directly as an include dir - tools/string.h vs the
@@ -201,6 +195,7 @@ target_include_directories(dynablaster_core PUBLIC
     src
     src/framework
     src/engine
+    ../shared
 )
 target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui)
 
