@@ -10,3 +10,5 @@ Makefile.Debug
 Makefile.Release
 debug
 release
+client/build-ref/
+aqtinstall.log

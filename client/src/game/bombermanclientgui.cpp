@@ -1,6 +1,9 @@
 // header
 #include "bombermanclientgui.h"
 
+// stdlib
+#include <cstdlib>
+
 // engine
 #include "tools/singleton.h"
 #include "renderthread.h"
@@ -106,7 +109,11 @@ BombermanClientGui::BombermanClientGui(QObject* parent, float fps)
       mUpdateTimer,
       SIGNAL( timeout() ),
       mGameView,
-      SLOT( update() ),
+      // updateGL() forces an immediate synchronous repaint instead of update()'s "schedule a
+      // paint event" - needed for the reference-screenshot hook in GameView::paintGL() to ever
+      // run in a sandboxed/non-interactive session with no real desktop compositor. Temporary,
+      // for comparing this build's rendering against the client-sdl port.
+      SLOT( updateGL() ),
       Qt::DirectConnection
    );
 
@@ -934,6 +941,32 @@ void BombermanClientGui::initGameView()
 //-----------------------------------------------------------------------------
 /*!
 */
+// test-harness hook (reference-build tooling, not part of the shipped game): if DYNA_TEST_PAGE
+// is set to a psd path (e.g. "data/menus/selectgame.psd"), jump straight to that page for a
+// static comparison screenshot against the client-sdl port's own --page= flag - same rationale,
+// bypassing real click-driven navigation (GameMenuWorkflow) since it isn't being tested here.
+static void jumpToTestPageIfRequested(Menu* menu)
+{
+   const char* pagePath = getenv("DYNA_TEST_PAGE");
+   if (!pagePath || !*pagePath)
+      return;
+
+   MenuPage* targetPage = menu->getPageByName(pagePath);
+   if (!targetPage)
+   {
+      qWarning("DYNA_TEST_PAGE=%s: no such page", pagePath);
+      return;
+   }
+
+   MenuPage* previous = menu->getCurrentPage();
+   if (previous && previous != targetPage)
+      previous->setActive(false);
+
+   targetPage->setActive(true);
+   menu->setCurrentPage(targetPage);
+}
+
+
 void BombermanClientGui::initialize()
 {
    // init config
@@ -947,6 +980,7 @@ void BombermanClientGui::initialize()
       showSplashScreen();
 
    mClient->initialize();
+
    SoundManager::getInstance()->initialize();
 
    // init game view
@@ -985,6 +1019,8 @@ void BombermanClientGui::initialize()
       mGameView->showMenu();
       mGameView->getMenuDrawable()->initializationFinished();
    }
+
+   jumpToTestPageIfRequested(menu);
 
    // when everything is done, play the music
    bool shuffleMusic =

@@ -1,6 +1,12 @@
 // header
 #include "bombermanview.h"
 
+// stdlib
+#include <cstdlib>
+
+// Qt
+#include <QApplication>
+
 // menus
 #include "countdowndrawable.h"
 #include "fontmap.h"
@@ -176,6 +182,18 @@ void GameView::initializeGL()
    mDevice = new GLDevice();
    if (!mDevice->init())
    {
+      // temporary reference-build diagnostic: QMessageBox::critical() below is modal and blocks
+      // forever with no way to dismiss it in this non-interactive session - log the real error to
+      // a file first so it's visible even though the process then hangs on the invisible dialog.
+      {
+         FILE* f = fopen("d:/git/dynablaster_revenge/client/build-ref/gl_error.txt", "w");
+         if (f)
+         {
+            QByteArray err = GLDevice::getErrorText().toUtf8();
+            fwrite(err.constData(), 1, err.size(), f);
+            fclose(f);
+         }
+      }
       QMessageBox::critical(
                0,
                "Error",
@@ -702,6 +720,21 @@ void GameView::paintGL()
    }
 
    mFrameNumber++;
+
+   // test-harness hook (reference-build tooling, not part of the shipped game): DYNA_TEST_SCREENSHOT
+   // set to an output path dumps a single PNG of the composited screen once the splash/fade-in
+   // has had time to pass, then quits - mirrors the client-sdl port's own --selftest --screenshot=
+   // flag so the two builds can be compared page-for-page (see DYNA_TEST_PAGE in
+   // bombermanclientgui.cpp).
+   if (mFrameNumber == 180)
+   {
+      const char* shotPath = getenv("DYNA_TEST_SCREENSHOT");
+      if (shotPath && *shotPath)
+      {
+         grabFrameBuffer().save(shotPath);
+         qApp->quit();
+      }
+   }
 }
 
 

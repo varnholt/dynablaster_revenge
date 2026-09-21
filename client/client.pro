@@ -3,6 +3,7 @@ TARGET = dynablaster
 
 QT += core
 QT += gui
+QT += widgets
 QT += opengl
 QT += network
 
