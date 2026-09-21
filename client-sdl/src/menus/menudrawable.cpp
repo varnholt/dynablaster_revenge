@@ -133,6 +133,11 @@ void MenuDrawable::drawMenuContents()
          if (animation)
             animation->animate();
 
+         // initGlParameters() only sets this once per frame - not enough once 2 pages can be
+         // active at once (a real cross-fade). Re-establish per page too.
+         glEnable(GL_BLEND);
+         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
          // page cross-fade render target - see class comment for why this port owns it
          // directly (sized to the current page) instead of pulling one from MainDrawable.
          if (!mFrameBuffer)
@@ -158,6 +163,10 @@ void MenuDrawable::drawMenuContents()
          FrameBuffer::pop();
 
          pageAlpha = animation ? ((MenuPageFadeAnimation*)animation)->getAlpha() : 1.0f;
+
+         // same as above - the draws just above may have changed blend state again.
+         glEnable(GL_BLEND);
+         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
          // draw the composited page to the screen through the texalphaignore shader (not the
          // default per-item mShader) - the FBO's own alpha channel here is accumulated blend
