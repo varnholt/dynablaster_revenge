@@ -78,20 +78,17 @@ list(FILTER DYNABLASTER_ENGINE_SOURCES EXCLUDE REGEX "filestreamrunnable\\.(cpp|
 # here too rather than "fixed", matching the original project's own exclusion.
 list(FILTER DYNABLASTER_ENGINE_SOURCES EXCLUDE REGEX "(cartoonshading|glowring|gouraudshading|logoreflection|shadowvolume)\\.(cpp|h)$")
 
-add_executable(dynablaster_sdl
-    src/main.cpp
+# Everything the game and the test/diagnostic harness both need - i.e. everything except the two
+# main()s themselves (src/main.cpp - the real game, src/main_harness.cpp - --selftest/--click/
+# --logo3d/etc tooling). Kept as one shared static library so the two executables can never drift
+# out of sync with each other and so the ~280 engine/menu/effects files only compile once.
+add_library(dynablaster_core STATIC
     src/gles3.cpp
     src/gles3.h
     src/glescontext.cpp
     src/glescontext.h
     src/shader.cpp
     src/shader.h
-    src/screenshot.cpp
-    src/screenshot.h
-    src/inputinjector.cpp
-    src/inputinjector.h
-    src/demofactory.cpp
-    src/demofactory.h
     src/sdlglobaltime.cpp
     src/sdlglobaltime.h
 
@@ -197,33 +194,54 @@ add_executable(dynablaster_sdl
 # real <string.h> is a real collision, and it silently breaks Qt/STL headers that #include
 # <string.h> internally (they'd resolve to our String class instead). Bare includes like
 # "stream.h" from inside engine/materials were fixed to proper relative paths instead.
-target_include_directories(dynablaster_sdl PRIVATE
+target_include_directories(dynablaster_core PUBLIC
     third_party
     src
     src/framework
     src/engine
 )
-target_link_libraries(dynablaster_sdl PRIVATE SDL3::SDL3 Qt6::Core Qt6::Gui)
+target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui)
 
-if(WIN32)
-    add_custom_command(TARGET dynablaster_sdl POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:SDL3::SDL3>
-            $<TARGET_FILE:Qt6::Core>
-            $<TARGET_FILE:Qt6::Gui>
-            $<TARGET_FILE_DIR:dynablaster_sdl>
-    )
-endif()
+# dynablaster_sdl - the real game, no CLI flags, launches straight into the main menu.
+add_executable(dynablaster_sdl src/main.cpp)
+target_link_libraries(dynablaster_sdl PRIVATE dynablaster_core)
 
-# Shaders/textures load through FileStream at runtime (not compiled in), so they need to sit
-# next to the exe - mirrors the SDL3.dll copy step above.
-add_custom_command(TARGET dynablaster_sdl POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/data
-        $<TARGET_FILE_DIR:dynablaster_sdl>/data
+# dynablaster_sdl_harness - test/diagnostic tooling (--selftest, --menu, --click, --realclick,
+# --dumplayer, --page, --logo3d, --screenshot, and the standalone castle-level demo) - see
+# src/main_harness.cpp's own header comment. Not the shipped game; shares dynablaster_core so it
+# can never drift out of sync with the real thing it's testing.
+add_executable(dynablaster_sdl_harness
+    src/main_harness.cpp
+    src/screenshot.cpp
+    src/screenshot.h
+    src/inputinjector.cpp
+    src/inputinjector.h
+    src/demofactory.cpp
+    src/demofactory.h
 )
+target_link_libraries(dynablaster_sdl_harness PRIVATE dynablaster_core)
+
+foreach(dynablaster_target dynablaster_sdl dynablaster_sdl_harness)
+    if(WIN32)
+        add_custom_command(TARGET ${dynablaster_target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:SDL3::SDL3>
+                $<TARGET_FILE:Qt6::Core>
+                $<TARGET_FILE:Qt6::Gui>
+                $<TARGET_FILE_DIR:${dynablaster_target}>
+        )
+    endif()
+
+    # Shaders/textures load through FileStream at runtime (not compiled in), so they need to sit
+    # next to the exe - mirrors the DLL copy step above.
+    add_custom_command(TARGET ${dynablaster_target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/data
+            $<TARGET_FILE_DIR:${dynablaster_target}>/data
+    )
+endforeach()
 
 enable_testing()
 add_test(NAME selftest_smoke
-    COMMAND dynablaster_sdl --selftest --screenshot=${CMAKE_BINARY_DIR}/selftest.png
+    COMMAND dynablaster_sdl_harness --selftest --screenshot=${CMAKE_BINARY_DIR}/selftest.png
 )

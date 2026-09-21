@@ -17,7 +17,9 @@ isn't the goal. Instead this test:
      early in its port.
 
 Requires both executables to already be built:
-  - client-sdl:  client-sdl/build/Release/dynablaster_sdl.exe
+  - client-sdl:  client-sdl/build/Release/dynablaster_sdl_harness.exe (the test/diagnostic
+                 binary - --page=/--screenshot= and friends live here, not in the real game
+                 binary, dynablaster_sdl.exe - see main.cpp/main_harness.cpp)
   - reference:   client/build-ref/release/dynablaster.exe (see project memory for how this was
                  set up - it needs a separate Qt5 install, not part of this repo's normal build)
 
@@ -33,7 +35,7 @@ import pytest
 from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CLIENT_SDL_EXE = REPO_ROOT / "client-sdl" / "build" / "Release" / "dynablaster_sdl.exe"
+CLIENT_SDL_EXE = REPO_ROOT / "client-sdl" / "build" / "Release" / "dynablaster_sdl_harness.exe"
 CLIENT_SDL_CWD = CLIENT_SDL_EXE.parent
 REFERENCE_EXE = REPO_ROOT / "client" / "build-ref" / "release" / "dynablaster.exe"
 REFERENCE_CWD = REPO_ROOT / "client"
