@@ -149,6 +149,8 @@ add_library(dynablaster_core STATIC
     src/menus/menupageslideritem.h
     src/menus/menupagescrollimageitem.cpp
     src/menus/menupagescrollimageitem.h
+    src/menus/menupagenavigator.cpp
+    src/menus/menupagenavigator.h
 
     # Sphere-fragments effect (the 3D "exploding earth/bomb" logo subsystem GameLogoDrawable is
     # built on) - listed explicitly like the menu system above, since only this subset of the real

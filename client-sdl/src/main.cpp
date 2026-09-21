@@ -19,6 +19,7 @@
 #include "menus/menu.h"
 #include "menus/menudrawable.h"
 #include "menus/menumousecursor.h"
+#include "menus/menupagenavigator.h"
 
 #include <QObject>
 
@@ -100,7 +101,17 @@ int main(int, char**)
    logoDrawable.setVisible(true);
    QObject::connect(&menuDrawable, SIGNAL(pageChanged(QString)), &logoDrawable, SLOT(pageChanged(QString)));
 
+   // turns button clicks (Menu::actionRequest) into actual page navigation - see
+   // menupagenavigator.h for exactly what this does and doesn't handle yet (no networking).
+   // pageChangeRequest connects to MenuDrawable's *protected* slot of the same name - legal via
+   // Qt's string-based SIGNAL/SLOT connect, which bypasses C++ access control; this is the same
+   // connection the real client/src/game/bombermanclientgui.cpp makes for GameMenuWorkflow.
+   MenuPageNavigator navigator;
+   QObject::connect(menuDrawable.getMenu(), SIGNAL(actionRequest(QString, QString)), &navigator, SLOT(onActionRequest(QString, QString)));
+   QObject::connect(&navigator, SIGNAL(pageChangeRequest(QString)), &menuDrawable, SLOT(pageChangeRequest(QString)));
+
    bool running = true;
+   QObject::connect(&navigator, &MenuPageNavigator::quitRequest, [&running]() { running = false; });
 
    while (running)
    {
