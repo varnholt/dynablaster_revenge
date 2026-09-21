@@ -21,7 +21,7 @@
 #include "menus/menumousecursor.h"
 #include "menus/menupagenavigator.h"
 
-#include "server.h"
+#include "game/bombermanclient.h"
 
 #include <QCoreApplication>
 #include <QKeyEvent>
@@ -86,12 +86,13 @@ int main(int argc, char** argv)
    // handing control to qApp->exec(), since SDL already owns the main loop here.
    QCoreApplication qtApp(argc, argv);
 
-   // matches BombermanClient::host() (client/src/game/bombermanclient.cpp) - construct the real
-   // server and confirm it actually bound its port. Unconditional for now (this port has no
-   // menu-driven host()/join() wiring yet - that's the rest of Phase 4); this is just proving the
-   // embedded server, copied in unmodified, comes up correctly inside client-sdl.
-   Server server;
-   SDL_Log("Server: isListening=%d", server.isListening() ? 1 : 0);
+   // BombermanClient (client/src/game/bombermanclient.cpp, copied in as-is - see project memory,
+   // Phase 4) owns Server construction itself now, on demand via host() (matches the real
+   // client/src/game/bombermanclientgui.cpp construction order - "new BombermanClient()" then
+   // initialize()). Superseded the earlier always-on "Server server;" proof-of-concept from before
+   // BombermanClient existed in this port.
+   BombermanClient bombermanClient;
+   bombermanClient.initialize();
 
    GlesContext context;
    // matches the real original client's own DEFAULT_VIDEO_WIDTH/HEIGHT (client/src/game/gamesettings.cpp)

@@ -1,6 +1,12 @@
 #include "menupagenavigator.h"
 
+#include "game/bombermanclient.h"
+#include "game/gamesettings.h"
+#include "gameinformation.h"
+
 #include <QDebug>
+#include <QHostAddress>
+#include <QNetworkInterface>
 
 namespace
 {
@@ -33,6 +39,7 @@ const char* const kOptionsActionGame = "button_game_active";
 
 const char* const kAbout = "data/menus/about.psd";
 const char* const kAboutActionBack = "button_back_active";
+const char* const kLounge = "data/menus/lounge.psd";
 const char* const kLoungeActionStart = "button_start_active";
 const char* const kLoungeActionBack = "button_leave_active";
 const char* const kLoungeActionAddPlayer = "button_addplayer_active";
@@ -51,15 +58,20 @@ bool isOptionsPage(const QString& page)
    return page == kOptionsVideo || page == kOptionsAudio || page == kOptionsControls || page == kOptionsGame;
 }
 
-// SINGLE/MULTI (and JOIN/CREATE-OK/LOUNGE_*, not individually named here) go through
-// BombermanClient::host()+loginRequest() in the real client - real client-server networking
-// (a local Server instance for single-player too, connected to over 127.0.0.1), not yet ported -
-// see project memory, Phase 4. This is a real, scoped, in-progress gap, not a missing capability.
-bool needsBombermanClient(const QString& action)
+// matches GameMenuWorkflow::isHostLocal() - true if the configured host resolves to one of this
+// machine's own network interfaces, in which case MULTI also hosts an in-process server (same as
+// SINGLE always does), rather than only connecting out to a remote one.
+bool isHostLocal(const QString& hostName)
 {
-   return action == kMainMenuActionSingle || action == kMainMenuActionMulti || action == kGameSelectActionJoin ||
-          action == kGameCreateActionOk || action == kLoungeActionStart || action == kLoungeActionBack ||
-          action == kLoungeActionAddPlayer || action == kLoungeLineeditSay;
+   QHostAddress hostAddress(hostName);
+
+   for (const QHostAddress& address : QNetworkInterface::allAddresses())
+   {
+      if (hostAddress == address)
+         return true;
+   }
+
+   return false;
 }
 
 bool needsBrowser(const QString& action)
@@ -72,9 +84,7 @@ void logUnhandled(const QString& page, const QString& action)
    if (action.isEmpty())
       return;
 
-   if (needsBombermanClient(action))
-      qDebug("MenuPageNavigator: page=%s action=%s needs BombermanClient (Phase 4, not ported yet)", qPrintable(page), qPrintable(action));
-   else if (needsBrowser(action))
+   if (needsBrowser(action))
       qDebug("MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", qPrintable(page), qPrintable(action));
    // else: not a real menu action (e.g. an editablecombobox's own internal layer-name emission) -
    // the real GameMenuWorkflow doesn't log these either, so neither do we.
@@ -84,6 +94,13 @@ void logUnhandled(const QString& page, const QString& action)
 
 MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
 {
+   // BombermanClient must already be constructed+initialize()'d by main.cpp before this runs -
+   // getInstance() doesn't self-construct (matches the real client/src/game/bombermanclientgui.cpp
+   // construction order).
+   connect(BombermanClient::getInstance(), SIGNAL(loginResponse(bool)), this, SLOT(onLoginResponse(bool)));
+   connect(BombermanClient::getInstance(), SIGNAL(createGameResponse(bool, int, bool)), this, SLOT(onCreateGameResponse(bool, int, bool)));
+   connect(BombermanClient::getInstance(), SIGNAL(joinGameResponse(bool)), this, SLOT(onJoinGameResponse(bool)));
+   connect(BombermanClient::getInstance(), SIGNAL(gameStarted()), this, SLOT(onGameStarted()));
 }
 
 void MenuPageNavigator::onActionRequest(const QString& page, const QString& action)
@@ -96,6 +113,27 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          emit pageChangeRequest(kAbout);
       else if (action == kMainMenuActionQuit)
          emit quitRequest();
+      else if (action == kMainMenuActionSingle)
+      {
+         // matches GameMenuWorkflow's MAINMENU_ACTION_SINGLE handler exactly: single player
+         // always hosts an in-process server and logs into it over loopback.
+         BombermanClient::getInstance()->setGameMode(Constants::GameModeSinglePlayer);
+         BombermanClient::getInstance()->host();
+         BombermanClient::getInstance()->loginRequest("127.0.0.1", GameSettings::getInstance()->getLoginSettings()->getNick());
+      }
+      else if (action == kMainMenuActionMulti)
+      {
+         // matches GameMenuWorkflow's MAINMENU_ACTION_MULTI handler: only hosts if the
+         // configured host is actually this machine, always logs in to whatever host is set.
+         BombermanClient::getInstance()->setGameMode(Constants::GameModeMultiPlayer);
+
+         const QString host = GameSettings::getInstance()->getLoginSettings()->getHost();
+
+         if (isHostLocal(host))
+            BombermanClient::getInstance()->host();
+
+         BombermanClient::getInstance()->loginRequest(host, GameSettings::getInstance()->getLoginSettings()->getNick());
+      }
       else
          logUnhandled(page, action);
    }
@@ -105,6 +143,18 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          emit pageChangeRequest(kGameCreate);
       else if (action == kGameSelectActionBack)
          emit pageChangeRequest(kMainMenu);
+      else if (action == kGameSelectActionJoin)
+      {
+         // the real GAME_SELECT_ACTION_JOIN reads the operator-selected row out of the game
+         // table (GameMenuInterfaceSelect::getSelectedGame()) - that table selection isn't wired
+         // in this port yet, so this joins the first known game instead. Real enough to prove the
+         // join->lounge chain; picking a specific game is a later refinement.
+         const QList<GameInformation>* games = BombermanClient::getInstance()->getGames();
+         if (games && !games->isEmpty())
+            BombermanClient::getInstance()->joinGame(games->first().getId());
+         else
+            qDebug("MenuPageNavigator: JOIN clicked with no games known yet");
+      }
       else
          logUnhandled(page, action);
    }
@@ -117,6 +167,14 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          // this port yet, so this always goes back to GAME_SELECT, the multiplayer flow's own
          // back target and the only way to have reached GAME_CREATE at all right now.
          emit pageChangeRequest(kGameSelect);
+      }
+      else if (action == kGameCreateActionOk)
+      {
+         // real GameMenuInterfaceCreate reads the page's own controls (name/level/rounds/extras
+         // checkboxes) into a CreateGameRequestPacket - that UI readback isn't wired in this port
+         // yet, so this uses BombermanClient::createGameAutomatic() (the same dev/test convenience
+         // the original codebase already ships), not a reimplementation of the real defaults.
+         BombermanClient::getInstance()->createGameAutomatic();
       }
       else
       {
@@ -150,9 +208,67 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
       else
          logUnhandled(page, action);
    }
+   else if (page == kLounge)
+   {
+      if (action == kLoungeActionStart)
+      {
+         BombermanClient::getInstance()->startGame(BombermanClient::getInstance()->getGameId());
+      }
+      else if (action == kLoungeActionBack)
+      {
+         BombermanClient::getInstance()->leaveGameRequest();
+         emit pageChangeRequest(kGameSelect);
+      }
+      else if (action == kLoungeActionAddPlayer || action == kLoungeLineeditSay)
+      {
+         // real headless-player / chat handling - not ported yet, not required to prove the
+         // login->create->join->lounge chain works.
+         logUnhandled(page, action);
+      }
+      else
+         logUnhandled(page, action);
+   }
    else
    {
-      // LOUNGE and anything else - logUnhandled() classifies known action names correctly.
       logUnhandled(page, action);
    }
+}
+
+void MenuPageNavigator::onLoginResponse(bool granted)
+{
+   // matches GameMenuWorkflow::loginResponse(): single player goes straight to GAME_CREATE
+   // (create-and-join is automatic from there), multiplayer goes to GAME_SELECT to pick/create.
+   if (granted)
+   {
+      const Constants::GameMode mode = BombermanClient::getInstance()->getGameMode();
+      emit pageChangeRequest(mode == Constants::GameModeMultiPlayer ? kGameSelect : kGameCreate);
+   }
+   else
+   {
+      qDebug("MenuPageNavigator: login denied");
+   }
+}
+
+void MenuPageNavigator::onCreateGameResponse(bool granted, int gameId, bool owner)
+{
+   // matches GameMenuWorkflow::createGameResponse(): the creator auto-joins the game they just
+   // made; everyone else (broadcast of the same response) just sees the updated game list.
+   if (granted && owner)
+      BombermanClient::getInstance()->joinGame(gameId);
+   else if (granted)
+      emit pageChangeRequest(kGameSelect);
+}
+
+void MenuPageNavigator::onJoinGameResponse(bool success)
+{
+   if (success)
+      emit pageChangeRequest(kLounge);
+}
+
+void MenuPageNavigator::onGameStarted()
+{
+   // real gameplay handoff (level loading, HUD, in-game rendering/input) is the separate,
+   // not-yet-scoped "Phase 5" - this proves the network state machine reaches GameActive for
+   // real, nothing more.
+   qDebug("MenuPageNavigator: gameStarted() - real gameplay handoff not implemented yet (Phase 5)");
 }

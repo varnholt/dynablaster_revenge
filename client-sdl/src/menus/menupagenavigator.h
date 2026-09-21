@@ -2,23 +2,20 @@
 
 #include <QObject>
 
-/// \brief minimal stand-in for the pure page-navigation subset of the real GameMenuWorkflow
-/// (client/src/menus/gamemenuworkflow.cpp) - i.e. purely "which button switches to which page",
-/// with none of that class's real networking (login/create/join-game via BombermanClient, which
-/// isn't ported yet - see project memory, Phase 4). Deliberately named differently from
-/// GameMenuWorkflow so a future real port of that class isn't confused with this one.
+/// \brief page-navigation + real BombermanClient wiring for the menu system.
 ///
-/// Listens to Menu::actionRequest(page, action) and re-emits its own pageChangeRequest(QString)
-/// for the actions that are pure navigation - wire that up to MenuDrawable::pageChangeRequest the
-/// same way the real client/src/game/bombermanclientgui.cpp already connects
-/// GameMenuWorkflow::pageChangeRequest to it (a signal-to-protected-slot connection; Qt's
-/// string-based SIGNAL/SLOT connect bypasses normal C++ access control, which is exactly why the
-/// original code could leave that slot protected).
+/// Started as a pure page-navigation stand-in for the real GameMenuWorkflow
+/// (client/src/menus/gamemenuworkflow.cpp); now that BombermanClient itself is ported (see
+/// project memory, Phase 4), SINGLE/MULTI/GAME_CREATE-OK/LOUNGE-start drive the real
+/// host()/loginRequest()/createGameAutomatic()/joinGame()/startGame() calls and follow the real
+/// signal chain (loginResponse -> createGame -> createGameResponse -> joinGame ->
+/// joinGameResponse -> LOUNGE), matching GameMenuWorkflow's own logic in each of those handlers.
+/// Still not ported: the actual gameplay handoff once StartGameResponse arrives (level loading,
+/// HUD, in-game rendering) - gameStarted() is logged, not acted on. That's the separate,
+/// not-yet-scoped "Phase 5" step.
 ///
-/// Actions this doesn't recognize (SINGLE/MULTI/JOIN/CREATE-OK/POUET/FACEBOOK/etc, all of which
-/// need real networking or an external browser launch this port doesn't have) are logged via
-/// qDebug(), not silently swallowed - so the console makes it clear the click really was
-/// received, only the follow-up behavior is unimplemented.
+/// Deliberately named differently from GameMenuWorkflow so a future full port of that class isn't
+/// confused with this one.
 class MenuPageNavigator : public QObject
 {
    Q_OBJECT
@@ -32,4 +29,10 @@ signals:
 
 public slots:
    void onActionRequest(const QString& page, const QString& action);
+
+private slots:
+   void onLoginResponse(bool granted);
+   void onCreateGameResponse(bool granted, int gameId, bool owner);
+   void onJoinGameResponse(bool success);
+   void onGameStarted();
 };

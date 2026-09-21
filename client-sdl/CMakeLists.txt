@@ -203,6 +203,8 @@ add_library(dynablaster_core STATIC
     # Phase 4 (real client<->server networking) prep - small, self-contained utility classes
     # BombermanClient itself depends on, ported ahead of it.
     src/game/gamehelptexts.h
+    src/game/gamesettings.cpp
+    src/game/gamesettings.h
     src/game/gamestatemachine.cpp
     src/game/gamestatemachine.h
     src/game/helpelement.cpp
@@ -211,6 +213,24 @@ add_library(dynablaster_core STATIC
     src/game/helpmanager.h
     src/game/mapitemanimation.cpp
     src/game/mapitemanimation.h
+    src/levels/camerainterpolation.cpp
+    src/levels/camerainterpolation.h
+    src/levels/level.cpp
+    src/levels/level.h
+
+    # Phase 4 continued: real client<->server networking. soundmanager.{h,cpp}/gameplayback.{h,cpp}/
+    # ai/botfactory.{h,cpp} are no-op stand-ins for still-unported subsystems (real audio backend,
+    # replay/record, AI bots) - see the "Deferred subsystem" comment in each for what's stubbed and why.
+    src/ai/botfactory.cpp
+    src/ai/botfactory.h
+    src/game/gameplayback.cpp
+    src/game/gameplayback.h
+    src/game/soundmanager.cpp
+    src/game/soundmanager.h
+    src/game/positioninterpolation.cpp
+    src/game/positioninterpolation.h
+    src/game/bombermanclient.cpp
+    src/game/bombermanclient.h
 
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
