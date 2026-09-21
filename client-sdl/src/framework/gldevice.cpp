@@ -97,6 +97,13 @@ void GLDevice::clear()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void GLDevice::clear(float r, float g, float b, float a)
+{
+   glClearColor(r, g, b, a);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glClearColor(0.1f, 0.1f, 0.12f, 1.0f);
+}
+
 void GLDevice::setPerspective(float scale, float aspect, float zNear, float zFar)
 {
    const float ymin = -zNear * scale;

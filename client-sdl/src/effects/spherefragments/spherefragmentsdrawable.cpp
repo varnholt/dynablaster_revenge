@@ -154,9 +154,13 @@ void SphereFragmentsDrawable::paintGL()
 
    // lighting pass 1
 
-   // draw earth fragments once into a framebuffer, reuse later
+   // draw earth fragments once into a framebuffer, reuse later. Clears to alpha=0 (not the
+   // device's default opaque clear color) - this buffer's own alpha channel is later used by
+   // mBlendQuad's alpha-blend composite onto the menu (see below), so it must start fully
+   // transparent, or the blend replaces the whole full-screen quad with this buffer's flat clear
+   // color instead of just the drawn earth/fragments/bomb pixels.
    mEarthFb->bind();
-   mDevice->clear();
+   static_cast<GLDevice*>(mDevice)->clear(0.0f, 0.0f, 0.0f, 0.0f);
 
    // put bomb into zbuffer to black backside fragments
    mBomb->draw(Vector4(1, 1, 1, 0));
@@ -167,9 +171,9 @@ void SphereFragmentsDrawable::paintGL()
 
    // atmosphere pass
 
-   // create white mask from alpha channel
+   // create white mask from alpha channel. alpha=0 clear - same reasoning as mEarthFb above.
    mAuraFb->bind();
-   mDevice->clear();
+   static_cast<GLDevice*>(mDevice)->clear(0.0f, 0.0f, 0.0f, 0.0f);
    mAlphaDuplicate->process(mEarthFb->texture(), Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
    // blur white mask
@@ -178,9 +182,9 @@ void SphereFragmentsDrawable::paintGL()
    mAuraFb->unbind();
 
    // lava glow pass
-   // draw the bomb...
+   // draw the bomb... alpha=0 clear - same reasoning as mEarthFb above.
    mBombFb->bind();
-   mDevice->clear();
+   static_cast<GLDevice*>(mDevice)->clear(0.0f, 0.0f, 0.0f, 0.0f);
    mBomb->draw(Vector4(1, 1, 1, 1));
 
    // draw black fragments

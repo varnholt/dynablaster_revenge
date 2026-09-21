@@ -36,6 +36,13 @@ public:
    void convertFromViewPort(int* x, int* y, int targetWidth, int targetHeight);
    void clear();
 
+   /// \brief clears the currently bound framebuffer with an explicit color, then restores the
+   /// device's default clear color. Needed by offscreen compositing passes (SphereFragmentsDrawable's
+   /// mEarthFb/mAuraFb/mBombFb) that must clear to alpha=0 - clear() alone always reuses the global
+   /// opaque (alpha=1) clear color set in init(), which is correct for the main screen but wrong for
+   /// a buffer that gets alpha-blended onto something else afterward.
+   void clear(float r, float g, float b, float a);
+
    void setPerspective(float fov, float aspect, float zNear = 1.0f, float zFar = 5000.0f);
    void setCamera(const Matrix& m, float fov, float zNear = 1.0f, float zFar = 1000.0f, bool perspective = true);
    void push(const Matrix& mat);
