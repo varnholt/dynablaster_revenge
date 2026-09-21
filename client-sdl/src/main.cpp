@@ -192,6 +192,10 @@ int main(int argc, char** argv)
       menuCursor->initializeGL();
       menuCursor->setVisible(true);
 
+      // the menu draws its own cursor (above, MenuMouseCursor) - hide the OS cursor so the two
+      // don't overlap on screen.
+      SDL_HideCursor();
+
       // the animated main-menu logo (sphere-fragments earth/bomb effect + "Dynablaster"/"Revenge"
       // PSD text overlay + spark sparks) - only actually visible while the main menu page is
       // showing (see GameLogoDrawable::pageChanged()), matching the original's own
@@ -372,6 +376,26 @@ int main(int argc, char** argv)
       }
    }
 
+   // --realclick=x,y (WINDOW-space pixels, unlike --click which is page-space and calls
+   // menuDrawable's handlers directly) - pushes genuine SDL_Event structs via SDL_PushEvent so
+   // they flow through the exact same SDL_PollEvent loop and convertFromViewPort() conversion a
+   // real OS mouse click would, instead of bypassing that path like --click does. Diagnostic tool
+   // for the "buttons don't react to real mouse clicks" bug - see project memory (seventeenth
+   // session) - isolates whether the real-event code path itself is broken, independent of
+   // whether this environment can generate genuine OS input events at all.
+   const std::string realclick_arg = argValue(args, "--realclick=");
+   int realClickX = -1;
+   int realClickY = -1;
+   if (!realclick_arg.empty())
+   {
+      const size_t comma = realclick_arg.find(',');
+      if (comma != std::string::npos)
+      {
+         realClickX = std::atoi(realclick_arg.substr(0, comma).c_str());
+         realClickY = std::atoi(realclick_arg.substr(comma + 1).c_str());
+      }
+   }
+
    bool running = true;
    int frame = 0;
 
@@ -467,6 +491,49 @@ int main(int argc, char** argv)
             menuDrawable->mouseReleaseEvent(nullptr);
             if (menuCursor)
                menuCursor->mouseReleaseEvent(nullptr);
+         }
+      }
+
+      // --realclick=x,y: same frame schedule as --click above, but injects genuine SDL_Event
+      // structs (window-space coordinates) via SDL_PushEvent instead of calling menuDrawable's
+      // handlers directly - exercises the real SDL_PollEvent switch-case above, including
+      // convertFromViewPort(), exactly like a real OS mouse click would.
+      if (menuMode && realClickX >= 0)
+      {
+         const SDL_WindowID windowId = SDL_GetWindowID(context.window());
+
+         if (frame == 15)
+         {
+            SDL_Event motionEvent{};
+            motionEvent.type = SDL_EVENT_MOUSE_MOTION;
+            motionEvent.motion.windowID = windowId;
+            motionEvent.motion.x = static_cast<float>(realClickX);
+            motionEvent.motion.y = static_cast<float>(realClickY);
+            SDL_PushEvent(&motionEvent);
+         }
+         else if (frame == 20)
+         {
+            SDL_Event downEvent{};
+            downEvent.type = SDL_EVENT_MOUSE_BUTTON_DOWN;
+            downEvent.button.windowID = windowId;
+            downEvent.button.button = SDL_BUTTON_LEFT;
+            downEvent.button.down = true;
+            downEvent.button.clicks = 1;
+            downEvent.button.x = static_cast<float>(realClickX);
+            downEvent.button.y = static_cast<float>(realClickY);
+            SDL_PushEvent(&downEvent);
+         }
+         else if (frame == 22)
+         {
+            SDL_Event upEvent{};
+            upEvent.type = SDL_EVENT_MOUSE_BUTTON_UP;
+            upEvent.button.windowID = windowId;
+            upEvent.button.button = SDL_BUTTON_LEFT;
+            upEvent.button.down = false;
+            upEvent.button.clicks = 1;
+            upEvent.button.x = static_cast<float>(realClickX);
+            upEvent.button.y = static_cast<float>(realClickY);
+            SDL_PushEvent(&upEvent);
          }
       }
 

@@ -22,6 +22,13 @@ bool GlesContext::init(const std::string& title, int width, int height)
       return false;
    }
 
+   // On Windows, a freshly created window launched from a console/IDE doesn't always receive
+   // input focus automatically (the OS's focus-stealing prevention can leave it behind the
+   // launching process's window) - real mouse clicks then never reach this window's SDL event
+   // queue at all, even though the window is visibly on screen. Explicitly claim focus so mouse
+   // input actually arrives.
+   SDL_RaiseWindow(_window);
+
    _context = SDL_GL_CreateContext(_window);
    if (_context == nullptr)
    {
