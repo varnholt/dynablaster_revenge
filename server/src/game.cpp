@@ -41,7 +41,11 @@
 #include "timepacket.h"
 
 // Qt
+#include <QRandomGenerator>
 #include <QSettings>
+
+// stdlib
+#include <algorithm>
 #include <QTcpServer>
 #include <QTcpSocket>
 
@@ -3470,8 +3474,8 @@ Constants::Color Game::getColorForNextPlayer() const
    foreach (Player* p, mPlayers.values())
       colors.remove(p->getColor());
 
-   QList<Constants::Color> colorList = colors.toList();
-   qSort(colorList);
+   QList<Constants::Color> colorList(colors.begin(), colors.end());
+   std::sort(colorList.begin(), colorList.end());
 
    if (!colorList.isEmpty())
       color = colorList.first();
@@ -3625,8 +3629,8 @@ void Game::spawn()
 
       while (!done)
       {
-         x = qrand() % width;
-         y = qrand() % height;
+         x = QRandomGenerator::global()->bounded(width);
+         y = QRandomGenerator::global()->bounded(height);
 
          item = map->getItem(x, y);
 

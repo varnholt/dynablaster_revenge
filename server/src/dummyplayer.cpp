@@ -3,6 +3,7 @@
 #include "joingamerequestpacket.h"
 #include "constants.h"
 #include <QHostAddress>
+#include <QRandomGenerator>
 
 DummyPlayer::DummyPlayer(const QString& nickName, int gameId)
  : QTcpSocket()
@@ -62,7 +63,7 @@ void Server::unitTestAddPlayer()
 
       // init player attributes
       player->setLoggedIn(true);
-      player->setNick(QString::number(qrand() % 99999999));
+      player->setNick(QString::number(QRandomGenerator::global()->bounded(99999999)));
 
       // assign player color
       player->setColor(

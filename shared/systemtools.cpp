@@ -26,10 +26,6 @@ bool checkQtVersion( int major, int minor, QString* returnVersion )
          if (version[1] < minor)
             return false;
       }
-      else if (version[0] > major)
-      {
-         return false;
-      }
    }
 
    return true;

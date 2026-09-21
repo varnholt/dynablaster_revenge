@@ -1,6 +1,7 @@
 #include "extrashakepackethandler.h"
 
 // Qt
+#include <QRandomGenerator>
 #include <QTimer>
 
 // server
@@ -61,8 +62,8 @@ void ExtraShakePacketHandler::check()
          int w = map->getWidth();
          int h = map->getHeight();
 
-         int x = qrand() % (w-1);
-         int y = qrand() % (h-1);
+         int x = QRandomGenerator::global()->bounded(w - 1);
+         int y = QRandomGenerator::global()->bounded(h - 1);
 
          StoneMapItem* stone = dynamic_cast<StoneMapItem*>(map->getItem(x, y));
 

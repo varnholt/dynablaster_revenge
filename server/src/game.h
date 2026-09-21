@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <QElapsedTimer>
 #include <QList>
 #include <QMap>
 #include <QObject>
@@ -429,7 +430,7 @@ class Game : public QObject
       QTimer* mGameTimeUpdateTimer;
 
       //! game time
-      QTime mGameTime;
+      QElapsedTimer mGameTime;
 
       //! game duration
       int mDuration;
@@ -444,7 +445,7 @@ class Game : public QObject
       QTimer* mPreparationTimer;
 
       //! prepration time
-      QTime mPreparationTime;
+      QElapsedTimer mPreparationTime;
 
       //! preparation counter
       int mPreparationCounter;
@@ -465,7 +466,7 @@ class Game : public QObject
       int mGamesPlayed;
 
       //! game synchronization time
-      QTime mSynchronizationTime;
+      QElapsedTimer mSynchronizationTime;
 
       //! synchronization is active or not
       bool mSynchronizationActive;

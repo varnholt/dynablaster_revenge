@@ -16,6 +16,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QPushButton>
+#include <QRandomGenerator>
 #include <QTime>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -44,7 +45,7 @@ ServerGui::ServerGui()
    setCentralWidget(window);
 
    QHBoxLayout *mainLayout = new QHBoxLayout(window);
-   mainLayout->setMargin(2);
+   mainLayout->setContentsMargins(2, 2, 2, 2);
 
    // left side
    QVBoxLayout *left = new QVBoxLayout();
@@ -303,7 +304,7 @@ void ServerGui::addPlayer()
    if (item)
    {
       QVariant id = item->data(0, Qt::UserRole);
-      QString nick = QString::number(qrand() % 99999999);
+      QString nick = QString::number(QRandomGenerator::global()->bounded(99999999));
       DummyPlayer* player = new DummyPlayer(nick, id.toInt());
       Q_UNUSED(player);
    }
