@@ -21,6 +21,9 @@
 #include "menus/menumousecursor.h"
 #include "menus/menupagenavigator.h"
 
+#include "server.h"
+
+#include <QCoreApplication>
 #include <QKeyEvent>
 #include <QObject>
 
@@ -74,8 +77,22 @@ void registerMenuFont()
 
 }  // namespace
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+   // Server (server/src/server.h, copied in as-is from the old client's embedded server - see
+   // client.pro's own ../server/src SOURCES) needs a running Qt event loop to ever fire
+   // QTcpServer::newConnection/readyRead - there was no QCoreApplication anywhere in this port
+   // before now. Constructed once, pumped once per frame below (processEvents()) rather than
+   // handing control to qApp->exec(), since SDL already owns the main loop here.
+   QCoreApplication qtApp(argc, argv);
+
+   // matches BombermanClient::host() (client/src/game/bombermanclient.cpp) - construct the real
+   // server and confirm it actually bound its port. Unconditional for now (this port has no
+   // menu-driven host()/join() wiring yet - that's the rest of Phase 4); this is just proving the
+   // embedded server, copied in unmodified, comes up correctly inside client-sdl.
+   Server server;
+   SDL_Log("Server: isListening=%d", server.isListening() ? 1 : 0);
+
    GlesContext context;
    // matches the real original client's own DEFAULT_VIDEO_WIDTH/HEIGHT (client/src/game/gamesettings.cpp)
    // - 16:9, same aspect as the menu system's own 1920x1080 page space (mainmenu.psd etc.).
@@ -211,6 +228,10 @@ int main(int, char**)
                break;
          }
       }
+
+      // pumps Server's QTcpServer/QTimer signals (newConnection, readyRead, ...) - see the
+      // QCoreApplication comment above main().
+      QCoreApplication::processEvents();
 
       device.clear();
 

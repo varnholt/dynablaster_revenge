@@ -198,7 +198,7 @@ void Server::newConnection()
 
       connect(
          socket,
-         SIGNAL(error(QAbstractSocket::SocketError)),
+         SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
          this,
          SLOT(displayError(QAbstractSocket::SocketError))
       );

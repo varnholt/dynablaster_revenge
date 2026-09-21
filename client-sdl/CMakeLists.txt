@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(dynablaster_sdl LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Material still derives from QObject (hot-reload via QFileSystemWatcher) and a couple of
@@ -52,6 +52,24 @@ file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
 # tools/map.h `Map` collision that blocked this before is gone - tools/map.h's unused generic
 # container was renamed to RbTreeMap (had zero real callers in client-sdl).
 file(GLOB DYNABLASTER_SHARED_SOURCES CONFIGURE_DEPENDS ../shared/*.cpp ../shared/*.h)
+
+# server/src (sibling directory) - the real embedded server, copied in as-is, same set client.pro
+# already embeds into the old client for local/hosted games (dummyplayer.cpp/servergui.cpp are
+# standalone-server-only test tooling, excluded here same as client.pro excludes them). Zero
+# GL/rendering code - pure Qt network/game-logic, so no SDL porting needed, just wiring in.
+set(DYNABLASTER_SERVER_SOURCES
+    ../server/src/collisiondetection.cpp
+    ../server/src/collisiondetection.h
+    ../server/src/extrashakepackethandler.cpp
+    ../server/src/extrashakepackethandler.h
+    ../server/src/extraspawn.cpp
+    ../server/src/extraspawn.h
+    ../server/src/game.cpp
+    ../server/src/game.h
+    ../server/src/server.cpp
+    ../server/src/server.h
+    ../server/src/serverversion.h
+)
 
 # engine/helper/chunk.{cpp,h} is a second, unrelated Chunk class that collides by name with
 # tools/chunk.{cpp,h} - a genuine pre-existing duplicate in the legacy tree. Only tools/chunk.cpp
@@ -196,6 +214,7 @@ add_library(dynablaster_core STATIC
 
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
+    ${DYNABLASTER_SERVER_SOURCES}
 )
 
 # NOTE: do not add src/tools (or similar) directly as an include dir - tools/string.h vs the
@@ -208,6 +227,7 @@ target_include_directories(dynablaster_core PUBLIC
     src/framework
     src/engine
     ../shared
+    ../server/src
 )
 target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui Qt6::Network)
 
