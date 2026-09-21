@@ -9,39 +9,30 @@
 // defines
 #define COLOR_CHANGE_DURATION 2000
 
-
 MenuPageBackgroundItem::MenuPageBackgroundItem(QObject* parent)
-   : MenuPageItem(parent),
-     mX(0.0f),
-     mY(0.0f),
-     mBackgroundColor(BackgroundColorBlue),
-     mBackgroundColorPrevious(BackgroundColorBlue),
-     mVertexBuffer(0)
+    : MenuPageItem(parent),
+      mX(0.0f),
+      mY(0.0f),
+      mBackgroundColor(BackgroundColorBlue),
+      mBackgroundColorPrevious(BackgroundColorBlue),
+      mVertexBuffer(0)
 {
    mElapsed.start();
 
-   memset(mBackgroundLayers, 0, (BackgroundColorBlue + 1)*sizeof(PSDLayer*));
+   memset(mBackgroundLayers, 0, (BackgroundColorBlue + 1) * sizeof(PSDLayer*));
 }
-
 
 void MenuPageBackgroundItem::initialize()
 {
    MenuPageItem::initialize();
 }
 
-
-void MenuPageBackgroundItem::addGradientLayer(
-   PSDLayer *gradient,
-   MenuPageBackgroundItem::BackgroundColor color
-)
+void MenuPageBackgroundItem::addGradientLayer(PSDLayer* gradient, MenuPageBackgroundItem::BackgroundColor color)
 {
-   mBackgroundLayers[color]=gradient;
+   mBackgroundLayers[color] = gradient;
 }
 
-
-void MenuPageBackgroundItem::setBackgroundColor(
-   MenuPageBackgroundItem::BackgroundColor color
-)
+void MenuPageBackgroundItem::setBackgroundColor(MenuPageBackgroundItem::BackgroundColor color)
 {
    if (color != mBackgroundColor)
    {
@@ -51,16 +42,11 @@ void MenuPageBackgroundItem::setBackgroundColor(
    }
 }
 
-
 void MenuPageBackgroundItem::draw()
 {
    if (mBackgroundLayers[mBackgroundColor])
    {
-      float alpha =
-         qMin(
-            mFlipBackgroundElapsed.elapsed() / (float)COLOR_CHANGE_DURATION,
-            1.0f
-         );
+      float alpha = qMin(mFlipBackgroundElapsed.elapsed() / (float)COLOR_CHANGE_DURATION, 1.0f);
 
       float alphaInverted = 1.0f - alpha;
 
@@ -90,22 +76,21 @@ void MenuPageBackgroundItem::draw()
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-   const float quad[] =
-   {
-      xTranslation,       yTranslation,        -1.0f, 0.0f+mX, 0.0f+mY,
-      xTranslation,       yTranslation+height, -1.0f, 0.0f+mX, 1.0f+mY,
-      xTranslation+width, yTranslation+height, -1.0f, 1.0f+mX, 1.0f+mY,
-      xTranslation,       yTranslation,        -1.0f, 0.0f+mX, 0.0f+mY,
-      xTranslation+width, yTranslation+height, -1.0f, 1.0f+mX, 1.0f+mY,
-      xTranslation+width, yTranslation,        -1.0f, 1.0f+mX, 0.0f+mY,
+   const float quad[] = {
+      xTranslation,         yTranslation,          -1.0f, 0.0f + mX, 0.0f + mY,
+      xTranslation,         yTranslation + height, -1.0f, 0.0f + mX, 1.0f + mY,
+      xTranslation + width, yTranslation + height, -1.0f, 1.0f + mX, 1.0f + mY,
+      xTranslation,         yTranslation,          -1.0f, 0.0f + mX, 0.0f + mY,
+      xTranslation + width, yTranslation + height, -1.0f, 1.0f + mX, 1.0f + mY,
+      xTranslation + width, yTranslation,          -1.0f, 1.0f + mX, 0.0f + mY,
    };
 
    if (mVertexBuffer == 0)
-      mVertexBuffer= activeDevice->createVertexBuffer(sizeof(quad), true);
+      mVertexBuffer = activeDevice->createVertexBuffer(sizeof(quad), true);
    else
       activeDevice->allocateVertexBuffer(mVertexBuffer, sizeof(quad), true);
 
-   void* dst= activeDevice->lockVertexBuffer(mVertexBuffer, sizeof(quad));
+   void* dst = activeDevice->lockVertexBuffer(mVertexBuffer, sizeof(quad));
    memcpy(dst, quad, sizeof(quad));
    activeDevice->unlockVertexBuffer(mVertexBuffer);
 
@@ -117,8 +102,8 @@ void MenuPageBackgroundItem::draw()
    glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
    glEnableVertexAttribArray(0);
    glEnableVertexAttribArray(1);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)(sizeof(float)*3));
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
    glDrawArrays(GL_TRIANGLES, 0, 6);
 

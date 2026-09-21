@@ -1,13 +1,13 @@
 #include "menudrawable.h"
 
 // Qt
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 
 // menu
+#include "defaultshader.h"
 #include "menu.h"
 #include "menupageitem.h"
-#include "defaultshader.h"
 
 // engine
 #include "framework/framebuffer.h"
@@ -20,36 +20,34 @@
 #include "math.h"
 #include "math/matrix.h"
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param device render device
 */
 MenuDrawable::MenuDrawable(RenderDevice* device)
-   : QObject(),
-     Drawable(device),
-     mMenu(0),
-     mFadeInAnimation(0),
-     mFadeOutAnimation(0),
-     mInputBlocked(false),
-     mMouseX(0),
-     mMouseY(0),
-     mTime(0.0f),
-     mFadeOut(false),
-     mFadeIn(false),
-     mAlpha(0.0f),
-     mResetTime(false),
-     mShader(0),
-     mAlphaParameter(-1),
-     mFrameBuffer(0)
+    : QObject(),
+      Drawable(device),
+      mMenu(0),
+      mFadeInAnimation(0),
+      mFadeOutAnimation(0),
+      mInputBlocked(false),
+      mMouseX(0),
+      mMouseY(0),
+      mTime(0.0f),
+      mFadeOut(false),
+      mFadeIn(false),
+      mAlpha(0.0f),
+      mResetTime(false),
+      mShader(0),
+      mAlphaParameter(-1),
+      mFrameBuffer(0)
 {
    mMenu = new Menu();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::initializeGL()
 {
    mMenu->initialize();
@@ -67,10 +65,9 @@ void MenuDrawable::initializeGL()
    mAlphaParameter = getDefaultMenuShaderAlphaParam();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 MenuDrawable::~MenuDrawable()
 {
    delete mMenu;
@@ -86,22 +83,14 @@ MenuDrawable::~MenuDrawable()
    mFrameBuffer = 0;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::initGlParameters()
 {
    if (mMenu->getCurrentPage())
    {
-      Matrix ortho= Matrix::ortho(
-         0.0f,
-         mMenu->getCurrentPage()->getWidth(),
-         mMenu->getCurrentPage()->getHeight(),
-         0.0f,
-         -1.0f,
-         1.0f
-      );
+      Matrix ortho = Matrix::ortho(0.0f, mMenu->getCurrentPage()->getWidth(), mMenu->getCurrentPage()->getHeight(), 0.0f, -1.0f, 1.0f);
 
       static_cast<GLDevice*>(activeDevice)->setProjectionMatrix(ortho);
    }
@@ -109,14 +98,22 @@ void MenuDrawable::initGlParameters()
    glDisable(GL_DEPTH_TEST);
    glDepthMask(GL_FALSE);
 
-   // enable blending
+   // enable blending - the func must be set explicitly too, not just left enabled: other
+   // drawables (SphereFragmentsDrawable's multi-pass compositing, GameLogoDrawable's additive
+   // spark pass) legitimately change glBlendFunc mid-frame for their own needs, and this is the
+   // first real draw call of a new frame - relying on whatever the previous frame's last
+   // drawable happened to leave it at is exactly the kind of global-state coupling that caused
+   // the main-menu background to render with a cyan tint instead of its real dark, low-contrast
+   // pattern (2026-09-21: confirmed by explicitly resetting the func right before the
+   // background's own draw call, which fixed it; moved the fix up to here since every page item
+   // needs this, not just the background).
    glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::drawMenuContents()
 {
    initGlParameters();
@@ -160,10 +157,7 @@ void MenuDrawable::drawMenuContents()
          mFrameBuffer->unbind();
          FrameBuffer::pop();
 
-         pageAlpha =
-            animation
-               ? ((MenuPageFadeAnimation*)animation)->getAlpha()
-               : 1.0f;
+         pageAlpha = animation ? ((MenuPageFadeAnimation*)animation)->getAlpha() : 1.0f;
 
          // draw the composited page to the screen through the texalphaignore shader (not the
          // default per-item mShader) - the FBO's own alpha channel here is accumulated blend
@@ -190,15 +184,13 @@ void MenuDrawable::drawMenuContents()
    cleanupGlParameters();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::paintGL()
 {
    drawMenuContents();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -223,7 +215,6 @@ void MenuDrawable::setVisible(bool visible)
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -264,14 +255,13 @@ void MenuDrawable::animateFadeFrameBuffer(float dt)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param time time
 */
 void MenuDrawable::animate(float time)
 {
-   if (time != mTime )
+   if (time != mTime)
    {
       float dt = 0.0f;
 
@@ -295,7 +285,7 @@ void MenuDrawable::animate(float time)
 
          if (page->isActive())
          {
-            foreach(MenuPageItem* item, *page->getPageItems())
+            foreach (MenuPageItem* item, *page->getPageItems())
             {
                item->animate(time);
             }
@@ -306,10 +296,9 @@ void MenuDrawable::animate(float time)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::initializationFinished()
 {
    // called externally after everything is set up
@@ -317,50 +306,45 @@ void MenuDrawable::initializationFinished()
       emit pageChanged(mMenu->getCurrentPage()->getFilename());
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::startFadeOutFrameBuffer()
 {
    mAlpha = 1.0f;
    mFadeOut = true;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::startFadeInFrameBuffer()
 {
    mAlpha = 0.0f;
    mFadeIn = true;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::fadeInFinished()
 {
    Drawable::setVisible(true);
    emit visible(true);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::fadeOutFinished()
 {
    Drawable::setVisible(false);
    emit visible(false);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::cleanupGlParameters()
 {
    // enable blending
@@ -368,7 +352,6 @@ void MenuDrawable::cleanupGlParameters()
    glEnable(GL_DEPTH_TEST);
    glDepthMask(GL_TRUE);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -379,7 +362,6 @@ void MenuDrawable::setInputBlocked(bool blocked)
    mInputBlocked = blocked;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
   \return \c true if blocked
@@ -388,7 +370,6 @@ bool MenuDrawable::isInputBlocked() const
 {
    return mInputBlocked;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -406,7 +387,6 @@ void MenuDrawable::mousePressEvent(
       mMenu->mousePressed(x, y);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param x x pos
@@ -420,16 +400,14 @@ void MenuDrawable::mouseMoveEvent(int x, int y)
    mMenu->mouseMoved(x, y);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::mouseReleaseEvent(QMouseEvent* /*event*/)
 {
    if (!isInputBlocked())
       mMenu->mouseReleased();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -441,7 +419,6 @@ void MenuDrawable::keyPressEvent(QKeyEvent* event)
 
    emit keyPressed(event);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -465,33 +442,13 @@ void MenuDrawable::pageChangeRequest(const QString& name)
    mFadeOutAnimation->disconnect();
 
    // disable previous page when animation has finished
-   connect(
-      mFadeOutAnimation,
-      SIGNAL(stopped()),
-      previous,
-      SLOT(deactivate())
-   );
+   connect(mFadeOutAnimation, SIGNAL(stopped()), previous, SLOT(deactivate()));
 
-   connect(
-      mFadeOutAnimation,
-      SIGNAL(stopped()),
-      previous,
-      SLOT(resetAnimation())
-   );
+   connect(mFadeOutAnimation, SIGNAL(stopped()), previous, SLOT(resetAnimation()));
 
-   connect(
-      mFadeInAnimation,
-      SIGNAL(stopped()),
-      current,
-      SLOT(resetAnimation())
-   );
+   connect(mFadeInAnimation, SIGNAL(stopped()), current, SLOT(resetAnimation()));
 
-   connect(
-      mFadeInAnimation,
-      SIGNAL(stopped()),
-      this,
-      SLOT(pageChangeAnimationStopped())
-   );
+   connect(mFadeInAnimation, SIGNAL(stopped()), this, SLOT(pageChangeAnimationStopped()));
 
    // activate the current page
    current->setActive(true);
@@ -507,7 +464,6 @@ void MenuDrawable::pageChangeRequest(const QString& name)
    emit pageChangeActive(true);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return ptr to menu
@@ -517,10 +473,9 @@ Menu* MenuDrawable::getMenu()
    return mMenu;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuDrawable::pageChangeAnimationStopped()
 {
    // allow access to the page
