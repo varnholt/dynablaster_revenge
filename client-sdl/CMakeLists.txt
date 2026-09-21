@@ -48,6 +48,13 @@ file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     src/image/*.cpp src/image/*.h
 )
 
+# shared/ (sibling directory, the real client<->server wire protocol) was tried as a source set
+# here (2026-09-21) and does NOT compile as-is against Qt6 - see project memory
+# (project_client_sdl_port.md, Phase 3 section) for the exact list of real fixes needed
+# (QTime::start/elapsed removed, QDateTime::toTime_t removed, qrand/qsrand removed, a couple of
+# missing includes, and a genuine Map-vs-tools/map.h::Map<K,V> symbol collision to untangle) before
+# re-attempting this. Left out of the build for now so client-sdl stays green.
+
 # engine/helper/chunk.{cpp,h} is a second, unrelated Chunk class that collides by name with
 # tools/chunk.{cpp,h} - a genuine pre-existing duplicate in the legacy tree. Only tools/chunk.cpp
 # is in the real client.pro SOURCES list and nothing includes the engine/helper one, so it's
