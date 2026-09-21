@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # none of that is windowing-toolkit-specific, it's just Qt's basic value types for images/events,
 # so it carries the same "kept for now, stripped later" status as Core above.
 set(CMAKE_AUTOMOC ON)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network)
 
 include(FetchContent)
 
@@ -182,6 +182,16 @@ add_library(dynablaster_core STATIC
     src/game/gamelogodrawable.cpp
     src/game/gamelogodrawable.h
 
+    # Phase 4 (real client<->server networking) prep - small, self-contained utility classes
+    # BombermanClient itself depends on, ported ahead of it.
+    src/game/gamehelptexts.h
+    src/game/gamestatemachine.cpp
+    src/game/gamestatemachine.h
+    src/game/helpelement.cpp
+    src/game/helpelement.h
+    src/game/helpmanager.cpp
+    src/game/helpmanager.h
+
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
 )
@@ -197,7 +207,7 @@ target_include_directories(dynablaster_core PUBLIC
     src/engine
     ../shared
 )
-target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui)
+target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui Qt6::Network)
 
 # dynablaster_sdl - the real game, no CLI flags, launches straight into the main menu.
 add_executable(dynablaster_sdl src/main.cpp)
@@ -225,6 +235,7 @@ foreach(dynablaster_target dynablaster_sdl dynablaster_sdl_harness)
                 $<TARGET_FILE:SDL3::SDL3>
                 $<TARGET_FILE:Qt6::Core>
                 $<TARGET_FILE:Qt6::Gui>
+                $<TARGET_FILE:Qt6::Network>
                 $<TARGET_FILE_DIR:${dynablaster_target}>
         )
     endif()
