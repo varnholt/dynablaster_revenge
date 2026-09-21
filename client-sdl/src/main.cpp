@@ -48,7 +48,9 @@ void registerMenuFont()
 int main(int, char**)
 {
    GlesContext context;
-   if (!context.init("Dynablaster Revenge", 800, 600))
+   // matches the real original client's own DEFAULT_VIDEO_WIDTH/HEIGHT (client/src/game/gamesettings.cpp)
+   // - 16:9, same aspect as the menu system's own 1920x1080 page space (mainmenu.psd etc.).
+   if (!context.init("Dynablaster Revenge", 1024, 576))
    {
       return 1;
    }
