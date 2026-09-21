@@ -24,59 +24,59 @@ void Vector2::set(float px, float py)
    y = py;
 }
 
-Vector2 Vector2::operator*(const float f) const
+Vector2 Vector2::operator*(const float scalar) const
 {
-   Vector2 n;
-   n.x = x * f;
-   n.y = y * f;
-   return n;
+   Vector2 result;
+   result.x = x * scalar;
+   result.y = y * scalar;
+   return result;
 }
 
-void Vector2::operator*=(const float f)
+void Vector2::operator*=(const float scalar)
 {
-   x *= f;
-   y *= f;
+   x *= scalar;
+   y *= scalar;
 }
 
-float Vector2::operator*(const Vector2& v) const
+float Vector2::operator*(const Vector2& other) const
 {
-   return x * v.x + y * v.y;
+   return x * other.x + y * other.y;
 }
 
-Vector2 Vector2::operator+(const Vector2& v) const
+Vector2 Vector2::operator+(const Vector2& other) const
 {
-   Vector2 n;
-   n.x = x + v.x;
-   n.y = y + v.y;
-   return n;
+   Vector2 result;
+   result.x = x + other.x;
+   result.y = y + other.y;
+   return result;
 }
 
-void Vector2::operator+=(const Vector2& v)
+void Vector2::operator+=(const Vector2& other)
 {
-   x += v.x;
-   y += v.y;
+   x += other.x;
+   y += other.y;
 }
 
-Vector2 Vector2::operator-(const Vector2& v) const
+Vector2 Vector2::operator-(const Vector2& other) const
 {
-   Vector2 n;
-   n.x = x - v.x;
-   n.y = y - v.y;
-   return n;
+   Vector2 result;
+   result.x = x - other.x;
+   result.y = y - other.y;
+   return result;
 }
 
 Vector2 Vector2::operator-() const
 {
-   Vector2 n;
-   n.x = -x;
-   n.y = -y;
-   return n;
+   Vector2 result;
+   result.x = -x;
+   result.y = -y;
+   return result;
 }
 
-void Vector2::operator-=(const Vector2& v)
+void Vector2::operator-=(const Vector2& other)
 {
-   x -= v.x;
-   y -= v.y;
+   x -= other.x;
+   y -= other.y;
 }
 
 void Vector2::operator<<(Stream& stream)
@@ -106,7 +106,7 @@ float* Vector2::data() const
    return (float*)&x;
 }
 
-Vector2 Vector2::linear(const Vector2& v, float t) const
+Vector2 Vector2::linear(const Vector2& other, float interpolation_factor) const
 {
-   return *this + (v - *this) * t;
+   return *this + (other - *this) * interpolation_factor;
 }

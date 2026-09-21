@@ -23,20 +23,20 @@ public:
    operator const float*() const
    {
       return &x;
-   }                                           // cast to float*
-   Vector4 operator+(const Vector4& v) const;  // add two vectors
-   void operator+=(const Vector4& v);          // add another vector
-   Vector4 operator-(const Vector4& v) const;  // subtract two vectors
-   Vector4 operator-() const;                  // negate
-   void operator-=(const Vector4& v);          // subtract another vector
-   Vector4 operator*(const float f) const;     // multiply by scalar
-   float operator*(const Vector4& v) const;    // dot product
-   void operator*=(const float f);             // multiply by scalar
+   }  // cast to float*
+   Vector4 operator+(const Vector4& other) const;  // add two vectors
+   void operator+=(const Vector4& other);          // add another vector
+   Vector4 operator-(const Vector4& other) const;  // subtract two vectors
+   Vector4 operator-() const;                      // negate
+   void operator-=(const Vector4& other);          // subtract another vector
+   Vector4 operator*(const float scalar) const;    // multiply by scalar
+   float operator*(const Vector4& other) const;    // dot product
+   void operator*=(const float scalar);            // multiply by scalar
 
    void set(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 0.0f);  // set components
    float* data() const;                                                       // get float[4] pointer to components
    unsigned int rgba() const;
-   Vector4 linear(const Vector4& v, float t) const;
+   Vector4 linear(const Vector4& other, float interpolationFactor) const;
 
    Vector xyz() const;
 

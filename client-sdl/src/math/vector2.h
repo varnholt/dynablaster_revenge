@@ -23,19 +23,19 @@ public:
    operator const float*() const
    {
       return &x;
-   }                                           // cast to float*
-   Vector2 operator+(const Vector2& v) const;  // add two vectors
-   void operator+=(const Vector2& v);          // add another vector
-   Vector2 operator-(const Vector2& v) const;  // subtract two vectors
-   Vector2 operator-() const;                  // negate
-   void operator-=(const Vector2& v);          // subtract another vector
-   Vector2 operator*(const float f) const;     // multiply by scalar
-   float operator*(const Vector2& v) const;    // dot product
-   void operator*=(const float f);             // multiply by scalar
+   }  // cast to float*
+   Vector2 operator+(const Vector2& other) const;  // add two vectors
+   void operator+=(const Vector2& other);          // add another vector
+   Vector2 operator-(const Vector2& other) const;  // subtract two vectors
+   Vector2 operator-() const;                      // negate
+   void operator-=(const Vector2& other);          // subtract another vector
+   Vector2 operator*(const float scalar) const;    // multiply by scalar
+   float operator*(const Vector2& other) const;    // dot product
+   void operator*=(const float scalar);            // multiply by scalar
 
    void set(float x = 0.0f, float y = 0.0f);  // set components
    float* data() const;                       // get float[2] pointer to components
-   Vector2 linear(const Vector2& v, float t) const;
+   Vector2 linear(const Vector2& other, float interpolation_factor) const;
 
    void operator<<(Stream& stream);  // stream operator
    void operator>>(Stream& stream);  // stream operator

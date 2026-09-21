@@ -25,104 +25,104 @@ void Vector::set(float px, float py, float pz)
    z = pz;
 }
 
-Vector Vector::operator*(const float f) const
+Vector Vector::operator*(const float scalar) const
 {
-   Vector n;
-   n.x = x * f;
-   n.y = y * f;
-   n.z = z * f;
-   return n;
+   Vector result;
+   result.x = x * scalar;
+   result.y = y * scalar;
+   result.z = z * scalar;
+   return result;
 }
 
-float Vector::operator*(const Vector& v) const
+float Vector::operator*(const Vector& other) const
 {
-   return x * v.x + y * v.y + z * v.z;
+   return x * other.x + y * other.y + z * other.z;
 }
 
-void Vector::operator*=(const float f)
+void Vector::operator*=(const float scalar)
 {
-   x *= f;
-   y *= f;
-   z *= f;
+   x *= scalar;
+   y *= scalar;
+   z *= scalar;
 }
 
-void Vector::operator/=(const float f)
+void Vector::operator/=(const float scalar)
 {
-   float t = 1.0f / f;
-   x *= t;
-   y *= t;
-   z *= t;
+   float reciprocal = 1.0f / scalar;
+   x *= reciprocal;
+   y *= reciprocal;
+   z *= reciprocal;
 }
 
-Vector Vector::operator+(const Vector& v) const
+Vector Vector::operator+(const Vector& other) const
 {
-   Vector n;
-   n.x = x + v.x;
-   n.y = y + v.y;
-   n.z = z + v.z;
-   return n;
+   Vector result;
+   result.x = x + other.x;
+   result.y = y + other.y;
+   result.z = z + other.z;
+   return result;
 }
 
-void Vector::operator+=(const Vector& v)
+void Vector::operator+=(const Vector& other)
 {
-   x += v.x;
-   y += v.y;
-   z += v.z;
+   x += other.x;
+   y += other.y;
+   z += other.z;
 }
 
-Vector Vector::operator-(const Vector& v) const
+Vector Vector::operator-(const Vector& other) const
 {
-   Vector n;
-   n.x = x - v.x;
-   n.y = y - v.y;
-   n.z = z - v.z;
-   return n;
+   Vector result;
+   result.x = x - other.x;
+   result.y = y - other.y;
+   result.z = z - other.z;
+   return result;
 }
 
 Vector Vector::operator-() const
 {
-   Vector n;
-   n.x = -x;
-   n.y = -y;
-   n.z = -z;
-   return n;
+   Vector result;
+   result.x = -x;
+   result.y = -y;
+   result.z = -z;
+   return result;
 }
 
-void Vector::operator-=(const Vector& v)
+void Vector::operator-=(const Vector& other)
 {
-   x -= v.x;
-   y -= v.y;
-   z -= v.z;
+   x -= other.x;
+   y -= other.y;
+   z -= other.z;
 }
 
-Vector Vector::operator%(const Vector& v) const
+Vector Vector::operator%(const Vector& other) const
 {
-   Vector n;
-   n.x = y * v.z - z * v.y;
-   n.y = z * v.x - x * v.z;
-   n.z = x * v.y - y * v.x;
-   return n;
+   Vector result;
+   result.x = y * other.z - z * other.y;
+   result.y = z * other.x - x * other.z;
+   result.z = x * other.y - y * other.x;
+   return result;
 }
 
-bool Vector::operator==(const Vector& v1) const
+bool Vector::operator==(const Vector& other) const
 {
-   float x1 = x - v1.x;
-   float y1 = y - v1.y;
-   float z1 = z - v1.z;
-   float dist = x1 * x1 + y1 * y1 + z1 * z1;
-   if (dist < 0.0001f)
+   float delta_x = x - other.x;
+   float delta_y = y - other.y;
+   float delta_z = z - other.z;
+   float distance = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
+   if (distance < 0.0001f)
       return true;
    else
       return false;
 }
 
-bool Vector::operator!=(const Vector& v1) const
+bool Vector::operator!=(const Vector& other) const
 {
-   float x1 = x - v1.x;
-   float y1 = y - v1.y;
-   float z1 = z - v1.z;
-   float dist = x1 * x1 + y1 * y1 + z1 * z1;  // no sqrt! compare with EPS^2 instead
-   if (dist < EPS)
+   float delta_x = x - other.x;
+   float delta_y = y - other.y;
+   float delta_z = z - other.z;
+   float distance = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;  // no sqrt! compare with EPS^2 instead
+   if (distance < EPS)
       return false;
    else
       return true;
@@ -140,20 +140,20 @@ void Vector::operator>>(Stream& stream)
 
 void Vector::normalize(float length)
 {
-   float t = length / sqrt(x * x + y * y + z * z);
-   x *= t;
-   y *= t;
-   z *= t;
+   float scale_factor = length / sqrt(x * x + y * y + z * z);
+   x *= scale_factor;
+   y *= scale_factor;
+   z *= scale_factor;
 }
 
-Vector Vector::normalize(const Vector& v)
+Vector Vector::normalize(const Vector& other)
 {
-   Vector n;
-   float t = 1.0f / sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-   n.x = v.x * t;
-   n.y = v.y * t;
-   n.z = v.z * t;
-   return n;
+   Vector result;
+   float scale_factor = 1.0f / sqrt(other.x * other.x + other.y * other.y + other.z * other.z);
+   result.x = other.x * scale_factor;
+   result.y = other.y * scale_factor;
+   result.z = other.z * scale_factor;
+   return result;
 }
 
 float Vector::length() const
@@ -190,43 +190,43 @@ int Vector::maxIndex() const
       return 2;
 }
 
-void Vector::maximum(const Vector& v)
+void Vector::maximum(const Vector& other)
 {
-   if (v.x > x)
-      x = v.x;
-   if (v.y > y)
-      y = v.y;
-   if (v.z > z)
-      z = v.z;
+   if (other.x > x)
+      x = other.x;
+   if (other.y > y)
+      y = other.y;
+   if (other.z > z)
+      z = other.z;
 }
 
-void Vector::minimum(const Vector& v)
+void Vector::minimum(const Vector& other)
 {
-   if (v.x < x)
-      x = v.x;
-   if (v.y < y)
-      y = v.y;
-   if (v.z < z)
-      z = v.z;
+   if (other.x < x)
+      x = other.x;
+   if (other.y < y)
+      y = other.y;
+   if (other.z < z)
+      z = other.z;
 }
 
 Vector Vector::abs() const
 {
-   Vector n;
-   n.x = fabs(x);
-   n.y = fabs(y);
-   n.z = fabs(z);
-   return n;
+   Vector result;
+   result.x = fabs(x);
+   result.y = fabs(y);
+   result.z = fabs(z);
+   return result;
 }
 
 int Vector::absMaxIndex() const
 {
-   float ax = fabs(x);
-   float ay = fabs(y);
-   float az = fabs(z);
-   if (ax >= ay && ax >= az)
+   float abs_x = fabs(x);
+   float abs_y = fabs(y);
+   float abs_z = fabs(z);
+   if (abs_x >= abs_y && abs_x >= abs_z)
       return 0;
-   else if (ay >= az && ay >= ax)
+   else if (abs_y >= abs_z && abs_y >= abs_x)
       return 1;
    else
       return 2;

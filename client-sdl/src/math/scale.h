@@ -9,7 +9,7 @@ class Scale
 {
 public:
    Scale();
-   Scale(const Quat& q, const Vector& v);
+   Scale(const Quat& rotation, const Vector& scale);
 
    void operator<<(Stream& stream);  // stream operator
    void operator>>(Stream& stream);  // stream operator
@@ -20,6 +20,6 @@ public:
    const Quat& orientation() const;
 
 private:
-   Quat mRot;
-   Vector mScale;
+   Quat _rotation;
+   Vector _scale;
 };

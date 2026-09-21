@@ -4,20 +4,20 @@ Scale::Scale()
 {
 }
 
-Scale::Scale(const Quat& q, const Vector& v) : mRot(q), mScale(v)
+Scale::Scale(const Quat& rotation, const Vector& scale) : _rotation(rotation), _scale(scale)
 {
 }
 
 void Scale::load(Stream* stream)
 {
-   mRot.load(stream);
-   mScale.load(stream);
+   _rotation.load(stream);
+   _scale.load(stream);
 }
 
 void Scale::write(Stream* stream)
 {
-   mRot.write(stream);
-   mScale.write(stream);
+   _rotation.write(stream);
+   _scale.write(stream);
 }
 
 void Scale::operator<<(Stream& stream)
@@ -32,10 +32,10 @@ void Scale::operator>>(Stream& stream)
 
 const Vector& Scale::value() const
 {
-   return mScale;
+   return _scale;
 }
 
 const Quat& Scale::orientation() const
 {
-   return mRot;
+   return _rotation;
 }

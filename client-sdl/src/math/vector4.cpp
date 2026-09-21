@@ -27,73 +27,73 @@ void Vector4::set(float px, float py, float pz, float pw)
    w = pw;
 }
 
-Vector4 Vector4::operator*(const float f) const
+Vector4 Vector4::operator*(const float scalar) const
 {
-   Vector4 n;
-   n.x = x * f;
-   n.y = y * f;
-   n.z = z * f;
-   n.w = w * f;
-   return n;
+   Vector4 result;
+   result.x = x * scalar;
+   result.y = y * scalar;
+   result.z = z * scalar;
+   result.w = w * scalar;
+   return result;
 }
 
-void Vector4::operator*=(const float f)
+void Vector4::operator*=(const float scalar)
 {
-   x *= f;
-   y *= f;
-   z *= f;
-   w *= f;
+   x *= scalar;
+   y *= scalar;
+   z *= scalar;
+   w *= scalar;
 }
 
-float Vector4::operator*(const Vector4& v) const
+float Vector4::operator*(const Vector4& other) const
 {
-   return x * v.x + y * v.y + z * v.z + w * v.w;
+   return x * other.x + y * other.y + z * other.z + w * other.w;
 }
 
-Vector4 Vector4::operator+(const Vector4& v) const
+Vector4 Vector4::operator+(const Vector4& other) const
 {
-   Vector4 n;
-   n.x = x + v.x;
-   n.y = y + v.y;
-   n.z = z + v.z;
-   n.w = w + v.w;
-   return n;
+   Vector4 result;
+   result.x = x + other.x;
+   result.y = y + other.y;
+   result.z = z + other.z;
+   result.w = w + other.w;
+   return result;
 }
 
-void Vector4::operator+=(const Vector4& v)
+void Vector4::operator+=(const Vector4& other)
 {
-   x += v.x;
-   y += v.y;
-   z += v.z;
-   w += v.w;
+   x += other.x;
+   y += other.y;
+   z += other.z;
+   w += other.w;
 }
 
-Vector4 Vector4::operator-(const Vector4& v) const
+Vector4 Vector4::operator-(const Vector4& other) const
 {
-   Vector4 n;
-   n.x = x - v.x;
-   n.y = y - v.y;
-   n.z = z - v.z;
-   n.w = w - v.w;
-   return n;
+   Vector4 result;
+   result.x = x - other.x;
+   result.y = y - other.y;
+   result.z = z - other.z;
+   result.w = w - other.w;
+   return result;
 }
 
 Vector4 Vector4::operator-() const
 {
-   Vector4 n;
-   n.x = -x;
-   n.y = -y;
-   n.z = -z;
-   n.w = -w;
-   return n;
+   Vector4 result;
+   result.x = -x;
+   result.y = -y;
+   result.z = -z;
+   result.w = -w;
+   return result;
 }
 
-void Vector4::operator-=(const Vector4& v)
+void Vector4::operator-=(const Vector4& other)
 {
-   x -= v.x;
-   y -= v.y;
-   z -= v.z;
-   w -= v.w;
+   x -= other.x;
+   y -= other.y;
+   z -= other.z;
+   w -= other.w;
 }
 
 void Vector4::operator<<(Stream& stream)
@@ -157,9 +157,9 @@ unsigned int Vector4::rgba() const
    return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-Vector4 Vector4::linear(const Vector4& v, float t) const
+Vector4 Vector4::linear(const Vector4& other, float interpolation_factor) const
 {
-   return *this + (v - *this) * t;
+   return *this + (other - *this) * interpolation_factor;
 }
 
 Vector Vector4::xyz() const
