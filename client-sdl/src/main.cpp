@@ -21,12 +21,41 @@
 #include "menus/menumousecursor.h"
 #include "menus/menupagenavigator.h"
 
+#include <QKeyEvent>
 #include <QObject>
 
 #include <SDL3/SDL.h>
 
 namespace
 {
+
+/// \brief maps the editing/navigation keys MenuPageTextEditItem::keyPressed() special-cases
+/// (menus/menupagetextedit.cpp) to Qt::Key. Printable characters don't go through this - they
+/// come from SDL_EVENT_TEXT_INPUT instead, which already gives correctly-shifted/composed text.
+int mapEditingKey(SDL_Keycode key)
+{
+   switch (key)
+   {
+      case SDLK_BACKSPACE:
+         return Qt::Key_Backspace;
+      case SDLK_DELETE:
+         return Qt::Key_Delete;
+      case SDLK_LEFT:
+         return Qt::Key_Left;
+      case SDLK_RIGHT:
+         return Qt::Key_Right;
+      case SDLK_HOME:
+         return Qt::Key_Home;
+      case SDLK_END:
+         return Qt::Key_End;
+      case SDLK_RETURN:
+         return Qt::Key_Return;
+      case SDLK_KP_ENTER:
+         return Qt::Key_Enter;
+      default:
+         return 0;
+   }
+}
 
 /// \brief registers the BitmapFonts the ported menu pages actually need (see project memory -
 /// "outlined"/"time"/"large"/"large-outlined" are for in-game HUD text, not menus, and are
@@ -54,6 +83,9 @@ int main(int, char**)
    {
       return 1;
    }
+
+   // needed for SDL_EVENT_TEXT_INPUT - off by default in SDL3.
+   SDL_StartTextInput(context.window());
 
    // shaders (loaded by GLDevice::loadShader) and textures (loaded by Image via loadtga) are
    // both plain FileStream reads, resolved against these search paths rather than a hardcoded
@@ -159,12 +191,33 @@ int main(int, char**)
                menuDrawable.mouseReleaseEvent(nullptr);
                menuCursor.mouseReleaseEvent(nullptr);
                break;
+            case SDL_EVENT_KEY_DOWN:
+            {
+               const int qtKey = mapEditingKey(event.key.key);
+               if (qtKey != 0)
+               {
+                  QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier);
+                  menuDrawable.keyPressEvent(&keyEvent);
+               }
+               break;
+            }
+            case SDL_EVENT_TEXT_INPUT:
+            {
+               QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
+               menuDrawable.keyPressEvent(&keyEvent);
+               break;
+            }
             default:
                break;
          }
       }
 
       device.clear();
+
+      // must run before menuDrawable.paintGL() - the page cross-fade animation reads GlobalTime
+      // (via FrameTimer), so updating it after paintGL() makes every frame's fade calc use last
+      // frame's stale time instead of this frame's.
+      globalTime.update();
 
       const float timeMs = static_cast<float>(SDL_GetTicks());
 
@@ -179,14 +232,7 @@ int main(int, char**)
 
       if (logoDrawable.isVisible())
       {
-         // GameLogoDrawable's own fade/spark timing (FADE_IN_LENGTH etc.) is calibrated against
-         // the original engine's Drawable::animate() convention (real seconds * 62.5, see
-         // client/src/game/bombermanview.cpp) - timeMs is real milliseconds, so convert
-         // (ms/1000)*62.5 == ms*0.0625 to keep the fade durations meaning what they say. The
-         // earth/bomb sphere's own rotation reads GlobalTime directly (see
-         // SphereFragmentsDrawable/SphereGeometryVbo) - update it here too so the logo actually
-         // animates during play.
-         globalTime.update();
+         // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
          logoDrawable.animate(timeMs * 0.0625f);
          logoDrawable.paintGL();
       }
