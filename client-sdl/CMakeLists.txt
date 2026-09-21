@@ -191,6 +191,8 @@ add_library(dynablaster_core STATIC
     src/game/helpelement.h
     src/game/helpmanager.cpp
     src/game/helpmanager.h
+    src/game/mapitemanimation.cpp
+    src/game/mapitemanimation.h
 
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
