@@ -1,5 +1,7 @@
 #include "packet.h"
 
+#include <QIODevice>
+
 // qt
 #include <QDataStream>
 

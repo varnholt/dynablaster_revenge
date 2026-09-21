@@ -48,12 +48,17 @@ file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     src/image/*.cpp src/image/*.h
 )
 
-# shared/ (sibling directory, the real client<->server wire protocol) was tried as a source set
-# here (2026-09-21) and does NOT compile as-is against Qt6 - see project memory
-# (project_client_sdl_port.md, Phase 3 section) for the exact list of real fixes needed
-# (QTime::start/elapsed removed, QDateTime::toTime_t removed, qrand/qsrand removed, a couple of
-# missing includes, and a genuine Map-vs-tools/map.h::Map<K,V> symbol collision to untangle) before
-# re-attempting this. Left out of the build for now so client-sdl stays green.
+# shared/ (sibling directory, the real client<->server wire protocol) was retried as a source set
+# here (2026-09-21) after fixing its Qt6-removed-API usage (QTime::start/elapsed -> QElapsedTimer,
+# QDateTime::toTime_t/qrand/qsrand -> QRandomGenerator, a couple of missing Qt6-modularized
+# includes - all verified real and applied directly to shared/, independent of this build, and
+# confirmed not to regress the existing Qt5 server/ build either). One problem remains: shared/
+# map.h's real `class Map` collides with tools/map.h's `template<KeyType,ValueType> class Map` (an
+# unrelated generic container) - `error C2990/C2955` inside shared/bombkickanimation.h itself, even
+# though its own .cpp's quote-include of "map.h" correctly resolves to shared/map.h. The exact leak
+# path from tools/map.h's template declaration into that translation unit wasn't found yet - next
+# step is a raw preprocessed dump (cl /P or /E) of the failing .cpp to see the real include order,
+# rather than guessing further. Left out of the build for now so client-sdl stays green.
 
 # engine/helper/chunk.{cpp,h} is a second, unrelated Chunk class that collides by name with
 # tools/chunk.{cpp,h} - a genuine pre-existing duplicate in the legacy tree. Only tools/chunk.cpp

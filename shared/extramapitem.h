@@ -8,8 +8,8 @@
 #include "constants.h"
 
 // Qt
+#include <QElapsedTimer>
 #include <QList>
-#include <QTime>
 
 // forward declarations
 class ExtraMapItemCreatedPacket;
@@ -54,7 +54,7 @@ class ExtraMapItem : public MapItem
       Constants::ExtraType mExtraType;
 
       //! time since extra map item is visible
-      QTime mStartTime;
+      QElapsedTimer mStartTime;
 
       //! skull face setup
       QList<Constants::SkullType> mSkullFaces;

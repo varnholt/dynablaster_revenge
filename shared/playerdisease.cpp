@@ -6,6 +6,7 @@
 #include "player.h"
 
 // Qt
+#include <QRandomGenerator>
 #include <QTimer>
 
 
@@ -96,7 +97,7 @@ void PlayerDisease::activate()
 */
 void PlayerDisease::randomizeType()
 {
-   setType((Constants::SkullType)(qrand() % Constants::SkullReset));
+   setType((Constants::SkullType)(QRandomGenerator::global()->bounded(static_cast<int>(Constants::SkullReset))));
 }
 
 

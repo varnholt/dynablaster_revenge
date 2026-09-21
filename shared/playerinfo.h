@@ -6,8 +6,9 @@
 #include "playerstats.h"
 
 // Qt
-#include <QString>
+#include <QObject>
 #include <QPointer>
+#include <QString>
 
 // forward declarations
 class PlayerDisease;

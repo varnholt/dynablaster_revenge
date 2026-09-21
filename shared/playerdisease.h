@@ -2,9 +2,9 @@
 #define PLAYERDISEASE_H
 
 // Qt
+#include <QElapsedTimer>
 #include <QObject>
 #include <QSet>
-#include <QTime>
 
 // constants
 #include "constants.h"
@@ -96,7 +96,7 @@ protected:
    int mDuration;
 
    //! active time
-   QTime mActiveTime;
+   QElapsedTimer mActiveTime;
 
    //! player id
    int mPlayerId;

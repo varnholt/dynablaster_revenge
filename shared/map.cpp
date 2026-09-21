@@ -13,7 +13,7 @@
 #include "playerdisease.h"
 
 // Qt
-#include <QDateTime>
+#include <QRandomGenerator>
 #include <QSet>
 
 // cmath
@@ -170,8 +170,6 @@ void Map::initialize()
 */
 void Map::initializeTestMap()
 {
-   qsrand(QDateTime::currentDateTime().toTime_t());
-
    QList<QPoint> startPositions;
    startPositions
       << QPoint(0,0)
@@ -195,7 +193,7 @@ void Map::initializeTestMap()
          if (!item)
          {
             // ..eventually place a stone
-            if ((qrand() % 100) > 75)
+            if ((QRandomGenerator::global()->bounded(100)) > 75)
             {
                // but keep some space around the players' start positions
                for (int p = 0; p < startPositions.size(); p++)
@@ -377,9 +375,6 @@ Map* Map::generateMap(
       // init the player start positions
       map->setStartPositions(startPositions);
 
-      // init random seed
-      qsrand(QDateTime::currentDateTime().toTime_t());
-
       MapItem* item = 0;
       QPoint playerPosition;
 
@@ -425,7 +420,7 @@ Map* Map::generateMap(
             // i want 2 ways definitely open at maximum
             for (int i = 0; i < 2; i++)
             {
-               int randIndex = qrand() % 4;
+               int randIndex = QRandomGenerator::global()->bounded(4);
 
                blockedPositions << openPositions.at(randIndex);
             }
@@ -434,8 +429,8 @@ Map* Map::generateMap(
 
       while (stonesPlaced < stoneCount)
       {
-         randX = qrand() % width;
-         randY = qrand() % height;
+         randX = QRandomGenerator::global()->bounded(width);
+         randY = QRandomGenerator::global()->bounded(height);
 
          item = map->getItem(randX, randY);
 
@@ -499,8 +494,8 @@ Map* Map::generateMap(
          || (extraSkullPlaced   < extraSkullCount)
       )
       {
-         randX = qrand() % width;
-         randY = qrand() % height;
+         randX = QRandomGenerator::global()->bounded(width);
+         randY = QRandomGenerator::global()->bounded(height);
 
          item = map->getItem(randX, randY);
 
