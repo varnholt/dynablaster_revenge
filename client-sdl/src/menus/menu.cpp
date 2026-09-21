@@ -5,42 +5,23 @@
 
 Menu* Menu::lInstance = 0;
 
-
-Menu::Menu()
-   : QObject(),
-     mSettings(0),
-     mCurrentPage(0),
-     mBackground(0),
-     mMenuWorkflow(0)
+Menu::Menu() : QObject(), mSettings(0), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
-   mSettings =
-      new QSettings(
-         "data/menus/menu.ini",
-         QSettings::IniFormat
-      );
+   mSettings = new QSettings("data/menus/menu.ini", QSettings::IniFormat);
 
    lInstance = this;
 }
 
-
-Menu::Menu(const Menu& /*menu*/)
-   : QObject(),
-     QList<MenuPage*>(),
-     mSettings(0),
-     mCurrentPage(0),
-     mBackground(0),
-     mMenuWorkflow(0)
+Menu::Menu(const Menu& /*menu*/) : QObject(), QList<MenuPage*>(), mSettings(0), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
    qFatal("fuck");
 }
-
 
 Menu::~Menu()
 {
    while (!isEmpty())
       delete takeFirst();
 }
-
 
 void Menu::initialize()
 {
@@ -50,7 +31,7 @@ void Menu::initialize()
 
    QString filename;
    bool defaultAssigned = false;
-   foreach (const QString &childKey, childKeys)
+   foreach (const QString& childKey, childKeys)
    {
       filename = mSettings->value(childKey).toString();
 
@@ -62,26 +43,11 @@ void Menu::initialize()
       page->initialize();
 
       // connect page actions to outside world
-      connect(
-         page,
-         SIGNAL(actionRequest(QString,QString)),
-         this,
-         SIGNAL(actionRequest(QString,QString))
-      );
+      connect(page, SIGNAL(actionRequest(QString, QString)), this, SIGNAL(actionRequest(QString, QString)));
 
-      connect(
-         page,
-         SIGNAL(actionKeyPressed(QString,QString,int)),
-         this,
-         SIGNAL(actionKeyPressed(QString,QString,int))
-      );
+      connect(page, SIGNAL(actionKeyPressed(QString, QString, int)), this, SIGNAL(actionKeyPressed(QString, QString, int)));
 
-      connect(
-         page,
-         SIGNAL(layerFocussed(QString,QString)),
-         this,
-         SIGNAL(layerFocussed(QString,QString))
-      );
+      connect(page, SIGNAL(layerFocussed(QString, QString)), this, SIGNAL(layerFocussed(QString, QString)));
 
       // store page
       push_back(page);
@@ -114,12 +80,10 @@ void Menu::initialize()
    mSettings->endGroup();
 }
 
-
-Menu *Menu::getInstance()
+Menu* Menu::getInstance()
 {
    return lInstance;
 }
-
 
 void Menu::mouseMoved(int x, int y)
 {
@@ -129,7 +93,6 @@ void Menu::mouseMoved(int x, int y)
    }
 }
 
-
 void Menu::mousePressed(int x, int y)
 {
    if (mCurrentPage)
@@ -137,7 +100,6 @@ void Menu::mousePressed(int x, int y)
       mCurrentPage->mousePressed(x, y);
    }
 }
-
 
 void Menu::mouseReleased()
 {
@@ -147,7 +109,6 @@ void Menu::mouseReleased()
    }
 }
 
-
 void Menu::keyPressed(int key, const QString& text)
 {
    if (mCurrentPage)
@@ -156,8 +117,7 @@ void Menu::keyPressed(int key, const QString& text)
    }
 }
 
-
-void Menu::paste(const QString &text)
+void Menu::paste(const QString& text)
 {
    if (mCurrentPage)
    {
@@ -165,30 +125,25 @@ void Menu::paste(const QString &text)
    }
 }
 
-
 void Menu::setCurrentPage(MenuPage* page)
 {
    mCurrentPage = page;
 }
-
 
 MenuPage* Menu::getCurrentPage()
 {
    return mCurrentPage;
 }
 
-
 MenuPage* Menu::getBackground()
 {
    return mBackground;
 }
 
-
 void Menu::setMenuWorkflow(MenuWorkflow* workflow)
 {
    mMenuWorkflow = workflow;
 }
-
 
 void Menu::actionResponse(
    const QString& /*page*/,
@@ -196,9 +151,7 @@ void Menu::actionResponse(
    bool /*ok*/
 )
 {
-
 }
-
 
 MenuPage* Menu::getPageByName(const QString& pageName)
 {
@@ -217,8 +170,7 @@ MenuPage* Menu::getPageByName(const QString& pageName)
    return page;
 }
 
-
-MenuWorkflow *Menu::getMenuWorkflow() const
+MenuWorkflow* Menu::getMenuWorkflow() const
 {
    return mMenuWorkflow;
 }

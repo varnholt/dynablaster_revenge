@@ -1,16 +1,16 @@
 #pragma once
 
-#include "playermaterialbase.h"
 #include "math/matrix.h"
+#include "playermaterialbase.h"
 #include "render/uv.h"
 
 class InvisibilityMaterial : public PlayerMaterialBase
 {
 public:
-   InvisibilityMaterial(SceneGraph *scene);
+   InvisibilityMaterial(SceneGraph* scene);
    virtual ~InvisibilityMaterial();
 
-   void load(Stream *stream);
+   void load(Stream* stream);
    virtual void renderDiffuse();
 
    void setTexture(unsigned int texture);
@@ -32,4 +32,3 @@ private:
    int mParamBones;
    int mParamFlash;
 };
-

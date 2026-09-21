@@ -5,4 +5,4 @@
 #include "key.h"
 #include "math/quat.h"
 
-typedef Key< Quat > RotKey;
+typedef Key<Quat> RotKey;

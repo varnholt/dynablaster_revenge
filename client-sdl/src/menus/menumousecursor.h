@@ -16,75 +16,66 @@
 
 class PSDLayer;
 
-class MenuMouseCursor
-  : public QObject,
-    public Drawable
+class MenuMouseCursor : public QObject, public Drawable
 {
    Q_OBJECT
 
-   public:
+public:
+   enum State
+   {
+      Default,
+      Clicked,
+      Busy
+   };
 
-      enum State
-      {
-         Default,
-         Clicked,
-         Busy
-      };
+   MenuMouseCursor(RenderDevice* dev, bool visible = false);
 
-      MenuMouseCursor(
-         RenderDevice* dev,
-         bool visible = false
-      );
+   virtual ~MenuMouseCursor();
 
-      virtual ~MenuMouseCursor();
+   virtual void initializeGL();
+   virtual void paintGL();
+   virtual void animate(float globalTime);
 
-      virtual void initializeGL();
-      virtual void paintGL();
-      virtual void animate(float globalTime);
+   //! mouse events
+   virtual void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
+   virtual void mouseMoveEvent(int x, int y);
+   virtual void mouseReleaseEvent(QMouseEvent* event);
 
-      //! mouse events
-      virtual void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
-      virtual void mouseMoveEvent(int x, int y);
-      virtual void mouseReleaseEvent(QMouseEvent* event);
+public slots:
 
+   void setBusy(bool);
 
-   public slots:
+protected:
+   void initializeLayers();
 
-      void setBusy(bool);
+   void initGlParameters();
+   void cleanupGlParameters();
 
+   void paintDefaultCursor();
+   void paintClickedCursor();
+   void paintCursor(PSDLayer* layer, float opacity = 1.0f);
+   void paintBusyIcon();
 
-   protected:
+   PSD mPsd;
 
-      void initializeLayers();
+   QString mFilename;
 
-      void initGlParameters();
-      void cleanupGlParameters();
+   PSDLayer* mDefaultLayer;
+   PSDLayer* mClickedLayer;
+   PSDLayer* mBusyLayer;
 
-      void paintDefaultCursor();
-      void paintClickedCursor();
-      void paintCursor(PSDLayer* layer, float opacity=1.0f);
-      void paintBusyIcon();
+   int mBusyX;
+   int mBusyY;
 
-      PSD mPsd;
+   int mX;
+   int mY;
 
-      QString mFilename;
+   float mSizeFactor;
 
-      PSDLayer* mDefaultLayer;
-      PSDLayer* mClickedLayer;
-      PSDLayer* mBusyLayer;
+   bool mBusy;
+   bool mMousePressed;
 
-      int mBusyX;
-      int mBusyY;
+   FrameTimer mClickTime;
 
-      int mX;
-      int mY;
-
-      float mSizeFactor;
-
-      bool mBusy;
-      bool mMousePressed;
-
-      FrameTimer mClickTime;
-
-      float mTime;
+   float mTime;
 };

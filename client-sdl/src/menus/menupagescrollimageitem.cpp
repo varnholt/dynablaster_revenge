@@ -10,12 +10,12 @@
 
 // defines
 #define SCROLLTIME 36.0f
-#define LIM_0 (0.0f          * SCROLLTIME)
-#define LIM_1 (0.13f         * SCROLLTIME)
+#define LIM_0 (0.0f * SCROLLTIME)
+#define LIM_1 (0.13f * SCROLLTIME)
 #define LIM_2 (0.3333333333f * SCROLLTIME)
 #define LIM_3 (0.6666666666f * SCROLLTIME)
-#define LIM_4 (0.87f         * SCROLLTIME)
-#define LIM_5 (1.0f          * SCROLLTIME)
+#define LIM_4 (0.87f * SCROLLTIME)
+#define LIM_5 (1.0f * SCROLLTIME)
 #define LIM_2_POS_OFFSET 0.0f
 #define LIM_2_POS_LENGTH 0.2f
 #define LIM_3_POS_OFFSET 0.2f
@@ -23,35 +23,26 @@
 #define LIM_4_POS_OFFSET 0.8f
 #define LIM_4_POS_LENGTH 0.2f
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 MenuPageScrollImageItem::MenuPageScrollImageItem()
- : mClipper(0),
-   mLayer(0),
-   mY(0.0f),
-   mStartTime(0.0f),
-   mAnimationTime(0.0f),
-   mMoveUp(false),
-   mRelativeTimePrevious(0.0f)
+    : mClipper(0), mLayer(0), mY(0.0f), mStartTime(0.0f), mAnimationTime(0.0f), mMoveUp(false), mRelativeTimePrevious(0.0f)
 {
    mPageItemType = PageItemTypeScrollImage;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 MenuPageScrollImageItem::~MenuPageScrollImageItem()
 {
    delete mClipper;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageScrollImageItem::initialize()
 {
    MenuPageItem::initialize();
@@ -59,35 +50,27 @@ void MenuPageScrollImageItem::initialize()
    PSDLayer* boundingRect = getInactiveLayer();
 
    // use layer for clipping
-   mClipper = new Clipper(
-      boundingRect->getLeft(),
-      boundingRect->getTop(),
-      boundingRect->getRight(),
-      boundingRect->getBottom()
-   );
+   mClipper = new Clipper(boundingRect->getLeft(), boundingRect->getTop(), boundingRect->getRight(), boundingRect->getBottom());
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageScrollImageItem::draw()
 {
-   PSDLayer* layer= getActiveLayer();
+   PSDLayer* layer = getActiveLayer();
 
    float offset = mY * (layer->getHeight() - mClipper->getHeight());
 
    // clip image to reference layer
    mClipper->enable();
-   layer->render(0.0f, -offset); // move up to scroll down
+   layer->render(0.0f, -offset);  // move up to scroll down
    mClipper->disable();
-
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageScrollImageItem::reset()
 {
    mRelativeTimePrevious = 0.0f;
@@ -96,10 +79,9 @@ void MenuPageScrollImageItem::reset()
    mStartTime = GlobalTime::Instance()->getTime();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageScrollImageItem::animate(float /*time*/)
 {
    mAnimationTime = GlobalTime::Instance()->getTime();

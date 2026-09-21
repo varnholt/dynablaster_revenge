@@ -1,39 +1,30 @@
 #include "menupagecheckboxitem.h"
 
-MenuPageCheckBoxItem::MenuPageCheckBoxItem(QObject* parent)
-   : MenuPageItem(parent),
-     mLayerChecked(0),
-     mLayerUnchecked(0),
-     mChecked(false)
+MenuPageCheckBoxItem::MenuPageCheckBoxItem(QObject* parent) : MenuPageItem(parent), mLayerChecked(0), mLayerUnchecked(0), mChecked(false)
 {
    mPageItemType = PageItemTypeCheckbox;
    mInteractive = true;
 }
-
 
 void MenuPageCheckBoxItem::setCheckedLayer(PSDLayer* layer)
 {
    mLayerChecked = layer;
 }
 
-
 void MenuPageCheckBoxItem::setUncheckedLayer(PSDLayer* layer)
 {
    mLayerUnchecked = layer;
 }
 
-
-PSDLayer *MenuPageCheckBoxItem::getCheckedLayer() const
+PSDLayer* MenuPageCheckBoxItem::getCheckedLayer() const
 {
    return mLayerChecked;
 }
 
-
-PSDLayer *MenuPageCheckBoxItem::getUncheckedLayer() const
+PSDLayer* MenuPageCheckBoxItem::getUncheckedLayer() const
 {
    return mLayerUnchecked;
 }
-
 
 PSDLayer* MenuPageCheckBoxItem::getLayer() const
 {
@@ -43,12 +34,10 @@ PSDLayer* MenuPageCheckBoxItem::getLayer() const
       return mLayerUnchecked;
 }
 
-
 bool MenuPageCheckBoxItem::isChecked() const
 {
    return mChecked;
 }
-
 
 void MenuPageCheckBoxItem::setChecked(bool checked)
 {
@@ -58,12 +47,10 @@ void MenuPageCheckBoxItem::setChecked(bool checked)
    emit stateChanged();
 }
 
-
 void MenuPageCheckBoxItem::toggleChecked()
 {
    setChecked(!isChecked());
 }
-
 
 void MenuPageCheckBoxItem::draw()
 {
@@ -71,13 +58,11 @@ void MenuPageCheckBoxItem::draw()
    MenuPageItem::draw();
 }
 
-
 void MenuPageCheckBoxItem::activated()
 {
    toggleChecked();
    MenuPageItem::activated();
 }
-
 
 void MenuPageCheckBoxItem::deactivated()
 {

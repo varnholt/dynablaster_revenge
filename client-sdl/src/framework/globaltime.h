@@ -6,13 +6,13 @@
 class GlobalTime
 {
 public:
-    GlobalTime();
-    ~GlobalTime();
+   GlobalTime();
+   ~GlobalTime();
 
-    static GlobalTime* Instance();
+   static GlobalTime* Instance();
 
-    virtual float getTime() const = 0;
+   virtual float getTime() const = 0;
 
 private:
-    static GlobalTime* mInstance;
+   static GlobalTime* mInstance;
 };

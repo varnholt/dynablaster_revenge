@@ -1,19 +1,19 @@
 #pragma once
 
-#include "playermaterialbase.h"
 #include "math/matrix.h"
+#include "playermaterialbase.h"
 #include "render/uv.h"
 
 class PlayerMaterial : public PlayerMaterialBase
 {
 public:
-   PlayerMaterial(SceneGraph *scene);
-   PlayerMaterial(SceneGraph *scene, const char *colormap, const char *envmap, const char *specmap, const char *aomap=0);
+   PlayerMaterial(SceneGraph* scene);
+   PlayerMaterial(SceneGraph* scene, const char* colormap, const char* envmap, const char* specmap, const char* aomap = 0);
    virtual ~PlayerMaterial();
 
    void exportOBJ(Stream* stream, int& indexOffset);
 
-   void load(Stream *stream);
+   void load(Stream* stream);
    virtual void renderDiffuse();
 
    //! colormap setter
@@ -39,4 +39,3 @@ private:
    int mParamFlash;
    int mParamFade;
 };
-

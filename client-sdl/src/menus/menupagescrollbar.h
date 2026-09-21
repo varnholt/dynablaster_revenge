@@ -2,48 +2,41 @@
 
 #include "menupageitem.h"
 
-
 class MenuPageScrollbar : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageScrollbar();
 
-       MenuPageScrollbar();
+   virtual bool isGrabbingMouseEvents();
 
-       virtual bool isGrabbingMouseEvents();
+   virtual void mousePressed(int x, int y);
 
-       virtual void mousePressed(int x, int y);
+   virtual void mouseMoved(int x, int y);
 
-       virtual void mouseMoved(int x, int y);
+   virtual void mouseReleased();
 
-       virtual void mouseReleased();
+   void setHeight(int);
 
-       void setHeight(int);
+   void setTop(int);
 
-       void setTop(int);
+public slots:
 
+   void updateFromAnimation(float);
 
-   public slots:
+signals:
 
-       void updateFromAnimation(float);
+   void scrollToPercentage(float percent);
 
+protected:
+   int mPosition;
 
-   signals:
+   int mHeight;
 
-       void scrollToPercentage(float percent);
+   int mTop;
 
+   float mOffset;
 
-   protected:
-
-       int mPosition;
-
-       int mHeight;
-
-       int mTop;
-
-       float mOffset;
-
-       int mRelativeToY;
-
+   int mRelativeToY;
 };

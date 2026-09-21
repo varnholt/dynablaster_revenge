@@ -1,20 +1,20 @@
 #pragma once
 
-#include "weight.h"
-#include "tools/streamable.h"
 #include "math/matrix.h"
-#include "tools/list.h"
 #include "tools/array.h"
+#include "tools/list.h"
+#include "tools/streamable.h"
+#include "weight.h"
 
 class Bone : public Streamable
 {
 public:
    Bone();
    Bone(const Bone& bone);
-   Bone(const Bone& bone, Array<int> *remap);
+   Bone(const Bone& bone, Array<int>* remap);
    virtual ~Bone();
 
-   Bone& operator = (const Bone& bone);
+   Bone& operator=(const Bone& bone);
 
    int id() const;
    void setId(int id);
@@ -31,4 +31,3 @@ private:
    Matrix mInitTM;
    List<Weight> mWeights;
 };
-

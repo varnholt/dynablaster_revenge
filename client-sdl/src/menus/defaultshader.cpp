@@ -8,16 +8,13 @@ int gAlphaParam = -1;
 
 unsigned int gBlitShader = 0;
 int gBlitAlphaParam = -1;
-}
+}  // namespace
 
 unsigned int getDefaultMenuShader()
 {
    if (gShader == 0)
    {
-      gShader = activeDevice->loadShader(
-         "data/shaders/texalpha-vert.glsl",
-         "data/shaders/texalpha-frag.glsl"
-      );
+      gShader = activeDevice->loadShader("data/shaders/texalpha-vert.glsl", "data/shaders/texalpha-frag.glsl");
       gAlphaParam = activeDevice->getParameterIndex("alpha");
    }
 
@@ -34,10 +31,7 @@ unsigned int getFramebufferBlitShader()
 {
    if (gBlitShader == 0)
    {
-      gBlitShader = activeDevice->loadShader(
-         "data/shaders/texalphaignore-vert.glsl",
-         "data/shaders/texalphaignore-frag.glsl"
-      );
+      gBlitShader = activeDevice->loadShader("data/shaders/texalphaignore-vert.glsl", "data/shaders/texalphaignore-frag.glsl");
       gBlitAlphaParam = activeDevice->getParameterIndex("alpha");
    }
 

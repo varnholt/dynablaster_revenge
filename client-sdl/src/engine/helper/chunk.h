@@ -13,18 +13,18 @@ class Stream;
 class Chunk
 {
 public:
-   Chunk(Stream *stream);
+   Chunk(Stream* stream);
    ~Chunk();
-   void  skip();
-   int   id() const;
+   void skip();
+   int id() const;
    const char* name() const;
 
 private:
-  int    mID;
-  char   *mName;
-  int    mSize;
-  Stream *mStream;
-  int    mChunkPos;
+   int mID;
+   char* mName;
+   int mSize;
+   Stream* mStream;
+   int mChunkPos;
 };
 
 #endif

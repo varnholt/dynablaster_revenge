@@ -1,11 +1,11 @@
 #include "demofactory.h"
 
-#include "engine/materials/material.h"
-#include "engine/materials/texturematerial.h"
+#include "engine/materials/displacementmaterial.h"
+#include "engine/materials/environmentambientdiffusematerial.h"
 #include "engine/materials/environmentmaterial.h"
 #include "engine/materials/environmenttexturematerial.h"
-#include "engine/materials/environmentambientdiffusematerial.h"
-#include "engine/materials/displacementmaterial.h"
+#include "engine/materials/material.h"
+#include "engine/materials/texturematerial.h"
 
 Material* DemoMaterialFactory::createMaterial(SceneGraph* scene, int materialId) const
 {

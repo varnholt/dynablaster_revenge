@@ -1,33 +1,42 @@
 #pragma once
 
+#include "image/psd.h"
 #include "material.h"
 #include "math/matrix.h"
 #include "render/uv.h"
-#include "image/psd.h"
 
 class Camera;
 
 class BlockMaterial : public Material
 {
 public:
-   struct Vertex {
+   struct Vertex
+   {
       Vector pos;
       Vector normal;
-      UV     uv;
+      UV uv;
    };
 
-   BlockMaterial(SceneGraph *scene);
-   BlockMaterial(SceneGraph *scene, const char *colormap, const char* diffusemap, const char* specmap, const char* shadowMap, Camera* shadowCam, bool ambient = true);
+   BlockMaterial(SceneGraph* scene);
+   BlockMaterial(
+      SceneGraph* scene,
+      const char* colormap,
+      const char* diffusemap,
+      const char* specmap,
+      const char* shadowMap,
+      Camera* shadowCam,
+      bool ambient = true
+   );
    ~BlockMaterial();
 
-   void update(float frame, Node **nodelist, const Matrix& cam);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   void update(float frame, Node** nodelist, const Matrix& cam);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
 
 private:
    void putImage(Image& target, int posX, int posY, const Image& source);
-   void putScanline(unsigned int *dst, unsigned int *src, int width);
+   void putScanline(unsigned int* dst, unsigned int* src, int width);
 
    void init();
    void begin();

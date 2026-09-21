@@ -1,50 +1,48 @@
 #include "spherefragmentsdrawable.h"
 
 // engine
+#include "framework/framebuffer.h"
+#include "gldevice.h"
+#include "math/matrix.h"
+#include "math/vector.h"
+#include "math/vector4.h"
 #include "nodes/mesh.h"
 #include "nodes/node.h"
 #include "nodes/scenegraph.h"
 #include "render/geometry.h"
-#include "gldevice.h"
-#include "framework/framebuffer.h"
 #include "tools/filestream.h"
 #include "tools/string.h"
-#include "math/vector.h"
-#include "math/matrix.h"
-#include "math/vector4.h"
 
 // spherefragments
-#include "bombsocketgeometryvbo.h"
-#include "bombfuzegeometryvbo.h"
-#include "spheregeometryvbo.h"
-#include "spherefragmentcontainer.h"
-#include "duplicatealpha.h"
 #include "blendquad.h"
+#include "bombfuzegeometryvbo.h"
+#include "bombsocketgeometryvbo.h"
+#include "duplicatealpha.h"
+#include "spherefragmentcontainer.h"
+#include "spheregeometryvbo.h"
 
 // postproduction
 #include "postproduction/blurfilter.h"
 
-
 SphereFragmentsDrawable::SphereFragmentsDrawable(RenderDevice* dev, bool visible)
-  : QObject(),
-    Drawable(dev, visible),
-    mSceneGraphEarth(0),
-    mSceneGraphBomb(0),
-    mBomb(0),
-    mFuze(0),
-    mSocket(0),
-    mFragmentContainer(0),
-    mBlur(0),
-    mAlphaDuplicate(0),
-    mBlendQuad(0),
-    mAlpha(1.0f),
-    mScale(0.65f),
-    mEarthFb(0),
-    mAuraFb(0),
-    mBombFb(0)
+    : QObject(),
+      Drawable(dev, visible),
+      mSceneGraphEarth(0),
+      mSceneGraphBomb(0),
+      mBomb(0),
+      mFuze(0),
+      mSocket(0),
+      mFragmentContainer(0),
+      mBlur(0),
+      mAlphaDuplicate(0),
+      mBlendQuad(0),
+      mAlpha(1.0f),
+      mScale(0.65f),
+      mEarthFb(0),
+      mAuraFb(0),
+      mBombFb(0)
 {
 }
-
 
 SphereFragmentsDrawable::~SphereFragmentsDrawable()
 {
@@ -62,7 +60,6 @@ SphereFragmentsDrawable::~SphereFragmentsDrawable()
    delete mBombFb;
 }
 
-
 void SphereFragmentsDrawable::initializeGL()
 {
    FileStream::addPath("data/shaders");
@@ -70,8 +67,8 @@ void SphereFragmentsDrawable::initializeGL()
    FileStream::addPath("data/effects/spherefragments/meshes");
    FileStream::addPath("data/effects/spherefragments/images");
 
-   mAlphaDuplicate= new DuplicateAlpha();
-   mBlendQuad= new BlendQuad();
+   mAlphaDuplicate = new DuplicateAlpha();
+   mBlendQuad = new BlendQuad();
 
    // earth
    mSceneGraphEarth = new SceneGraph();
@@ -113,23 +110,21 @@ void SphereFragmentsDrawable::initializeGL()
    mBlur = new BlurFilter();
    mBlur->init();
 
-   mFragmentContainer = new SphereFragmentContainer( mSceneGraphEarth );
+   mFragmentContainer = new SphereFragmentContainer(mSceneGraphEarth);
 
    FileStream::removePath("data/effects/spherefragments/images");
 }
 
-
 void SphereFragmentsDrawable::projectionSetup()
 {
-    float aspect = 9.0f/16.0f;
+   float aspect = 9.0f / 16.0f;
 
-    Matrix proj= Matrix::scale(mScale, mScale, mScale);
-    proj= proj * Matrix::position(-mCamera);
-    proj= proj * Matrix::frustum(-1.0f, 1.0f, -aspect, aspect, 1.0f, 500.0f);
+   Matrix proj = Matrix::scale(mScale, mScale, mScale);
+   proj = proj * Matrix::position(-mCamera);
+   proj = proj * Matrix::frustum(-1.0f, 1.0f, -aspect, aspect, 1.0f, 500.0f);
 
-    static_cast<GLDevice*>(activeDevice)->setProjectionMatrix(proj);
+   static_cast<GLDevice*>(activeDevice)->setProjectionMatrix(proj);
 }
-
 
 void SphereFragmentsDrawable::paintGL()
 {
@@ -139,17 +134,17 @@ void SphereFragmentsDrawable::paintGL()
    const int height = activeDevice->getHeight();
 
    if (!mEarthFb)
-      mEarthFb= new FrameBuffer(width, height);
+      mEarthFb = new FrameBuffer(width, height);
    else
       mEarthFb->setResolution(width, height);
 
    if (!mAuraFb)
-      mAuraFb= new FrameBuffer(width, height);
+      mAuraFb = new FrameBuffer(width, height);
    else
       mAuraFb->setResolution(width, height);
 
    if (!mBombFb)
-      mBombFb= new FrameBuffer(width, height);
+      mBombFb = new FrameBuffer(width, height);
    else
       mBombFb->setResolution(width, height);
 
@@ -164,28 +159,23 @@ void SphereFragmentsDrawable::paintGL()
    mDevice->clear();
 
    // put bomb into zbuffer to black backside fragments
-   mBomb->draw( Vector4(1,1,1,0) );
+   mBomb->draw(Vector4(1, 1, 1, 0));
    mSocket->draw(Vector4(1, 1, 1, 1));
 
-   mFragmentContainer->drawFragments( mCamera );
+   mFragmentContainer->drawFragments(mCamera);
    mEarthFb->unbind();
-
 
    // atmosphere pass
 
    // create white mask from alpha channel
    mAuraFb->bind();
    mDevice->clear();
-   mAlphaDuplicate->process(
-      mEarthFb->texture(),
-      Vector4(1.0f, 1.0f, 1.0f, 1.0f)
-   );
+   mAlphaDuplicate->process(mEarthFb->texture(), Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
    // blur white mask
    mBlur->setRadius(30.0f * mAuraFb->width() / 1920.0f);
    mBlur->process(mAuraFb->texture());
    mAuraFb->unbind();
-
 
    // lava glow pass
    // draw the bomb...
@@ -203,7 +193,6 @@ void SphereFragmentsDrawable::paintGL()
    mBlur->process(mBombFb->texture());
    mBombFb->unbind();
 
-
    // lighting pass 2
 
    // draw bomb into fragment fb
@@ -217,7 +206,6 @@ void SphereFragmentsDrawable::paintGL()
 
    FrameBuffer::pop();
 
-
    // layer composition pass
 
    glDisable(GL_DEPTH_TEST);
@@ -226,33 +214,18 @@ void SphereFragmentsDrawable::paintGL()
    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
    Vector4 colorAtmosphere = Vector4(0.7f, 0.9f, 1.5f, 0.5f) * mAlpha;
-   Vector4 colorFragments  = Vector4(1.0f, 1.0f, 1.0f, 1.0f) * mAlpha;
-   Vector4 colorGlow       = Vector4(4.0f, 4.0f, 4.0f, 1.0f) * mAlpha;
+   Vector4 colorFragments = Vector4(1.0f, 1.0f, 1.0f, 1.0f) * mAlpha;
+   Vector4 colorGlow = Vector4(4.0f, 4.0f, 4.0f, 1.0f) * mAlpha;
 
    // atmosphere
-   mBlendQuad->process(
-      mAuraFb->texture(),
-      colorAtmosphere,
-      1.0f,
-      mPositionOffset
-   );
+   mBlendQuad->process(mAuraFb->texture(), colorAtmosphere, 1.0f, mPositionOffset);
 
    // fragments and inner sphere
-   mBlendQuad->process(
-      mEarthFb->texture(),
-      colorFragments,
-      1.0f,
-      mPositionOffset
-   );
+   mBlendQuad->process(mEarthFb->texture(), colorFragments, 1.0f, mPositionOffset);
 
    // add glow
    glBlendFunc(GL_ONE, GL_ONE);
-   mBlendQuad->process(
-      mBombFb->texture(),
-      colorGlow,
-      1.0f,
-      mPositionOffset
-   );
+   mBlendQuad->process(mBombFb->texture(), colorGlow, 1.0f, mPositionOffset);
 
    // cleanup
    glDisable(GL_BLEND);
@@ -260,29 +233,27 @@ void SphereFragmentsDrawable::paintGL()
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-
 void SphereFragmentsDrawable::drawBombParts()
 {
    mSocket->draw(Vector4(1, 1, 1, 1));
    mFuze->draw(Vector4(1, 1, 1, 1));
 }
 
-
 void SphereFragmentsDrawable::removeFragments()
 {
-   for (int i=0; i<mSceneGraphBomb->getChildCount(); i++)
+   for (int i = 0; i < mSceneGraphBomb->getChildCount(); i++)
    {
-      Node* node= mSceneGraphBomb->getChild(i);
-      String name= node->name();
-      int index= name.indexOf("_");
-      if (index>=0)
+      Node* node = mSceneGraphBomb->getChild(i);
+      String name = node->name();
+      int index = name.indexOf("_");
+      if (index >= 0)
       {
-         name= name.mid(0, index);
+         name = name.mid(0, index);
 
-         Node* frag= mSceneGraphEarth->getChild(name);
-         if (frag && frag->id()==Node::idMesh)
+         Node* frag = mSceneGraphEarth->getChild(name);
+         if (frag && frag->id() == Node::idMesh)
          {
-            Mesh* mesh= (Mesh*)frag;
+            Mesh* mesh = (Mesh*)frag;
             mesh->setVisible(false);
          }
       }

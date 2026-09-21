@@ -5,4 +5,4 @@
 #include "key.h"
 #include "math/vector.h"
 
-typedef Key< Vector > PosKey;
+typedef Key<Vector> PosKey;

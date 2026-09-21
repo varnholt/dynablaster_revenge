@@ -21,18 +21,9 @@
 #include "menupageslideritem.h"
 #include "menupagetextedit.h"
 
-
-
-MenuPage::MenuPage(QObject* parent)
-   : QObject(parent),
-     PSD(),
-     mSettings(0),
-     mActiveItem(0),
-     mAnimation(0),
-     mActive(false)
+MenuPage::MenuPage(QObject* parent) : QObject(parent), PSD(), mSettings(0), mActiveItem(0), mAnimation(0), mActive(false)
 {
 }
-
 
 MenuPage::~MenuPage()
 {
@@ -43,15 +34,10 @@ MenuPage::~MenuPage()
    mRenderLayers.clear();
 }
 
-
 void MenuPage::initialize()
 {
    // init settings
-   mSettings =
-      new QSettings(
-         "data/menus/menu.ini",
-         QSettings::IniFormat
-      );
+   mSettings = new QSettings("data/menus/menu.ini", QSettings::IniFormat);
 
    // initialize layer information
    initializeLayers();
@@ -63,7 +49,6 @@ void MenuPage::initialize()
    initializeTabIndices();
 }
 
-
 void MenuPage::initializeLayers()
 {
    load(qPrintable(mFilename));
@@ -73,111 +58,103 @@ void MenuPage::initializeLayers()
    {
       PSD::Layer* layer = getLayer(l);
 
-      QString layerName= layer->getName();
+      QString layerName = layer->getName();
       PSDLayer* renderLayer = 0;
       if (layerName.startsWith("background"))
-         renderLayer= new PSDLayer( layer, -1.0f, false );
+         renderLayer = new PSDLayer(layer, -1.0f, false);
       else
-         renderLayer= new PSDLayer( layer, -1.0f );
+         renderLayer = new PSDLayer(layer, -1.0f);
 
       mRenderLayers << renderLayer;
    }
 }
 
-
-MenuPageItem *MenuPage::processLabel(PSDLayer* layer, QString layerName)
+MenuPageItem* MenuPage::processLabel(PSDLayer* layer, QString layerName)
 {
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageLabelItem();
-    mPageItems << pageItem;
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageLabelItem();
+   mPageItems << pageItem;
 
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
 
-    QString fontNameKey = QString("%1_font_name").arg(layerName);
-    QString fontXOffsetKey = QString("%1_font_x_offset").arg(layerName);
-    QString fontYOffsetKey = QString("%1_font_y_offset").arg(layerName);
-    QString maxCharsKey = QString("%1_field_width").arg(layerName);
-    QString scaleKey = QString("%1_scale").arg(layerName);
-    QString colorKey = QString("%1_color").arg(layerName);
-    QString alphaKey = QString("%1_alpha").arg(layerName);
+   QString fontNameKey = QString("%1_font_name").arg(layerName);
+   QString fontXOffsetKey = QString("%1_font_x_offset").arg(layerName);
+   QString fontYOffsetKey = QString("%1_font_y_offset").arg(layerName);
+   QString maxCharsKey = QString("%1_field_width").arg(layerName);
+   QString scaleKey = QString("%1_scale").arg(layerName);
+   QString colorKey = QString("%1_color").arg(layerName);
+   QString alphaKey = QString("%1_alpha").arg(layerName);
 
-    QString fontName = mSettings->value(fontNameKey, "default").toString();
-    int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
-    int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
-    int maxChars = mSettings->value(maxCharsKey).toInt();
-    float scale = mSettings->value(scaleKey).toFloat();
-    QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
-    int alpha = mSettings->value(alphaKey, 255).toInt();
+   QString fontName = mSettings->value(fontNameKey, "default").toString();
+   int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
+   int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
+   int maxChars = mSettings->value(maxCharsKey).toInt();
+   float scale = mSettings->value(scaleKey).toFloat();
+   QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
+   int alpha = mSettings->value(alphaKey, 255).toInt();
 
-    // set label properties
-    ((MenuPageLabelItem*)pageItem)->setFontName(fontName);
-    ((MenuPageLabelItem*)pageItem)->setFontXOffset(fontXOffset);
-    ((MenuPageLabelItem*)pageItem)->setFontYOffset(fontYOffset);
-    ((MenuPageLabelItem*)pageItem)->setMaxChars(maxChars);
-    ((MenuPageLabelItem*)pageItem)->setScale(scale);
-    ((MenuPageLabelItem*)pageItem)->setColor(color);
-    ((MenuPageLabelItem*)pageItem)->setAlpha(alpha);
+   // set label properties
+   ((MenuPageLabelItem*)pageItem)->setFontName(fontName);
+   ((MenuPageLabelItem*)pageItem)->setFontXOffset(fontXOffset);
+   ((MenuPageLabelItem*)pageItem)->setFontYOffset(fontYOffset);
+   ((MenuPageLabelItem*)pageItem)->setMaxChars(maxChars);
+   ((MenuPageLabelItem*)pageItem)->setScale(scale);
+   ((MenuPageLabelItem*)pageItem)->setColor(color);
+   ((MenuPageLabelItem*)pageItem)->setAlpha(alpha);
 
-    // store page item without postfix names
-    mPageItemNameMap.insert(layerName, pageItem);
+   // store page item without postfix names
+   mPageItemNameMap.insert(layerName, pageItem);
 
-    return pageItem;
+   return pageItem;
 }
 
-MenuPageItem *MenuPage::processLineEdit(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processLineEdit(PSDLayer* layer, QString layerName)
 {
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageTextEditItem();
-    mPageItems << pageItem;
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageTextEditItem();
+   mPageItems << pageItem;
 
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
 
-    QString fontNameKey = QString("%1_font_name").arg(layerName);
-    QString fontXOffsetKey = QString("%1_font_x_offset").arg(layerName);
-    QString fontYOffsetKey = QString("%1_font_y_offset").arg(layerName);
-    QString fieldWidthKey = QString("%1_field_width").arg(layerName);
-    QString fieldMaxLength = QString("%1_max_length").arg(layerName);
-    QString scaleKey = QString("%1_scale").arg(layerName);
-    QString colorKey = QString("%1_color").arg(layerName);
-    QString alphaKey = QString("%1_alpha").arg(layerName);
+   QString fontNameKey = QString("%1_font_name").arg(layerName);
+   QString fontXOffsetKey = QString("%1_font_x_offset").arg(layerName);
+   QString fontYOffsetKey = QString("%1_font_y_offset").arg(layerName);
+   QString fieldWidthKey = QString("%1_field_width").arg(layerName);
+   QString fieldMaxLength = QString("%1_max_length").arg(layerName);
+   QString scaleKey = QString("%1_scale").arg(layerName);
+   QString colorKey = QString("%1_color").arg(layerName);
+   QString alphaKey = QString("%1_alpha").arg(layerName);
 
-    QString fontName = mSettings->value(fontNameKey, "default").toString();
-    int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
-    int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
-    int fieldWidth = mSettings->value(fieldWidthKey).toInt();
-    int maxLength = mSettings->value(fieldMaxLength).toInt();
-    float scale = mSettings->value(scaleKey).toFloat();
-    QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
-    int alpha = mSettings->value(alphaKey, 255).toInt();
+   QString fontName = mSettings->value(fontNameKey, "default").toString();
+   int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
+   int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
+   int fieldWidth = mSettings->value(fieldWidthKey).toInt();
+   int maxLength = mSettings->value(fieldMaxLength).toInt();
+   float scale = mSettings->value(scaleKey).toFloat();
+   QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
+   int alpha = mSettings->value(alphaKey, 255).toInt();
 
-    // set lineedit properties
-    ((MenuPageTextEditItem*)pageItem)->setFontName(fontName);
-    ((MenuPageTextEditItem*)pageItem)->setFontXOffset(fontXOffset);
-    ((MenuPageTextEditItem*)pageItem)->setFontYOffset(fontYOffset);
-    ((MenuPageTextEditItem*)pageItem)->setFieldWidth(fieldWidth);
-    ((MenuPageTextEditItem*)pageItem)->setMaxLength(maxLength);
-    ((MenuPageTextEditItem*)pageItem)->setScale(scale);
-    ((MenuPageTextEditItem*)pageItem)->setColor(color);
-    ((MenuPageTextEditItem*)pageItem)->setAlpha(alpha);
+   // set lineedit properties
+   ((MenuPageTextEditItem*)pageItem)->setFontName(fontName);
+   ((MenuPageTextEditItem*)pageItem)->setFontXOffset(fontXOffset);
+   ((MenuPageTextEditItem*)pageItem)->setFontYOffset(fontYOffset);
+   ((MenuPageTextEditItem*)pageItem)->setFieldWidth(fieldWidth);
+   ((MenuPageTextEditItem*)pageItem)->setMaxLength(maxLength);
+   ((MenuPageTextEditItem*)pageItem)->setScale(scale);
+   ((MenuPageTextEditItem*)pageItem)->setColor(color);
+   ((MenuPageTextEditItem*)pageItem)->setAlpha(alpha);
 
-    // store page item without postfix names
-    mPageItemNameMap.insert(layerName, pageItem);
+   // store page item without postfix names
+   mPageItemNameMap.insert(layerName, pageItem);
 
-    return pageItem;
+   return pageItem;
 }
 
-
-MenuPageItem* MenuPage::processBackground(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processBackground(PSDLayer* layer, QString layerName)
 {
    bool added = false;
    MenuPageItem* pageItem = 0;
@@ -212,180 +189,79 @@ MenuPageItem* MenuPage::processBackground(
       else
          color = MenuPageBackgroundItem::BackgroundColorBlue;
 
-      dynamic_cast<MenuPageBackgroundItem*>(pageItem)->addGradientLayer(
-         layer,
-         color
-      );
+      dynamic_cast<MenuPageBackgroundItem*>(pageItem)->addGradientLayer(layer, color);
    }
 
    return added ? pageItem : 0;
 }
 
-
-MenuPageItem* MenuPage::processTableMain(
-   PSDLayer* layer,
-   QString layerName
-)
-{
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageListItem();
-    mPageItems << pageItem;
-
-    QString baseName = layerName;
-    baseName.remove("_main");
-
-    // read lineedit properties
-    QString fontNameKey = QString("%1_font_name").arg(baseName);
-    QString fontXOffsetKey = QString("%1_font_x_offset").arg(baseName);
-    QString fontYOffsetKey = QString("%1_font_y_offset").arg(baseName);
-    QString fieldWidthKey = QString("%1_field_width").arg(baseName);
-    QString scaleKey = QString("%1_scale").arg(baseName);
-    QString rowHeightKey = QString("%1_row_height").arg(baseName);
-
-    QString fontName = mSettings->value(fontNameKey, "default").toString();
-    int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
-    int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
-    int fieldWidth = mSettings->value(fieldWidthKey).toInt();
-    float scale = mSettings->value(scaleKey).toFloat();
-    int rowHeight = mSettings->value(rowHeightKey).toInt();
-
-    // set lineedit properties
-    ((MenuPageListItem*)pageItem)->setFontName(fontName);
-    ((MenuPageListItem*)pageItem)->setFontXOffset(fontXOffset);
-    ((MenuPageListItem*)pageItem)->setFontYOffset(fontYOffset);
-    ((MenuPageListItem*)pageItem)->setFieldWidth(fieldWidth);
-    ((MenuPageListItem*)pageItem)->setScale(scale);
-    ((MenuPageListItem*)pageItem)->setRowHeight(rowHeight);
-
-    // store page item without postfix names
-    mPageItemNameMap.insert(layerName, pageItem);
-
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
-
-    return pageItem;
-}
-
-
-MenuPageItem* MenuPage::processTableScrollButtons(
-    PSDLayer* layer,
-    QString layerName
-)
-{
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageItem();
-    mPageItems << pageItem;
-
-    pageItem->setInteractive(true);
-
-    bool up = false;
-
-    if (layerName.contains("scroll_up"))
-    {
-       up = true;
-       pageItem->setAction("scroll_up");
-    }
-    else
-    {
-       pageItem->setAction("scroll_down");
-    }
-
-    QString baseLayer =
-       QString("table_%1_main")
-          .arg(layerName.split("_").at(1));
-
-    connect(
-       pageItem,
-       SIGNAL(action(QString)),
-       (MenuPageListItem*)mPageItemNameMap[baseLayer],
-       up
-          ? SLOT(scrollUp())
-          : SLOT(scrollDown())
-    );
-
-    connect(
-       pageItem,
-       SIGNAL(signalMouseReleased()),
-       (MenuPageListItem*)mPageItemNameMap[baseLayer],
-       SLOT(scrollStop())
-    );
-
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
-
-    // store page item without postfix names
-    mPageItemNameMap.insert(layerName, pageItem);
-
-    return pageItem;
-}
-
-
-MenuPageItem* MenuPage::processTableScrollBar(
-   PSDLayer* layer,
-   QString layerName
-)
-{
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageItem();
-    mPageItems << pageItem;
-
-    pageItem->setInteractive(true);
-
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
-
-    // store page item without postfix names
-    mPageItemNameMap.insert(layerName, pageItem);
-
-    return pageItem;
-}
-
-
-MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString layerName)
+MenuPageItem* MenuPage::processTableMain(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
-   pageItem = new MenuPageScrollbar();
+   pageItem = new MenuPageListItem();
+   mPageItems << pageItem;
+
+   QString baseName = layerName;
+   baseName.remove("_main");
+
+   // read lineedit properties
+   QString fontNameKey = QString("%1_font_name").arg(baseName);
+   QString fontXOffsetKey = QString("%1_font_x_offset").arg(baseName);
+   QString fontYOffsetKey = QString("%1_font_y_offset").arg(baseName);
+   QString fieldWidthKey = QString("%1_field_width").arg(baseName);
+   QString scaleKey = QString("%1_scale").arg(baseName);
+   QString rowHeightKey = QString("%1_row_height").arg(baseName);
+
+   QString fontName = mSettings->value(fontNameKey, "default").toString();
+   int fontXOffset = mSettings->value(fontXOffsetKey).toInt();
+   int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
+   int fieldWidth = mSettings->value(fieldWidthKey).toInt();
+   float scale = mSettings->value(scaleKey).toFloat();
+   int rowHeight = mSettings->value(rowHeightKey).toInt();
+
+   // set lineedit properties
+   ((MenuPageListItem*)pageItem)->setFontName(fontName);
+   ((MenuPageListItem*)pageItem)->setFontXOffset(fontXOffset);
+   ((MenuPageListItem*)pageItem)->setFontYOffset(fontYOffset);
+   ((MenuPageListItem*)pageItem)->setFieldWidth(fieldWidth);
+   ((MenuPageListItem*)pageItem)->setScale(scale);
+   ((MenuPageListItem*)pageItem)->setRowHeight(rowHeight);
+
+   // store page item without postfix names
+   mPageItemNameMap.insert(layerName, pageItem);
+
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
+
+   return pageItem;
+}
+
+MenuPageItem* MenuPage::processTableScrollButtons(PSDLayer* layer, QString layerName)
+{
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageItem();
    mPageItems << pageItem;
 
    pageItem->setInteractive(true);
 
-   QString scrollAreaLayer =
-      QString("table_%1_scrollbar")
-         .arg(layerName.split("_").at(1));
+   bool up = false;
 
-   // connect slider to table
-   QString baseLayer =
-      QString("table_%1_main")
-         .arg(layerName.split("_").at(1));
-
-   if (!connect(
-      pageItem,
-      SIGNAL(scrollToPercentage(float)),
-      (MenuPageListItem*)mPageItemNameMap[baseLayer],
-      SLOT(scrollToPercentage(float))
-   )
-   )
+   if (layerName.contains("scroll_up"))
    {
-      qDebug(
-         "processTableScrollBarSlider: layer '%s' missing",
-         qPrintable(baseLayer)
-      );
+      up = true;
+      pageItem->setAction("scroll_up");
+   }
+   else
+   {
+      pageItem->setAction("scroll_down");
    }
 
-   MenuPageItem* scrollbar = mPageItemNameMap[scrollAreaLayer];
-   ((MenuPageScrollbar*)pageItem)->setTop(scrollbar->getCurrentLayer()->getTop());
-   ((MenuPageScrollbar*)pageItem)->setHeight(scrollbar->getCurrentLayer()->getHeight());
+   QString baseLayer = QString("table_%1_main").arg(layerName.split("_").at(1));
 
-   // connect table back to slider
-   connect(
-      (MenuPageListItem*)mPageItemNameMap[baseLayer],
-      SIGNAL(scrollAnimation(float)),
-      pageItem,
-      SLOT(updateFromAnimation(float))
-   );
+   connect(pageItem, SIGNAL(action(QString)), (MenuPageListItem*)mPageItemNameMap[baseLayer], up ? SLOT(scrollUp()) : SLOT(scrollDown()));
+
+   connect(pageItem, SIGNAL(signalMouseReleased()), (MenuPageListItem*)mPageItemNameMap[baseLayer], SLOT(scrollStop()));
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -397,44 +273,87 @@ MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString lay
    return pageItem;
 }
 
-
-MenuPageItem* MenuPage::processSliderScrollBarIcons(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processTableScrollBar(PSDLayer* layer, QString layerName)
 {
-    MenuPageItem* pageItem = 0;
-    pageItem = new MenuPageSliderItem();
-    mPageItems << pageItem;
-    mPageItemNameMap.insert(layerName, pageItem);
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageItem();
+   mPageItems << pageItem;
 
-    // both layers are the same
-    pageItem->setActiveLayer(layer);
-    pageItem->setInactiveLayer(layer);
+   pageItem->setInteractive(true);
 
-    for (int l = 0; l < getLayerCount(); l++)
-    {
-       PSD::Layer* tmpLayer = getLayer(l);
-       if (tmpLayer->getName() == QString("%1_bar").arg(layerName) )
-       {
-          ((MenuPageSliderItem*)pageItem)->setMinimum(
-             tmpLayer->getLeft()
-          );
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
 
-          ((MenuPageSliderItem*)pageItem)->setMaximum(
-             tmpLayer->getLeft()+tmpLayer->getWidth()
-          );
-       }
-    }
+   // store page item without postfix names
+   mPageItemNameMap.insert(layerName, pageItem);
 
-    return pageItem;
+   return pageItem;
 }
 
+MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString layerName)
+{
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageScrollbar();
+   mPageItems << pageItem;
 
-MenuPageItem* MenuPage::processScrollImage(
-   PSDLayer* layer,
-   QString layerName
-)
+   pageItem->setInteractive(true);
+
+   QString scrollAreaLayer = QString("table_%1_scrollbar").arg(layerName.split("_").at(1));
+
+   // connect slider to table
+   QString baseLayer = QString("table_%1_main").arg(layerName.split("_").at(1));
+
+   if (!connect(
+          pageItem, SIGNAL(scrollToPercentage(float)), (MenuPageListItem*)mPageItemNameMap[baseLayer], SLOT(scrollToPercentage(float))
+       ))
+   {
+      qDebug("processTableScrollBarSlider: layer '%s' missing", qPrintable(baseLayer));
+   }
+
+   MenuPageItem* scrollbar = mPageItemNameMap[scrollAreaLayer];
+   ((MenuPageScrollbar*)pageItem)->setTop(scrollbar->getCurrentLayer()->getTop());
+   ((MenuPageScrollbar*)pageItem)->setHeight(scrollbar->getCurrentLayer()->getHeight());
+
+   // connect table back to slider
+   connect((MenuPageListItem*)mPageItemNameMap[baseLayer], SIGNAL(scrollAnimation(float)), pageItem, SLOT(updateFromAnimation(float)));
+
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
+
+   // store page item without postfix names
+   mPageItemNameMap.insert(layerName, pageItem);
+
+   return pageItem;
+}
+
+MenuPageItem* MenuPage::processSliderScrollBarIcons(PSDLayer* layer, QString layerName)
+{
+   MenuPageItem* pageItem = 0;
+   pageItem = new MenuPageSliderItem();
+   mPageItems << pageItem;
+   mPageItemNameMap.insert(layerName, pageItem);
+
+   // both layers are the same
+   pageItem->setActiveLayer(layer);
+   pageItem->setInactiveLayer(layer);
+
+   for (int l = 0; l < getLayerCount(); l++)
+   {
+      PSD::Layer* tmpLayer = getLayer(l);
+      if (tmpLayer->getName() == QString("%1_bar").arg(layerName))
+      {
+         ((MenuPageSliderItem*)pageItem)->setMinimum(tmpLayer->getLeft());
+
+         ((MenuPageSliderItem*)pageItem)->setMaximum(tmpLayer->getLeft() + tmpLayer->getWidth());
+      }
+   }
+
+   return pageItem;
+}
+
+MenuPageItem* MenuPage::processScrollImage(PSDLayer* layer, QString layerName)
 {
    QString baseName;
    MenuPageScrollImageItem* sci = 0;
@@ -484,55 +403,47 @@ MenuPageItem* MenuPage::processScrollImage(
    return complete ? sci : 0;
 }
 
-
-MenuPageItem *MenuPage::processCheckBox(
-    PSDLayer* layer,
-    QString layerNameWithoutPostfix,
-    QString layerName
-)
+MenuPageItem* MenuPage::processCheckBox(PSDLayer* layer, QString layerNameWithoutPostfix, QString layerName)
 {
-    MenuPageItem* pageItem = 0;
-    layerNameWithoutPostfix = layerName;
-    layerNameWithoutPostfix.remove("_yes");
-    layerNameWithoutPostfix.remove("_no");
+   MenuPageItem* pageItem = 0;
+   layerNameWithoutPostfix = layerName;
+   layerNameWithoutPostfix.remove("_yes");
+   layerNameWithoutPostfix.remove("_no");
 
-    // find page item
-    if (!mPageItemNameMap.contains(layerNameWithoutPostfix))
-    {
-       // create a new page item
-       pageItem = new MenuPageCheckBoxItem();
+   // find page item
+   if (!mPageItemNameMap.contains(layerNameWithoutPostfix))
+   {
+      // create a new page item
+      pageItem = new MenuPageCheckBoxItem();
 
-       // store button action
-       pageItem->setAction(
-          mSettings->value(layerNameWithoutPostfix).toString()
-       );
+      // store button action
+      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString());
 
-       mPageItems << pageItem;
+      mPageItems << pageItem;
 
-       // store page item without postfix names
-       mPageItemNameMap.insert(layerNameWithoutPostfix, pageItem);
-    }
-    else
-    {
-       // use previously assigned pageitem
-       pageItem = mPageItemNameMap[layerNameWithoutPostfix];
-    }
+      // store page item without postfix names
+      mPageItemNameMap.insert(layerNameWithoutPostfix, pageItem);
+   }
+   else
+   {
+      // use previously assigned pageitem
+      pageItem = mPageItemNameMap[layerNameWithoutPostfix];
+   }
 
-    // store
-    if (layerName.endsWith("_no"))
-    {
-       dynamic_cast<MenuPageCheckBoxItem*>(pageItem)->setUncheckedLayer(layer);
-    }
-    else if (layerName.endsWith("_yes"))
-    {
-       dynamic_cast<MenuPageCheckBoxItem*>(pageItem)->setCheckedLayer(layer);
-    }
+   // store
+   if (layerName.endsWith("_no"))
+   {
+      dynamic_cast<MenuPageCheckBoxItem*>(pageItem)->setUncheckedLayer(layer);
+   }
+   else if (layerName.endsWith("_yes"))
+   {
+      dynamic_cast<MenuPageCheckBoxItem*>(pageItem)->setCheckedLayer(layer);
+   }
 
-    return pageItem;
+   return pageItem;
 }
 
-
-MenuPageItem *MenuPage::processPixmap(PSDLayer *layer, QString layerName)
+MenuPageItem* MenuPage::processPixmap(PSDLayer* layer, QString layerName)
 {
    MenuPagePixmapItem* pageItem = new MenuPagePixmapItem();
    mPageItems << pageItem;
@@ -547,11 +458,7 @@ MenuPageItem *MenuPage::processPixmap(PSDLayer *layer, QString layerName)
    return pageItem;
 }
 
-
-MenuPageItem* MenuPage::processDefaultItem(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processDefaultItem(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
 
@@ -571,12 +478,7 @@ MenuPageItem* MenuPage::processDefaultItem(
    return pageItem;
 }
 
-
-MenuPageItem* MenuPage::processButton(
-   PSDLayer* layer,
-   QString layerName,
-   QString layerNameWithoutPostfix
-)
+MenuPageItem* MenuPage::processButton(PSDLayer* layer, QString layerName, QString layerNameWithoutPostfix)
 {
    MenuPageItem* pageItem = 0;
    layerNameWithoutPostfix = layerName;
@@ -590,16 +492,9 @@ MenuPageItem* MenuPage::processButton(
       pageItem = new MenuPageButtonItem();
 
       // store button action
-      pageItem->setAction(
-         mSettings->value(layerNameWithoutPostfix).toString()
-      );
+      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString());
 
-      connect(
-         pageItem,
-         SIGNAL(action(QString)),
-         this,
-         SLOT(actionRequestFromItem(QString))
-      );
+      connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
       mPageItems << pageItem;
 
@@ -626,11 +521,7 @@ MenuPageItem* MenuPage::processButton(
    return pageItem;
 }
 
-
-MenuPageItem *MenuPage::processComboBox(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
    QStringList items = layerName.split("_");
@@ -740,16 +631,9 @@ MenuPageItem *MenuPage::processComboBox(
          pageItem = new MenuPageButtonItem();
 
          // store button action
-         pageItem->setAction(
-            mSettings->value(baseName).toString()
-         );
+         pageItem->setAction(mSettings->value(baseName).toString());
 
-         connect(
-            pageItem,
-            SIGNAL(action(QString)),
-            this,
-            SLOT(actionRequestFromItem(QString))
-         );
+         connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
          mPageItems << pageItem;
 
@@ -815,11 +699,7 @@ MenuPageItem *MenuPage::processComboBox(
    return pageItem;
 }
 
-
-MenuPageItem *MenuPage::processEditableComboBox(
-   PSDLayer* layer,
-   QString layerName
-)
+MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
    QStringList items = layerName.split("_");
@@ -929,16 +809,9 @@ MenuPageItem *MenuPage::processEditableComboBox(
          pageItem = new MenuPageButtonItem();
 
          // store button action
-         pageItem->setAction(
-            mSettings->value(baseName).toString()
-         );
+         pageItem->setAction(mSettings->value(baseName).toString());
 
-         connect(
-            pageItem,
-            SIGNAL(action(QString)),
-            this,
-            SLOT(actionRequestFromItem(QString))
-         );
+         connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
          mPageItems << pageItem;
 
@@ -1016,7 +889,6 @@ MenuPageItem *MenuPage::processEditableComboBox(
    return pageItem;
 }
 
-
 void MenuPage::initializePageItems()
 {
    // start reading settings
@@ -1028,7 +900,7 @@ void MenuPage::initializePageItems()
 
    for (int l = 0; l < getLayerCount(); l++)
    {
-      PSDLayer* layer= mRenderLayers[l];
+      PSDLayer* layer = mRenderLayers[l];
       layerName = QString(getLayer(l)->getName()).trimmed();
       layerNameWithoutPostfix.clear();
 
@@ -1084,50 +956,31 @@ void MenuPage::initializePageItems()
          pageItem = processPixmap(layer, layerName);
       }
 
-      else if (
-            layerName.startsWith("table_")
-         && layerName.endsWith("_main")
-      )
+      else if (layerName.startsWith("table_") && layerName.endsWith("_main"))
       {
          // create a new page item
          pageItem = processTableMain(layer, layerName);
       }
 
-      else if (
-            layerName.startsWith("table_")
-         && (
-               layerName.contains("_scroll_up")
-            || layerName.contains("_scroll_down")
-         )
-      )
+      else if (layerName.startsWith("table_") && (layerName.contains("_scroll_up") || layerName.contains("_scroll_down")))
       {
          // create a new page item
          pageItem = processTableScrollButtons(layer, layerName);
       }
 
-      else if (
-            layerName.startsWith("table_")
-         && layerName.endsWith("_scrollbar")
-      )
+      else if (layerName.startsWith("table_") && layerName.endsWith("_scrollbar"))
       {
          // create a new page item
          pageItem = processTableScrollBar(layer, layerName);
       }
 
-      else if (
-            layerName.startsWith("table_")
-         && layerName.endsWith("_scroll_slider")
-      )
+      else if (layerName.startsWith("table_") && layerName.endsWith("_scroll_slider"))
       {
          // create a new page item
          pageItem = processTableScrollBarSlider(layer, layerName);
       }
 
-      else if (
-             layerName.startsWith("slider_")
-         &&! layerName.endsWith("_bar")
-         &&! layerName.endsWith("_icons")
-      )
+      else if (layerName.startsWith("slider_") && !layerName.endsWith("_bar") && !layerName.endsWith("_icons"))
       {
          // create new slider
          pageItem = processSliderScrollBarIcons(layer, layerName);
@@ -1162,7 +1015,6 @@ void MenuPage::initializePageItems()
    mSettings->endGroup();
 }
 
-
 void MenuPage::initializeTabIndices()
 {
    mSettings->beginGroup(mTitle);
@@ -1184,7 +1036,6 @@ void MenuPage::initializeTabIndices()
 
    mSettings->endGroup();
 }
-
 
 void MenuPage::tabPressed()
 {
@@ -1225,9 +1076,7 @@ void MenuPage::tabPressed()
 
    if (nextFocusItem)
    {
-      if (
-             mActiveItem
-          && mActiveItem != nextFocusItem)
+      if (mActiveItem && mActiveItem != nextFocusItem)
       {
          mActiveItem->deactivated();
          mActiveItem = nextFocusItem;
@@ -1236,18 +1085,15 @@ void MenuPage::tabPressed()
    }
 }
 
-
-MenuPageItem *MenuPage::getActiveItem() const
+MenuPageItem* MenuPage::getActiveItem() const
 {
    return mActiveItem;
 }
 
-
-void MenuPage::setActiveItem(MenuPageItem *value)
+void MenuPage::setActiveItem(MenuPageItem* value)
 {
    mActiveItem = value;
 }
-
 
 QList<MenuPageItem*> MenuPage::getItemsAt(int x, int y) const
 {
@@ -1255,21 +1101,14 @@ QList<MenuPageItem*> MenuPage::getItemsAt(int x, int y) const
    MenuPageItem* itemAtPos = 0;
    PSD::Layer* layer = 0;
 
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
-      if (
-            item
-         && item->isInteractive()
-      )
+      if (item && item->isInteractive())
       {
          layer = item->getCurrentLayer();
 
-         if (
-               x > layer->getLeft()
-            && x < layer->getLeft() + layer->getWidth()
-            && y > layer->getTop()
-            && y < layer->getTop() + layer->getHeight()
-         )
+         if (x > layer->getLeft() && x < layer->getLeft() + layer->getWidth() && y > layer->getTop() &&
+             y < layer->getTop() + layer->getHeight())
          {
             itemAtPos = item;
             items.push_back(itemAtPos);
@@ -1280,12 +1119,11 @@ QList<MenuPageItem*> MenuPage::getItemsAt(int x, int y) const
    return items;
 }
 
-
-MenuPageItem *MenuPage::getFocussedItem() const
+MenuPageItem* MenuPage::getFocussedItem() const
 {
    MenuPageItem* focussedItem = 0;
 
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
       if (item->isFocussed())
       {
@@ -1297,27 +1135,19 @@ MenuPageItem *MenuPage::getFocussedItem() const
    return focussedItem;
 }
 
-
 void MenuPage::mouseMoved(int x, int y)
 {
    // check for layer collisions
    PSD::Layer* layer = 0;
 
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
-      if (
-            item
-         && item->isInteractive()
-      )
+      if (item && item->isInteractive())
       {
          layer = item->getCurrentLayer();
 
-         if (
-               x > layer->getLeft()
-            && x < layer->getLeft() + layer->getWidth()
-            && y > layer->getTop()
-            && y < layer->getTop() + layer->getHeight()
-         )
+         if (x > layer->getLeft() && x < layer->getLeft() + layer->getWidth() && y > layer->getTop() &&
+             y < layer->getTop() + layer->getHeight())
          {
             if (!item->isFocussed())
             {
@@ -1352,7 +1182,6 @@ void MenuPage::mouseMoved(int x, int y)
    }
 }
 
-
 void MenuPage::mousePressed(int x, int y)
 {
    PSD::Layer* layer = 0;
@@ -1360,21 +1189,14 @@ void MenuPage::mousePressed(int x, int y)
 
    QList<MenuPageItem*> clickedItems;
 
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
-      if (
-            item
-         && item->isInteractive()
-      )
+      if (item && item->isInteractive())
       {
          layer = item->getCurrentLayer();
 
-         if (
-               x > layer->getLeft()
-            && x < layer->getLeft() + layer->getWidth()
-            && y > layer->getTop()
-            && y < layer->getTop() + layer->getHeight()
-         )
+         if (x > layer->getLeft() && x < layer->getLeft() + layer->getWidth() && y > layer->getTop() &&
+             y < layer->getTop() + layer->getHeight())
          {
             clickedItems << item;
          }
@@ -1397,10 +1219,7 @@ void MenuPage::mousePressed(int x, int y)
 
       if (item->isActionRequestOnClickEnabled())
       {
-         emit actionRequest(
-            mFilename,
-            layer->getName()
-         );
+         emit actionRequest(mFilename, layer->getName());
       }
 
       item->activated();
@@ -1426,8 +1245,7 @@ void MenuPage::mousePressed(int x, int y)
    }
 }
 
-
-void MenuPage::paste(const QString &text)
+void MenuPage::paste(const QString& text)
 {
    if (mActiveItem)
    {
@@ -1435,53 +1253,43 @@ void MenuPage::paste(const QString &text)
    }
 }
 
-
 void MenuPage::mouseReleased()
 {
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
-      if (
-            item
-         && item->isInteractive()
-      )
+      if (item && item->isInteractive())
       {
          item->mouseReleased();
       }
    }
 }
 
-
 void MenuPage::setTitle(const QString& title)
 {
    mTitle = title;
 }
-
 
 void MenuPage::setFilename(const QString& filename)
 {
    mFilename = filename;
 }
 
-
 QList<MenuPageItem*>* MenuPage::getPageItems()
 {
    return &mPageItems;
 }
 
-
 MenuPageItem* MenuPage::getPageItem(const QString& layerName) const
 {
    MenuPageItem* item = 0;
 
-   QMap<QString, MenuPageItem*>::const_iterator it =
-      mPageItemNameMap.find(layerName);
+   QMap<QString, MenuPageItem*>::const_iterator it = mPageItemNameMap.find(layerName);
 
    if (it != mPageItemNameMap.end())
       item = it.value();
 
    return item;
 }
-
 
 void MenuPage::keyPressed(int key, const QString& text)
 {
@@ -1498,86 +1306,67 @@ void MenuPage::keyPressed(int key, const QString& text)
 
          if (key == Qt::Key_Return || key == Qt::Key_Enter)
          {
-            emit actionRequest(
-               mFilename,
-               mActiveItem->getCurrentLayer()->getName()
-            );
+            emit actionRequest(mFilename, mActiveItem->getCurrentLayer()->getName());
          }
 
          // in any case notify workflow a key was pressed
-         emit actionKeyPressed(
-            mFilename,
-            mActiveItem->getCurrentLayer()->getName(),
-            key
-         );
+         emit actionKeyPressed(mFilename, mActiveItem->getCurrentLayer()->getName(), key);
       }
    }
 }
-
 
 void MenuPage::setActive(bool active)
 {
    mActive = active;
 }
 
-
 bool MenuPage::isActive()
 {
    return mActive;
 }
-
 
 QString MenuPage::getFilename() const
 {
    return mFilename;
 }
 
-
 void MenuPage::setAnimation(MenuPageAnimation* animation)
 {
    mAnimation = animation;
 }
-
 
 MenuPageAnimation* MenuPage::getAnimation()
 {
    return mAnimation;
 }
 
-
 void MenuPage::deactivate()
 {
    setActive(false);
 }
-
 
 void MenuPage::resetAnimation()
 {
    mAnimation = 0;
 }
 
-
 void MenuPage::unFocusAllItems()
 {
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
       item->setFocus(false);
    }
 }
 
-
 void MenuPage::render()
 {
-   foreach(MenuPageItem* item, mPageItems)
+   foreach (MenuPageItem* item, mPageItems)
    {
       item->draw();
    }
 }
 
-
-void MenuPage::actionRequestFromItem(
-   const QString& request
-)
+void MenuPage::actionRequestFromItem(const QString& request)
 {
    emit actionRequest(mFilename, request);
 }

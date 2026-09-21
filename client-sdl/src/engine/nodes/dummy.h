@@ -11,8 +11,8 @@ class Stream;
 class Dummy : public Node
 {
 public:
-           Dummy(Node *parent = 0);
+   Dummy(Node* parent = 0);
    virtual ~Dummy();
-   void    load(Stream *stream);
-   void    write(Stream *stream);
+   void load(Stream* stream);
+   void write(Stream* stream);
 };

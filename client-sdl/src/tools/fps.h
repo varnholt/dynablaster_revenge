@@ -9,13 +9,13 @@
 class FPS
 {
 private:
-   int   mPeriod;
+   int mPeriod;
    float mCurFPS;
-   int   mFrame;
-   int   mTime;
+   int mFrame;
+   int mTime;
 
 public:
-   FPS(int period=100);
+   FPS(int period = 100);
    ~FPS();
    void next();
    float get();

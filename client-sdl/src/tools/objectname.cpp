@@ -4,13 +4,11 @@ ObjectName::ObjectName()
 {
 }
 
-ObjectName::ObjectName(const ObjectName& other)
-: mName(other.name())
+ObjectName::ObjectName(const ObjectName& other) : mName(other.name())
 {
 }
 
-ObjectName::ObjectName( const String& name )
-: mName(name)
+ObjectName::ObjectName(const String& name) : mName(name)
 {
 }
 
@@ -25,7 +23,7 @@ const String& ObjectName::name() const
 
 void ObjectName::setName(const String& name)
 {
-   mName= name;
+   mName = name;
 }
 
 void ObjectName::load(Stream* stream)

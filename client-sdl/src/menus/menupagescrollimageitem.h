@@ -11,34 +11,29 @@ class MenuPageScrollImageItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageScrollImageItem();
 
-      MenuPageScrollImageItem();
+   virtual ~MenuPageScrollImageItem();
 
-      virtual ~MenuPageScrollImageItem();
+   virtual void initialize();
 
-      virtual void initialize();
+   virtual void draw();
 
-      virtual void draw();
+public slots:
 
+   virtual void reset();
 
-   public slots:
+   virtual void animate(float time);
 
+protected:
+   Clipper* mClipper;
 
-      virtual void reset();
+   PSDLayer* mLayer;
 
-      virtual void animate(float time);
-
-
-   protected:
-
-      Clipper* mClipper;
-
-      PSDLayer* mLayer;
-
-      float mY;
-      float mStartTime;
-      float mAnimationTime;
-      bool mMoveUp;
-      float mRelativeTimePrevious;
+   float mY;
+   float mStartTime;
+   float mAnimationTime;
+   bool mMoveUp;
+   float mRelativeTimePrevious;
 };

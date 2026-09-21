@@ -4,88 +4,81 @@
 #include "menupagetextedit.h"
 
 // framework
+#include "framework/frametimer.h"
 #include "tools/array.h"
 #include "vertex.h"
-#include "framework/frametimer.h"
 
 class MenuPageListItemElement : public MenuPageTextEditItem
 {
-   public:
+public:
+   MenuPageListItemElement();
 
-      MenuPageListItemElement();
+   virtual ~MenuPageListItemElement();
 
-      virtual ~MenuPageListItemElement();
+   // main
 
-      // main
+   virtual void initialize();
 
-      virtual void initialize();
+   void draw(float x, float y, float opacity = 1.0f);
 
-      void draw(float x, float y, float opacity = 1.0f);
+   void setIndex(int index);
 
-      void setIndex(int index);
+   void setHeight(int height);
 
-      void setHeight(int height);
+   void setWidth(int width);
 
-      void setWidth(int width);
+   int getHeight() const;
 
-      int getHeight() const;
+   int getWidth() const;
 
-      int getWidth() const;
+   void setX(float x);
 
-      void setX(float x);
+   void setY(float y);
 
-      void setY(float y);
+   float getX() const;
 
-      float getX() const;
+   float getY() const;
 
-      float getY() const;
+   Array<Vertex> getBoundingRectVertices(float x, float y);
 
-      Array<Vertex> getBoundingRectVertices(float x, float y);
+   bool isFadingOut();
 
+   void stopFadeOut();
 
-      bool isFadingOut();
+   float getFadeOutValue();
 
-      void stopFadeOut();
+   void setOverrideAlpha(bool);
 
-      float getFadeOutValue();
+   bool isOverrideAlphaActive() const;
 
-      void setOverrideAlpha(bool);
+   const FrameTimer& getFocusOutTime() const;
 
-      bool isOverrideAlphaActive() const;
+public slots:
 
-      const FrameTimer& getFocusOutTime() const;
+   virtual void setFocus(bool);
 
+   virtual void setActive(bool);
 
-   public slots:
+private:
+   int mIndex;
 
-      virtual void setFocus(bool);
+   int mWidth;
 
-      virtual void setActive(bool);
+   int mHeight;
 
+   float mX;
 
-   private:
+   float mY;
 
-      int mIndex;
+   // fading
 
-      int mWidth;
+   FrameTimer mFocusOutTime;
 
-      int mHeight;
+   bool mFadeOut;
 
-      float mX;
+   float mFadeValue;
 
-      float mY;
+   // color specific
 
-
-      // fading
-
-      FrameTimer mFocusOutTime;
-
-      bool mFadeOut;
-
-      float mFadeValue;
-
-
-      // color specific
-
-      bool mOverrideAlpha;
+   bool mOverrideAlpha;
 };

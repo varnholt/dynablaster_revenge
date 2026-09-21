@@ -11,100 +11,74 @@
 // forward declarations
 class MenuWorkflow;
 
-
 class Menu : public QObject, public QList<MenuPage*>
 {
    Q_OBJECT
 
-   public:
+public:
+   Menu();
 
-       Menu();
+   Menu(const Menu&);
 
-       Menu(const Menu&);
+   virtual ~Menu();
 
-       virtual ~Menu();
+   void initialize();
 
-       void initialize();
+   static Menu* getInstance();
 
-       static Menu* getInstance();
+public slots:
 
+   void mouseMoved(int x, int y);
 
-    public slots:
+   void mousePressed(int x, int y);
 
-       void mouseMoved(int x, int y);
+   void mouseReleased();
 
-       void mousePressed(int x, int y);
+   void keyPressed(int key, const QString&);
 
-       void mouseReleased();
+   void paste(const QString& text);
 
-       void keyPressed(int key, const QString&);
+   MenuPage* getCurrentPage();
 
-       void paste(const QString& text);
+   void setCurrentPage(MenuPage* page);
 
-       MenuPage* getCurrentPage();
+   MenuPage* getBackground();
 
-       void setCurrentPage(MenuPage* page);
+   MenuPage* getPageByName(const QString&);
 
-       MenuPage* getBackground();
+   MenuWorkflow* getMenuWorkflow() const;
 
-       MenuPage* getPageByName(const QString&);
+   //!
+   void setMenuWorkflow(MenuWorkflow*);
 
-       MenuWorkflow* getMenuWorkflow() const;
+   // workflow
 
+   //! action response
+   void actionResponse(const QString& page, const QString& action, bool ok);
 
-      //!
-      void setMenuWorkflow(MenuWorkflow*);
+signals:
 
+   // workflow
 
-      // workflow
+   //! action request
+   void actionRequest(const QString& page, const QString& action);
 
-      //! action response
-      void actionResponse(
-         const QString& page,
-         const QString& action,
-         bool ok
-      );
+   void pageChangeRequest(MenuPage* previous, MenuPage* current);
 
+   //! a key was pressed while an item was focussed
+   void actionKeyPressed(const QString& page, const QString& itemName, int key);
 
-   signals:
+   //! an item was focussed
+   void layerFocussed(const QString& page, const QString& itemName);
 
-       // workflow
+private:
+   QSettings* mSettings;
 
-      //! action request
-      void actionRequest(
-          const QString& page,
-          const QString& action
-      );
+   MenuPage* mCurrentPage;
 
-      void pageChangeRequest(
-         MenuPage* previous,
-         MenuPage* current
-      );
+   MenuPage* mBackground;
 
-      //! a key was pressed while an item was focussed
-      void actionKeyPressed(
-         const QString& page,
-         const QString& itemName,
-         int key
-      );
+   MenuWorkflow* mMenuWorkflow;
 
-      //! an item was focussed
-      void layerFocussed(
-         const QString& page,
-         const QString& itemName
-      );
-
-
-   private:
-
-      QSettings* mSettings;
-
-      MenuPage* mCurrentPage;
-
-      MenuPage* mBackground;
-
-      MenuWorkflow* mMenuWorkflow;
-
-      static Menu* lInstance;
-
+   static Menu* lInstance;
 };

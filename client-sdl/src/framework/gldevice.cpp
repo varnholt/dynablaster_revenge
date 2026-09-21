@@ -72,7 +72,7 @@ void GLDevice::setViewPort(int x, int y, int width, int height)
    glViewport(x, y, width, height);
 }
 
-void GLDevice::getViewPort(int *x, int *y, int *width, int *height)
+void GLDevice::getViewPort(int* x, int* y, int* width, int* height)
 {
    if (x)
       *x = mViewPortX;
@@ -84,7 +84,7 @@ void GLDevice::getViewPort(int *x, int *y, int *width, int *height)
       *height = mViewPortHeight;
 }
 
-void GLDevice::convertFromViewPort(int *x, int *y, int targetWidth, int targetHeight)
+void GLDevice::convertFromViewPort(int* x, int* y, int targetWidth, int targetHeight)
 {
    *x -= mViewPortX;
    *y -= mViewPortY;
@@ -252,7 +252,7 @@ void GLDevice::drawLine(Vector*)
    // the legacy implementation was already fully commented out upstream - no live callers.
 }
 
-unsigned int GLDevice::createTexture(void *data, int x, int y, int flags)
+unsigned int GLDevice::createTexture(void* data, int x, int y, int flags)
 {
    GLuint tex = 0;
    glGenTextures(1, &tex);
@@ -267,7 +267,7 @@ void GLDevice::deleteTexture(unsigned int textureId)
    glDeleteTextures(1, &tex);
 }
 
-void GLDevice::updateTexture(void *data, int x, int y, int flags)
+void GLDevice::updateTexture(void* data, int x, int y, int flags)
 {
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (flags & 1) ? GL_LINEAR : GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (flags & 2) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
@@ -340,8 +340,7 @@ void GLDevice::updateTexture(void *data, int x, int y, int flags)
       x >>= 1;
       y >>= 1;
       ++level;
-   }
-   while ((x != 0 || y != 0) && (flags & 2));
+   } while ((x != 0 || y != 0) && (flags & 2));
 
    delete[] temp;
 }
@@ -353,7 +352,7 @@ unsigned int GLDevice::uploadTexture1D(void*, int, int)
    return 0;
 }
 
-unsigned int GLDevice::loadShader(const char *vname, const char *pname)
+unsigned int GLDevice::loadShader(const char* vname, const char* pname)
 {
    FileStream stream;
    GLuint vertexShader = 0;
@@ -433,7 +432,7 @@ void GLDevice::setShader(unsigned int shader)
    }
 }
 
-int GLDevice::getParameterIndex(const char *name)
+int GLDevice::getParameterIndex(const char* name)
 {
    const auto it = mShaderTable.find(mCurShader);
    if (it == mShaderTable.end())

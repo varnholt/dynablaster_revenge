@@ -6,47 +6,41 @@ class MenuPageCheckBoxItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageCheckBoxItem(QObject* parent = 0);
 
-      MenuPageCheckBoxItem(QObject *parent = 0);
+   virtual void draw();
 
-      virtual void draw();
+   virtual void setCheckedLayer(PSDLayer* layer);
 
-      virtual void setCheckedLayer(PSDLayer* layer);
+   virtual void setUncheckedLayer(PSDLayer* layer);
 
-      virtual void setUncheckedLayer(PSDLayer* layer);
+   virtual PSDLayer* getCheckedLayer() const;
 
-      virtual PSDLayer* getCheckedLayer() const;
+   virtual PSDLayer* getUncheckedLayer() const;
 
-      virtual PSDLayer* getUncheckedLayer() const;
+   virtual PSDLayer* getLayer() const;
 
-      virtual PSDLayer* getLayer() const;
+   bool isChecked() const;
 
-      bool isChecked() const;
+   void setChecked(bool checked);
 
-      void setChecked(bool checked);
+public slots:
 
+   virtual void activated();
 
-   public slots:
+   virtual void deactivated();
 
-      virtual void activated();
+signals:
 
-      virtual void deactivated();
+   void stateChanged();
 
+protected:
+   virtual void toggleChecked();
 
-   signals:
+   PSDLayer* mLayerChecked;
 
-      void stateChanged();
+   PSDLayer* mLayerUnchecked;
 
-
-   protected:
-
-      virtual void toggleChecked();
-
-      PSDLayer* mLayerChecked;
-
-      PSDLayer* mLayerUnchecked;
-
-      bool mChecked;
-
+   bool mChecked;
 };

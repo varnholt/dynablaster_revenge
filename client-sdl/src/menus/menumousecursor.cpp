@@ -1,18 +1,18 @@
 #include "menumousecursor.h"
 
 // base
-#include "framework/gldevice.h"
-#include "psdlayer.h"
 #include "defaultshader.h"
+#include "framework/gldevice.h"
 #include "math/matrix.h"
 #include "math/quat.h"
+#include "psdlayer.h"
 
 // Qt
 #include <QMouseEvent>
 
 // texture names
 #define DEFAULT "default"
-#define BUSY    "busy"
+#define BUSY "busy"
 #define CLICKED "clicked"
 
 // cmath
@@ -23,20 +23,20 @@ namespace
 constexpr float kPi = 3.14159265358979323846f;
 }
 
-MenuMouseCursor::MenuMouseCursor(RenderDevice *dev, bool visible)
-   : QObject(),
-     Drawable(dev, visible),
-     mDefaultLayer(0),
-     mClickedLayer(0),
-     mBusyLayer(0),
-     mBusyX(0),
-     mBusyY(0),
-     mX(0),
-     mY(0),
-     mSizeFactor(1.0f),
-     mBusy(false),
-     mMousePressed(false),
-     mTime(0.0f)
+MenuMouseCursor::MenuMouseCursor(RenderDevice* dev, bool visible)
+    : QObject(),
+      Drawable(dev, visible),
+      mDefaultLayer(0),
+      mClickedLayer(0),
+      mBusyLayer(0),
+      mBusyX(0),
+      mBusyY(0),
+      mX(0),
+      mY(0),
+      mSizeFactor(1.0f),
+      mBusy(false),
+      mMousePressed(false),
+      mTime(0.0f)
 {
    mFilename = "data/cursors/cursor_small.psd";
 }
@@ -53,12 +53,10 @@ MenuMouseCursor::~MenuMouseCursor()
    mBusyLayer = 0;
 }
 
-
 void MenuMouseCursor::animate(float time)
 {
    mTime = time;
 }
-
 
 void MenuMouseCursor::mousePressEvent(int /*x*/, int /*y*/, Qt::MouseButton)
 {
@@ -66,12 +64,10 @@ void MenuMouseCursor::mousePressEvent(int /*x*/, int /*y*/, Qt::MouseButton)
    mClickTime.restart();
 }
 
-
 void MenuMouseCursor::mouseReleaseEvent(QMouseEvent* /*event*/)
 {
    mMousePressed = false;
 }
-
 
 void MenuMouseCursor::mouseMoveEvent(int x, int y)
 {
@@ -79,18 +75,15 @@ void MenuMouseCursor::mouseMoveEvent(int x, int y)
    mY = y;
 }
 
-
 void MenuMouseCursor::setBusy(bool busy)
 {
    mBusy = busy;
 }
 
-
 void MenuMouseCursor::initializeGL()
 {
    initializeLayers();
 }
-
 
 void MenuMouseCursor::initializeLayers()
 {
@@ -100,25 +93,24 @@ void MenuMouseCursor::initializeLayers()
 
    PSD::Layer* psdlayer;
 
-   psdlayer= mPsd.getLayer( DEFAULT );
+   psdlayer = mPsd.getLayer(DEFAULT);
    if (psdlayer)
-      mDefaultLayer= new PSDLayer(psdlayer);
+      mDefaultLayer = new PSDLayer(psdlayer);
 
-   psdlayer= mPsd.getLayer( CLICKED );
+   psdlayer = mPsd.getLayer(CLICKED);
    if (psdlayer)
-      mClickedLayer= new PSDLayer(psdlayer);
+      mClickedLayer = new PSDLayer(psdlayer);
 
-   psdlayer= mPsd.getLayer( BUSY );
+   psdlayer = mPsd.getLayer(BUSY);
    if (psdlayer)
    {
-      mBusyX= psdlayer->getLeft();
-      mBusyY= psdlayer->getTop();
+      mBusyX = psdlayer->getLeft();
+      mBusyY = psdlayer->getTop();
       psdlayer->setX(0);
       psdlayer->setY(0);
-      mBusyLayer= new PSDLayer(psdlayer);
+      mBusyLayer = new PSDLayer(psdlayer);
    }
 }
-
 
 void MenuMouseCursor::paintGL()
 {
@@ -133,12 +125,10 @@ void MenuMouseCursor::paintGL()
    cleanupGlParameters();
 }
 
-
 void MenuMouseCursor::paintCursor(PSDLayer* layer, float opacity)
 {
    layer->render(mX, mY, opacity);
 }
-
 
 void MenuMouseCursor::paintDefaultCursor()
 {
@@ -148,22 +138,18 @@ void MenuMouseCursor::paintDefaultCursor()
    paintCursor(mDefaultLayer);
 }
 
-
 void MenuMouseCursor::paintClickedCursor()
 {
    if (!mClickedLayer)
       return;
 
-   float opacity =
-         qMax(300 - (int)mClickTime.elapsed(), 0) * 0.00003f
-       * mClickedLayer->getOpacity();
+   float opacity = qMax(300 - (int)mClickTime.elapsed(), 0) * 0.00003f * mClickedLayer->getOpacity();
 
    if (opacity > 0.0f)
    {
       paintCursor(mClickedLayer, opacity);
    }
 }
-
 
 void MenuMouseCursor::paintBusyIcon()
 {
@@ -176,25 +162,19 @@ void MenuMouseCursor::paintBusyIcon()
       // own center, then move it to (mX+mBusyX, mY+mBusyY). Not visually verified yet (mBusy is
       // never true in the ported code so far) - double check against the original once something
       // actually sets it.
-      const float w= static_cast<float>(mBusyLayer->getWidth());
-      const float h= static_cast<float>(mBusyLayer->getHeight());
-      const float angle= mTime * kPi / 180.0f;
+      const float w = static_cast<float>(mBusyLayer->getWidth());
+      const float h = static_cast<float>(mBusyLayer->getHeight());
+      const float angle = mTime * kPi / 180.0f;
 
       Matrix pre;
-      pre.translate(Vector(-0.5f*w, -0.5f*h, 0.0f));
+      pre.translate(Vector(-0.5f * w, -0.5f * h, 0.0f));
 
-      Matrix rot(Quat(0.0f, 0.0f, sinf(angle*0.5f), cosf(angle*0.5f)));
+      Matrix rot(Quat(0.0f, 0.0f, sinf(angle * 0.5f), cosf(angle * 0.5f)));
 
       Matrix post;
-      post.translate(
-         Vector(
-            mX + mBusyX + 0.5f*w,
-            mY + mBusyY + 0.5f*h,
-            0.0f
-         )
-      );
+      post.translate(Vector(mX + mBusyX + 0.5f * w, mY + mBusyY + 0.5f * h, 0.0f));
 
-      Matrix world= pre * rot * post;
+      Matrix world = pre * rot * post;
       activeDevice->push(world);
 
       mBusyLayer->render();
@@ -202,7 +182,6 @@ void MenuMouseCursor::paintBusyIcon()
       activeDevice->pop();
    }
 }
-
 
 void MenuMouseCursor::cleanupGlParameters()
 {
@@ -212,10 +191,9 @@ void MenuMouseCursor::cleanupGlParameters()
    glDepthMask(GL_TRUE);
 }
 
-
 void MenuMouseCursor::initGlParameters()
 {
-   GLDevice* device= static_cast<GLDevice*>(activeDevice);
+   GLDevice* device = static_cast<GLDevice*>(activeDevice);
 
    // enable blending
    glEnable(GL_BLEND);

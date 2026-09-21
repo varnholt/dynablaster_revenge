@@ -10,9 +10,9 @@ public:
    Texture(const Texture& texture);
    ~Texture();
 
-   Texture& operator = (const Texture& texture);
+   Texture& operator=(const Texture& texture);
 
-   operator unsigned int () const
+   operator unsigned int() const
    {
       return mTextureId;
    }

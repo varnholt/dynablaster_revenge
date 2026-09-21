@@ -4,4 +4,4 @@
 
 #include "key.h"
 
-typedef Key< float > ValKey;
+typedef Key<float> ValKey;

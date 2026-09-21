@@ -1,8 +1,8 @@
 #pragma once
 
-#include "material.h"
 #include "../render/renderbuffer.h"
 #include "../render/uv.h"
+#include "material.h"
 
 class TextureMaterial : public Material
 {
@@ -14,12 +14,12 @@ public:
       UV uv;
    };
 
-   TextureMaterial(SceneGraph *scene);
-   TextureMaterial(SceneGraph *scene, const char* texmap);
+   TextureMaterial(SceneGraph* scene);
+   TextureMaterial(SceneGraph* scene, const char* texmap);
 
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
-   void update(float frame, Node **nodelist, const Matrix& cam);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
+   void update(float frame, Node** nodelist, const Matrix& cam);
 
    virtual void renderDiffuse();
 

@@ -14,17 +14,13 @@ class Geometry;
 
 class GeometryVbo
 {
-
 public:
-
    GeometryVbo();
    virtual ~GeometryVbo();
 
    virtual void initialize();
 
-
 protected:
-
    unsigned int mVertexBuffer;
    unsigned int mIndexBuffer;
 

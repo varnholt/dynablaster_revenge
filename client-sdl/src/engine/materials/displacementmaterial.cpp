@@ -1,43 +1,38 @@
 #include "displacementmaterial.h"
-#include "textureslot.h"
-#include "tools/stream.h"
-#include "tools/profiling.h"
-#include "nodes/mesh.h"
+#include "framework/globaltime.h"
 #include "gldevice.h"
-#include "render/renderbuffer.h"
+#include "image/image.h"
+#include "nodes/mesh.h"
 #include "render/geometry.h"
+#include "render/renderbuffer.h"
+#include "render/texturepool.h"
 #include "render/uv.h"
 #include "render/vertexbuffer.h"
-#include "render/texturepool.h"
-#include "image/image.h"
-#include "framework/globaltime.h"
+#include "textureslot.h"
+#include "tools/profiling.h"
+#include "tools/stream.h"
 
-DisplacementMaterial::DisplacementMaterial(SceneGraph *scene)
-: Material(scene, MAP_DIFFUSE | MAP_DISPLACE),
-  mColorMap(0),
-  mDiffuseMap(0),
-  mShader(0)
+DisplacementMaterial::DisplacementMaterial(SceneGraph* scene)
+    : Material(scene, MAP_DIFFUSE | MAP_DISPLACE), mColorMap(0), mDiffuseMap(0), mShader(0)
 {
 }
 
-DisplacementMaterial::DisplacementMaterial(SceneGraph *scene, const char* map, const char* diffusemap)
-: Material(scene, MAP_DIFFUSE | MAP_DISPLACE),
-  mShader(0)
+DisplacementMaterial::DisplacementMaterial(SceneGraph* scene, const char* map, const char* diffusemap)
+    : Material(scene, MAP_DIFFUSE | MAP_DISPLACE), mShader(0)
 {
    addTexture(mColorMap, map);
    addTexture(mDiffuseMap, diffusemap);
 }
 
-
 void DisplacementMaterial::init()
 {
-   mShader= activeDevice->loadShader("displacementmaterial-vert.glsl", "displacementmaterial-frag.glsl");
-   mParamTexture= activeDevice->getParameterIndex("texturemap");
-   mParamDiffuse= activeDevice->getParameterIndex("diffusemap");
-   mParamTime= activeDevice->getParameterIndex("time");
+   mShader = activeDevice->loadShader("displacementmaterial-vert.glsl", "displacementmaterial-frag.glsl");
+   mParamTexture = activeDevice->getParameterIndex("texturemap");
+   mParamDiffuse = activeDevice->getParameterIndex("diffusemap");
+   mParamTime = activeDevice->getParameterIndex("time");
 }
 
-void DisplacementMaterial::load(Stream *stream)
+void DisplacementMaterial::load(Stream* stream)
 {
    Material::load(stream);
 
@@ -45,42 +40,39 @@ void DisplacementMaterial::load(Stream *stream)
    addTexture(mDiffuseMap, "diffuse_level");
 }
 
-
-void DisplacementMaterial::addGeometry(Geometry *geo)
+void DisplacementMaterial::addGeometry(Geometry* geo)
 {
-   VertexBuffer *vb= mPool->get(geo);
+   VertexBuffer* vb = mPool->get(geo);
    if (!vb)
    {
-      vb= mPool->add(geo);
+      vb = mPool->add(geo);
 
-      Vector *vtx= geo->getVertices();
-      UV *uv= geo->getUV(1);
+      Vector* vtx = geo->getVertices();
+      UV* uv = geo->getUV(1);
 
-      activeDevice->allocateVertexBuffer( vb->getVertexBuffer(), sizeof(Vertex)*geo->getVertexCount() );
-      volatile Vertex *dst= (Vertex*)activeDevice->lockVertexBuffer( vb->getVertexBuffer() );
-      for (int i=0;i<geo->getVertexCount();i++)
+      activeDevice->allocateVertexBuffer(vb->getVertexBuffer(), sizeof(Vertex) * geo->getVertexCount());
+      volatile Vertex* dst = (Vertex*)activeDevice->lockVertexBuffer(vb->getVertexBuffer());
+      for (int i = 0; i < geo->getVertexCount(); i++)
       {
-         dst->pos.x= vtx[i].x;
-         dst->pos.y= vtx[i].y;
-         dst->pos.z= vtx[i].z;
-         dst->uv.u= uv[i].u;
-         dst->uv.v= uv[i].v;
+         dst->pos.x = vtx[i].x;
+         dst->pos.y = vtx[i].y;
+         dst->pos.z = vtx[i].z;
+         dst->uv.u = uv[i].u;
+         dst->uv.v = uv[i].v;
          dst++;
       }
-      activeDevice->unlockVertexBuffer( vb->getVertexBuffer() );
+      activeDevice->unlockVertexBuffer(vb->getVertexBuffer());
 
-      vb->setIndexBuffer( geo->getIndices(), geo->getIndexCount() );
+      vb->setIndexBuffer(geo->getIndices(), geo->getIndexCount());
    }
 
-   mVB.add(Material::Buffer(geo,vb));
+   mVB.add(Material::Buffer(geo, vb));
 }
-
 
 void DisplacementMaterial::update(float, Node**, const Matrix& cam)
 {
-   mCamera= cam;
+   mCamera = cam;
 }
-
 
 void DisplacementMaterial::begin()
 {
@@ -89,7 +81,7 @@ void DisplacementMaterial::begin()
    activeDevice->setCulling(false);
    glDisable(GL_BLEND);
 
-   activeDevice->setShader( mShader );
+   activeDevice->setShader(mShader);
 
    glBindTexture(GL_TEXTURE_2D, mColorMap);
    activeDevice->bindSampler(mParamTexture, 0);
@@ -100,16 +92,16 @@ void DisplacementMaterial::begin()
    activeDevice->bindSampler(mParamDiffuse, 1);
 
    // enable required vertex arrays
-   glEnableVertexAttribArray(0); // vertex data
+   glEnableVertexAttribArray(0);  // vertex data
    glEnableVertexAttribArray(2);
 
-   float time= GlobalTime::Instance()->getTime();
+   float time = GlobalTime::Instance()->getTime();
    activeDevice->setParameter(mParamTime, time);
 }
 
 void DisplacementMaterial::end()
 {
-   glDisableVertexAttribArray(0); // vertex data
+   glDisableVertexAttribArray(0);  // vertex data
    glDisableVertexAttribArray(2);
 
    glActiveTexture(GL_TEXTURE1);
@@ -123,18 +115,18 @@ void DisplacementMaterial::end()
 
 void DisplacementMaterial::renderDiffuse()
 {
-   int count= 0;
+   int count = 0;
 
    // set material parameters
    //   activeDevice->setMaterial(mAmbient, mDiffuse, mSpecular, mShininess);
 
    begin();
 
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      VertexBuffer *vb= mVB[i].vb;
-      Geometry *geo= mVB[i].geo;
+      VertexBuffer* vb = mVB[i].vb;
+      Geometry* geo = mVB[i].geo;
 
       if (geo->isVisible())
       {
@@ -144,12 +136,12 @@ void DisplacementMaterial::renderDiffuse()
          activeDevice->push(geo->getTransform());
 
          // draw mesh
-         glBindBuffer( GL_ARRAY_BUFFER, vb->getVertexBuffer() );
-         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0  );
-         glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector)  );  
+         glBindBuffer(GL_ARRAY_BUFFER, vb->getVertexBuffer());
+         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector));
 
-         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer() );
-         glDrawElements( GL_TRIANGLES, vb->getIndexCount(), GL_UNSIGNED_SHORT, 0 ); // render
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer());
+         glDrawElements(GL_TRIANGLES, vb->getIndexCount(), GL_UNSIGNED_SHORT, 0);  // render
 
          activeDevice->pop();
          count++;
@@ -158,4 +150,3 @@ void DisplacementMaterial::renderDiffuse()
 
    end();
 }
-

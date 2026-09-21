@@ -8,8 +8,8 @@
 class CartoonShading : public Material
 {
 public:
-   void load(Stream *stream);
-   void add(Geometry *geo);
+   void load(Stream* stream);
+   void add(Geometry* geo);
    virtual void renderAmbient();
    virtual void renderDiffuse();
 
@@ -18,7 +18,7 @@ private:
    int mColorMap;
    int mGradientMap;
    int mShader;
-	int mTransform;
+   int mTransform;
 };
 
 #endif

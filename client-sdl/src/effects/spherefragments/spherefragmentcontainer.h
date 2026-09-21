@@ -12,7 +12,6 @@ class Node;
 class SphereFragmentContainer
 {
 public:
-
    SphereFragmentContainer(Node* scene);
    virtual ~SphereFragmentContainer();
 
@@ -24,9 +23,7 @@ public:
    void begin();
    void end();
 
-
 protected:
-
    Array<SphereFragment*> mFragments;
 
    // textures
@@ -56,5 +53,4 @@ protected:
    int mNormalMapParam;
    int mSpecularMapParam;
    int mLavaMapParam;
-
 };

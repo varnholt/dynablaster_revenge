@@ -1,55 +1,51 @@
 #include "invisibilitymaterial.h"
-#include "textureslot.h"
-#include "nodes/mesh.h"
-#include "gldevice.h"
-#include "render/renderbuffer.h"
-#include "render/uv.h"
-#include "render/vertexbuffer.h"
-#include "render/texturepool.h"
-#include "image/image.h"
-#include "tools/stream.h"
-#include "tools/profiling.h"
 #include "animation/motionmixer.h"
 #include "framework/globaltime.h"
+#include "gldevice.h"
+#include "image/image.h"
+#include "nodes/mesh.h"
+#include "render/renderbuffer.h"
+#include "render/texturepool.h"
+#include "render/uv.h"
+#include "render/vertexbuffer.h"
+#include "textureslot.h"
+#include "tools/profiling.h"
+#include "tools/stream.h"
 
-
-InvisibilityMaterial::InvisibilityMaterial(SceneGraph *scene)
-: PlayerMaterialBase(scene, MAP_DIFFUSE | MAP_REFLECT)
-, mShader(0)
-, mTextureMap(0)
-, mGradientMap(0)
-, mParamTexture(0)
-, mParamGradient(0)
-, mParamFadeThreshold(0)
-, mParamCamera(0)
-, mParamBones(0)
+InvisibilityMaterial::InvisibilityMaterial(SceneGraph* scene)
+    : PlayerMaterialBase(scene, MAP_DIFFUSE | MAP_REFLECT),
+      mShader(0),
+      mTextureMap(0),
+      mGradientMap(0),
+      mParamTexture(0),
+      mParamGradient(0),
+      mParamFadeThreshold(0),
+      mParamCamera(0),
+      mParamBones(0)
 {
    addTexture(mGradientMap, "invisble-mask");
 }
-
 
 InvisibilityMaterial::~InvisibilityMaterial()
 {
 }
 
-
 void InvisibilityMaterial::init()
 {
-   mShader= activeDevice->loadShader("invisibility-vert.glsl", "invisibility-frag.glsl");
+   mShader = activeDevice->loadShader("invisibility-vert.glsl", "invisibility-frag.glsl");
 
-   mParamTexture= activeDevice->getParameterIndex("texturemap");
-   mParamGradient= activeDevice->getParameterIndex("gradientmap");
-   mParamFadeThreshold= activeDevice->getParameterIndex("fadeThreshold");
+   mParamTexture = activeDevice->getParameterIndex("texturemap");
+   mParamGradient = activeDevice->getParameterIndex("gradientmap");
+   mParamFadeThreshold = activeDevice->getParameterIndex("fadeThreshold");
 
-   mParamCamera= activeDevice->getParameterIndex("camera");
-   mParamBones= activeDevice->getParameterIndex("bones");
+   mParamCamera = activeDevice->getParameterIndex("camera");
+   mParamBones = activeDevice->getParameterIndex("bones");
 }
 
-void InvisibilityMaterial::load(Stream *stream)
+void InvisibilityMaterial::load(Stream* stream)
 {
    Material::load(stream);
 }
-
 
 void InvisibilityMaterial::begin()
 {
@@ -65,10 +61,10 @@ void InvisibilityMaterial::begin()
    glBindTexture(GL_TEXTURE_2D, mGradientMap);
    activeDevice->bindSampler(mParamGradient, 1);
 
-   activeDevice->setShader( mShader );
+   activeDevice->setShader(mShader);
 
    // enable required vertex arrays
-   glEnableVertexAttribArray(0); // vertex data
+   glEnableVertexAttribArray(0);  // vertex data
    glEnableVertexAttribArray(1);
 
    // texcoord0 (location 2) plus two more vec4 attributes (3, 4) that the legacy renderer
@@ -85,7 +81,7 @@ void InvisibilityMaterial::end()
 {
    activeDevice->setShader(0);
 
-   glDisableVertexAttribArray(0); // vertex data
+   glDisableVertexAttribArray(0);  // vertex data
    glDisableVertexAttribArray(1);
    glDisableVertexAttribArray(2);
    glDisableVertexAttribArray(3);
@@ -99,76 +95,73 @@ void InvisibilityMaterial::end()
    glDisable(GL_BLEND);
 }
 
-
 void InvisibilityMaterial::renderDiffuse()
 {
    begin();
 
-/*
-   Matrix projMat;
-   glGetFloatv(GL_PROJECTION_MATRIX, projMat.data());
-   projMat= projMat.invert();
-   Vector camPos= projMat.translation();
-*/
+   /*
+      Matrix projMat;
+      glGetFloatv(GL_PROJECTION_MATRIX, projMat.data());
+      projMat= projMat.invert();
+      Vector camPos= projMat.translation();
+   */
 
    Matrix bones[8];
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      VertexBuffer *vb= mVB[i].vb;
-      Geometry *geo= mVB[i].geo;
+      VertexBuffer* vb = mVB[i].vb;
+      Geometry* geo = mVB[i].geo;
 
       if (geo->isVisible())
       {
-         Mesh* mesh= (Mesh*)geo->getParent();
-         float time= mesh->getRenderParameter(1);
+         Mesh* mesh = (Mesh*)geo->getParent();
+         float time = mesh->getRenderParameter(1);
          activeDevice->setParameter(mParamFadeThreshold, time);
 
-         MotionMixer *mixer= mesh->getMotionMixer();
+         MotionMixer* mixer = mesh->getMotionMixer();
 
-         Matrix invView= (geo->getTransform() * mCamera).invert();
-         Vector osCam= invView.translation();
+         Matrix invView = (geo->getTransform() * mCamera).invert();
+         Vector osCam = invView.translation();
 
-//         Vector osCam= geo->getParent()->getWorld2Obj() * camPos;
+         //         Vector osCam= geo->getParent()->getWorld2Obj() * camPos;
          activeDevice->setParameter(mParamCamera, osCam);
 
          activeDevice->push(geo->getTransform());
 
          // draw mesh
-         glBindBuffer( GL_ARRAY_BUFFER, vb->getVertexBuffer() );
-         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0  );
-         glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector)  );
+         glBindBuffer(GL_ARRAY_BUFFER, vb->getVertexBuffer());
+         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector));
 
-         glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector)*2)  );
-         glVertexAttribPointer( 3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector)*2+2*4) );
-         glVertexAttribPointer( 4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector)*2+6*4) );
+         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector) * 2));
+         glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector) * 2 + 2 * 4));
+         glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector) * 2 + 6 * 4));
 
-         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer() );
-
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer());
 
          // render all clusters from the same vertex buffer
-         unsigned short* offset= 0;
-         int end= 0;
-         for (int c=0; c<mClusters.size(); c++)
+         unsigned short* offset = 0;
+         int end = 0;
+         for (int c = 0; c < mClusters.size(); c++)
          {
-            Cluster* cluster= mClusters[c];
+            Cluster* cluster = mClusters[c];
 
-            for (int i=0; i<cluster->mBones.size(); i++)
+            for (int i = 0; i < cluster->mBones.size(); i++)
             {
-               int idx= cluster->mBones[i];
-               Node *node= mixer->getNode( idx );
-               bones[i]= node->getTransform();
+               int idx = cluster->mBones[i];
+               Node* node = mixer->getNode(idx);
+               bones[i] = node->getTransform();
             }
-            for (int i=cluster->mBones.size(); i<8; i++)
-               bones[i]= Matrix();
+            for (int i = cluster->mBones.size(); i < 8; i++)
+               bones[i] = Matrix();
             glUniformMatrix4fv(mParamBones, 8, false, (float*)bones);
 
-            int start= end;
+            int start = end;
             end += cluster->mVertices.size();
-            glDrawRangeElements( GL_TRIANGLES, start, end, cluster->mIndices.size(), GL_UNSIGNED_SHORT, (void*)offset ); // render
+            glDrawRangeElements(GL_TRIANGLES, start, end, cluster->mIndices.size(), GL_UNSIGNED_SHORT, (void*)offset);  // render
             offset += cluster->mIndices.size();
          }
-
 
          activeDevice->pop();
       }
@@ -176,15 +169,13 @@ void InvisibilityMaterial::renderDiffuse()
 
    end();
 
-/*
-   if (mVB.size()>0)
-      printf("players: %f \n", (t2-t1)/1000000.0);
-*/
+   /*
+      if (mVB.size()>0)
+         printf("players: %f \n", (t2-t1)/1000000.0);
+   */
 }
-
 
 void InvisibilityMaterial::setTexture(unsigned int textureMap)
 {
    mTextureMap = textureMap;
 }
-

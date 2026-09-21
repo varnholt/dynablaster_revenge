@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "tools/array.h"
 #include <stdio.h>
+#include "tools/array.h"
 
-template <class Item> class Singleton
+template <class Item>
+class Singleton
 {
 protected:
    //! constructor
@@ -17,14 +18,14 @@ protected:
       }
       else
       {
-         mInstance= (Item*)this;
+         mInstance = (Item*)this;
       }
    }
 
    //! destructor
    virtual ~Singleton()
    {
-      mInstance= 0;
+      mInstance = 0;
    }
 
 public:
@@ -32,7 +33,7 @@ public:
    static Item* Instance()
    {
       if (!mInstance)
-         mInstance= new Item();
+         mInstance = new Item();
       return mInstance;
    }
 
@@ -42,8 +43,9 @@ public:
    }
 
 private:
-   static Item* mInstance;    //!< static instance
+   static Item* mInstance;  //!< static instance
 };
 
 // instance is initially 0
-template <class Item> Item* Singleton<Item>::mInstance = 0;
+template <class Item>
+Item* Singleton<Item>::mInstance = 0;

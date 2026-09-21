@@ -1,13 +1,13 @@
 // header
 #include "gamelogodrawable.h"
 #include "gamelogopointsprite.h"
-#include "menus/psdlayer.h"
 #include "menus/defaultshader.h"
+#include "menus/psdlayer.h"
 
 // engine
 #include "gldevice.h"
-#include "tools/random.h"
 #include "math/matrix.h"
+#include "tools/random.h"
 
 // cmath
 #include <math.h>
@@ -27,28 +27,25 @@
 #define FADE_IN_LENGTH 80.0f
 #define FADE_OUT_LENGTH 80.0f
 
-
-GameLogoDrawable::GameLogoDrawable(RenderDevice *dev, bool visible)
-   : SphereFragmentsDrawable(dev, visible),
-     mMainMenuVisible(true),
-     mDeltaTime(0.0f),
-     mTime(0.0f),
-     mLayerDynablaster(0),
-     mLayerRevenge(0),
-     mFadeInEnd(0.0f),
-     mFadeOutEnd(0.0f),
-     mSparkTimesInitialized(false)
+GameLogoDrawable::GameLogoDrawable(RenderDevice* dev, bool visible)
+    : SphereFragmentsDrawable(dev, visible),
+      mMainMenuVisible(true),
+      mDeltaTime(0.0f),
+      mTime(0.0f),
+      mLayerDynablaster(0),
+      mLayerRevenge(0),
+      mFadeInEnd(0.0f),
+      mFadeOutEnd(0.0f),
+      mSparkTimesInitialized(false)
 {
    mFilename = "data/logo/logo.psd";
 }
-
 
 GameLogoDrawable::~GameLogoDrawable()
 {
    for (int i = 0; i < mLayers.size(); i++)
       delete mLayers[i];
 }
-
 
 void GameLogoDrawable::initializeGL()
 {
@@ -57,7 +54,6 @@ void GameLogoDrawable::initializeGL()
 
    SphereFragmentsDrawable::initializeGL();
 }
-
 
 void GameLogoDrawable::paintGL()
 {
@@ -69,17 +65,9 @@ void GameLogoDrawable::paintGL()
 
       initOrthoGlParameters();
 
-      mLayerDynablaster->render(
-         20.0f * cos(mTime * 0.03f),
-         30.0f + 15.0f * sin(mTime * 0.04f),
-         mAlpha
-      );
+      mLayerDynablaster->render(20.0f * cos(mTime * 0.03f), 30.0f + 15.0f * sin(mTime * 0.04f), mAlpha);
 
-      mLayerRevenge->render(
-         30.0f * cos(mTime * 0.03f),
-         30.0f + 25.0f * sin(mTime * 0.04f),
-         mAlpha
-      );
+      mLayerRevenge->render(30.0f * cos(mTime * 0.03f), 30.0f + 25.0f * sin(mTime * 0.04f), mAlpha);
 
       initPointSpriteGlParameters();
       drawSparks();
@@ -88,8 +76,7 @@ void GameLogoDrawable::paintGL()
    }
 }
 
-
-void GameLogoDrawable::pageChanged(const QString &page)
+void GameLogoDrawable::pageChanged(const QString& page)
 {
    bool wasVisible = mMainMenuVisible;
    mMainMenuVisible = (page == MAINMENU);
@@ -107,13 +94,11 @@ void GameLogoDrawable::pageChanged(const QString &page)
    }
 }
 
-
 void GameLogoDrawable::animate(float time)
 {
    mDeltaTime = time - mTime;
    mTime = time;
 }
-
 
 void GameLogoDrawable::setVisible(bool visible)
 {
@@ -122,7 +107,6 @@ void GameLogoDrawable::setVisible(bool visible)
    if (!visible)
       mSparkTimesInitialized = false;
 }
-
 
 void GameLogoDrawable::drawSparks()
 {
@@ -154,14 +138,7 @@ void GameLogoDrawable::drawSparks()
          mSparks[i].mScalar += mDeltaTime * 0.02f;
          mSparks[i].mIntensity -= mDeltaTime * 0.0015f;
 
-         Vector pos =
-               mSparks[i].mOrigin
-             +
-               (
-                  mSparks[i].mDirection
-                * mSparks[i].mLength
-                * mSparks[i].mScalar
-            );
+         Vector pos = mSparks[i].mOrigin + (mSparks[i].mDirection * mSparks[i].mLength * mSparks[i].mScalar);
 
          // TODO: fix this (kept verbatim from the original - see gamelogodrawable.cpp)
          pos.z = -12.0f;
@@ -170,7 +147,7 @@ void GameLogoDrawable::drawSparks()
          float intensity = 1.0f;
          if (mFadeInEnd > mTime)
          {
-            intensity =  1.0f - (mFadeInEnd - mTime) / FADE_IN_LENGTH;
+            intensity = 1.0f - (mFadeInEnd - mTime) / FADE_IN_LENGTH;
          }
          else if (mFadeOutEnd > mTime)
          {
@@ -191,15 +168,11 @@ void GameLogoDrawable::drawSparks()
 
    if (visible)
    {
-      GameLogoPointSprite::setPointSprites(
-         positions,
-         glow
-      );
+      GameLogoPointSprite::setPointSprites(positions, glow);
 
       GameLogoPointSprite::draw();
    }
 }
-
 
 void GameLogoDrawable::updateFadeAlpha()
 {
@@ -207,16 +180,15 @@ void GameLogoDrawable::updateFadeAlpha()
 
    if (mFadeInEnd > mTime)
    {
-      alpha = 1.0f - (mFadeInEnd - mTime)/FADE_IN_LENGTH;
+      alpha = 1.0f - (mFadeInEnd - mTime) / FADE_IN_LENGTH;
    }
    else if (mFadeOutEnd > mTime)
    {
-      alpha = (mFadeOutEnd - mTime)/FADE_OUT_LENGTH;
+      alpha = (mFadeOutEnd - mTime) / FADE_OUT_LENGTH;
    }
 
    mAlpha = alpha;
 }
-
 
 void GameLogoDrawable::initOrthoGlParameters()
 {
@@ -237,14 +209,13 @@ void GameLogoDrawable::initOrthoGlParameters()
    glDepthMask(GL_FALSE);
 }
 
-
 void GameLogoDrawable::initPointSpriteGlParameters()
 {
    float znear = 0.1f;
    float zfar = 5000.0f;
 
-   float scale= 0.5f;
-   float aspect= 16.0f / 9.0f;
+   float scale = 0.5f;
+   float aspect = 16.0f / 9.0f;
 
    float ymin = znear * scale;
    float ymax = -ymin;
@@ -252,9 +223,7 @@ void GameLogoDrawable::initPointSpriteGlParameters()
    float xmax = ymax * aspect;
    float xmin = ymin * aspect;
 
-   static_cast<GLDevice*>(mDevice)->setProjectionMatrix(
-      Matrix::frustum(xmin, xmax, ymin, ymax, znear, zfar)
-   );
+   static_cast<GLDevice*>(mDevice)->setProjectionMatrix(Matrix::frustum(xmin, xmax, ymin, ymax, znear, zfar));
 
    // init blending (additive glow)
    glDisable(GL_DEPTH_TEST);
@@ -266,7 +235,6 @@ void GameLogoDrawable::initPointSpriteGlParameters()
    mDevice->setShader(0);
 }
 
-
 void GameLogoDrawable::cleanupGlParameters()
 {
    // enable blending
@@ -275,7 +243,6 @@ void GameLogoDrawable::cleanupGlParameters()
    glDepthMask(GL_TRUE);
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
-
 
 void GameLogoDrawable::initializeLayers()
 {
@@ -287,9 +254,9 @@ void GameLogoDrawable::initializeLayers()
    // per this port's own scope rule).
    for (int l = 0; l < mPsd.getLayerCount(); l++)
    {
-      PSD::Layer* psdlayer= mPsd.getLayer(l);
+      PSD::Layer* psdlayer = mPsd.getLayer(l);
 
-      PSDLayer* layer= new PSDLayer( psdlayer );
+      PSDLayer* layer = new PSDLayer(psdlayer);
 
       if (strcmp(psdlayer->getName(), LAYER_DYNABLASTER) == 0)
       {
@@ -304,10 +271,9 @@ void GameLogoDrawable::initializeLayers()
    }
 }
 
-
 void GameLogoDrawable::initSpark(Spark& spark)
 {
-   spark.mOrigin = mSparkOrigin; // maybe vary a little
+   spark.mOrigin = mSparkOrigin;  // maybe vary a little
    spark.mPosition = mSparkOrigin;
    spark.mIntensity = SPARK_START_INTENSITY;
    spark.mScalar = 0.0f;
@@ -323,16 +289,10 @@ void GameLogoDrawable::initSpark(Spark& spark)
    float dirRandX = -0.75f + frand(0.5f);
    float dirRandY = -0.75f + frand(0.5f);
 
-   spark.mDirection =
-      Vector(
-         -1.0f - dirRandX,
-         -1.0f - dirRandY,
-         -12.0f
-      );
+   spark.mDirection = Vector(-1.0f - dirRandX, -1.0f - dirRandY, -12.0f);
 
    spark.mLength = 1.0f;
 }
-
 
 void GameLogoDrawable::initializeSparks()
 {

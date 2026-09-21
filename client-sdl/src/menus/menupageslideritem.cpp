@@ -1,15 +1,10 @@
 #include "menupageslideritem.h"
 
-MenuPageSliderItem::MenuPageSliderItem()
-   : mMinimum(0),
-     mMaximum(0),
-     mValue(0.0f),
-     mRelativeToX(0)
+MenuPageSliderItem::MenuPageSliderItem() : mMinimum(0), mMaximum(0), mValue(0.0f), mRelativeToX(0)
 {
    mPageItemType = PageItemTypeSlider;
    mInteractive = true;
 }
-
 
 void MenuPageSliderItem::mousePressed(int x, int y)
 {
@@ -19,13 +14,11 @@ void MenuPageSliderItem::mousePressed(int x, int y)
    MenuPageItem::mousePressed(x, y);
 }
 
-
 void MenuPageSliderItem::mouseReleased()
 {
    setActive(false);
    MenuPageItem::mouseReleased();
 }
-
 
 void MenuPageSliderItem::mouseMoved(int x, int y)
 {
@@ -46,42 +39,35 @@ void MenuPageSliderItem::mouseMoved(int x, int y)
    MenuPageItem::mouseMoved(x, y);
 }
 
-
 bool MenuPageSliderItem::isGrabbingMouseEvents()
 {
    return true;
 }
-
 
 void MenuPageSliderItem::setMinimum(int min)
 {
    mMinimum = min;
 }
 
-
 void MenuPageSliderItem::setMaximum(int max)
 {
    mMaximum = max;
 }
-
 
 int MenuPageSliderItem::getMinimum() const
 {
    return mMinimum;
 }
 
-
 int MenuPageSliderItem::getMaximum() const
 {
    return mMaximum;
 }
 
-
 float MenuPageSliderItem::getValue() const
 {
    return mValue;
 }
-
 
 void MenuPageSliderItem::setValue(float value)
 {

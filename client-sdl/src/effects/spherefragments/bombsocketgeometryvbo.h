@@ -11,26 +11,23 @@ class Vector4;
 
 class BombSocketGeometryVbo : public GeometryVbo
 {
-   public:
+public:
+   BombSocketGeometryVbo(Geometry* geo);
 
-      BombSocketGeometryVbo(Geometry* geo);
+   virtual void initialize();
 
-      virtual void initialize();
+   void draw(const Vector4& color);
 
-      void draw(const Vector4& color);
+   void initGlParameters();
 
-      void initGlParameters();
+   void cleanupGlParameter();
 
-      void cleanupGlParameter();
+protected:
+   //! sphere texture
+   Texture mTexture;
 
-
-   protected:
-
-      //! sphere texture
-      Texture mTexture;
-
-      //! shader
-      unsigned int mShader;
-      int mFresnel;
-      int mColorParam;
+   //! shader
+   unsigned int mShader;
+   int mFresnel;
+   int mColorParam;
 };

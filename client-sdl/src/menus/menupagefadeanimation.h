@@ -1,46 +1,41 @@
 #pragma once
 
-#include "menupageanimation.h"
 #include "framework/frametimer.h"
+#include "menupageanimation.h"
 
 class MenuPageFadeAnimation : public MenuPageAnimation
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageFadeAnimation();
 
-       MenuPageFadeAnimation();
+   virtual ~MenuPageFadeAnimation();
 
-       virtual ~MenuPageFadeAnimation();
+   void setAlpha(float);
 
-       void setAlpha(float);
+   void setFadeIn(bool);
 
-       void setFadeIn(bool);
+   virtual void initialize();
 
-       virtual void initialize();
+   float getAlpha() const;
 
-       float getAlpha() const;
+   bool isStopped() const;
 
-       bool isStopped() const;
-
-       void setStopped(bool value);
-
+   void setStopped(bool value);
 
 public slots:
 
-       virtual void start();
+   virtual void start();
 
-       virtual void animate();
+   virtual void animate();
 
+private:
+   FrameTimer mElapsed;
 
-   private:
+   bool mStopped;
 
-       FrameTimer mElapsed;
+   bool mFadeIn;
 
-       bool mStopped;
-
-       bool mFadeIn;
-
-       float mAlpha;
-
+   float mAlpha;
 };

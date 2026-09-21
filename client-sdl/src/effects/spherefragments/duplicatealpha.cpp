@@ -1,20 +1,13 @@
 #include "duplicatealpha.h"
-#include "math/vector4.h"
 #include "gldevice.h"
+#include "math/vector4.h"
 
-DuplicateAlpha::DuplicateAlpha()
- : mShader(0),
-   mColorParam(-1)
+DuplicateAlpha::DuplicateAlpha() : mShader(0), mColorParam(-1)
 {
-   mShader = activeDevice->loadShader(
-      "duplicatealpha-vert.glsl",
-      "duplicatealpha-frag.glsl"
-   );
+   mShader = activeDevice->loadShader("duplicatealpha-vert.glsl", "duplicatealpha-frag.glsl");
 
    mColorParam = activeDevice->getParameterIndex("color");
 }
-
-
 
 void DuplicateAlpha::process(unsigned int texture, const Vector4& color)
 {

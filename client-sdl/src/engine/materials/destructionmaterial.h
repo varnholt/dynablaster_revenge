@@ -9,19 +9,27 @@ class Camera;
 class DestructionMaterial : public Material
 {
 public:
-   struct Vertex {
+   struct Vertex
+   {
       Vector pos;
       Vector normal;
-      UV     uv;
+      UV uv;
    };
 
-   DestructionMaterial(SceneGraph *scene);
-   DestructionMaterial(SceneGraph *scene, const char *colormap, const char *envmap, const char *specmap, const char* shadowmap, Camera* shadowCam);
+   DestructionMaterial(SceneGraph* scene);
+   DestructionMaterial(
+      SceneGraph* scene,
+      const char* colormap,
+      const char* envmap,
+      const char* specmap,
+      const char* shadowmap,
+      Camera* shadowCam
+   );
    virtual ~DestructionMaterial();
 
-   void update(float frame, Node **nodelist, const Matrix& cam);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   void update(float frame, Node** nodelist, const Matrix& cam);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
 
 private:

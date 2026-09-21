@@ -161,83 +161,83 @@ using GLsizeiptr = intptr_t;
 // straight through is always correct, just potentially a little slower.
 #define glDrawRangeElements(mode, start, end, count, type, indices) glDrawElements(mode, count, type, indices)
 
-using PFNGLVIEWPORTPROC = void(*)(GLint, GLint, GLsizei, GLsizei);
-using PFNGLCLEARCOLORPROC = void(*)(GLfloat, GLfloat, GLfloat, GLfloat);
-using PFNGLCLEARPROC = void(*)(GLbitfield);
-using PFNGLENABLEPROC = void(*)(GLenum);
-using PFNGLDISABLEPROC = void(*)(GLenum);
-using PFNGLBLENDFUNCPROC = void(*)(GLenum, GLenum);
-using PFNGLPIXELSTOREIPROC = void(*)(GLenum, GLint);
-using PFNGLREADPIXELSPROC = void(*)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void*);
-using PFNGLSCISSORPROC = void(*)(GLint, GLint, GLsizei, GLsizei);
+using PFNGLVIEWPORTPROC = void (*)(GLint, GLint, GLsizei, GLsizei);
+using PFNGLCLEARCOLORPROC = void (*)(GLfloat, GLfloat, GLfloat, GLfloat);
+using PFNGLCLEARPROC = void (*)(GLbitfield);
+using PFNGLENABLEPROC = void (*)(GLenum);
+using PFNGLDISABLEPROC = void (*)(GLenum);
+using PFNGLBLENDFUNCPROC = void (*)(GLenum, GLenum);
+using PFNGLPIXELSTOREIPROC = void (*)(GLenum, GLint);
+using PFNGLREADPIXELSPROC = void (*)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void*);
+using PFNGLSCISSORPROC = void (*)(GLint, GLint, GLsizei, GLsizei);
 
-using PFNGLCREATESHADERPROC = GLuint(*)(GLenum);
-using PFNGLSHADERSOURCEPROC = void(*)(GLuint, GLsizei, const GLchar* const*, const GLint*);
-using PFNGLCOMPILESHADERPROC = void(*)(GLuint);
-using PFNGLGETSHADERIVPROC = void(*)(GLuint, GLenum, GLint*);
-using PFNGLGETSHADERINFOLOGPROC = void(*)(GLuint, GLsizei, GLsizei*, GLchar*);
-using PFNGLDELETESHADERPROC = void(*)(GLuint);
+using PFNGLCREATESHADERPROC = GLuint (*)(GLenum);
+using PFNGLSHADERSOURCEPROC = void (*)(GLuint, GLsizei, const GLchar* const*, const GLint*);
+using PFNGLCOMPILESHADERPROC = void (*)(GLuint);
+using PFNGLGETSHADERIVPROC = void (*)(GLuint, GLenum, GLint*);
+using PFNGLGETSHADERINFOLOGPROC = void (*)(GLuint, GLsizei, GLsizei*, GLchar*);
+using PFNGLDELETESHADERPROC = void (*)(GLuint);
 
-using PFNGLCREATEPROGRAMPROC = GLuint(*)();
-using PFNGLATTACHSHADERPROC = void(*)(GLuint, GLuint);
-using PFNGLLINKPROGRAMPROC = void(*)(GLuint);
-using PFNGLGETPROGRAMIVPROC = void(*)(GLuint, GLenum, GLint*);
-using PFNGLGETPROGRAMINFOLOGPROC = void(*)(GLuint, GLsizei, GLsizei*, GLchar*);
-using PFNGLUSEPROGRAMPROC = void(*)(GLuint);
-using PFNGLDELETEPROGRAMPROC = void(*)(GLuint);
+using PFNGLCREATEPROGRAMPROC = GLuint (*)();
+using PFNGLATTACHSHADERPROC = void (*)(GLuint, GLuint);
+using PFNGLLINKPROGRAMPROC = void (*)(GLuint);
+using PFNGLGETPROGRAMIVPROC = void (*)(GLuint, GLenum, GLint*);
+using PFNGLGETPROGRAMINFOLOGPROC = void (*)(GLuint, GLsizei, GLsizei*, GLchar*);
+using PFNGLUSEPROGRAMPROC = void (*)(GLuint);
+using PFNGLDELETEPROGRAMPROC = void (*)(GLuint);
 
-using PFNGLGENBUFFERSPROC = void(*)(GLsizei, GLuint*);
-using PFNGLBINDBUFFERPROC = void(*)(GLenum, GLuint);
-using PFNGLBUFFERDATAPROC = void(*)(GLenum, GLsizeiptr, const void*, GLenum);
-using PFNGLDELETEBUFFERSPROC = void(*)(GLsizei, const GLuint*);
+using PFNGLGENBUFFERSPROC = void (*)(GLsizei, GLuint*);
+using PFNGLBINDBUFFERPROC = void (*)(GLenum, GLuint);
+using PFNGLBUFFERDATAPROC = void (*)(GLenum, GLsizeiptr, const void*, GLenum);
+using PFNGLDELETEBUFFERSPROC = void (*)(GLsizei, const GLuint*);
 
-using PFNGLGENVERTEXARRAYSPROC = void(*)(GLsizei, GLuint*);
-using PFNGLBINDVERTEXARRAYPROC = void(*)(GLuint);
-using PFNGLDELETEVERTEXARRAYSPROC = void(*)(GLsizei, const GLuint*);
-using PFNGLVERTEXATTRIBPOINTERPROC = void(*)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void*);
-using PFNGLENABLEVERTEXATTRIBARRAYPROC = void(*)(GLuint);
-using PFNGLDISABLEVERTEXATTRIBARRAYPROC = void(*)(GLuint);
-using PFNGLDEPTHMASKPROC = void(*)(GLboolean);
+using PFNGLGENVERTEXARRAYSPROC = void (*)(GLsizei, GLuint*);
+using PFNGLBINDVERTEXARRAYPROC = void (*)(GLuint);
+using PFNGLDELETEVERTEXARRAYSPROC = void (*)(GLsizei, const GLuint*);
+using PFNGLVERTEXATTRIBPOINTERPROC = void (*)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void*);
+using PFNGLENABLEVERTEXATTRIBARRAYPROC = void (*)(GLuint);
+using PFNGLDISABLEVERTEXATTRIBARRAYPROC = void (*)(GLuint);
+using PFNGLDEPTHMASKPROC = void (*)(GLboolean);
 
-using PFNGLGENTEXTURESPROC = void(*)(GLsizei, GLuint*);
-using PFNGLBINDTEXTUREPROC = void(*)(GLenum, GLuint);
-using PFNGLTEXIMAGE2DPROC = void(*)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*);
-using PFNGLTEXPARAMETERIPROC = void(*)(GLenum, GLenum, GLint);
-using PFNGLDELETETEXTURESPROC = void(*)(GLsizei, const GLuint*);
-using PFNGLACTIVETEXTUREPROC = void(*)(GLenum);
+using PFNGLGENTEXTURESPROC = void (*)(GLsizei, GLuint*);
+using PFNGLBINDTEXTUREPROC = void (*)(GLenum, GLuint);
+using PFNGLTEXIMAGE2DPROC = void (*)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*);
+using PFNGLTEXPARAMETERIPROC = void (*)(GLenum, GLenum, GLint);
+using PFNGLDELETETEXTURESPROC = void (*)(GLsizei, const GLuint*);
+using PFNGLACTIVETEXTUREPROC = void (*)(GLenum);
 
-using PFNGLGETUNIFORMLOCATIONPROC = GLint(*)(GLuint, const GLchar*);
-using PFNGLUNIFORM1IPROC = void(*)(GLint, GLint);
-using PFNGLUNIFORM1FPROC = void(*)(GLint, GLfloat);
-using PFNGLUNIFORM1FVPROC = void(*)(GLint, GLsizei, const GLfloat*);
-using PFNGLUNIFORM2FVPROC = void(*)(GLint, GLsizei, const GLfloat*);
-using PFNGLUNIFORM3FVPROC = void(*)(GLint, GLsizei, const GLfloat*);
-using PFNGLUNIFORM4FVPROC = void(*)(GLint, GLsizei, const GLfloat*);
-using PFNGLUNIFORMMATRIX4FVPROC = void(*)(GLint, GLsizei, GLboolean, const GLfloat*);
+using PFNGLGETUNIFORMLOCATIONPROC = GLint (*)(GLuint, const GLchar*);
+using PFNGLUNIFORM1IPROC = void (*)(GLint, GLint);
+using PFNGLUNIFORM1FPROC = void (*)(GLint, GLfloat);
+using PFNGLUNIFORM1FVPROC = void (*)(GLint, GLsizei, const GLfloat*);
+using PFNGLUNIFORM2FVPROC = void (*)(GLint, GLsizei, const GLfloat*);
+using PFNGLUNIFORM3FVPROC = void (*)(GLint, GLsizei, const GLfloat*);
+using PFNGLUNIFORM4FVPROC = void (*)(GLint, GLsizei, const GLfloat*);
+using PFNGLUNIFORMMATRIX4FVPROC = void (*)(GLint, GLsizei, GLboolean, const GLfloat*);
 
-using PFNGLDRAWARRAYSPROC = void(*)(GLenum, GLint, GLsizei);
-using PFNGLDRAWELEMENTSPROC = void(*)(GLenum, GLsizei, GLenum, const void*);
-using PFNGLGETATTRIBLOCATIONPROC = GLint(*)(GLuint, const GLchar*);
+using PFNGLDRAWARRAYSPROC = void (*)(GLenum, GLint, GLsizei);
+using PFNGLDRAWELEMENTSPROC = void (*)(GLenum, GLsizei, GLenum, const void*);
+using PFNGLGETATTRIBLOCATIONPROC = GLint (*)(GLuint, const GLchar*);
 
-using PFNGLDEPTHFUNCPROC = void(*)(GLenum);
-using PFNGLCLEARDEPTHFPROC = void(*)(GLfloat);
-using PFNGLCLEARSTENCILPROC = void(*)(GLint);
-using PFNGLTEXPARAMETERFPROC = void(*)(GLenum, GLenum, GLfloat);
-using PFNGLGETERRORPROC = GLenum(*)();
+using PFNGLDEPTHFUNCPROC = void (*)(GLenum);
+using PFNGLCLEARDEPTHFPROC = void (*)(GLfloat);
+using PFNGLCLEARSTENCILPROC = void (*)(GLint);
+using PFNGLTEXPARAMETERFPROC = void (*)(GLenum, GLenum, GLfloat);
+using PFNGLGETERRORPROC = GLenum (*)();
 
-using PFNGLMAPBUFFERRANGEPROC = void*(*)(GLenum, GLintptr, GLsizeiptr, GLbitfield);
-using PFNGLUNMAPBUFFERPROC = GLboolean(*)(GLenum);
+using PFNGLMAPBUFFERRANGEPROC = void* (*)(GLenum, GLintptr, GLsizeiptr, GLbitfield);
+using PFNGLUNMAPBUFFERPROC = GLboolean (*)(GLenum);
 
-using PFNGLGENFRAMEBUFFERSPROC = void(*)(GLsizei, GLuint*);
-using PFNGLBINDFRAMEBUFFERPROC = void(*)(GLenum, GLuint);
-using PFNGLDELETEFRAMEBUFFERSPROC = void(*)(GLsizei, const GLuint*);
-using PFNGLFRAMEBUFFERTEXTURE2DPROC = void(*)(GLenum, GLenum, GLenum, GLuint, GLint);
-using PFNGLCHECKFRAMEBUFFERSTATUSPROC = GLenum(*)(GLenum);
-using PFNGLGENRENDERBUFFERSPROC = void(*)(GLsizei, GLuint*);
-using PFNGLBINDRENDERBUFFERPROC = void(*)(GLenum, GLuint);
-using PFNGLDELETERENDERBUFFERSPROC = void(*)(GLsizei, const GLuint*);
-using PFNGLRENDERBUFFERSTORAGEPROC = void(*)(GLenum, GLenum, GLsizei, GLsizei);
-using PFNGLFRAMEBUFFERRENDERBUFFERPROC = void(*)(GLenum, GLenum, GLenum, GLuint);
+using PFNGLGENFRAMEBUFFERSPROC = void (*)(GLsizei, GLuint*);
+using PFNGLBINDFRAMEBUFFERPROC = void (*)(GLenum, GLuint);
+using PFNGLDELETEFRAMEBUFFERSPROC = void (*)(GLsizei, const GLuint*);
+using PFNGLFRAMEBUFFERTEXTURE2DPROC = void (*)(GLenum, GLenum, GLenum, GLuint, GLint);
+using PFNGLCHECKFRAMEBUFFERSTATUSPROC = GLenum (*)(GLenum);
+using PFNGLGENRENDERBUFFERSPROC = void (*)(GLsizei, GLuint*);
+using PFNGLBINDRENDERBUFFERPROC = void (*)(GLenum, GLuint);
+using PFNGLDELETERENDERBUFFERSPROC = void (*)(GLsizei, const GLuint*);
+using PFNGLRENDERBUFFERSTORAGEPROC = void (*)(GLenum, GLenum, GLsizei, GLsizei);
+using PFNGLFRAMEBUFFERRENDERBUFFERPROC = void (*)(GLenum, GLenum, GLenum, GLuint);
 
 extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
@@ -314,7 +314,7 @@ extern PFNGLCLEARSTENCILPROC glClearStencil;
 extern PFNGLTEXPARAMETERFPROC glTexParameterf;
 extern PFNGLGETERRORPROC glGetError;
 
-using PFNGLGETSTRINGPROC = const GLubyte*(*)(GLenum);
+using PFNGLGETSTRINGPROC = const GLubyte* (*)(GLenum);
 extern PFNGLGETSTRINGPROC glGetString;
 #define GL_VERSION 0x1F02
 #define GL_RENDERER 0x1F01

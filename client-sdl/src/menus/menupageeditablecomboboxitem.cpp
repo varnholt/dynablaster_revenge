@@ -8,20 +8,17 @@
 // static
 QMap<QString, MenuPageTextEditItem*> MenuPageEditableComboBoxItem::sMapTextEdits;
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-MenuPageEditableComboBoxItem::MenuPageEditableComboBoxItem()
- : mTextEditItem(0)
+ */
+MenuPageEditableComboBoxItem::MenuPageEditableComboBoxItem() : mTextEditItem(0)
 {
    mPageItemType = PageItemTypeEditableCombobox;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageEditableComboBoxItem::updateClipperBounds()
 {
    // the same code could be used in the usual combobox item as well
@@ -34,25 +31,22 @@ void MenuPageEditableComboBoxItem::updateClipperBounds()
    );
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void MenuPageEditableComboBoxItem::initialize()
 {
    MenuPageComboBoxItem::initialize();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param item item to set
 */
-void MenuPageEditableComboBoxItem::setTextEditItem(MenuPageTextEditItem *item)
+void MenuPageEditableComboBoxItem::setTextEditItem(MenuPageTextEditItem* item)
 {
    mTextEditItem = item;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -62,7 +56,6 @@ MenuPageTextEditItem* MenuPageEditableComboBoxItem::getTextEditItem() const
 {
    return mTextEditItem;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -88,20 +81,15 @@ void MenuPageEditableComboBoxItem::setVisible(bool visible)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param key item key
    \param item textedit item to add
 */
-void MenuPageEditableComboBoxItem::addTextEdit(
-   const QString & key,
-   MenuPageTextEditItem * item
-)
+void MenuPageEditableComboBoxItem::addTextEdit(const QString& key, MenuPageTextEditItem* item)
 {
    sMapTextEdits.insert(key, item);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -110,47 +98,29 @@ void MenuPageEditableComboBoxItem::addTextEdit(
    \param overrideAlpha \c true if alpha is overriden
    \param outlineColor item's outline color
 */
-void MenuPageEditableComboBoxItem::appendItem(
-   const QString &item,
-   const QColor &color,
-   bool overrideAlpha,
-   const QColor &outlineColor
-)
+void MenuPageEditableComboBoxItem::appendItem(const QString& item, const QColor& color, bool overrideAlpha, const QColor& outlineColor)
 {
    MenuPageListItem::appendItem(item, color, overrideAlpha, outlineColor);
    updateClipperBounds();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param labelKey textedit item key
    \param comboBoxKey combobox item key
 */
-void MenuPageEditableComboBoxItem::linkComboBoxToTextEdit(
-   const QString& textEditKey,
-   const QString& comboBoxKey
-)
+void MenuPageEditableComboBoxItem::linkComboBoxToTextEdit(const QString& textEditKey, const QString& comboBoxKey)
 {
-   if (
-         sMapTextEdits.contains(textEditKey)
-      && sMapComboBoxes.contains(comboBoxKey)
-   )
+   if (sMapTextEdits.contains(textEditKey) && sMapComboBoxes.contains(comboBoxKey))
    {
       MenuPageTextEditItem* textEdit = sMapTextEdits[textEditKey];
       MenuPageComboBoxItem* comboBox = sMapComboBoxes[comboBoxKey];
-      MenuPageEditableComboBoxItem* editableCombobBox
-         = dynamic_cast<MenuPageEditableComboBoxItem*>(comboBox);
+      MenuPageEditableComboBoxItem* editableCombobBox = dynamic_cast<MenuPageEditableComboBoxItem*>(comboBox);
 
       editableCombobBox->setTextEditItem(textEdit);
 
       // see MenuPageComboBoxItem::linkComboBoxToButton for why qApp->connect() becomes
       // QObject::connect() in this port (no QApplication instance exists).
-      QObject::connect(
-         editableCombobBox,
-         SIGNAL(valueChanged(QString)),
-         textEdit,
-         SLOT(setText(QString))
-      );
+      QObject::connect(editableCombobBox, SIGNAL(valueChanged(QString)), textEdit, SLOT(setText(QString)));
    }
 }

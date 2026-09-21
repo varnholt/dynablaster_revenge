@@ -4,7 +4,6 @@
 
 class MenuFont
 {
-   public:
-
-      static BitmapFont::Parameter sMenuChars[129];
+public:
+   static BitmapFont::Parameter sMenuChars[129];
 };

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tools/string.h"
 #include "tools/objectname.h"
+#include "tools/string.h"
 
 class Stream;
 
@@ -9,7 +9,7 @@ class TextureSlot : public ObjectName
 {
 public:
    TextureSlot();
-   TextureSlot(Stream *stream);
+   TextureSlot(Stream* stream);
 
    void load(Stream* stream);
    void write(Stream* stream);
@@ -19,5 +19,5 @@ public:
 
 private:
    float mAmount;
-   int   mChannel;
+   int mChannel;
 };

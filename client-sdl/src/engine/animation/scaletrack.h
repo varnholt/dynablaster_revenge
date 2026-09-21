@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "math/matrix.h"
 #include "scalekey.h"
 #include "track.h"
-#include "math/matrix.h"
 
 class ScaleTrack : public Track<ScaleKey>
 {
@@ -15,6 +15,6 @@ public:
 
    void add(int time, const Scale& scale);
 
-   virtual void load(Stream *stream);
-   virtual void write(Stream *stream);
+   virtual void load(Stream* stream);
+   virtual void write(Stream* stream);
 };

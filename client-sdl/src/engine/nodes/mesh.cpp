@@ -1,31 +1,24 @@
 #include "mesh.h"
-#include "tools/stream.h"
+#include "animation/motionmixer.h"
 #include "math/vector.h"
 #include "renderdevice.h"
-#include "animation/motionmixer.h"
 #include "tools/profiling.h"
+#include "tools/stream.h"
 
-Mesh::Mesh(Node *parent)
-: Node(Node::idMesh, parent)
-, mSkeleton(0)
-, mMotionMixer(0)
-, mAnimFrame(0.0f)
-, mRenderFlags(0)
+Mesh::Mesh(Node* parent) : Node(Node::idMesh, parent), mSkeleton(0), mMotionMixer(0), mAnimFrame(0.0f), mRenderFlags(0)
 {
-   for (int i=0;i<4; i++) mRenderParameter[i]= 0.0f;
+   for (int i = 0; i < 4; i++)
+      mRenderParameter[i] = 0.0f;
 }
 
 Mesh::Mesh(const Mesh& mesh, Node* parent)
-: Node(mesh, parent)
-, mSkeleton( mesh.getSkeleton() )
-, mMotionMixer( mesh.getMotionMixer() )
-, mAnimFrame(0.0f)
+    : Node(mesh, parent), mSkeleton(mesh.getSkeleton()), mMotionMixer(mesh.getMotionMixer()), mAnimFrame(0.0f)
 {
-   for (int i=0;i<mesh.getPartCount();i++)
+   for (int i = 0; i < mesh.getPartCount(); i++)
    {
-	   Geometry *p= mesh.getPart(i);
-	   Geometry *geo= new Geometry( *p );
-	   geo->setParent(this);
+      Geometry* p = mesh.getPart(i);
+      Geometry* geo = new Geometry(*p);
+      geo->setParent(this);
       add(geo);
    }
 
@@ -39,27 +32,27 @@ Mesh::~Mesh()
 void Mesh::copy(const Mesh& mesh)
 {
    if (!mParent)
-      mParent= mesh.parent();
-   mHasSkinning= mesh.hasSkinning();
-   mUserTransform= mesh.getUserTransformable();
-   mFrame= mesh.getFrame();
-   mAnimFrame= mesh.getAnimationFrame();
-   mSkeleton= mesh.getSkeleton();
-   mMotionMixer= mesh.getMotionMixer();
+      mParent = mesh.parent();
+   mHasSkinning = mesh.hasSkinning();
+   mUserTransform = mesh.getUserTransformable();
+   mFrame = mesh.getFrame();
+   mAnimFrame = mesh.getAnimationFrame();
+   mSkeleton = mesh.getSkeleton();
+   mMotionMixer = mesh.getMotionMixer();
 
-   mBake= mesh.getBakedAnimation();
+   mBake = mesh.getBakedAnimation();
 
-   for (int i=0;i<mesh.getPartCount();i++)
+   for (int i = 0; i < mesh.getPartCount(); i++)
    {
-      Geometry *geo= new Geometry(this);
-      geo->copy( *(mesh.getPart(i)) );
+      Geometry* geo = new Geometry(this);
+      geo->copy(*(mesh.getPart(i)));
       add(geo);
    }
 }
 
 void Mesh::setAnimationFrame(float frame)
 {
-   mAnimFrame= frame;
+   mAnimFrame = frame;
 }
 
 float Mesh::getAnimationFrame() const
@@ -67,7 +60,7 @@ float Mesh::getAnimationFrame() const
    return mAnimFrame;
 }
 
-void Mesh::add(Geometry *geo)
+void Mesh::add(Geometry* geo)
 {
    mGeometry.add(geo);
 }
@@ -76,7 +69,6 @@ int Mesh::getPartCount() const
 {
    return mGeometry.size();
 }
-
 
 Geometry* Mesh::getPart(int index) const
 {
@@ -88,9 +80,9 @@ Node* Mesh::getSkeleton() const
    return mSkeleton;
 }
 
-void Mesh::setSkeleton(Node *node)
+void Mesh::setSkeleton(Node* node)
 {
-   mSkeleton= node;
+   mSkeleton = node;
 }
 
 MotionMixer* Mesh::getMotionMixer() const
@@ -100,117 +92,112 @@ MotionMixer* Mesh::getMotionMixer() const
 
 void Mesh::setMotionMixer(MotionMixer* mixer)
 {
-   mMotionMixer= mixer;
+   mMotionMixer = mixer;
 }
 
 void Mesh::transform(float frame)
 {
    Node::transform(frame);
-   MotionMixer *mixer= getMotionMixer();
+   MotionMixer* mixer = getMotionMixer();
    if (!mixer)
       return;
 
-   double t1= getCpuTick();
+   double t1 = getCpuTick();
 
-   mixer->animate( getFrame() );
+   mixer->animate(getFrame());
 
-   double t2= getCpuTick();
-/*
-   for (int i=0; i<mGeometry.size(); i++)
-   {
-      Geometry* geo= mGeometry[i];
-
-      int nv= geo->getVertexCount();
-      Vector *vtemp= geo->getSkinVertices();
-      Vector *ntemp= geo->getSkinNormals();
-      memset(vtemp, 0, sizeof(Vector)*nv);
-      memset(ntemp, 0, sizeof(Vector)*nv);
-
-      Vector *vtx= geo->getVertices();
-      Vector *nrm= geo->getNormals();
-
-      for (int b=0;b<geo->getBoneCount();b++)
+   double t2 = getCpuTick();
+   /*
+      for (int i=0; i<mGeometry.size(); i++)
       {
-         const Bone& bone= geo->getBone(b);
+         Geometry* geo= mGeometry[i];
 
-         Node *node= mixer->getNode( bone.id() );
+         int nv= geo->getVertexCount();
+         Vector *vtemp= geo->getSkinVertices();
+         Vector *ntemp= geo->getSkinNormals();
+         memset(vtemp, 0, sizeof(Vector)*nv);
+         memset(ntemp, 0, sizeof(Vector)*nv);
 
-//         Matrix bm= bone.transform() * node->getTransform();
-         const Matrix& bm= node->getTransform();
-         Matrix nbm= bm.normalize();
+         Vector *vtx= geo->getVertices();
+         Vector *nrm= geo->getNormals();
 
-         Weight* weights= bone.weights();
-         for (int v=0;v<bone.count();v++)
+         for (int b=0;b<geo->getBoneCount();b++)
          {
-            int idx= weights[v].id();
-            float f= weights[v].weight();
+            const Bone& bone= geo->getBone(b);
 
-            vtemp[idx] += (bm * vtx[idx]) * f;
-            ntemp[idx] += (nbm * nrm[idx]) * f;
+            Node *node= mixer->getNode( bone.id() );
+
+   //         Matrix bm= bone.transform() * node->getTransform();
+            const Matrix& bm= node->getTransform();
+            Matrix nbm= bm.normalize();
+
+            Weight* weights= bone.weights();
+            for (int v=0;v<bone.count();v++)
+            {
+               int idx= weights[v].id();
+               float f= weights[v].weight();
+
+               vtemp[idx] += (bm * vtx[idx]) * f;
+               ntemp[idx] += (nbm * nrm[idx]) * f;
+            }
          }
       }
-   }
-*/
+   */
 
-   double t3= getCpuTick();
+   double t3 = getCpuTick();
 
-   t1= (t2-t1)/1000000.0;
-   t2= (t3-t2)/1000000.0;
+   t1 = (t2 - t1) / 1000000.0;
+   t2 = (t3 - t2) / 1000000.0;
 
-//   printf("skin performance: %f / %f ms \r", t1, t2);
+   //   printf("skin performance: %f / %f ms \r", t1, t2);
 }
-
 
 unsigned int Mesh::getRenderFlags() const
 {
    return mRenderFlags;
 }
 
-
 void Mesh::setRenderFlags(unsigned int flags)
 {
-   mRenderFlags= flags;
+   mRenderFlags = flags;
 }
-
 
 float Mesh::getRenderParameter(int index) const
 {
    return mRenderParameter[index];
 }
 
-
 void Mesh::setRenderParameter(int index, float param)
 {
-   mRenderParameter[index]= param;
+   mRenderParameter[index] = param;
 }
 
-
-void Mesh::load(Stream *stream)
+void Mesh::load(Stream* stream)
 {
    Node::load(stream);
 
-   /*int flags=*/ stream->getInt();
+   /*int flags=*/stream->getInt();
 
    // int castshadow= flags & 1;
    // int recvshadow= flags & 2;
 
-   int ng= stream->getInt();
+   int ng = stream->getInt();
    mGeometry.init(ng);
-   for (int i=0;i<ng;i++)
+   for (int i = 0; i < ng; i++)
    {
-	   Geometry *geo= new Geometry(this);
-	   geo->load(stream);
-	   mGeometry.add(geo);
+      Geometry* geo = new Geometry(this);
+      geo->load(stream);
+      mGeometry.add(geo);
    }
 
-/*
-   for (int i=0;i<ng;i++) 
-	   if (mGeometry[i]->getWeightCount()>0) 
-		   mHasSkinning= true;
-*/
+   /*
+      for (int i=0;i<ng;i++)
+              if (mGeometry[i]->getWeightCount()>0)
+                      mHasSkinning= true;
+   */
 
    // morph targets
-//   int mt= stream->getInt();
+   //   int mt= stream->getInt();
 
    /*
    for (int i=0;i<4;i++)
@@ -229,25 +216,23 @@ void Mesh::load(Stream *stream)
    mRotTrack.load(&anim);
    mScaleTrack.load(&anim);
    mVisTrack.load(&anim);
-//   mFlipTrack.load(&anim);
+   //   mFlipTrack.load(&anim);
    anim.skip();
-
 }
 
-void Mesh::write(Stream *stream)
+void Mesh::write(Stream* stream)
 {
    Node::write(stream);
 
-   int flags= 0; // TODO!
+   int flags = 0;  // TODO!
    stream->writeInt(flags);
 
-   stream->writeInt( mGeometry.size() );
-   for (int i=0; i<mGeometry.size(); i++)
+   stream->writeInt(mGeometry.size());
+   for (int i = 0; i < mGeometry.size(); i++)
    {
-	   Geometry *geo= mGeometry[i];
-	   geo->write(stream);
+      Geometry* geo = mGeometry[i];
+      geo->write(stream);
    }
-
 
    // write tracks
    Chunk anim(stream, 2000, "Animation");
@@ -258,11 +243,10 @@ void Mesh::write(Stream *stream)
    mFlipTrack.write(&anim);
 }
 
-
 // create box mapping
 void Mesh::createBoxMapping(bool unwrap, const Vector& min, const Vector& max, const Matrix& tm)
 {
-   for (int i=0; i<mGeometry.size(); i++)
+   for (int i = 0; i < mGeometry.size(); i++)
    {
       mGeometry[i]->createBoxMapping(unwrap, min, max, getTransform(), tm);
    }

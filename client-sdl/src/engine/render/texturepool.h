@@ -1,11 +1,11 @@
 #ifndef TEXTUREPOOL_H
 #define TEXTUREPOOL_H
 
-#include <QObject>
 #include <QMap>
-#include "tools/singleton.h"
-#include "tools/array.h"
+#include <QObject>
 #include "texture.h"
+#include "tools/array.h"
+#include "tools/singleton.h"
 
 class Image;
 
@@ -38,10 +38,10 @@ private slots:
    void updateImage(Image*);
 
 private:
-   QMap<QString,Texture> mPool;
-   Array<unsigned int>   mRemoval;
-   bool                  mBlock;
-   unsigned int          mMemory;
+   QMap<QString, Texture> mPool;
+   Array<unsigned int> mRemoval;
+   bool mBlock;
+   unsigned int mMemory;
 };
 
 #endif

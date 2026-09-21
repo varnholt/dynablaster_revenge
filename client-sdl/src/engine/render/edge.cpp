@@ -1,6 +1,5 @@
 #include "edge.h"
 
-void Edge::operator << (Stream& /*stream*/)
+void Edge::operator<<(Stream& /*stream*/)
 {
-
 }

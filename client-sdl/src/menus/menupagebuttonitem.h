@@ -8,25 +8,20 @@ class MenuPageButtonItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageButtonItem(QObject* parent = 0);
 
-      MenuPageButtonItem(QObject* parent = 0);
+   virtual void draw();
 
-      virtual void draw();
+public slots:
 
+   virtual void setFocus(bool focus);
 
-   public slots:
+   virtual void setEnabled(bool enabled);
 
-      virtual void setFocus(bool focus);
+private:
+   FrameTimer mFocusOutTime;
 
-      virtual void setEnabled(bool enabled);
-
-
-   private:
-
-      FrameTimer mFocusOutTime;
-
-      float mFadeValue;
-      bool mFadeOut;
-
+   float mFadeValue;
+   bool mFadeOut;
 };

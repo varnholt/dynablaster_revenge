@@ -11,27 +11,24 @@ class Vector4;
 
 class SphereGeometryVbo : public GeometryVbo
 {
-   public:
+public:
+   SphereGeometryVbo(Geometry* geo);
 
-      SphereGeometryVbo(Geometry* geo);
+   virtual void initialize();
 
-      virtual void initialize();
+   void draw(const Vector4& color);
 
-      void draw(const Vector4& color);
+   void initGlParameters();
 
-      void initGlParameters();
+   void cleanupGlParameter();
 
-      void cleanupGlParameter();
+protected:
+   //! sphere texture
+   Texture mTexture;
 
+   //! shader
+   unsigned int mShader;
 
-   protected:
-
-      //! sphere texture
-      Texture mTexture;
-
-      //! shader
-      unsigned int mShader;
-
-      //! uniform locations
-      int mColorParam;
+   //! uniform locations
+   int mColorParam;
 };

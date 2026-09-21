@@ -20,7 +20,7 @@ public:
    FrameBuffer(int width, int height, int multiSample = 0, int formatFlags = 0);
    ~FrameBuffer();
 
-   static void push(FrameBuffer* fb= 0);
+   static void push(FrameBuffer* fb = 0);
    static void pop();
    static FrameBuffer* Instance();
 

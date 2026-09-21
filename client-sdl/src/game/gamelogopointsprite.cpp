@@ -3,9 +3,9 @@
 
 // framework
 #include "gldevice.h"
-#include "render/texturepool.h"
 #include "math/matrix.h"
 #include "math/vector.h"
+#include "render/texturepool.h"
 
 #include <vector>
 
@@ -17,49 +17,39 @@ unsigned int GameLogoPointSprite::sVertexBuffer = 0;
 Array<Vector> GameLogoPointSprite::mPositions;
 Array<float> GameLogoPointSprite::mGlowValues;
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 GameLogoPointSprite::GameLogoPointSprite()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void GameLogoPointSprite::initialize()
 {
    TexturePool* pool = TexturePool::Instance();
    sTexture = pool->getTexture("pointsprite");
 
-   sShader = activeDevice->loadShader(
-      "pointsprite-vert.glsl",
-      "pointsprite-frag.glsl"
-   );
+   sShader = activeDevice->loadShader("pointsprite-vert.glsl", "pointsprite-frag.glsl");
    sTextureParam = activeDevice->getParameterIndex("texturemap");
 
    glGenBuffers(1, &sVertexBuffer);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-void GameLogoPointSprite::setPointSprites(
-   const Array<Vector>& v,
-   const Array<float>& glowValues
-)
+ */
+void GameLogoPointSprite::setPointSprites(const Array<Vector>& v, const Array<float>& glowValues)
 {
    mPositions = v;
    mGlowValues = glowValues;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void GameLogoPointSprite::draw()
 {
    if (mPositions.size() == 0)
@@ -86,12 +76,12 @@ void GameLogoPointSprite::draw()
       const float pointSize = mGlowValues[i];
       const Vector& p = mPositions[i];
 
-      const float bl[5] = { p.x - pointSize, p.y - pointSize, p.z, 0.0f, 0.0f };
-      const float br[5] = { p.x + pointSize, p.y - pointSize, p.z, 1.0f, 0.0f };
-      const float tr[5] = { p.x + pointSize, p.y + pointSize, p.z, 1.0f, 1.0f };
-      const float tl[5] = { p.x - pointSize, p.y + pointSize, p.z, 0.0f, 1.0f };
+      const float bl[5] = {p.x - pointSize, p.y - pointSize, p.z, 0.0f, 0.0f};
+      const float br[5] = {p.x + pointSize, p.y - pointSize, p.z, 1.0f, 0.0f};
+      const float tr[5] = {p.x + pointSize, p.y + pointSize, p.z, 1.0f, 1.0f};
+      const float tl[5] = {p.x - pointSize, p.y + pointSize, p.z, 0.0f, 1.0f};
 
-      const float* quad[6] = { bl, br, tr, bl, tr, tl };
+      const float* quad[6] = {bl, br, tr, bl, tr, tl};
       for (int v = 0; v < 6; v++)
       {
          verts.insert(verts.end(), quad[v], quad[v] + 5);

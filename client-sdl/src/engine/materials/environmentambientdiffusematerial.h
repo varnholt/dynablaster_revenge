@@ -7,19 +7,20 @@
 class EnvironmentAmbientDiffuseMaterial : public Material
 {
 public:
-   struct Vertex {
+   struct Vertex
+   {
       Vector pos;
       Vector normal;
-      UV     uv;
+      UV uv;
    };
 
-   EnvironmentAmbientDiffuseMaterial(SceneGraph *scene);
-   EnvironmentAmbientDiffuseMaterial(SceneGraph *scene, const char *ambientmap, const char* diffusemap, const char *specmap);
+   EnvironmentAmbientDiffuseMaterial(SceneGraph* scene);
+   EnvironmentAmbientDiffuseMaterial(SceneGraph* scene, const char* ambientmap, const char* diffusemap, const char* specmap);
    ~EnvironmentAmbientDiffuseMaterial();
 
-   void update(float frame, Node **nodelist, const Matrix& cam);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   void update(float frame, Node** nodelist, const Matrix& cam);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
 
 private:

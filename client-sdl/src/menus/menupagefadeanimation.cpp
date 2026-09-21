@@ -7,44 +7,34 @@ namespace
 // MSVC only defines kPi when _USE_MATH_DEFINES is set before every <math.h>/<cmath> include
 // site (fragile project-wide), so this is a self-contained local constant instead.
 constexpr float kPi = 3.14159265358979323846f;
-}
+}  // namespace
 
-MenuPageFadeAnimation::MenuPageFadeAnimation()
-   : MenuPageAnimation(),
-     mStopped(false),
-     mFadeIn(false),
-     mAlpha(0.0f)
+MenuPageFadeAnimation::MenuPageFadeAnimation() : MenuPageAnimation(), mStopped(false), mFadeIn(false), mAlpha(0.0f)
 {
 }
-
 
 MenuPageFadeAnimation::~MenuPageFadeAnimation()
 {
 }
 
-
 void MenuPageFadeAnimation::initialize()
 {
 }
-
 
 float MenuPageFadeAnimation::getAlpha() const
 {
    return mAlpha;
 }
 
-
 void MenuPageFadeAnimation::setAlpha(float alpha)
 {
    mAlpha = alpha;
 }
 
-
 void MenuPageFadeAnimation::setFadeIn(bool fadeIn)
 {
    mFadeIn = fadeIn;
 }
-
 
 void MenuPageFadeAnimation::start()
 {
@@ -56,7 +46,6 @@ void MenuPageFadeAnimation::start()
    mStopped = false;
    mElapsed.restart();
 }
-
 
 void MenuPageFadeAnimation::animate()
 {
@@ -91,12 +80,10 @@ void MenuPageFadeAnimation::animate()
    }
 }
 
-
 bool MenuPageFadeAnimation::isStopped() const
 {
    return mStopped;
 }
-
 
 void MenuPageFadeAnimation::setStopped(bool value)
 {

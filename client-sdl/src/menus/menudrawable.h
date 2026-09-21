@@ -2,10 +2,10 @@
 
 // Qt
 #include <QImage>
-#include <QList>
-#include <QObject>
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QList>
+#include <QMouseEvent>
+#include <QObject>
 
 // engine
 #include "framework/drawable.h"
@@ -33,144 +33,133 @@ class FrameBuffer;
 /// anywhere (dead code even upstream).
 class MenuDrawable : public QObject, public Drawable
 {
-    Q_OBJECT
+   Q_OBJECT
 
-   public:
+public:
+   MenuDrawable(RenderDevice*);
 
-      MenuDrawable(RenderDevice*);
+   ~MenuDrawable();
 
-      ~MenuDrawable();
+   Menu* getMenu();
 
-      Menu* getMenu();
+   // gl
 
-      // gl
+   void initializeGL();
 
-      void initializeGL();
+   void paintGL();
 
-      void paintGL();
+   virtual void setVisible(bool visible);
 
-      virtual void setVisible(bool visible);
+   // event handler
 
+   //!
+   void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
 
-      // event handler
+   //!
+   void mouseMoveEvent(int x, int y);
 
-      //!
-      void mousePressEvent(
-         int x,
-         int y,
-         Qt::MouseButton = Qt::LeftButton
-      );
+   //!
+   void mouseReleaseEvent(QMouseEvent* event);
 
-      //!
-      void mouseMoveEvent(int x, int y);
+   //!
+   void keyPressEvent(QKeyEvent* event);
 
-      //!
-      void mouseReleaseEvent(QMouseEvent* event);
+   //! overwrite animate
+   virtual void animate(float globalTime);
 
-      //!
-      void keyPressEvent(QKeyEvent* event);
+   //! initialization finished
+   void initializationFinished();
 
-      //! overwrite animate
-      virtual void animate(float globalTime);
+signals:
 
-      //! initialization finished
-      void initializationFinished();
+   //! page was changed
+   void pageChanged(const QString&);
 
+   //! page change active
+   void pageChangeActive(bool);
 
-   signals:
+   //! visible or not
+   void visible(bool);
 
-      //! page was changed
-      void pageChanged(const QString&);
+   //! page change finished
+   void pageChangeAnimationStoppedSignal();
 
-      //! page change active
-      void pageChangeActive(bool);
+   //! signal key pressed event
+   void keyPressed(QKeyEvent*);
 
-      //! visible or not
-      void visible(bool);
+protected slots:
 
-      //! page change finished
-      void pageChangeAnimationStoppedSignal();
+   //! setter for active page by name
+   void pageChangeRequest(const QString&);
 
-      //! signal key pressed event
-      void keyPressed(QKeyEvent*);
+   //! page change has been finished
+   void pageChangeAnimationStopped();
 
+   //! fade in has finished
+   void fadeInFinished();
 
-   protected slots:
+   //! fade out has finished
+   void fadeOutFinished();
 
-      //! setter for active page by name
-      void pageChangeRequest(const QString&);
+protected:
+   void initGlParameters();
 
-      //! page change has been finished
-      void pageChangeAnimationStopped();
+   void cleanupGlParameters();
 
-      //! fade in has finished
-      void fadeInFinished();
+   void setInputBlocked(bool);
 
-      //! fade out has finished
-      void fadeOutFinished();
+   bool isInputBlocked() const;
 
+   void drawMenuContents();
 
-   protected:
+   //! animate fade out of frame buffer
+   void animateFadeFrameBuffer(float dt);
 
-      void initGlParameters();
+   //! fade out menu framebuffer
+   void startFadeOutFrameBuffer();
 
-      void cleanupGlParameters();
+   //! fade in menu framebuffer
+   void startFadeInFrameBuffer();
 
-      void setInputBlocked(bool);
+   // menu
 
-      bool isInputBlocked() const;
+   Menu* mMenu;
 
-      void drawMenuContents();
+   //
+   MenuPageFadeAnimation* mFadeInAnimation;
 
-      //! animate fade out of frame buffer
-      void animateFadeFrameBuffer(float dt);
+   //
+   MenuPageFadeAnimation* mFadeOutAnimation;
 
-      //! fade out menu framebuffer
-      void startFadeOutFrameBuffer();
+   //!
+   bool mInputBlocked;
 
-      //! fade in menu framebuffer
-      void startFadeInFrameBuffer();
+   //! mouse x position
+   int mMouseX;
 
+   //! mouse y position
+   int mMouseY;
 
-      // menu
+   //! time
+   float mTime;
 
-      Menu* mMenu;
+   //! fade out framebuffer flag
+   bool mFadeOut;
 
-      //
-      MenuPageFadeAnimation* mFadeInAnimation;
+   //! fade in framebuffer flag
+   bool mFadeIn;
 
-      //
-      MenuPageFadeAnimation* mFadeOutAnimation;
+   //! alpha
+   float mAlpha;
 
-      //!
-      bool mInputBlocked;
+   //! reset time on setVisible(true)
+   bool mResetTime;
 
-      //! mouse x position
-      int mMouseX;
+   //! alpha shader
+   unsigned int mShader;
+   int mAlphaParameter;
 
-      //! mouse y position
-      int mMouseY;
-
-      //! time
-      float mTime;
-
-      //! fade out framebuffer flag
-      bool mFadeOut;
-
-      //! fade in framebuffer flag
-      bool mFadeIn;
-
-      //! alpha
-      float mAlpha;
-
-      //! reset time on setVisible(true)
-      bool mResetTime;
-
-      //! alpha shader
-      unsigned int mShader;
-      int mAlphaParameter;
-
-      //! page cross-fade render target - see class comment for why this port owns it directly
-      //! instead of pulling it from MainDrawable.
-      FrameBuffer* mFrameBuffer;
+   //! page cross-fade render target - see class comment for why this port owns it directly
+   //! instead of pulling it from MainDrawable.
+   FrameBuffer* mFrameBuffer;
 };

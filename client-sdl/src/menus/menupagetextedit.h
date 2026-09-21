@@ -1,15 +1,14 @@
 #pragma once
 
 // base
-#include "menupageitem.h"
 #include "framework/frametimer.h"
+#include "menupageitem.h"
 
 // Qt
 #include <QColor>
 
 // forward declarations
 class BitmapFont;
-
 
 /// \brief GLES3 port of client/src/menus/menupagetextedit.cpp.
 /// drawCursor()'s highlight quad drops the mColor tint (always drawn white now) - it used to be
@@ -23,140 +22,134 @@ class MenuPageTextEditItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   MenuPageTextEditItem();
 
-      //! constructor
-      MenuPageTextEditItem();
+   // main
 
-       // main
+   //! draw textedit
+   virtual void draw();
 
-       //! draw textedit
-       virtual void draw();
+   //! initialize textedit
+   virtual void initialize();
 
-       //! initialize textedit
-       virtual void initialize();
+   //! getter for field width
+   int getFieldWidth() const;
 
-       //! getter for field width
-       int getFieldWidth() const;
+   //! setter for max length
+   void setMaxLength(int maxLength);
 
-       //! setter for max length
-       void setMaxLength(int maxLength);
+   //! getter for max length
+   int getMaxLength() const;
 
-       //! getter for max length
-       int getMaxLength() const;
+   //! getter for scale
+   float getScale() const;
 
-       //! getter for scale
-       float getScale() const;
+   //! getter for text
+   const QString& getText() const;
 
-       //! getter for text
-       const QString& getText() const;
+   //! getter for color
+   const QColor& getColor() const;
 
-       //! getter for color
-       const QColor& getColor() const;
+   //! check if action request on click is enabled
+   virtual bool isActionRequestOnClickEnabled() const;
 
-       //! check if action request on click is enabled
-       virtual bool isActionRequestOnClickEnabled() const;
+   //! setter for cursor position
+   void setCursorPosition(int);
 
-       //! setter for cursor position
-       void setCursorPosition(int);
+   //! getter for cursor position
+   int getCursorPosition() const;
 
-       //! getter for cursor position
-       int getCursorPosition() const;
+   //! check if editing is active
+   bool isEditingActive() const;
 
-       //! check if editing is active
-       bool isEditingActive() const;
+public slots:
 
+   void setText(const QString&);
 
-   public slots:
+   void setScale(float scale);
 
-      void setText(const QString&);
+   void setColor(const QColor& color);
 
-      void setScale(float scale);
+   void setOutlineColor(const QColor& outlineColor);
 
-      void setColor(const QColor& color);
+   void setAlpha(int alpha);
 
-      void setOutlineColor(const QColor& outlineColor);
+   void setFontName(const QString& fontName);
 
-      void setAlpha(int alpha);
+   void setFontXOffset(int xOffset);
 
-      void setFontName(const QString& fontName);
+   void setFontYOffset(int yOffset);
 
-      void setFontXOffset(int xOffset);
+   void setFieldWidth(int fieldWidth);
 
-      void setFontYOffset(int yOffset);
+   virtual void keyPressed(int key, const QString& text);
 
-      void setFieldWidth(int fieldWidth);
+   virtual void activated();
 
+   virtual void deactivated();
 
-      virtual void keyPressed(int key, const QString& text);
+   virtual void paste(const QString& text);
 
-      virtual void activated();
+protected slots:
 
-      virtual void deactivated();
+   //! update the cursor's highlight
+   void updateCursorHighlight();
 
-      virtual void paste(const QString & text);
+protected:
+   //! getter for cursor at end state
+   bool isCursorAtEnd() const;
 
+   //! cursor right
+   void moveCursorRight();
 
-   protected slots:
+   //! cursor left
+   void moveCursorLeft();
 
-       //! update the cursor's highlight
-       void updateCursorHighlight();
+   //! cursor to start
+   void moveCursorToStart();
 
+   //! cursor to end
+   void moveCursorToEnd();
 
-   protected:
+   //! draw the cursor
+   void drawCursor();
 
-       //! getter for cursor at end state
-       bool isCursorAtEnd() const;
+   QString mFontName;
 
-       //! cursor right
-       void moveCursorRight();
+   FrameTimer mTimer;
 
-       //! cursor left
-       void moveCursorLeft();
+   FrameTimer mCursorTime;
 
-       //! cursor to start
-       void moveCursorToStart();
+   BitmapFont* mFont;
 
-       //! cursor to end
-       void moveCursorToEnd();
+   QString mText;
 
-       //! draw the cursor
-       void drawCursor();
+   int mFontXOffset;
 
-       QString mFontName;
+   int mFontYOffset;
 
-       FrameTimer mTimer;
+   int mFieldWidth;
 
-       FrameTimer mCursorTime;
+   int mMaxLength;
 
-       BitmapFont* mFont;
+   float mScale;
 
-       QString mText;
+   bool mEditingActive;
 
-       int mFontXOffset;
+   bool mCursorVisible;
 
-       int mFontYOffset;
+   QColor mColor;
 
-       int mFieldWidth;
+   int mAlpha;
 
-       int mMaxLength;
+   QColor mOutlineColor;
 
-       float mScale;
+   int mCursorPosition;
 
-       bool mEditingActive;
-
-       bool mCursorVisible;
-
-       QColor mColor;
-
-       int mAlpha;
-
-       QColor mOutlineColor;
-
-       int mCursorPosition;
-
-       // lazily created 1x1 white texture + dynamic quad buffer for drawCursor() - see class
-       // comment.
-       unsigned int mCursorTexture;
-       unsigned int mCursorVertexBuffer;
+   // lazily created 1x1 white texture + dynamic quad buffer for drawCursor() - see class
+   // comment.
+   unsigned int mCursorTexture;
+   unsigned int mCursorVertexBuffer;
 };

@@ -9,191 +9,182 @@ class MenuPageItem : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
+   //! page item types
+   enum PageItemType
+   {
+      PageItemTypeUnknown,
+      PageItemTypeButton,
+      PageItemTypeCheckbox,
+      PageItemTypeCombobox,
+      PageItemTypeEditableCombobox,
+      PageItemTypeLabel,
+      PageItemTypeList,
+      PageItemTypeListElement,
+      PageItemTypePixmap,
+      PageItemTypeRadioButton,
+      PageItemTypeScrollbar,
+      PageItemTypeScrollImage,
+      PageItemTypeSlider,
+      PageItemTypeTextedit
+   };
 
-      //! page item types
-      enum PageItemType
-      {
-         PageItemTypeUnknown,
-         PageItemTypeButton,
-         PageItemTypeCheckbox,
-         PageItemTypeCombobox,
-         PageItemTypeEditableCombobox,
-         PageItemTypeLabel,
-         PageItemTypeList,
-         PageItemTypeListElement,
-         PageItemTypePixmap,
-         PageItemTypeRadioButton,
-         PageItemTypeScrollbar,
-         PageItemTypeScrollImage,
-         PageItemTypeSlider,
-         PageItemTypeTextedit
-      };
+   //!
+   MenuPageItem(QObject* parent = 0);
 
-      //!
-      MenuPageItem(QObject* parent = 0);
+   virtual ~MenuPageItem();
 
-      virtual ~MenuPageItem();
+   PageItemType getPageItemType() const;
 
-      PageItemType getPageItemType() const;
+   // layer information
 
+   virtual void setActiveLayer(PSDLayer* layer);
 
-      // layer information
+   virtual void setInactiveLayer(PSDLayer* layer);
 
-      virtual void setActiveLayer(PSDLayer* layer);
+   virtual PSDLayer* getLayer() const;
 
-      virtual void setInactiveLayer(PSDLayer* layer);
+   virtual PSD::Layer* getCurrentLayer();
 
-      virtual PSDLayer* getLayer() const;
+   virtual PSDLayer* getActiveLayer();
 
-      virtual PSD::Layer* getCurrentLayer();
+   virtual PSDLayer* getInactiveLayer();
 
-      virtual PSDLayer* getActiveLayer();
+   // main
 
-      virtual PSDLayer* getInactiveLayer();
+   //! initialize menupage item
+   virtual void initialize();
 
+   //! draw menupage item
+   virtual void draw();
 
-      // main
+   // behaviour
 
-      //! initialize menupage item
-      virtual void initialize();
+   //! setter for interactive flag
+   void setInteractive(bool);
 
-      //! draw menupage item
-      virtual void draw();
+   //! getter for interactive flag
+   bool isInteractive();
 
+   //! menupage item is focussed
+   bool isFocussed() const;
 
-      // behaviour
+   //! menu page item is modal
+   virtual bool isModal() const;
 
-      //! setter for interactive flag
-      void setInteractive(bool);
+   //! setter for action identifier
+   void setAction(const QString&);
 
-      //! getter for interactive flag
-      bool isInteractive();
+   //! menu page item has integrated items
+   virtual bool hasNestedElements();
 
-      //! menupage item is focussed
-      bool isFocussed() const;
+   //! menu page item is grabbing mouse events
+   virtual bool isGrabbingMouseEvents();
 
-      //! menu page item is modal
-      virtual bool isModal() const;
+   //! check if item is active
+   bool isActive();
 
-      //! setter for action identifier
-      void setAction(const QString&);
+   //! getter for visible flag
+   bool isVisible() const;
 
-      //! menu page item has integrated items
-      virtual bool hasNestedElements();
+   //! check if item is enabled
+   bool isEnabled() const;
 
-      //! menu page item is grabbing mouse events
-      virtual bool isGrabbingMouseEvents();
+   //! setter for tab index
+   void setTabIndex(int tabIndex);
 
-      //! check if item is active
-      bool isActive();
+   //! getter for tab index
+   int getTabIndex() const;
 
-      //! getter for visible flag
-      bool isVisible() const;
+   //! check if action request on click is enabled
+   virtual bool isActionRequestOnClickEnabled() const;
 
-      //! check if item is enabled
-      bool isEnabled() const;
+   // event handlers
 
-      //! setter for tab index
-      void setTabIndex(int tabIndex);
+   //! mouse moved
+   virtual void mouseMoved(int x, int y);
 
-      //! getter for tab index
-      int getTabIndex() const;
+   //! mouse pressed
+   virtual void mousePressed(int x, int y);
 
-      //! check if action request on click is enabled
-      virtual bool isActionRequestOnClickEnabled() const;
+   //! mouse released
+   virtual void mouseReleased();
 
+   //! setter for parent item
+   MenuPageItem* getParent() const;
 
-      // event handlers
+   //! getter for parent item
+   void setParent(MenuPageItem* value);
 
-      //! mouse moved
-      virtual void mouseMoved(int x, int y);
+signals:
 
-      //! mouse pressed
-      virtual void mousePressed(int x, int y);
+   //! action was triggered
+   void action(const QString&);
 
-      //! mouse released
-      virtual void mouseReleased();
+   //! mouse was released
+   void signalMouseReleased();
 
-      //! setter for parent item
-      MenuPageItem *getParent() const;
+   //! visibility changed
+   void visible(bool enabled);
 
-      //! getter for parent item
-      void setParent(MenuPageItem *value);
+public slots:
 
+   //! setter for visible flag
+   void setVisible(bool);
 
-   signals:
+   //! item was set active
+   virtual void setActive(bool);
 
-      //! action was triggered
-      void action(const QString&);
+   virtual void setFocus(bool);
 
-      //! mouse was released
-      void signalMouseReleased();
+   virtual void activated();
 
-      //! visibility changed
-      void visible(bool enabled);
+   virtual void deactivated();
 
+   virtual void keyPressed(int key, const QString& text);
 
-   public slots:
+   virtual void paste(const QString& /*text*/)
+   {
+   }
 
-      //! setter for visible flag
-      void setVisible(bool);
+   virtual void animate(float /*time*/)
+   {
+   }
 
-      //! item was set active
-      virtual void setActive(bool);
+   virtual void setEnabled(bool enabled);
 
-      virtual void setFocus(bool);
+protected:
+   //! page item type
+   PageItemType mPageItemType;
 
-      virtual void activated();
+   // behaviour
 
-      virtual void deactivated();
+   QString mAction;
 
-      virtual void keyPressed(int key, const QString& text);
+   // layer info
 
-      virtual void paste(const QString& /*text*/) {}
+   PSDLayer* mLayerActive;
 
-      virtual void animate(float /*time*/) {}
+   PSDLayer* mLayerInactive;
 
-      virtual void setEnabled(bool enabled);
+   // states
 
+   bool mFocussed;
 
-   protected:
+   bool mInteractive;
 
-      //! page item type
-      PageItemType mPageItemType;
+   bool mActive;
 
+   bool mVisible;
 
-      // behaviour
+   bool mEnabled;
 
-      QString mAction;
+   // item tab index
 
+   int mTabIndex;
 
-      // layer info
+   // items may have a parent item
 
-      PSDLayer* mLayerActive;
-
-      PSDLayer* mLayerInactive;
-
-      // states
-
-      bool mFocussed;
-
-      bool mInteractive;
-
-      bool mActive;
-
-      bool mVisible;
-
-      bool mEnabled;
-
-
-      // item tab index
-
-      int mTabIndex;
-
-
-      // items may have a parent item
-
-      //! parent item
-      MenuPageItem* mParent;
+   //! parent item
+   MenuPageItem* mParent;
 };

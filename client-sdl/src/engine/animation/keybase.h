@@ -10,8 +10,8 @@ public:
 
    int time() const;
 
-   virtual void load(Stream *stream);
-   virtual void write(Stream *stream);
+   virtual void load(Stream* stream);
+   virtual void write(Stream* stream);
 
 protected:
    int mTime;

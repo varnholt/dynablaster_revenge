@@ -1,38 +1,27 @@
 #include "psdlayer.h"
-#include "image/image.h"
 #include "framework/gldevice.h"
-#include "render/texturepool.h"
+#include "image/image.h"
 #include "math/matrix.h"
+#include "render/texturepool.h"
 
-PSDLayer::PSDLayer()
- : mLayer(0)
- , mTexture()
- , mVertexBuffer(0)
- , mIndexBuffer(0)
- , mOpacity(0.0f)
- , mU(0.0f)
- , mV(0.0f)
+PSDLayer::PSDLayer() : mLayer(0), mTexture(), mVertexBuffer(0), mIndexBuffer(0), mOpacity(0.0f), mU(0.0f), mV(0.0f)
 {
 }
 
 PSDLayer::PSDLayer(PSD::Layer* layer, float z, bool unwrap)
- : mLayer(layer)
- , mTexture()
- , mVertexBuffer(0)
- , mIndexBuffer(0)
- , mOpacity(layer->getOpacity()/255.0)
+    : mLayer(layer), mTexture(), mVertexBuffer(0), mIndexBuffer(0), mOpacity(layer->getOpacity() / 255.0)
 {
-   int w= layer->getWidth();
-   int h= layer->getHeight();
+   int w = layer->getWidth();
+   int h = layer->getHeight();
 
    // the original code computed a next-power-of-two size (log2) here, then immediately
    // overwrote it with the exact size on the next two lines - dead code even upstream, since
    // whatever hardware constraint once required power-of-two textures is long gone. Dropped.
-   int tw= w;
-   int th= h;
+   int tw = w;
+   int th = h;
 
-   Image* image= new Image(tw, th);
-   Image *src= layer->getImage();
+   Image* image = new Image(tw, th);
+   Image* src = layer->getImage();
 
    if (!unwrap)
    {
@@ -40,30 +29,34 @@ PSDLayer::PSDLayer(PSD::Layer* layer, float z, bool unwrap)
    }
    else
    {
-      image->copy(0,0, *src, true);
+      image->copy(0, 0, *src, true);
    }
 
-   mTexture= TexturePool::Instance()->getTexture(image, TexturePool::Trilinear | TexturePool::Clamp);
+   mTexture = TexturePool::Instance()->getTexture(image, TexturePool::Trilinear | TexturePool::Clamp);
 
    delete image;
 
-   mU= (float)w / tw;
-   mV= (float)h / th;
+   mU = (float)w / tw;
+   mV = (float)h / th;
 
    // create vertexbuffer
-   mVertexBuffer= activeDevice->createVertexBuffer(4 * sizeof(Vertex));
-   Vertex *vtx= (Vertex*)activeDevice->lockVertexBuffer(mVertexBuffer);
-   *vtx++= Vertex(0, 0, z,  0,  0 );
-   *vtx++= Vertex(0, h, z,  0,  mV);
-   *vtx++= Vertex(w, 0, z,  mU, 0 );
-   *vtx++= Vertex(w, h, z,  mU, mV);
+   mVertexBuffer = activeDevice->createVertexBuffer(4 * sizeof(Vertex));
+   Vertex* vtx = (Vertex*)activeDevice->lockVertexBuffer(mVertexBuffer);
+   *vtx++ = Vertex(0, 0, z, 0, 0);
+   *vtx++ = Vertex(0, h, z, 0, mV);
+   *vtx++ = Vertex(w, 0, z, mU, 0);
+   *vtx++ = Vertex(w, h, z, mU, mV);
    activeDevice->unlockVertexBuffer(mVertexBuffer);
 
    // create indexbuffer
-   mIndexBuffer= activeDevice->createIndexBuffer(6 * sizeof(unsigned short));
-   unsigned short *idx= (unsigned short*)activeDevice->lockIndexBuffer(mIndexBuffer);
-   *idx++= 0;  *idx++= 1;  *idx++= 2;
-   *idx++= 1;  *idx++= 3;  *idx++= 2;
+   mIndexBuffer = activeDevice->createIndexBuffer(6 * sizeof(unsigned short));
+   unsigned short* idx = (unsigned short*)activeDevice->lockIndexBuffer(mIndexBuffer);
+   *idx++ = 0;
+   *idx++ = 1;
+   *idx++ = 2;
+   *idx++ = 1;
+   *idx++ = 3;
+   *idx++ = 2;
    activeDevice->unlockIndexBuffer(mIndexBuffer);
 }
 
@@ -138,7 +131,7 @@ float PSDLayer::getOpacity() const
 
 void PSDLayer::setOpacity(float opacity)
 {
-   mOpacity= opacity;
+   mOpacity = opacity;
 }
 
 void PSDLayer::render(float x, float y, float alpha)
@@ -148,7 +141,7 @@ void PSDLayer::render(float x, float y, float alpha)
    // draw through the shared texalphaignore shader, with the translation folded into a world
    // matrix uploaded the same way every other draw call in the engine uploads one.
    Matrix world;
-   world.translate(Vector(mLayer->getLeft()+x, mLayer->getTop()+y, 0.0f));
+   world.translate(Vector(mLayer->getLeft() + x, mLayer->getTop() + y, 0.0f));
    activeDevice->push(world);
 
    glBindTexture(GL_TEXTURE_2D, mTexture);
@@ -159,7 +152,7 @@ void PSDLayer::render(float x, float y, float alpha)
    glEnableVertexAttribArray(0);
    glEnableVertexAttribArray(1);
    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3*sizeof(float)));
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(float)));
 
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);

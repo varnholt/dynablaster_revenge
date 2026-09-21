@@ -1,21 +1,15 @@
 #include "texture.h"
 #include "texturepool.h"
 
-Texture::Texture()
-: Referenced()
-, mTextureId(0)
+Texture::Texture() : Referenced(), mTextureId(0)
 {
 }
 
-Texture::Texture(unsigned int textureId)
-: Referenced()
-, mTextureId(textureId)
+Texture::Texture(unsigned int textureId) : Referenced(), mTextureId(textureId)
 {
 }
 
-Texture::Texture(const Texture& texture)
-: Referenced(texture)
-, mTextureId( texture.getTexture() )
+Texture::Texture(const Texture& texture) : Referenced(texture), mTextureId(texture.getTexture())
 {
 }
 
@@ -23,13 +17,13 @@ Texture::~Texture()
 {
    // this is the last instance?
    // another instance is inside the pool!
-   if (mTextureId && getRefCount()<=2)
+   if (mTextureId && getRefCount() <= 2)
    {
-        TexturePool::Instance()->remove(*this);
+      TexturePool::Instance()->remove(*this);
    }
 }
 
-Texture& Texture::operator = (const Texture& texture)
+Texture& Texture::operator=(const Texture& texture)
 {
    if (this != &texture)
    {
@@ -41,10 +35,9 @@ Texture& Texture::operator = (const Texture& texture)
          delete mReferences;
       }
 
-      mReferences= texture.getRef();
+      mReferences = texture.getRef();
       addRef();
-      mTextureId= texture.getTexture();
+      mTextureId = texture.getTexture();
    }
    return *this;
 }
-

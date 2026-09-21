@@ -7,10 +7,10 @@ public:
    Vertex(float x, float y, float u, float v);
    ~Vertex();
 
-   Vertex operator + (const Vertex& v) const;
-   Vertex operator - (const Vertex& v) const;
-   Vertex operator * (const float f) const;
+   Vertex operator+(const Vertex& v) const;
+   Vertex operator-(const Vertex& v) const;
+   Vertex operator*(const float f) const;
 
-   float x,y;
-   float u,v;
+   float x, y;
+   float u, v;
 };

@@ -11,9 +11,7 @@
 /// already-ported draw().
 class MenuPageEditableComboBoxItem : public MenuPageComboBoxItem
 {
-
 public:
-
    //! constructor
    MenuPageEditableComboBoxItem();
 
@@ -24,16 +22,13 @@ public:
    void setVisible(bool visible);
 
    //! setter for textedit item
-   void setTextEditItem(MenuPageTextEditItem *item);
+   void setTextEditItem(MenuPageTextEditItem* item);
 
    //! getter for textedit item
-   MenuPageTextEditItem *getTextEditItem() const;
+   MenuPageTextEditItem* getTextEditItem() const;
 
    //! link combobox to related textedit
-   static void linkComboBoxToTextEdit(
-      const QString& textEditKey,
-      const QString& comboBoxKey
-   );
+   static void linkComboBoxToTextEdit(const QString& textEditKey, const QString& comboBoxKey);
 
    //! add label to id/ptr-map
    static void addTextEdit(const QString&, MenuPageTextEditItem*);
@@ -46,9 +41,7 @@ public:
       const QColor& outlineColor = QColor()
    );
 
-
 protected:
-
    //! update clipper boundaries
    void updateClipperBounds();
 

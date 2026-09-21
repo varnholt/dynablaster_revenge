@@ -1,8 +1,8 @@
 #pragma once
 
 // framework
-#include "tools/array.h"
 #include "render/texture.h"
+#include "tools/array.h"
 #include "vertex.h"
 
 /// \brief GLES3 port of client/src/menus/bitmapfont.cpp.
@@ -13,7 +13,6 @@
 class BitmapFont
 {
 public:
-
    struct Parameter
    {
       char c;
@@ -27,18 +26,18 @@ public:
    };
 
    BitmapFont(
-         const char *filename,
-         Parameter* description,
-         float size = 1.0f,
-         float spacing= 0.0f,
-         float distanceRadius= 0.0f,
-         float outlineRed = 0.0f,
-         float outlineGreen = 0.0f,
-         float outlineBlue = 0.0f,
-         float outlineAlpha = 1.0f,
-         float outlineRadius = 0.15f,
-         float softRadius = 0.06f,
-         float thickness = 0.0f
+      const char* filename,
+      Parameter* description,
+      float size = 1.0f,
+      float spacing = 0.0f,
+      float distanceRadius = 0.0f,
+      float outlineRed = 0.0f,
+      float outlineGreen = 0.0f,
+      float outlineBlue = 0.0f,
+      float outlineAlpha = 1.0f,
+      float outlineRadius = 0.15f,
+      float softRadius = 0.06f,
+      float thickness = 0.0f
    );
 
    ~BitmapFont();
@@ -47,58 +46,50 @@ public:
    void setOutlineColor(float r, float g, float b, float a);
    void getOutlineColor(float& r, float& g, float& b, float& a);
    void setColor(float r, float g, float b, float a);
-   float buildVertices(float size, const char* text, float x, float y, float centerWidth= -1.0f, float centerHeight = -1.0f);
+   float buildVertices(float size, const char* text, float x, float y, float centerWidth = -1.0f, float centerHeight = -1.0f);
    void draw(const Array<Vertex>& vertices);
    void draw();
    unsigned int getTexture();
 
    //! getter cursor dimensions
-   void getCursor(
-      float scale,
-      int cursorPosition,
-      float& left,
-      float& right,
-      float& top,
-      float& bottom
-   );
+   void getCursor(float scale, int cursorPosition, float& left, float& right, float& top, float& bottom);
 
    Parameter* getCharParameter(char c) const;
 
 private:
+   unsigned int mShader;
+   Texture mTexture;
+   int mParamTexture;
+   int mParamOutlineColor;
+   int mParamColor;
+   int mParamSoftRadius;
+   int mParamOutlineRadius;
+   int mParamThickness;
+   int mParamSampleOffset;
 
-   unsigned int   mShader;
-   Texture        mTexture;
-   int            mParamTexture;
-   int            mParamOutlineColor;
-   int            mParamColor;
-   int            mParamSoftRadius;
-   int            mParamOutlineRadius;
-   int            mParamThickness;
-   int            mParamSampleOffset;
+   Parameter* mDescription;
+   float mSize;
+   float mSpacing;
+   float mRadius;
+   float mScaleU;
+   float mScaleV;
+   float mOutlineRed;
+   float mOutlineGreen;
+   float mOutlineBlue;
+   float mOutlineAlpha;
+   float mOutlineRadius;
+   float mSoftRadius;
+   float mThickness;
 
-   Parameter      *mDescription;
-   float          mSize;
-   float          mSpacing;
-   float          mRadius;
-   float          mScaleU;
-   float          mScaleV;
-   float          mOutlineRed;
-   float          mOutlineGreen;
-   float          mOutlineBlue;
-   float          mOutlineAlpha;
-   float          mOutlineRadius;
-   float          mSoftRadius;
-   float          mThickness;
+   float mColorRed;
+   float mColorGreen;
+   float mColorBlue;
+   float mColorAlpha;
 
-   float          mColorRed;
-   float          mColorGreen;
-   float          mColorBlue;
-   float          mColorAlpha;
-
-   float          mBaseline;
-   float          mBaseColumn;
+   float mBaseline;
+   float mBaseColumn;
    mutable Array<Vertex> mVertices;
 
    // dynamically re-uploaded each draw() call (text changes every frame) - lazily created.
-   unsigned int   mVertexBuffer;
+   unsigned int mVertexBuffer;
 };

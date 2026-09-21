@@ -10,13 +10,16 @@ public:
    UV();
    UV(float su, float sv);
 
-   operator const float* () const { return &u; }   //! cast to float*
+   operator const float*() const
+   {
+      return &u;
+   }  //! cast to float*
 
-   void operator << (Stream& stream);
-   void operator >> (Stream& stream);
+   void operator<<(Stream& stream);
+   void operator>>(Stream& stream);
 
-   void load(Stream *stream);
-   void write(Stream *stream);
+   void load(Stream* stream);
+   void write(Stream* stream);
 
-   float u,v;
+   float u, v;
 };

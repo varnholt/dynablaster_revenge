@@ -1,8 +1,8 @@
 #pragma once
 
 // engine
-#include "math/vector.h"
 #include "math/matrix.h"
+#include "math/vector.h"
 #include "tools/array.h"
 
 class Mesh;
@@ -11,7 +11,6 @@ class Image;
 class SphereFragment
 {
 public:
-
    //! constructor
    SphereFragment(const Array<Mesh*>& meshList, Image* orderImage);
 
@@ -26,15 +25,14 @@ public:
    //! draw single fragment
    void draw();
 
-
 protected:
    unsigned int mVertexBuffer;
    unsigned int mIndexBuffer;
-   int          mVertexCount;
-   int          mIndexCount;
+   int mVertexCount;
+   int mIndexCount;
    Array<Matrix> mMatrix;
-   Array<float>  mRandom;
-   Array<float>  mTime;
+   Array<float> mRandom;
+   Array<float> mTime;
    Array<Matrix> mModelView;
-   Array<float>  mFresnelFactors;
+   Array<float> mFresnelFactors;
 };

@@ -7,4 +7,3 @@ MaterialFactory::MaterialFactory()
 MaterialFactory::~MaterialFactory()
 {
 }
-

@@ -10,13 +10,13 @@ class Image : public Referenced
 {
 public:
    Image();
-   Image(const char *filename);
+   Image(const char* filename);
    Image(int x, int y);
-//   Image(unsigned int *data, int x, int y, bool owner= false);
+   //   Image(unsigned int *data, int x, int y, bool owner= false);
    Image(const Image& image);
    ~Image();
 
-   const Image& operator = (const Image& image);
+   const Image& operator=(const Image& image);
 
    void discard();
    void clear(unsigned int argb);
@@ -25,11 +25,11 @@ public:
 
    int getWidth() const;
    int getHeight() const;
-   unsigned int *getScanline(int y) const;
+   unsigned int* getScanline(int y) const;
    unsigned int* getData() const;
    Image downsample() const;
    void scaled(const Image& image) const;
-   void load(const char *filename);
+   void load(const char* filename);
    const char* getFilename() const;
    void copy(int x, int y, const Image& source, int clamp = 0);
    void premultiplyAlpha();
@@ -41,7 +41,7 @@ public:
    const String& filename() const;
 
 private:
-   unsigned int *mData;
+   unsigned int* mData;
    int mWidth;
    int mHeight;
    String mPath;

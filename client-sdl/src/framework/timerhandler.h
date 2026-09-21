@@ -1,10 +1,10 @@
 #pragma once
 
-#include "tools/singleton.h"
 #include "frametimer.h"
+#include "tools/singleton.h"
 
-#include <QSet>
 #include <QMutex>
+#include <QSet>
 
 class TimerHandler : public Singleton<TimerHandler>
 {

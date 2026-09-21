@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vertex.h"
 #include "tools/array.h"
+#include "vertex.h"
 
 class Clipper
 {

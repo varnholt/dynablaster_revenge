@@ -12,12 +12,12 @@ public:
    VertexBufferPool();
    ~VertexBufferPool();
 
-   bool contains(Geometry *geo) const;
-   VertexBuffer* add(Geometry *geo);
-   VertexBuffer* get(Geometry *geo);
+   bool contains(Geometry* geo) const;
+   VertexBuffer* add(Geometry* geo);
+   VertexBuffer* get(Geometry* geo);
 
 private:
-   QMap<int,VertexBuffer*> mPool;
+   QMap<int, VertexBuffer*> mPool;
 };
 
 #endif

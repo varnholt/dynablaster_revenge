@@ -1,8 +1,7 @@
 #include "animatedmesh.h"
 #include "render/geometry.h"
 
-AnimatedMesh::AnimatedMesh(Node *parent)
-: Mesh(parent)
+AnimatedMesh::AnimatedMesh(Node* parent) : Mesh(parent)
 {
    setUserTransformable(true);
 }
@@ -20,4 +19,3 @@ Geometry* AnimatedMesh::getFrame(int frame)
 {
    return mGeometry[frame];
 }
-

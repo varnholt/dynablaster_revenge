@@ -1,8 +1,7 @@
 #include "shape.h"
 #include "tools/stream.h"
 
-Shape::Shape(Node *parent)
-: Node(Node::idShape, parent)
+Shape::Shape(Node* parent) : Node(Node::idShape, parent)
 {
 }
 
@@ -10,16 +9,16 @@ Shape::~Shape()
 {
 }
 
-void Shape::load(Stream *stream)
+void Shape::load(Stream* stream)
 {
    Node::load(stream);
 
-   int numPolys= stream->getInt();
+   int numPolys = stream->getInt();
    mPolys.init(numPolys);
-   for (int i=0;i<numPolys;i++)
+   for (int i = 0; i < numPolys; i++)
    {
       Chunk polyChunk(stream);
-      PolyLine* poly= new PolyLine();
+      PolyLine* poly = new PolyLine();
       poly->load(&polyChunk);
       mPolys.add(poly);
       polyChunk.skip();
@@ -35,7 +34,7 @@ void Shape::load(Stream *stream)
    anim.skip();
 }
 
-void Shape::write(Stream *stream)
+void Shape::write(Stream* stream)
 {
    Node::write(stream);
 

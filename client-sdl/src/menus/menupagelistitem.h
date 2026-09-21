@@ -1,13 +1,12 @@
 #pragma once
 
 // base
-#include "menupageitem.h"
 #include "framework/frametimer.h"
+#include "menupageitem.h"
 
 // Qt
 #include <QColor>
 #include <QList>
-
 
 class Clipper;
 class MenuPageListItemElement;
@@ -25,298 +24,283 @@ class MenuPageListItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageListItem();
 
-      MenuPageListItem();
+   virtual ~MenuPageListItem();
 
-      virtual ~MenuPageListItem();
+   // main
 
-      // main
+   virtual void initialize();
 
-      virtual void initialize();
+   virtual void draw();
 
-      virtual void draw();
+   void setFontName(const QString& fontName);
 
-      void setFontName(const QString& fontName);
+   void setFontXOffset(int xOffset);
 
-      void setFontXOffset(int xOffset);
+   void setFontYOffset(int yOffset);
 
-      void setFontYOffset(int yOffset);
+   void setFieldWidth(int maxChars);
 
-      void setFieldWidth(int maxChars);
+   void setScale(float scale);
 
-      void setScale(float scale);
+   void setRowHeight(int height);
 
-      void setRowHeight(int height);
+   //! getter for list item elements
+   QList<MenuPageListItemElement*>* getElements() const;
 
-      //! getter for list item elements
-      QList<MenuPageListItemElement*>* getElements() const;
+   //! getter for element at i
+   MenuPageListItemElement* getElementAt(int i) const;
 
-      //! getter for element at i
-      MenuPageListItemElement* getElementAt(int i) const;
+   //! get element text
+   const QString& getElementText(int element);
 
-      //! get element text
-      const QString& getElementText(int element);
+   //! getter for element count
+   int getElementCount();
 
-      //! getter for element count
-      int getElementCount();
+   //! getter for the active element id
+   int getActiveElement() const;
 
-      //! getter for the active element id
-      int getActiveElement() const;
+   //! setter for active element id
+   void setActiveElement(int);
 
-      //! setter for active element id
-      void setActiveElement(int);
+   //! setter for the active element id
+   void setElementActive(int, bool);
 
-      //! setter for the active element id
-      void setElementActive(int, bool);
+   //! getter for focussed element id
+   int getFocussedElement() const;
 
-      //! getter for focussed element id
-      int getFocussedElement() const;
+   //! setter for focussed element id
+   void setFocussedElement(int element);
 
-      //! setter for focussed element id
-      void setFocussedElement(int element);
+   //! setter for element focus
+   void setElementFocussed(int element, bool focussed);
 
-      //! setter for element focus
-      void setElementFocussed(int element, bool focussed);
+   //! append an item to the list
+   virtual void appendItem(
+      const QString& item,
+      const QColor& color = QColor("#FFFFFF"),
+      bool overrideAlpha = false,
+      const QColor& outlineColor = QColor()
+   );
 
-      //! append an item to the list
-      virtual void appendItem(
-         const QString& item,
-         const QColor& color = QColor("#FFFFFF"),
-         bool overrideAlpha = false,
-         const QColor& outlineColor = QColor()
-      );
+   //! clear all items from the list
+   void clear();
 
-      //! clear all items from the list
-      void clear();
+   //! set list highlighting enabled
+   void setHighlightingEnabled(bool enabled);
 
-      //! set list highlighting enabled
-      void setHighlightingEnabled(bool enabled);
+   //! getter for highlighting flag
+   bool isHighlightingEnabled() const;
 
-      //! getter for highlighting flag
-      bool isHighlightingEnabled() const;
+   //! set row alphas
+   void setRowAlphas(int row0, int row1);
 
-      //! set row alphas
-      void setRowAlphas(int row0, int row1);
+   // overwritten
 
+   virtual bool hasNestedElements();
 
-      // overwritten
+   virtual void mouseMoved(int x, int y);
 
-      virtual bool hasNestedElements();
+   virtual void mousePressed(int x, int y);
 
-      virtual void mouseMoved(int x, int y);
+   virtual void setLayerFirstElement(PSDLayer* layer);
+   virtual void setLayerDefaultElement(PSDLayer* layer);
+   virtual void setLayerLastElement(PSDLayer* layer);
+   virtual void setLayerGradientElement(PSDLayer* layer);
+   virtual void setLayerSelectedElement(PSDLayer* layer);
+   virtual void setLayerFocussedElement(PSDLayer* layer);
 
-      virtual void mousePressed(int x, int y);
+   virtual PSDLayer* getLayerFirstElement() const;
+   virtual PSDLayer* getLayerDefaultElement() const;
+   virtual PSDLayer* getLayerLastElement() const;
+   virtual PSDLayer* getLayerGradientElement() const;
+   virtual PSDLayer* getLayerSelectedElement() const;
+   virtual PSDLayer* getLayerFocussedElement() const;
 
-      virtual void setLayerFirstElement(PSDLayer* layer);
-      virtual void setLayerDefaultElement(PSDLayer* layer);
-      virtual void setLayerLastElement(PSDLayer* layer);
-      virtual void setLayerGradientElement(PSDLayer* layer);
-      virtual void setLayerSelectedElement(PSDLayer* layer);
-      virtual void setLayerFocussedElement(PSDLayer *layer);
+   //! getter for blend duration
+   float getBlendDuration() const;
 
-      virtual PSDLayer* getLayerFirstElement() const;
-      virtual PSDLayer* getLayerDefaultElement() const;
-      virtual PSDLayer* getLayerLastElement() const;
-      virtual PSDLayer* getLayerGradientElement() const;
-      virtual PSDLayer* getLayerSelectedElement() const;
-      virtual PSDLayer *getLayerFocussedElement() const;
+   //! setter for blend duration
+   void setBlendDuration(float value);
 
-      //! getter for blend duration
-      float getBlendDuration() const;
+   //! getter for y offset source
+   float getYOffsetSource() const;
 
-      //! setter for blend duration
-      void setBlendDuration(float value);
+   //! setter for y offset source
+   void setYOffsetSource(float value);
 
-      //! getter for y offset source
-      float getYOffsetSource() const;
+   //! getter for y offset dest
+   float getYOffsetDest() const;
 
-      //! setter for y offset source
-      void setYOffsetSource(float value);
+   //! setter for y offset dest
+   void setYOffsetDest(float value);
 
-      //! getter for y offset dest
-      float getYOffsetDest() const;
+public slots:
 
-      //! setter for y offset dest
-      void setYOffsetDest(float value);
+   virtual void animate(float time);
 
+   virtual void scrollUp();
 
-   public slots:
+   virtual void scrollDown();
 
-      virtual void animate(float time);
+   virtual void scrollStop();
 
-      virtual void scrollUp();
+   //! scroll to particular percentage of table
+   virtual void scrollToPercentage(float percent, bool clicked = true);
 
-      virtual void scrollDown();
+   //! scroll to item of given index
+   virtual void scrollToIndex(int index, bool clicked = true);
 
-      virtual void scrollStop();
+   //! smooth scroll to index
+   virtual int scrollSmoothToIndex(int index);
 
-      //! scroll to particular percentage of table
-      virtual void scrollToPercentage(float percent, bool clicked = true);
+signals:
 
-      //! scroll to item of given index
-      virtual void scrollToIndex(int index, bool clicked = true);
+   void scrollAnimation(float percent);
 
-      //! smooth scroll to index
-      virtual int scrollSmoothToIndex(int index);
+   void elementFocussed(int element);
 
+protected:
+   //! draw the text
+   void drawText();
 
-   signals:
+   //! draw the rows
+   void drawRows();
 
-      void scrollAnimation(float percent);
+   //! bind list item shader
+   void bindShader();
 
-      void elementFocussed(int element);
+   //! release list item shader
+   void releaseShader();
 
+   //! bind row texture (if present)
+   PSDLayer* bindRowTexture(int row, float& u, float& v, float& s, float& t);
 
-   protected:
+   //! generate a new item instance
+   MenuPageListItemElement* itemInstance();
 
-      //! draw the text
-      void drawText();
+   //! initialize item instance
+   void initializeItem(MenuPageListItemElement* element, int index);
 
-      //! draw the rows
-      void drawRows();
+   //! update table bounds
+   virtual void updateTableBounds();
 
-      //! bind list item shader
-      void bindShader();
+   //! getter for maximum table height
+   virtual int getMaxTableHeight() const;
 
-      //! release list item shader
-      void releaseShader();
+   //! getter for maximum table width
+   virtual int getMaxTableWidth() const;
 
-      //! bind row texture (if present)
-      PSDLayer *bindRowTexture(int row, float& u, float& v, float& s, float& t);
+   //! set alpha value for given element
+   void selectAlpha(int rowToggle, MenuPageListItemElement* element);
 
-      //! generate a new item instance
-      MenuPageListItemElement* itemInstance();
+   //! update scrollbars depending on current offset
+   void updateScrollbars();
 
-      //! initialize item instance
-      void initializeItem(
-         MenuPageListItemElement* element,
-         int index
-      );
+   //! limit y to not allow table movement out of bounds
+   void limitY(float& y);
 
-      //! update table bounds
-      virtual void updateTableBounds();
+   //! update focussed element from given relative y position
+   void updateFocussedElement(int relY);
 
-      //! getter for maximum table height
-      virtual int getMaxTableHeight() const;
+   //! clipper to clip table to
+   Clipper* mClipper;
 
-      //! getter for maximum table width
-      virtual int getMaxTableWidth() const;
+   //! list of items
+   mutable QList<MenuPageListItemElement*> mElements;
 
-      //! set alpha value for given element
-      void selectAlpha(int rowToggle, MenuPageListItemElement* element);
+   //! time elapsed used for scrolling animation
+   FrameTimer mElapsed;
 
-      //! update scrollbars depending on current offset
-      void updateScrollbars();
+   // offset
 
-      //! limit y to not allow table movement out of bounds
-      void limitY(float& y);
+   float mX;
 
-      //! update focussed element from given relative y position
-      void updateFocussedElement(int relY);
+   float mY;
 
-      //! clipper to clip table to
-      Clipper* mClipper;
+   // dimensions
 
-      //! list of items
-      mutable QList<MenuPageListItemElement*> mElements;
+   float mWidthAllElements;
 
-      //! time elapsed used for scrolling animation
-      FrameTimer mElapsed;
+   float mHeightAllElements;
 
+   // properties for single lineedits
 
-      // offset
+   QString mFontName;
 
-      float mX;
+   int mFontXOffset;
 
-      float mY;
+   int mFontYOffset;
 
+   int mFieldWidth;
 
-      // dimensions
+   float mScale;
 
-      float mWidthAllElements;
+   float mScrollValue;
 
-      float mHeightAllElements;
+   int mVerticalSpacing;
 
+   int mRowHeight;
 
-      // properties for single lineedits
+   int mFocussedElement;
 
-      QString mFontName;
+   int mActiveElement;
 
-      int mFontXOffset;
+   bool mScrollingActive;
 
-      int mFontYOffset;
+   bool mHighlightingActive;
 
-      int mFieldWidth;
+   // individual layers for elements (to be used by comboboxes etc)
 
-      float mScale;
+   //! first element layer
+   PSDLayer* mLayerFirstElement;
 
-      float mScrollValue;
+   //! default element layer
+   PSDLayer* mLayerDefaultElement;
 
-      int mVerticalSpacing;
+   //! last element layer
+   PSDLayer* mLayerLastElement;
 
-      int mRowHeight;
+   //! gradient layer
+   PSDLayer* mLayerGradient;
 
-      int mFocussedElement;
+   //! selected element layer
+   PSDLayer* mLayerSelectedElement;
 
-      int mActiveElement;
+   //! focussed element layer
+   PSDLayer* mLayerFocussedElement;
 
-      bool mScrollingActive;
+   //! listhighlight shader and its uniform locations
+   unsigned int mShader;
+   int mParamTextureClamp;
+   int mParamTextureHighlight;
+   int mParamRowAlpha;
 
-      bool mHighlightingActive;
+   //! per-row dynamic vertex buffer (pos + uvClamp + uvHighlight), rebuilt every draw
+   unsigned int mRowVertexBuffer;
 
+   //! alphas
+   int mRowAlpha[2];
 
-      // individual layers for elements (to be used by comboboxes etc)
+   // blend between two positions
 
-      //! first element layer
-      PSDLayer* mLayerFirstElement;
+   //! blend timer
+   FrameTimer mBlendTimer;
 
-      //! default element layer
-      PSDLayer* mLayerDefaultElement;
+   //! blend duration
+   float mBlendDuration;
 
-      //! last element layer
-      PSDLayer* mLayerLastElement;
+   //! source mY
+   float mYOffsetSource;
 
-      //! gradient layer
-      PSDLayer* mLayerGradient;
+   //! destination mY
+   float mYOffsetDest;
 
-      //! selected element layer
-      PSDLayer* mLayerSelectedElement;
+   //! copy of dest
+   float mYDest;
 
-      //! focussed element layer
-      PSDLayer* mLayerFocussedElement;
-
-
-      //! listhighlight shader and its uniform locations
-      unsigned int mShader;
-      int mParamTextureClamp;
-      int mParamTextureHighlight;
-      int mParamRowAlpha;
-
-      //! per-row dynamic vertex buffer (pos + uvClamp + uvHighlight), rebuilt every draw
-      unsigned int mRowVertexBuffer;
-
-      //! alphas
-      int mRowAlpha[2];
-
-
-      // blend between two positions
-
-      //! blend timer
-      FrameTimer mBlendTimer;
-
-      //! blend duration
-      float mBlendDuration;
-
-      //! source mY
-      float mYOffsetSource;
-
-      //! destination mY
-      float mYOffsetDest;
-
-      //! copy of dest
-      float mYDest;
-
-      //! last mouse y position
-      int mMouseY;
+   //! last mouse y position
+   int mMouseY;
 };

@@ -7,43 +7,37 @@ class MenuPageSliderItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   MenuPageSliderItem();
 
-      //! constructor
-      MenuPageSliderItem();
+   virtual bool isGrabbingMouseEvents();
 
-      virtual bool isGrabbingMouseEvents();
+   virtual void mousePressed(int x, int y);
 
-      virtual void mousePressed(int x, int y);
+   virtual void mouseMoved(int x, int y);
 
-      virtual void mouseMoved(int x, int y);
+   virtual void mouseReleased();
 
-      virtual void mouseReleased();
+   void setMinimum(int min);
+   void setMaximum(int max);
 
+   int getMinimum() const;
+   int getMaximum() const;
 
-      void setMinimum(int min);
-      void setMaximum(int max);
+   float getValue() const;
 
-      int getMinimum() const;
-      int getMaximum() const;
+   void setValue(float);
 
-      float getValue() const;
+signals:
 
-      void setValue(float);
+   void valueChanged(float val);
 
+protected:
+   int mMinimum;
+   int mMaximum;
 
-   signals:
+   float mValue;
 
-      void valueChanged(float val);
-
-
-   protected:
-
-
-      int mMinimum;
-      int mMaximum;
-
-      float mValue;
-
-      int mRelativeToX;
+   int mRelativeToX;
 };

@@ -1,108 +1,111 @@
 // shadow volumes
 
 #include "shadowvolume.h"
-#include "tools/stream.h"
-#include "nodes/mesh.h"
 #include "gldevice.h"
-#include "render/renderbuffer.h"
 #include "image/tga.h"
+#include "nodes/mesh.h"
+#include "render/renderbuffer.h"
 #include "render/uv.h"
 #include "tools/profiling.h"
+#include "tools/stream.h"
 
 extern Vector globallight;
-//const Vector globalLight= Vector(1,0,-1);//Vector(-0.4,1,0.2);
+// const Vector globalLight= Vector(1,0,-1);//Vector(-0.4,1,0.2);
 
 class ShadowBuffer : public RenderBuffer
 {
 public:
-   ShadowBuffer(Geometry *geo) : RenderBuffer(geo)
+   ShadowBuffer(Geometry* geo) : RenderBuffer(geo)
    {
-      mVertex=  createVertexBuffer(NULL, geo->getEdgeCount()*4*4*sizeof(float), false);
-      mSize= 0;
+      mVertex = createVertexBuffer(NULL, geo->getEdgeCount() * 4 * 4 * sizeof(float), false);
+      mSize = 0;
    }
 };
 
-
 ShadowVolume::ShadowVolume()
 {
-   mTransform= activeDevice->loadShader("shadowvolume.vsh", "shadowvolume.psh");
+   mTransform = activeDevice->loadShader("shadowvolume.vsh", "shadowvolume.psh");
 }
 
-void ShadowVolume::load(Stream *stream)
+void ShadowVolume::load(Stream* stream)
 {
 }
 
-
-void ShadowVolume::add(Geometry *geo)
+void ShadowVolume::add(Geometry* geo)
 {
-   ShadowBuffer *vb= new ShadowBuffer(geo);
+   ShadowBuffer* vb = new ShadowBuffer(geo);
    mVB.add(vb);
 }
 
-
-int ShadowVolume::calcEdgeIndices(unsigned int buffer, Geometry *geo, const Vector& light)
+int ShadowVolume::calcEdgeIndices(unsigned int buffer, Geometry* geo, const Vector& light)
 {
-   float  t=0;
-   Vector n1,n2;
-   float  dir1, dir2;
-   int    count;
-   int    num=0;
+   float t = 0;
+   Vector n1, n2;
+   float dir1, dir2;
+   int count;
+   int num = 0;
 
-   Vector *verts= geo->getVertices();
+   Vector* verts = geo->getVertices();
 
    //   double time= getCpuTick();
 
-   int numtri= geo->getIndexCount()/3;
+   int numtri = geo->getIndexCount() / 3;
 
-   Edge *edge= geo->getEdges();
-   count= geo->getEdgeCount();
+   Edge* edge = geo->getEdges();
+   count = geo->getEdgeCount();
 
-   volatile float *dst= (float*)activeDevice->lockVertexBuffer(buffer);
+   volatile float* dst = (float*)activeDevice->lockVertexBuffer(buffer);
 
-   for (int j=0;j<count;j++)
+   for (int j = 0; j < count; j++)
    {
       // vertices of two triangles with shared edge v1->v2
-      const Vector& v1= verts[edge->i1];
-      const Vector& v2= verts[edge->i2];
-      const Vector& v3= verts[edge->i3];
-      const Vector& v4= verts[edge->i4];
+      const Vector& v1 = verts[edge->i1];
+      const Vector& v2 = verts[edge->i2];
+      const Vector& v3 = verts[edge->i3];
+      const Vector& v4 = verts[edge->i4];
 
       // takes 8.5MI for 90.000 edges
-      dir1= ((v2.y - v1.y)*(v3.z - v1.z) - (v2.z - v1.z)*(v3.y - v1.y)) * (light.x) +
-            ((v2.z - v1.z)*(v3.x - v1.x) - (v2.x - v1.x)*(v3.z - v1.z)) * (light.y) +
-            ((v2.x - v1.x)*(v3.y - v1.y) - (v2.y - v1.y)*(v3.x - v1.x)) * (light.z);
+      dir1 = ((v2.y - v1.y) * (v3.z - v1.z) - (v2.z - v1.z) * (v3.y - v1.y)) * (light.x) +
+             ((v2.z - v1.z) * (v3.x - v1.x) - (v2.x - v1.x) * (v3.z - v1.z)) * (light.y) +
+             ((v2.x - v1.x) * (v3.y - v1.y) - (v2.y - v1.y) * (v3.x - v1.x)) * (light.z);
 
-      dir2= ((v2.y - v1.y)*(v1.z - v4.z) - (v2.z - v1.z)*(v1.y - v4.y)) * (light.x) +
-            ((v2.z - v1.z)*(v1.x - v4.x) - (v2.x - v1.x)*(v1.z - v4.z)) * (light.y) +
-            ((v2.x - v1.x)*(v1.y - v4.y) - (v2.y - v1.y)*(v1.x - v4.x)) * (light.z);
+      dir2 = ((v2.y - v1.y) * (v1.z - v4.z) - (v2.z - v1.z) * (v1.y - v4.y)) * (light.x) +
+             ((v2.z - v1.z) * (v1.x - v4.x) - (v2.x - v1.x) * (v1.z - v4.z)) * (light.y) +
+             ((v2.x - v1.x) * (v1.y - v4.y) - (v2.y - v1.y) * (v1.x - v4.x)) * (light.z);
 
       // draw edge if one poly facing to viewer, one face away
-      if (dir1*dir2<0)
+      if (dir1 * dir2 < 0)
       {
-         if (dir1<0) dir1=1000.0; else dir1=0;
-         if (dir2<0) dir2=1000.0; else dir2=0;
+         if (dir1 < 0)
+            dir1 = 1000.0;
+         else
+            dir1 = 0;
+         if (dir2 < 0)
+            dir2 = 1000.0;
+         else
+            dir2 = 0;
 
-         *dst++= v1.x;
-         *dst++= v1.y;
-         *dst++= v1.z;
-         *dst++= dir1;
+         *dst++ = v1.x;
+         *dst++ = v1.y;
+         *dst++ = v1.z;
+         *dst++ = dir1;
 
-         *dst++= v1.x;
-         *dst++= v1.y;
-         *dst++= v1.z;
-         *dst++= dir2;
+         *dst++ = v1.x;
+         *dst++ = v1.y;
+         *dst++ = v1.z;
+         *dst++ = dir2;
 
-         *dst++= v2.x;
-         *dst++= v2.y;
-         *dst++= v2.z;
-         *dst++= dir2;
+         *dst++ = v2.x;
+         *dst++ = v2.y;
+         *dst++ = v2.z;
+         *dst++ = dir2;
 
-         *dst++= v2.x;
-         *dst++= v2.y;
-         *dst++= v2.z;
-         *dst++= dir1;
+         *dst++ = v2.x;
+         *dst++ = v2.y;
+         *dst++ = v2.z;
+         *dst++ = dir1;
 
-         num+=4;
+         num += 4;
       }
 
       edge++;
@@ -113,24 +116,22 @@ int ShadowVolume::calcEdgeIndices(unsigned int buffer, Geometry *geo, const Vect
    return num;
 }
 
-
-void ShadowVolume::update(Node **nodes)
+void ShadowVolume::update(Node** nodes)
 {
-//   Material::update(nodes);
+   //   Material::update(nodes);
 
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      ShadowBuffer *vb= (ShadowBuffer*)mVB[i];
+      ShadowBuffer* vb = (ShadowBuffer*)mVB[i];
 
       // inverse-transform camera position to local object space
-      Vector light= vb->getWorld2Obj().get3x3() * -globallight;
+      Vector light = vb->getWorld2Obj().get3x3() * -globallight;
 
-      int count= calcEdgeIndices(vb->getVertexBuffer(), vb->getGeometry(), light);
+      int count = calcEdgeIndices(vb->getVertexBuffer(), vb->getGeometry(), light);
       vb->setSize(count);
    }
 }
-
 
 void ShadowVolume::renderAmbient()
 {
@@ -141,45 +142,44 @@ void ShadowVolume::renderAmbient()
    glColorMask(false, false, false, false);
    glDepthMask(false);
 
-   glColorMask(true,true,true,true);
+   glColorMask(true, true, true, true);
    glEnable(GL_BLEND);
    glBlendFunc(GL_ONE, GL_SRC_COLOR);
-   glColor4f(0.5,0,0,1);
+   glColor4f(0.5, 0, 0, 1);
 
    glDisable(GL_CULL_FACE);
    glEnable(GL_STENCIL_TEST);
 
-
    // enable required vertex arrays
-   glEnableVertexAttribArray(0); // vertex data
+   glEnableVertexAttribArray(0);  // vertex data
 
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      ShadowBuffer *vb= (ShadowBuffer*)mVB[i];
+      ShadowBuffer* vb = (ShadowBuffer*)mVB[i];
 
       // set transformation
-      const Matrix& mat= vb->getTransform();
+      const Matrix& mat = vb->getTransform();
       activeDevice->push(mat);
 
       // inverse-transform camera position to local object space
-      Vector light= vb->getWorld2Obj().get3x3() * -globallight;
+      Vector light = vb->getWorld2Obj().get3x3() * -globallight;
 
-//      activeDevice->setShaderConstant("light", light);
+      //      activeDevice->setShaderConstant("light", light);
 
       // draw mesh
-      glBindBufferARB( GL_ARRAY_BUFFER, vb->getVertexBuffer() );
-      glVertexPointer( 4, GL_FLOAT, 0, NULL );
+      glBindBufferARB(GL_ARRAY_BUFFER, vb->getVertexBuffer());
+      glVertexPointer(4, GL_FLOAT, 0, NULL);
 
       glDrawArrays(GL_QUADS, 0, vb->getSize());
 
       activeDevice->pop();
    }
 
-   glDisableVertexAttribArray(0); // vertex data
+   glDisableVertexAttribArray(0);  // vertex data
 
    glCullFace(GL_BACK);
-   glColorMask(true,true,true,true);
+   glColorMask(true, true, true, true);
 
    glMatrixMode(GL_MODELVIEW);
    glPushMatrix();
@@ -187,21 +187,21 @@ void ShadowVolume::renderAmbient()
 
    glMatrixMode(GL_PROJECTION);
    glPushMatrix();
-   glLoadIdentity();   
-   glFrustum( -1.0f, 1.0f, -1.0f, 1.0f, 0.5f, 2.0f);
+   glLoadIdentity();
+   glFrustum(-1.0f, 1.0f, -1.0f, 1.0f, 0.5f, 2.0f);
 
    glStencilFunc(GL_NOTEQUAL, 0x80, 0xff);
-   glColor4f(164/255.0/2, 164/255.0/2, 164/255.0/2, 1.0);
-//   glColor4f(1,1,1,1);
-	glDisable(GL_DEPTH_TEST);
-//   activeDevice->setShader(0);
+   glColor4f(164 / 255.0 / 2, 164 / 255.0 / 2, 164 / 255.0 / 2, 1.0);
+   //   glColor4f(1,1,1,1);
+   glDisable(GL_DEPTH_TEST);
+   //   activeDevice->setShader(0);
 
-//   glScalef(0,0,0);
+   //   glScalef(0,0,0);
    glBegin(GL_QUADS);
-   glVertex4f(-2,-2,-1, 0);
-   glVertex4f( 2,-2,-1, 0);
-   glVertex4f( 2, 2,-1, 0);
-   glVertex4f(-2, 2,-1, 0);
+   glVertex4f(-2, -2, -1, 0);
+   glVertex4f(2, -2, -1, 0);
+   glVertex4f(2, 2, -1, 0);
+   glVertex4f(-2, 2, -1, 0);
    glEnd();
 
    glStencilFunc(GL_ALWAYS, 0x0, 0xff);
@@ -214,6 +214,4 @@ void ShadowVolume::renderAmbient()
 
    glMatrixMode(GL_MODELVIEW);
    glPopMatrix();
-
 }
-

@@ -32,8 +32,8 @@ public:
 
    void resize(int x, int y);
    void setViewPort(int x, int y, int width, int height);
-   void getViewPort(int *x, int *y, int *width, int *height);
-   void convertFromViewPort(int *x, int *y, int targetWidth, int targetHeight);
+   void getViewPort(int* x, int* y, int* width, int* height);
+   void convertFromViewPort(int* x, int* y, int targetWidth, int targetHeight);
    void clear();
 
    void setPerspective(float fov, float aspect, float zNear = 1.0f, float zFar = 5000.0f);
@@ -74,25 +74,25 @@ public:
    unsigned int createVertexBuffer(int size, bool dynamic = false);
    void allocateVertexBuffer(unsigned int buffer, int size, bool dyn = false);
    void* lockVertexBuffer(unsigned int handle, int size = 0);
-   void  unlockVertexBuffer(unsigned int buf);
+   void unlockVertexBuffer(unsigned int buf);
 
    unsigned int createIndexBuffer(int size, bool dyn = false);
    void allocateIndexBuffer(unsigned int buf, int size, bool dyn = false);
    void* lockIndexBuffer(unsigned int handle, int size = 0);
-   void  unlockIndexBuffer(unsigned int buf);
-   void  setCulling(bool state);
-   void  setMaterial(const Vector& amb, const Vector& dif, const Vector& spc, float shine);
+   void unlockIndexBuffer(unsigned int buf);
+   void setCulling(bool state);
+   void setMaterial(const Vector& amb, const Vector& dif, const Vector& spc, float shine);
 
-   void drawLine(Vector *v);
+   void drawLine(Vector* v);
 
-   unsigned int createTexture(void *data, int x, int y, int flags = 3);
+   unsigned int createTexture(void* data, int x, int y, int flags = 3);
    void deleteTexture(unsigned int textureId);
-   void updateTexture(void *data, int x, int y, int flags);
+   void updateTexture(void* data, int x, int y, int flags);
 
-   unsigned int uploadTexture1D(void *data, int x, int flags = 0);
-   unsigned int loadShader(const char *vname, const char *pname);
+   unsigned int uploadTexture1D(void* data, int x, int flags = 0);
+   unsigned int loadShader(const char* vname, const char* pname);
    void setShader(unsigned int shader);
-   int getParameterIndex(const char *name);
+   int getParameterIndex(const char* name);
    void bindSampler(int pos, int unit);
    void setParameter(int pos, float* data, int size);
    void setParameter(int pos, const Vector& vector);

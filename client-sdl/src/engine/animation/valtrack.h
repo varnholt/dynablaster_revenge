@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "valkey.h"
 #include "track.h"
+#include "valkey.h"
 
 class ValTrack : public Track<ValKey>
 {

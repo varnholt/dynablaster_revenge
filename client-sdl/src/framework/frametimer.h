@@ -12,7 +12,7 @@ public:
    FrameTimer(const FrameTimer& other);
    ~FrameTimer();
 
-   FrameTimer& operator = (const FrameTimer& other);
+   FrameTimer& operator=(const FrameTimer& other);
 
    static FrameTimer currentTime();
 
@@ -39,9 +39,9 @@ signals:
    void timeout();
 
 public:
-   bool  mStarted;
-   bool  mSingleShot;
+   bool mStarted;
+   bool mSingleShot;
    float mStartTime;
    float mInterval;
-   bool  mDelete;
+   bool mDelete;
 };

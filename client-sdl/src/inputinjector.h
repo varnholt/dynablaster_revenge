@@ -11,8 +11,8 @@ class InputInjector
 public:
    struct Step
    {
-      uint32_t keycode;   //!< SDLK_* value
-      int hold_frames;    //!< frames the key stays "down" before the key-up
+      uint32_t keycode;  //!< SDLK_* value
+      int hold_frames;   //!< frames the key stays "down" before the key-up
    };
 
    /// \brief pushes a key-down immediately followed by a key-up.

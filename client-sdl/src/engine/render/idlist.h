@@ -6,13 +6,13 @@
 class IDList : public Array<int>
 {
 public:
-	IDList();
-	IDList(const IDList&);
-	virtual ~IDList();
+   IDList();
+   IDList(const IDList&);
+   virtual ~IDList();
 
-	IDList& operator = (const IDList& other);
+   IDList& operator=(const IDList& other);
 
-	virtual int load(Stream *stream);
+   virtual int load(Stream* stream);
 
 private:
 };

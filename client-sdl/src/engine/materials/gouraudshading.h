@@ -8,15 +8,15 @@
 class GouraudShading : public Material
 {
 public:
-	void load(Stream *stream);
-	void add(Geometry *geo);
-	void render();
+   void load(Stream* stream);
+   void add(Geometry* geo);
+   void render();
 
 private:
    int mAmount;
    int mTexture;
    int mTexture2;
-	int mShader;
+   int mShader;
 };
 
 #endif

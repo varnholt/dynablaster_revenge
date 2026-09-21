@@ -10,7 +10,7 @@
 
 class FaceList : public Array<unsigned short>, public Streamable
 {
-public:   
-   void load(Stream *stream);
-   void write(Stream *stream);
+public:
+   void load(Stream* stream);
+   void write(Stream* stream);
 };

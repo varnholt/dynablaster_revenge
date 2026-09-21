@@ -9,13 +9,13 @@ class ShadowVolume : public Material
 {
 public:
    ShadowVolume();
-   void load(Stream *stream);
-   void add(Geometry *geo);
-   void update(Node **nodes);
+   void load(Stream* stream);
+   void add(Geometry* geo);
+   void update(Node** nodes);
    void renderAmbient();
 
 private:
-   int calcEdgeIndices(unsigned int vertexbuffer, Geometry *geo, const Vector& lightdir);
+   int calcEdgeIndices(unsigned int vertexbuffer, Geometry* geo, const Vector& lightdir);
 
    unsigned int mTransform;
 };

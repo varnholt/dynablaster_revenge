@@ -7,7 +7,7 @@ class ObjectName
 public:
    ObjectName();
    ObjectName(const ObjectName& other);
-   ObjectName( const String& name );
+   ObjectName(const String& name);
    virtual ~ObjectName();
 
    const String& name() const;

@@ -14,4 +14,3 @@ public:
 
    Vector get(float time);
 };
-

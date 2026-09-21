@@ -1,30 +1,16 @@
 #include "blendquad.h"
 #include "gldevice.h"
 
-BlendQuad::BlendQuad()
- : mShader(0),
-   mColorParam(-1),
-   mScaleParam(-1),
-   mOffsetParam(-1)
+BlendQuad::BlendQuad() : mShader(0), mColorParam(-1), mScaleParam(-1), mOffsetParam(-1)
 {
-   mShader = activeDevice->loadShader(
-      "blendquad-vert.glsl",
-      "blendquad-frag.glsl"
-   );
+   mShader = activeDevice->loadShader("blendquad-vert.glsl", "blendquad-frag.glsl");
 
    mColorParam = activeDevice->getParameterIndex("color");
    mScaleParam = activeDevice->getParameterIndex("scale");
    mOffsetParam = activeDevice->getParameterIndex("offset");
 }
 
-
-
-void BlendQuad::process(
-   unsigned int texture,
-   const Vector4& color,
-   float scale,
-   const Vector& offset
-)
+void BlendQuad::process(unsigned int texture, const Vector4& color, float scale, const Vector& offset)
 {
    activeDevice->setShader(mShader);
    glDisable(GL_DEPTH_TEST);

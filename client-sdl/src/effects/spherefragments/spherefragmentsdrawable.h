@@ -29,10 +29,9 @@ class FrameBuffer;
 
 class SphereFragmentsDrawable : public QObject, public Drawable
 {
-    Q_OBJECT
+   Q_OBJECT
 
 public:
-
    SphereFragmentsDrawable(RenderDevice* dev, bool visible = false);
 
    virtual ~SphereFragmentsDrawable();
@@ -41,10 +40,9 @@ public:
 
    virtual void paintGL();
 
-
    void removeFragments();
-protected:
 
+protected:
    //! setup project matrix
    void projectionSetup();
 

@@ -1,10 +1,10 @@
 #ifndef IMAGEPOOL_H
 #define IMAGEPOOL_H
 
-#include <QMap>
-#include <QString>
 #include <QDateTime>
 #include <QFileInfoList>
+#include <QMap>
+#include <QString>
 #include "image.h"
 #include "tools/singleton.h"
 
@@ -18,7 +18,7 @@ public:
    ImagePool();
    ~ImagePool();
 
-   Image* getImage(const char *filename, int flags = 0);
+   Image* getImage(const char* filename, int flags = 0);
 
    void remove(Image* image);
 
@@ -31,8 +31,8 @@ private slots:
 private:
    QDateTime getFileDate(const QFileInfoList& list, const QString& filename) const;
 
-   QMap<QString,Image*> mPool;
-   QTimer *mRefresh;
+   QMap<QString, Image*> mPool;
+   QTimer* mRefresh;
 };
 
 #endif

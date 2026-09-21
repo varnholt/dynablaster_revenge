@@ -6,32 +6,24 @@ Array<FrameBuffer*> FrameBuffer::mStack;
 unsigned int FrameBuffer::mQuadVertexBuffer = 0;
 
 FrameBuffer::FrameBuffer(int width, int height, int /*multiSample*/, int formatFlags)
-: mTarget(0)
-, mTexture(0)
-, mDepthBuffer(0)
-, mWidth(0)
-, mHeight(0)
-, mFormatFlags(formatFlags)
+    : mTarget(0), mTexture(0), mDepthBuffer(0), mWidth(0), mHeight(0), mFormatFlags(formatFlags)
 {
    if (setResolution(width, height))
    {
-      mWidth= width;
-      mHeight= height;
+      mWidth = width;
+      mHeight = height;
    }
 }
-
 
 FrameBuffer::~FrameBuffer()
 {
    discard();
 }
 
-
 FrameBuffer* FrameBuffer::Instance()
 {
    return mInstance;
 }
-
 
 void FrameBuffer::discard()
 {
@@ -44,7 +36,6 @@ void FrameBuffer::discard()
    if (mTexture)
       glDeleteTextures(1, &mTexture);
 }
-
 
 bool FrameBuffer::setResolution(int width, int height)
 {
@@ -78,13 +69,13 @@ bool FrameBuffer::setResolution(int width, int height)
    const bool ok = (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
    if (ok)
    {
-      mWidth= width;
-      mHeight= height;
+      mWidth = width;
+      mHeight = height;
    }
    else
    {
-      mWidth= 0;
-      mHeight= 0;
+      mWidth = 0;
+      mHeight = 0;
    }
 
    if ((mFormatFlags & NoDepthBuffer) == 0)
@@ -97,79 +88,69 @@ bool FrameBuffer::setResolution(int width, int height)
    return ok;
 }
 
-
 void FrameBuffer::bind(int width, int height)
 {
-   mInstance= this;
+   mInstance = this;
    glBindFramebuffer(GL_FRAMEBUFFER, mTarget);
    if (width && height)
-      glViewport(0,0, width, height);
+      glViewport(0, 0, width, height);
    else
-      glViewport(0,0, mWidth, mHeight);
+      glViewport(0, 0, mWidth, mHeight);
 }
-
 
 void FrameBuffer::unbind()
 {
-   mInstance= nullptr;
+   mInstance = nullptr;
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 void FrameBuffer::push(FrameBuffer* fb)
 {
-   mStack.add( mInstance );
+   mStack.add(mInstance);
    if (fb)
       fb->bind();
 }
 
-
 void FrameBuffer::pop()
 {
-   if (mStack.size()>0)
+   if (mStack.size() > 0)
    {
-      FrameBuffer *prev= mStack.takeLast();
+      FrameBuffer* prev = mStack.takeLast();
       if (prev)
          prev->bind();
       else
       {
-         mInstance= nullptr;
+         mInstance = nullptr;
          glBindFramebuffer(GL_FRAMEBUFFER, 0);
          glViewport(activeDevice->getBorderLeft(), activeDevice->getBorderBottom(), activeDevice->getWidth(), activeDevice->getHeight());
       }
    }
 }
 
-
 int FrameBuffer::width() const
 {
    return mWidth;
 }
-
 
 int FrameBuffer::height() const
 {
    return mHeight;
 }
 
-
 bool FrameBuffer::resolutionChanged(int width, int height) const
 {
    return (mWidth != width || mHeight != height);
 }
-
 
 unsigned int FrameBuffer::texture() const
 {
    return mTexture;
 }
 
-
 unsigned int FrameBuffer::target() const
 {
    return mTarget;
 }
-
 
 void FrameBuffer::draw(float alpha)
 {
@@ -182,14 +163,9 @@ void FrameBuffer::draw(float alpha)
    // glLoadIdentity() calls gave the legacy fixed-function quad.
    if (mQuadVertexBuffer == 0)
    {
-      static const float quad[] =
-      {
-         -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-          1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-          1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-         -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-          1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-         -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
+      static const float quad[] = {
+         -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
+         -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
       };
 
       glGenBuffers(1, &mQuadVertexBuffer);
@@ -205,8 +181,8 @@ void FrameBuffer::draw(float alpha)
    glBindBuffer(GL_ARRAY_BUFFER, mQuadVertexBuffer);
    glEnableVertexAttribArray(0);
    glEnableVertexAttribArray(1);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)(sizeof(float)*3));
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
    glDrawArrays(GL_TRIANGLES, 0, 6);
 

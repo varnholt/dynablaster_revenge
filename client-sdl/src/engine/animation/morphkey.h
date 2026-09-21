@@ -16,8 +16,8 @@ public:
 
    int getVertexCount() const;
 
-   virtual void load(Stream *stream);
-   virtual void write(Stream *stream);
+   virtual void load(Stream* stream);
+   virtual void write(Stream* stream);
 
    void calculateNormals(const Array<unsigned short>& indexBuffer);
 
@@ -25,4 +25,3 @@ protected:
    List<Vector> mVertices;
    List<Vector> mNormals;
 };
-

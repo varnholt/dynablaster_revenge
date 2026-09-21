@@ -3,11 +3,11 @@
 
 // menus
 #include "clipper.h"
+#include "framework/gldevice.h"
+#include "math/matrix.h"
 #include "menupagebuttonitem.h"
 #include "menupagelabelitem.h"
 #include "menupagelistitemelement.h"
-#include "framework/gldevice.h"
-#include "math/matrix.h"
 
 #include <cstring>
 
@@ -16,17 +16,11 @@ QMap<QString, MenuPageComboBoxItem*> MenuPageComboBoxItem::sMapComboBoxes;
 QMap<QString, MenuPageLabelItem*> MenuPageComboBoxItem::sMapLabels;
 QMap<QString, MenuPageButtonItem*> MenuPageComboBoxItem::sMapButtons;
 
-
 MenuPageComboBoxItem::MenuPageComboBoxItem()
- : mVisibleAnimationTime(0.0),
-   mInvisibleAnimationTime(0.0),
-   mButtonItem(0),
-   mLabelItem(0),
-   mQuadVertexBuffer(0)
+    : mVisibleAnimationTime(0.0), mInvisibleAnimationTime(0.0), mButtonItem(0), mLabelItem(0), mQuadVertexBuffer(0)
 {
    mPageItemType = PageItemTypeCombobox;
 }
-
 
 void MenuPageComboBoxItem::initialize()
 {
@@ -39,7 +33,6 @@ void MenuPageComboBoxItem::initialize()
    mVerticalSpacing = 0;
 }
 
-
 void MenuPageComboBoxItem::setFocus(bool focus)
 {
    MenuPageListItem::setFocus(focus);
@@ -48,12 +41,10 @@ void MenuPageComboBoxItem::setFocus(bool focus)
       setVisible(false);
 }
 
-
 bool MenuPageComboBoxItem::isModal() const
 {
    return true;
 }
-
 
 void MenuPageComboBoxItem::setVisible(bool visible)
 {
@@ -75,33 +66,22 @@ void MenuPageComboBoxItem::setVisible(bool visible)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    Legacy glBegin(GL_QUADS)/glColor4ub draw becomes a small dynamic vertex buffer through the
    shared texalphaignore shader (already bound by MenuDrawable for the whole page-render pass) -
    same treatment as MenuPageBackgroundItem's animated quad.
 */
-void MenuPageComboBoxItem::drawQuad(
-   PSDLayer* layer,
-   float x, float y,
-   float width, float height,
-   int opacity
-)
+void MenuPageComboBoxItem::drawQuad(PSDLayer* layer, float x, float y, float width, float height, int opacity)
 {
    glBindTexture(GL_TEXTURE_2D, layer->getTexture());
 
    float u = layer->getU();
    float v = layer->getV();
 
-   const float quad[] =
-   {
-      x,         y,          0.0f, 0.0f, 0.0f,
-      x,         y + height, 0.0f, 0.0f, v,
-      x + width, y + height, 0.0f, u,    v,
-      x,         y,          0.0f, 0.0f, 0.0f,
-      x + width, y + height, 0.0f, u,    v,
-      x + width, y,          0.0f, u,    0.0f,
+   const float quad[] = {
+      x, y, 0.0f, 0.0f, 0.0f, x,         y + height, 0.0f, 0.0f, v, x + width, y + height, 0.0f, u, v,
+      x, y, 0.0f, 0.0f, 0.0f, x + width, y + height, 0.0f, u,    v, x + width, y,          0.0f, u, 0.0f,
    };
 
    if (mQuadVertexBuffer == 0)
@@ -119,8 +99,8 @@ void MenuPageComboBoxItem::drawQuad(
    glBindBuffer(GL_ARRAY_BUFFER, mQuadVertexBuffer);
    glEnableVertexAttribArray(0);
    glEnableVertexAttribArray(1);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)(sizeof(float)*3));
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
    glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -129,7 +109,6 @@ void MenuPageComboBoxItem::drawQuad(
 
    activeDevice->pop();
 }
-
 
 void MenuPageComboBoxItem::updateTableBounds()
 {
@@ -142,7 +121,6 @@ void MenuPageComboBoxItem::updateTableBounds()
 
    getCurrentLayer()->setBottom(top + maxH);
 }
-
 
 void MenuPageComboBoxItem::draw()
 {
@@ -161,7 +139,7 @@ void MenuPageComboBoxItem::draw()
       x = getLayerFirstElement()->getLeft();
       y = getLayerFirstElement()->getTop();
 
-      drawQuad(getLayerFirstElement(), x, y, width, height+1);
+      drawQuad(getLayerFirstElement(), x, y, width, height + 1);
 
       // draw n-1th element layer
       height = mRowHeight;
@@ -190,57 +168,40 @@ void MenuPageComboBoxItem::draw()
       x = getLayerGradientElement()->getLeft();
       y = getLayerFirstElement()->getTop();
 
-      drawQuad(
-         getLayerGradientElement(),
-         x, y,
-         width, height,
-         static_cast<int>(getLayerGradientElement()->getOpacity() * 255.0f)
-      );
+      drawQuad(getLayerGradientElement(), x, y, width, height, static_cast<int>(getLayerGradientElement()->getOpacity() * 255.0f));
 
       // call parent
       MenuPageListItem::draw();
    }
 }
 
-
 void MenuPageComboBoxItem::animate(float time)
 {
    MenuPageListItem::animate(time);
 }
 
-
 void MenuPageComboBoxItem::dropDownEnabled(bool /*enabled*/)
 {
 }
 
-
-void MenuPageComboBoxItem::addComboBox(const QString & key, MenuPageComboBoxItem * item)
+void MenuPageComboBoxItem::addComboBox(const QString& key, MenuPageComboBoxItem* item)
 {
    sMapComboBoxes.insert(key, item);
 }
 
-
-void MenuPageComboBoxItem::addButton(const QString & key, MenuPageButtonItem * item)
+void MenuPageComboBoxItem::addButton(const QString& key, MenuPageButtonItem* item)
 {
    sMapButtons.insert(key, item);
 }
 
-
-void MenuPageComboBoxItem::addLabel(const QString & key, MenuPageLabelItem * item)
+void MenuPageComboBoxItem::addLabel(const QString& key, MenuPageLabelItem* item)
 {
    sMapLabels.insert(key, item);
 }
 
-
-void MenuPageComboBoxItem::linkComboBoxToButton(
-   const QString & buttonKey,
-   const QString &comboBoxKey
-)
+void MenuPageComboBoxItem::linkComboBoxToButton(const QString& buttonKey, const QString& comboBoxKey)
 {
-   if (
-         sMapButtons.contains(buttonKey)
-      && sMapComboBoxes.contains(comboBoxKey)
-   )
+   if (sMapButtons.contains(buttonKey) && sMapComboBoxes.contains(comboBoxKey))
    {
       MenuPageButtonItem* button = sMapButtons[buttonKey];
       MenuPageComboBoxItem* comboBox = sMapComboBoxes[comboBoxKey];
@@ -253,54 +214,34 @@ void MenuPageComboBoxItem::linkComboBoxToButton(
          // as a convenient QObject to call the (non-static) connect() member function on - this
          // port has no QApplication (SDL owns the window/event loop), so use the static
          // QObject::connect() instead, which needs no instance at all.
-         QObject::connect(
-            button,
-            SIGNAL(action(QString)),
-            comboBox,
-            SLOT(setVisible())
-         );
+         QObject::connect(button, SIGNAL(action(QString)), comboBox, SLOT(setVisible()));
       }
    }
 }
 
-
-void MenuPageComboBoxItem::linkComboBoxToLabel(
-   const QString& labelKey,
-   const QString& comboBoxKey
-)
+void MenuPageComboBoxItem::linkComboBoxToLabel(const QString& labelKey, const QString& comboBoxKey)
 {
-   if (
-         sMapLabels.contains(labelKey)
-      && sMapComboBoxes.contains(comboBoxKey)
-   )
+   if (sMapLabels.contains(labelKey) && sMapComboBoxes.contains(comboBoxKey))
    {
       MenuPageLabelItem* label = sMapLabels[labelKey];
       MenuPageComboBoxItem* comboBox = sMapComboBoxes[comboBoxKey];
       comboBox->setLabelItem(label);
 
-      QObject::connect(
-         comboBox,
-         SIGNAL(valueChanged(QString)),
-         label,
-         SLOT(setText(QString))
-      );
+      QObject::connect(comboBox, SIGNAL(valueChanged(QString)), label, SLOT(setText(QString)));
    }
 }
 
-
-void MenuPageComboBoxItem::setButtonItem(MenuPageButtonItem *item)
+void MenuPageComboBoxItem::setButtonItem(MenuPageButtonItem* item)
 {
    mButtonItem = item;
 }
 
-
-MenuPageButtonItem *MenuPageComboBoxItem::getButtonItem() const
+MenuPageButtonItem* MenuPageComboBoxItem::getButtonItem() const
 {
    return mButtonItem;
 }
 
-
-MenuPageButtonItem *MenuPageComboBoxItem::getButtonItem(const QString &name)
+MenuPageButtonItem* MenuPageComboBoxItem::getButtonItem(const QString& name)
 {
    MenuPageButtonItem* button = 0;
 
@@ -315,18 +256,15 @@ MenuPageButtonItem *MenuPageComboBoxItem::getButtonItem(const QString &name)
    return button;
 }
 
-
-void MenuPageComboBoxItem::setLabelItem(MenuPageLabelItem *item)
+void MenuPageComboBoxItem::setLabelItem(MenuPageLabelItem* item)
 {
    mLabelItem = item;
 }
 
-
-MenuPageLabelItem *MenuPageComboBoxItem::getLabelItem() const
+MenuPageLabelItem* MenuPageComboBoxItem::getLabelItem() const
 {
    return mLabelItem;
 }
-
 
 void MenuPageComboBoxItem::mousePressed(int x, int y)
 {
@@ -347,7 +285,6 @@ void MenuPageComboBoxItem::mousePressed(int x, int y)
    }
 }
 
-
 QString MenuPageComboBoxItem::getValue() const
 {
    QString value;
@@ -360,8 +297,7 @@ QString MenuPageComboBoxItem::getValue() const
    return value;
 }
 
-
-void MenuPageComboBoxItem::setValue(const QString & value)
+void MenuPageComboBoxItem::setValue(const QString& value)
 {
    if (getLabelItem())
    {

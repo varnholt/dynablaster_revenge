@@ -29,121 +29,108 @@ class GameLogoDrawable : public SphereFragmentsDrawable
 {
    Q_OBJECT
 
+public:
+   class Spark
+   {
    public:
-
-      class Spark
+      Spark() : mPointSize(1.0f), mIntensity(1.0f), mLength(0.0f), mScalar(0.0f), mStartTime(0.0f)
       {
-         public:
+      }
 
-            Spark()
-               : mPointSize(1.0f),
-                 mIntensity(1.0f),
-                 mLength(0.0f),
-                 mScalar(0.0f),
-                 mStartTime(0.0f)
-            {
-            }
+      Vector mOrigin;
+      Vector mDirection;
+      Vector mPosition;
 
-            Vector mOrigin;
-            Vector mDirection;
-            Vector mPosition;
+      float mPointSize;
+      float mIntensity;
+      float mLength;
+      float mScalar;
+      float mStartTime;
+   };
 
-            float mPointSize;
-            float mIntensity;
-            float mLength;
-            float mScalar;
-            float mStartTime;
-      };
+   //! constructor
+   GameLogoDrawable(RenderDevice* dev, bool visible = false);
 
-      //! constructor
-      GameLogoDrawable(RenderDevice* dev, bool visible = false);
+   //! destructor
+   virtual ~GameLogoDrawable();
 
-      //! destructor
-      virtual ~GameLogoDrawable();
+   //! initialize
+   void initializeGL();
 
-      //! initialize
-      void initializeGL();
+   //! draw
+   void paintGL();
 
-      //! draw
-      void paintGL();
+   //! animate
+   void animate(float time);
 
-      //! animate
-      void animate(float time);
+   //! overwrite base
+   void setVisible(bool visible);
 
-      //! overwrite base
-      void setVisible(bool visible);
+public slots:
 
+   //!
+   void pageChanged(const QString& page);
 
-   public slots:
+protected:
+   //! initialize layers
+   void initializeLayers();
 
-      //!
-      void pageChanged(const QString& page);
+   //! initialize sparks
+   void initializeSparks();
 
+   //! init ortho gl parameters
+   void initOrthoGlParameters();
 
-   protected:
+   //! init pointsprite gl parameters
+   void initPointSpriteGlParameters();
 
-      //! initialize layers
-      void initializeLayers();
+   //! cleanup gl parameters
+   void cleanupGlParameters();
 
-      //! initialize sparks
-      void initializeSparks();
+   // main drawing
 
-      //! init ortho gl parameters
-      void initOrthoGlParameters();
+   //! set alpha for psd layers
+   void updateFadeAlpha();
 
-      //! init pointsprite gl parameters
-      void initPointSpriteGlParameters();
+   //! draw point sprites
+   void drawSparks();
 
-      //! cleanup gl parameters
-      void cleanupGlParameters();
+   //
+   void initSpark(Spark& spark);
 
+   //
+   bool mMainMenuVisible;
 
-      // main drawing
+   // animation
 
-      //! set alpha for psd layers
-      void updateFadeAlpha();
+   //! time
+   float mDeltaTime;
+   float mTime;
 
-      //! draw point sprites
-      void drawSparks();
+   // overlay members
 
-      //
-      void initSpark(Spark& spark);
+   //! psd instance
+   PSD mPsd;
 
+   //! filename to load from
+   QString mFilename;
 
-      //
-      bool mMainMenuVisible;
+   //! font texture
+   PSDLayer* mLayerDynablaster;
 
-      // animation
+   //! font texture
+   PSDLayer* mLayerRevenge;
 
-      //! time
-      float mDeltaTime;
-      float mTime;
+   //! all layers (owns them - see destructor)
+   Array<PSDLayer*> mLayers;
 
+   //
+   float mFadeInEnd;
+   float mFadeOutEnd;
 
-      // overlay members
+   // spark point sprites
 
-      //! psd instance
-      PSD mPsd;
-
-      //! filename to load from
-      QString mFilename;
-
-      //! font texture
-      PSDLayer* mLayerDynablaster;
-
-      //! font texture
-      PSDLayer* mLayerRevenge;
-
-      //! all layers (owns them - see destructor)
-      Array<PSDLayer*> mLayers;
-
-      //
-      float mFadeInEnd;
-      float mFadeOutEnd;
-
-      // spark point sprites
-
-      Array<Spark> mSparks;
-      Vector mSparkOrigin;
-      bool mSparkTimesInitialized;
+   Array<Spark> mSparks;
+   Vector mSparkOrigin;
+   bool mSparkTimesInitialized;
 };

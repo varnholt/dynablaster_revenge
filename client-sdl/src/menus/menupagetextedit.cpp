@@ -14,23 +14,22 @@
 #define CURSOR_UPDATE_TIME 500
 
 MenuPageTextEditItem::MenuPageTextEditItem()
-   : mFont(0),
-     mFontXOffset(0),
-     mFontYOffset(0),
-     mFieldWidth(255),
-     mMaxLength(-1),
-     mScale(0.0f),
-     mEditingActive(false),
-     mCursorVisible(false),
-     mAlpha(255),
-     mCursorPosition(0),
-     mCursorTexture(0),
-     mCursorVertexBuffer(0)
+    : mFont(0),
+      mFontXOffset(0),
+      mFontYOffset(0),
+      mFieldWidth(255),
+      mMaxLength(-1),
+      mScale(0.0f),
+      mEditingActive(false),
+      mCursorVisible(false),
+      mAlpha(255),
+      mCursorPosition(0),
+      mCursorTexture(0),
+      mCursorVertexBuffer(0)
 {
    mPageItemType = PageItemTypeTextedit;
    mInteractive = true;
 }
-
 
 void MenuPageTextEditItem::initialize()
 {
@@ -39,14 +38,8 @@ void MenuPageTextEditItem::initialize()
    // init update timer
    mTimer.setInterval(CURSOR_UPDATE_TIME);
 
-   connect(
-      &mTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(updateCursorHighlight())
-   );
+   connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateCursorHighlight()));
 }
-
 
 void MenuPageTextEditItem::draw()
 {
@@ -73,10 +66,7 @@ void MenuPageTextEditItem::draw()
       QString visibleText = mText.mid(i0, getFieldWidth());
 
       mFont->buildVertices(
-         mScale,
-         qPrintable(visibleText),
-         mLayerActive->getLeft() + mFontXOffset,
-         mLayerActive->getBottom() + mFontYOffset
+         mScale, qPrintable(visibleText), mLayerActive->getLeft() + mFontXOffset, mLayerActive->getBottom() + mFontYOffset
       );
 
       mFont->draw();
@@ -87,7 +77,6 @@ void MenuPageTextEditItem::draw()
       }
    }
 }
-
 
 void MenuPageTextEditItem::keyPressed(int key, const QString& text)
 {
@@ -155,48 +144,40 @@ void MenuPageTextEditItem::keyPressed(int key, const QString& text)
    }
 }
 
-
-void MenuPageTextEditItem::setFontName(const QString &fontName)
+void MenuPageTextEditItem::setFontName(const QString& fontName)
 {
    mFontName = fontName;
 }
-
 
 void MenuPageTextEditItem::setFontXOffset(int xOffset)
 {
    mFontXOffset = xOffset;
 }
 
-
 void MenuPageTextEditItem::setFontYOffset(int yOffset)
 {
    mFontYOffset = yOffset;
 }
-
 
 void MenuPageTextEditItem::setFieldWidth(int fieldWidth)
 {
    mFieldWidth = fieldWidth;
 }
 
-
 void MenuPageTextEditItem::setMaxLength(int maxLength)
 {
    mMaxLength = maxLength;
 }
-
 
 int MenuPageTextEditItem::getMaxLength() const
 {
    return mMaxLength;
 }
 
-
 int MenuPageTextEditItem::getFieldWidth() const
 {
    return mFieldWidth;
 }
-
 
 void MenuPageTextEditItem::setScale(float scale)
 {
@@ -208,101 +189,76 @@ float MenuPageTextEditItem::getScale() const
    return mScale;
 }
 
-
 void MenuPageTextEditItem::setText(const QString& text)
 {
    mText = text.left(qMax(text.length(), getFieldWidth()));
    setCursorPosition(mText.length());
 }
 
-
-void MenuPageTextEditItem::setColor(const QColor &color)
+void MenuPageTextEditItem::setColor(const QColor& color)
 {
    mColor = color;
 }
 
-
-void MenuPageTextEditItem::setOutlineColor(const QColor &outlineColor)
+void MenuPageTextEditItem::setOutlineColor(const QColor& outlineColor)
 {
    mOutlineColor = outlineColor;
 }
 
-
-const QColor &MenuPageTextEditItem::getColor() const
+const QColor& MenuPageTextEditItem::getColor() const
 {
    return mColor;
 }
-
 
 void MenuPageTextEditItem::setAlpha(int alpha)
 {
    mAlpha = alpha;
 }
 
-
 bool MenuPageTextEditItem::isActionRequestOnClickEnabled() const
 {
    return false;
 }
-
 
 void MenuPageTextEditItem::setCursorPosition(int index)
 {
    mCursorPosition = index;
 }
 
-
 int MenuPageTextEditItem::getCursorPosition() const
 {
    return mCursorPosition;
 }
-
 
 bool MenuPageTextEditItem::isEditingActive() const
 {
    return mEditingActive;
 }
 
-
 void MenuPageTextEditItem::moveCursorRight()
 {
-   setCursorPosition(
-      qMin(
-         getCursorPosition() + 1,
-         getText().length()
-      )
-   );
+   setCursorPosition(qMin(getCursorPosition() + 1, getText().length()));
 }
-
 
 void MenuPageTextEditItem::moveCursorLeft()
 {
-   setCursorPosition(
-      qMax(
-         getCursorPosition() - 1,
-         0
-      )
-   );
+   setCursorPosition(qMax(getCursorPosition() - 1, 0));
 }
-
 
 void MenuPageTextEditItem::moveCursorToStart()
 {
    setCursorPosition(0);
 }
 
-
 void MenuPageTextEditItem::moveCursorToEnd()
 {
    setCursorPosition(getText().length());
 }
 
-
-const QString &MenuPageTextEditItem::getText() const
+const QString& MenuPageTextEditItem::getText() const
 {
    return mText;
 }
-
 
 void MenuPageTextEditItem::activated()
 {
@@ -315,7 +271,6 @@ void MenuPageTextEditItem::activated()
    MenuPageItem::activated();
 }
 
-
 void MenuPageTextEditItem::deactivated()
 {
    mTimer.stop();
@@ -323,13 +278,11 @@ void MenuPageTextEditItem::deactivated()
    MenuPageItem::deactivated();
 }
 
-
-void MenuPageTextEditItem::paste(const QString &text)
+void MenuPageTextEditItem::paste(const QString& text)
 {
    for (int i = 0; i < text.length(); i++)
       keyPressed(Qt::Key_unknown, text.at(i));
 }
-
 
 void MenuPageTextEditItem::drawCursor()
 {
@@ -338,7 +291,7 @@ void MenuPageTextEditItem::drawCursor()
    // equivalent - every draw needs a real bound texture and a real shader. Replaced with a
    // lazily-created 1x1 white texture drawn through the shared texalphaignore shader; the
    // mColor tint is dropped (see class comment), so this is always a white highlight now.
-   float alphaFactor = qMax(1.0f - 0.75f*(mCursorTime.elapsed() / (float)CURSOR_UPDATE_TIME), 0.0f);
+   float alphaFactor = qMax(1.0f - 0.75f * (mCursorTime.elapsed() / (float)CURSOR_UPDATE_TIME), 0.0f);
 
    float left = 0.0f;
    float right = 0.0f;
@@ -349,41 +302,36 @@ void MenuPageTextEditItem::drawCursor()
 
    if (mCursorTexture == 0)
    {
-      unsigned int white= 0xFFFFFFFF;
-      mCursorTexture= activeDevice->createTexture(&white, 1, 1, 0);
+      unsigned int white = 0xFFFFFFFF;
+      mCursorTexture = activeDevice->createTexture(&white, 1, 1, 0);
    }
 
    glBindTexture(GL_TEXTURE_2D, mCursorTexture);
 
    glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
 
-   const float quad[] =
-   {
-      left,  top,    -1.0f, 0.0f, 0.0f,
-      right, top,    -1.0f, 1.0f, 0.0f,
-      right, bottom, -1.0f, 1.0f, 1.0f,
-      left,  top,    -1.0f, 0.0f, 0.0f,
-      right, bottom, -1.0f, 1.0f, 1.0f,
-      left,  bottom, -1.0f, 0.0f, 1.0f,
+   const float quad[] = {
+      left, top, -1.0f, 0.0f, 0.0f, right, top,    -1.0f, 1.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f,
+      left, top, -1.0f, 0.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f, left,  bottom, -1.0f, 0.0f, 1.0f,
    };
 
    if (mCursorVertexBuffer == 0)
-      mCursorVertexBuffer= activeDevice->createVertexBuffer(sizeof(quad), true);
+      mCursorVertexBuffer = activeDevice->createVertexBuffer(sizeof(quad), true);
    else
       activeDevice->allocateVertexBuffer(mCursorVertexBuffer, sizeof(quad), true);
 
-   void* dst= activeDevice->lockVertexBuffer(mCursorVertexBuffer, sizeof(quad));
+   void* dst = activeDevice->lockVertexBuffer(mCursorVertexBuffer, sizeof(quad));
    memcpy(dst, quad, sizeof(quad));
    activeDevice->unlockVertexBuffer(mCursorVertexBuffer);
 
    activeDevice->push(Matrix());
-   activeDevice->setParameter(activeDevice->getParameterIndex("alpha"), (128.0f/255.0f) * alphaFactor);
+   activeDevice->setParameter(activeDevice->getParameterIndex("alpha"), (128.0f / 255.0f) * alphaFactor);
 
    glBindBuffer(GL_ARRAY_BUFFER, mCursorVertexBuffer);
    glEnableVertexAttribArray(0);
    glEnableVertexAttribArray(1);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (GLvoid*)(sizeof(float)*3));
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)0);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
    glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -395,12 +343,10 @@ void MenuPageTextEditItem::drawCursor()
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-
 void MenuPageTextEditItem::updateCursorHighlight()
 {
    mCursorTime.restart();
 }
-
 
 bool MenuPageTextEditItem::isCursorAtEnd() const
 {

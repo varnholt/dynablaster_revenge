@@ -6,7 +6,7 @@
 class AnimatedMesh : public Mesh
 {
 public:
-   AnimatedMesh(Node *parent = 0);
+   AnimatedMesh(Node* parent = 0);
    ~AnimatedMesh();
 
    int getFrameCount() const;

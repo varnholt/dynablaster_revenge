@@ -15,15 +15,15 @@
 #include "effects/spherefragments/spherefragmentsdrawable.h"
 #include "game/gamelogodrawable.h"
 
-#include "menus/menudrawable.h"
-#include "menus/menu.h"
-#include "menus/menupage.h"
-#include "menus/menupageeditablecomboboxitem.h"
-#include "menus/menumousecursor.h"
-#include "menus/fontpool.h"
+#include "image/image.h"
 #include "menus/bitmapfont.h"
 #include "menus/fontmap.h"
-#include "image/image.h"
+#include "menus/fontpool.h"
+#include "menus/menu.h"
+#include "menus/menudrawable.h"
+#include "menus/menumousecursor.h"
+#include "menus/menupage.h"
+#include "menus/menupageeditablecomboboxitem.h"
 
 #include <QObject>
 
@@ -45,12 +45,12 @@ class ActionLogger : public QObject
 {
    Q_OBJECT
 
-   public slots:
+public slots:
 
-      void onActionRequest(const QString& page, const QString& action)
-      {
-         SDL_Log("Menu::actionRequest: page=%s action=%s", qPrintable(page), qPrintable(action));
-      }
+   void onActionRequest(const QString& page, const QString& action)
+   {
+      SDL_Log("Menu::actionRequest: page=%s action=%s", qPrintable(page), qPrintable(action));
+   }
 };
 
 /// \brief the scripted key sequence a headless --selftest run feeds into the game.
@@ -96,18 +96,10 @@ bool hasFlag(const std::vector<std::string>& args, const std::string& flag)
 void registerMenuFont()
 {
    BitmapFont* fontDefault =
-      new BitmapFont(
-         "data/fonts/font",
-         MenuFont::sMenuChars,
-         2.1f, 3.0f, 32.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.05f, -0.025f
-      );
+      new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.1f, 3.0f, 32.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.05f, -0.025f);
 
    BitmapFont* fontLounge =
-      new BitmapFont(
-         "data/fonts/font",
-         MenuFont::sMenuChars,
-         2.2f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.1f, 0.05f, -0.025f
-      );
+      new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.2f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.1f, 0.05f, -0.025f);
 
    FontPool::Instance()->add("default", fontDefault);
    FontPool::Instance()->add("lounge", fontLounge);
@@ -142,14 +134,14 @@ int main(int argc, char** argv)
    FileStream::addPath("data/textures");
    FileStream::addPath("data/game");
    FileStream::addPath("data/level-castle");
-   FileStream::addPath("data/logo"); // GameLogoPointSprite's "pointsprite" texture
+   FileStream::addPath("data/logo");  // GameLogoPointSprite's "pointsprite" texture
 
    // constructing a RenderDevice sets the global activeDevice pointer (see renderdevice.cpp) -
    // every Material/VertexBuffer/etc call below goes through this.
    GLDevice device;
    device.init();
    device.resize(context.width(), context.height());
-   device.setCulling(false); // materials normally drive this per-draw via getCulling(); this demo doesn't wire that up
+   device.setCulling(false);  // materials normally drive this per-draw via getCulling(); this demo doesn't wire that up
 
    SDL_Log("GL_VERSION: %s", glGetString(GL_VERSION));
    SDL_Log("GL_RENDERER: %s", glGetString(GL_RENDERER));
@@ -207,12 +199,7 @@ int main(int argc, char** argv)
       logoDrawable = new GameLogoDrawable(&device);
       logoDrawable->initializeGL();
       logoDrawable->setVisible(true);
-      QObject::connect(
-         menuDrawable,
-         SIGNAL(pageChanged(QString)),
-         logoDrawable,
-         SLOT(pageChanged(QString))
-      );
+      QObject::connect(menuDrawable, SIGNAL(pageChanged(QString)), logoDrawable, SLOT(pageChanged(QString)));
 
       // --page=<psd path>: jump straight to a real page for a static verification screenshot,
       // bypassing full click-driven navigation (which needs GameMenuWorkflow - a later phase).
@@ -268,23 +255,12 @@ int main(int argc, char** argv)
             {
                const int w = image->getWidth();
                const int h = image->getHeight();
-               const int samples[][2] = {
-                  {w / 2, h / 2},
-                  {w / 4, h / 4},
-                  {(3 * w) / 4, (3 * h) / 4},
-                  {5, 5},
-                  {w - 5, h - 5}
-               };
+               const int samples[][2] = {{w / 2, h / 2}, {w / 4, h / 4}, {(3 * w) / 4, (3 * h) / 4}, {5, 5}, {w - 5, h - 5}};
                for (auto& s : samples)
                {
                   unsigned int px = image->getScanline(s[1])[s[0]];
                   SDL_Log(
-                     "  pixel(%d,%d): a=%d r=%d g=%d b=%d",
-                     s[0], s[1],
-                     (px >> 24) & 0xff,
-                     (px >> 16) & 0xff,
-                     (px >> 8) & 0xff,
-                     px & 0xff
+                     "  pixel(%d,%d): a=%d r=%d g=%d b=%d", s[0], s[1], (px >> 24) & 0xff, (px >> 16) & 0xff, (px >> 8) & 0xff, px & 0xff
                   );
                }
 
@@ -297,8 +273,7 @@ int main(int argc, char** argv)
                   if (a > 0)
                   {
                      SDL_Log(
-                        "  first non-zero-alpha in row0 at x=%d: a=%d r=%d g=%d b=%d",
-                        x, a, (px >> 16) & 0xff, (px >> 8) & 0xff, px & 0xff
+                        "  first non-zero-alpha in row0 at x=%d: a=%d r=%d g=%d b=%d", x, a, (px >> 16) & 0xff, (px >> 8) & 0xff, px & 0xff
                      );
                      break;
                   }
@@ -323,14 +298,19 @@ int main(int argc, char** argv)
                      if (((row[x] >> 24) & 0xff) > 0)
                      {
                         count++;
-                        if (examplePixel == 0) examplePixel = row[x];
+                        if (examplePixel == 0)
+                           examplePixel = row[x];
                      }
                   }
                   SDL_Log(
                      "  row %d: non-zero count=%d/%d example a=%d r=%d g=%d b=%d",
-                     checkY, count, w,
-                     (examplePixel >> 24) & 0xff, (examplePixel >> 16) & 0xff,
-                     (examplePixel >> 8) & 0xff, examplePixel & 0xff
+                     checkY,
+                     count,
+                     w,
+                     (examplePixel >> 24) & 0xff,
+                     (examplePixel >> 16) & 0xff,
+                     (examplePixel >> 8) & 0xff,
+                     examplePixel & 0xff
                   );
                }
             }
@@ -359,10 +339,7 @@ int main(int argc, char** argv)
 
       static ActionLogger actionLogger;
       QObject::connect(
-         menuDrawable->getMenu(),
-         SIGNAL(actionRequest(QString,QString)),
-         &actionLogger,
-         SLOT(onActionRequest(QString,QString))
+         menuDrawable->getMenu(), SIGNAL(actionRequest(QString, QString)), &actionLogger, SLOT(onActionRequest(QString, QString))
       );
 
       // the host-address dropdown normally lists previously-used server IPs, loaded from saved
@@ -540,9 +517,7 @@ int main(int argc, char** argv)
 
       ++frame;
 
-      const bool selftestDone = (menuMode || logo3dMode)
-         ? (selftest && frame > 40)
-         : (selftest && injector.finished() && frame > 40);
+      const bool selftestDone = (menuMode || logo3dMode) ? (selftest && frame > 40) : (selftest && injector.finished() && frame > 40);
 
       if (selftestDone)
       {

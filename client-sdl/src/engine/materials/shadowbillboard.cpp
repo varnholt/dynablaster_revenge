@@ -1,90 +1,78 @@
 #include "shadowbillboard.h"
-#include "tools/stream.h"
-#include "nodes/mesh.h"
 #include "gldevice.h"
-#include "render/renderbuffer.h"
-#include "render/geometry.h"
-#include "render/uv.h"
-#include "tools/profiling.h"
 #include "image/image.h"
-#include "render/vertexbuffer.h"
+#include "nodes/mesh.h"
+#include "render/geometry.h"
+#include "render/renderbuffer.h"
 #include "render/texturepool.h"
+#include "render/uv.h"
+#include "render/vertexbuffer.h"
 #include "textureslot.h"
+#include "tools/profiling.h"
+#include "tools/stream.h"
 
-ShadowBillboard::ShadowBillboard(SceneGraph *scene)
-: Material(scene, -1),
-  mColorMap(0),
-  mShader(0),
-  mVertices(0),
-  mTexcoords(0),
-  mIndices(0),
-  mOffset(0.0f, 0.0f)
+ShadowBillboard::ShadowBillboard(SceneGraph* scene)
+    : Material(scene, -1), mColorMap(0), mShader(0), mVertices(0), mTexcoords(0), mIndices(0), mOffset(0.0f, 0.0f)
 {
 }
 
-ShadowBillboard::ShadowBillboard(SceneGraph *scene, const char *map)
-: Material(scene, -1),
-  mColorMap(0),
-  mShader(0),
-  mVertices(0),
-  mTexcoords(0),
-  mIndices(0),
-  mOffset(0.0f, 0.0f)
+ShadowBillboard::ShadowBillboard(SceneGraph* scene, const char* map)
+    : Material(scene, -1), mColorMap(0), mShader(0), mVertices(0), mTexcoords(0), mIndices(0), mOffset(0.0f, 0.0f)
 {
-   addTexture(mColorMap, map, 1|2|4);
+   addTexture(mColorMap, map, 1 | 2 | 4);
 }
 
-void ShadowBillboard::removeMesh(Mesh *mesh)
+void ShadowBillboard::removeMesh(Mesh* mesh)
 {
-   for (int i=0; i<mesh->getPartCount(); i++)
+   for (int i = 0; i < mesh->getPartCount(); i++)
    {
-      mInstances.remove( mesh->getPart(i) );
+      mInstances.remove(mesh->getPart(i));
    }
 }
 
 void ShadowBillboard::init()
 {
-   mShader= activeDevice->loadShader("shadowbillboard-vert.glsl", "shadowbillboard-frag.glsl");
-   mParamTexture= activeDevice->getParameterIndex("texturemap");
+   mShader = activeDevice->loadShader("shadowbillboard-vert.glsl", "shadowbillboard-frag.glsl");
+   mParamTexture = activeDevice->getParameterIndex("texturemap");
 
-   mVertices= activeDevice->createVertexBuffer( sizeof(Vector) * 4 * 1000, true );
-   mTexcoords= activeDevice->createVertexBuffer( sizeof(float) * 2 * 4 * 1000 );
-   mIndices= activeDevice->createIndexBuffer( sizeof(unsigned short) * 6 * 1000 );
+   mVertices = activeDevice->createVertexBuffer(sizeof(Vector) * 4 * 1000, true);
+   mTexcoords = activeDevice->createVertexBuffer(sizeof(float) * 2 * 4 * 1000);
+   mIndices = activeDevice->createIndexBuffer(sizeof(unsigned short) * 6 * 1000);
 
-   volatile float *dst= (float*)activeDevice->lockVertexBuffer( mTexcoords );
-   float minUV= 0.01f;
-   float maxUV= 0.99f;
+   volatile float* dst = (float*)activeDevice->lockVertexBuffer(mTexcoords);
+   float minUV = 0.01f;
+   float maxUV = 0.99f;
 
-   for (int i=0;i<1000;i++)
+   for (int i = 0; i < 1000; i++)
    {
-      *dst++= minUV;
-      *dst++= maxUV;
+      *dst++ = minUV;
+      *dst++ = maxUV;
 
-      *dst++= maxUV;
-      *dst++= maxUV;
+      *dst++ = maxUV;
+      *dst++ = maxUV;
 
-      *dst++= maxUV;
-      *dst++= minUV;
+      *dst++ = maxUV;
+      *dst++ = minUV;
 
-      *dst++= minUV;
-      *dst++= minUV;
+      *dst++ = minUV;
+      *dst++ = minUV;
    }
-   activeDevice->unlockVertexBuffer( mTexcoords );
+   activeDevice->unlockVertexBuffer(mTexcoords);
 
-   volatile unsigned short *idx= (unsigned short*)activeDevice->lockIndexBuffer( mIndices );
-   for (int i=0;i<1000;i++)
+   volatile unsigned short* idx = (unsigned short*)activeDevice->lockIndexBuffer(mIndices);
+   for (int i = 0; i < 1000; i++)
    {
-      *idx++= i*4+0;
-      *idx++= i*4+1;
-      *idx++= i*4+2;
-      *idx++= i*4+0;
-      *idx++= i*4+2;
-      *idx++= i*4+3;
+      *idx++ = i * 4 + 0;
+      *idx++ = i * 4 + 1;
+      *idx++ = i * 4 + 2;
+      *idx++ = i * 4 + 0;
+      *idx++ = i * 4 + 2;
+      *idx++ = i * 4 + 3;
    }
-   activeDevice->unlockIndexBuffer( mIndices );
+   activeDevice->unlockIndexBuffer(mIndices);
 }
 
-void ShadowBillboard::load(Stream *stream)
+void ShadowBillboard::load(Stream* stream)
 {
    Material::load(stream);
 
@@ -93,91 +81,90 @@ void ShadowBillboard::load(Stream *stream)
 
 void ShadowBillboard::setOffset(float x, float y)
 {
-   mOffset.set(x,y);
+   mOffset.set(x, y);
 }
 
-void ShadowBillboard::addGeometry(Geometry *geo)
+void ShadowBillboard::addGeometry(Geometry* geo)
 {
    Bounding bound;
-   Matrix mat;//= geo->getTransform();
-//   mat.translate( Vector(0.0f) );
-//   mat= mat.invert();
-   bound.min= Vector(-1.5f-mOffset.x, -1.5f-mOffset.y);
-   bound.max= Vector( 1.5f-mOffset.x,  1.5f-mOffset.y);
+   Matrix mat;  //= geo->getTransform();
+                //   mat.translate( Vector(0.0f) );
+                //   mat= mat.invert();
+   bound.min = Vector(-1.5f - mOffset.x, -1.5f - mOffset.y);
+   bound.max = Vector(1.5f - mOffset.x, 1.5f - mOffset.y);
    mInstances.insert(geo, bound);
 
-/*
-   if (!vb)
-   {
-      vb= mPool->add(geo);
-
+   /*
+      if (!vb)
       {
-         Vector bmin(0.0f, 0.0f, 0.0f);
-         Vector bmax(0.0f, 0.0f, 0.0f);
-         geo->calcBoundingBox(bmin, bmax);
+         vb= mPool->add(geo);
 
-         Vector t= bmin;
-         bmin.minimum( -bmax );
-         bmax.maximum( -t );
+         {
+            Vector bmin(0.0f, 0.0f, 0.0f);
+            Vector bmax(0.0f, 0.0f, 0.0f);
+            geo->calcBoundingBox(bmin, bmax);
 
-         activeDevice->allocateVertexBuffer( vb->getVertexBuffer(), sizeof(Vertex)*geo->getVertexCount() );
-         volatile Vertex *dst= (Vertex*)activeDevice->lockVertexBuffer( vb->getVertexBuffer() );
+            Vector t= bmin;
+            bmin.minimum( -bmax );
+            bmax.maximum( -t );
 
-         float z= 0.2f;
+            activeDevice->allocateVertexBuffer( vb->getVertexBuffer(), sizeof(Vertex)*geo->getVertexCount() );
+            volatile Vertex *dst= (Vertex*)activeDevice->lockVertexBuffer( vb->getVertexBuffer() );
 
-         float dx= bmax.x - bmin.x;
-         float dy= bmax.y - bmin.y;
+            float z= 0.2f;
 
-         bmin -= Vector(dx,dy,0.0f);
-         bmax += Vector(dx,dy,0.0f);
+            float dx= bmax.x - bmin.x;
+            float dy= bmax.y - bmin.y;
 
-         bmin.y -= 0.1f;
-         bmax.y -= 0.1f;
+            bmin -= Vector(dx,dy,0.0f);
+            bmax += Vector(dx,dy,0.0f);
+
+            bmin.y -= 0.1f;
+            bmax.y -= 0.1f;
 
 
-         float minUV= 0.01f;
-         float maxUV= 0.99f;
-         dst[0].pos.x= bmin.x;
-         dst[0].pos.y= bmin.y;
-         dst[0].pos.z= z;
-         dst[0].uv.u= minUV;
-         dst[0].uv.v= maxUV;
+            float minUV= 0.01f;
+            float maxUV= 0.99f;
+            dst[0].pos.x= bmin.x;
+            dst[0].pos.y= bmin.y;
+            dst[0].pos.z= z;
+            dst[0].uv.u= minUV;
+            dst[0].uv.v= maxUV;
 
-         dst[1].pos.x= bmax.x;
-         dst[1].pos.y= bmin.y;
-         dst[1].pos.z= z;
-         dst[1].uv.u= maxUV;
-         dst[1].uv.v= maxUV;
+            dst[1].pos.x= bmax.x;
+            dst[1].pos.y= bmin.y;
+            dst[1].pos.z= z;
+            dst[1].uv.u= maxUV;
+            dst[1].uv.v= maxUV;
 
-         dst[2].pos.x= bmax.x;
-         dst[2].pos.y= bmax.y;
-         dst[2].pos.z= z;
-         dst[2].uv.u= maxUV;
-         dst[2].uv.v= minUV;
+            dst[2].pos.x= bmax.x;
+            dst[2].pos.y= bmax.y;
+            dst[2].pos.z= z;
+            dst[2].uv.u= maxUV;
+            dst[2].uv.v= minUV;
 
-         dst[3].pos.x= bmin.x;
-         dst[3].pos.y= bmax.y;
-         dst[3].pos.z= z;
-         dst[3].uv.u= minUV;
-         dst[3].uv.v= minUV;
+            dst[3].pos.x= bmin.x;
+            dst[3].pos.y= bmax.y;
+            dst[3].pos.z= z;
+            dst[3].uv.u= minUV;
+            dst[3].uv.v= minUV;
 
-         activeDevice->unlockVertexBuffer( vb->getVertexBuffer() );
+            activeDevice->unlockVertexBuffer( vb->getVertexBuffer() );
+         }
+
+         activeDevice->allocateIndexBuffer( vb->getIndexBuffer(), 6*sizeof(unsigned short) );
+         volatile unsigned short *idx= (unsigned short*)activeDevice->lockIndexBuffer( vb->getIndexBuffer() );
+         *idx++= 0; *idx++= 1; *idx++= 2;
+         *idx++= 0; *idx++= 2; *idx++= 3;
+         activeDevice->unlockIndexBuffer( vb->getIndexBuffer() );
+         vb->setIndexCount( 6 );
+
+
       }
 
-      activeDevice->allocateIndexBuffer( vb->getIndexBuffer(), 6*sizeof(unsigned short) );
-      volatile unsigned short *idx= (unsigned short*)activeDevice->lockIndexBuffer( vb->getIndexBuffer() );
-      *idx++= 0; *idx++= 1; *idx++= 2;
-      *idx++= 0; *idx++= 2; *idx++= 3;
-      activeDevice->unlockIndexBuffer( vb->getIndexBuffer() );
-      vb->setIndexCount( 6 );
-
-
-   }
-
-   mVB.add(Material::Buffer(geo,vb));
-*/
+      mVB.add(Material::Buffer(geo,vb));
+   */
 }
-
 
 void ShadowBillboard::begin()
 {
@@ -192,19 +179,17 @@ void ShadowBillboard::begin()
    glEnable(GL_TEXTURE_2D);
    glBindTexture(GL_TEXTURE_2D, mColorMap);
 
-   activeDevice->setShader( mShader );
+   activeDevice->setShader(mShader);
    activeDevice->bindSampler(mParamTexture, 0);
 
    // enable required vertex arrays
-   glEnableVertexAttribArray(0); // vertex data
+   glEnableVertexAttribArray(0);  // vertex data
    glEnableVertexAttribArray(2);
 }
 
-
 void ShadowBillboard::end()
 {
-
-   glDisableVertexAttribArray(0); // vertex data
+   glDisableVertexAttribArray(0);  // vertex data
    glDisableVertexAttribArray(2);
 
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -215,65 +200,64 @@ void ShadowBillboard::end()
    activeDevice->setShader(0);
 }
 
-
 void ShadowBillboard::renderDiffuse()
 {
    begin();
 
-   float z= 0.1f;
-   int count= 0;
-   Vector* dst= (Vector*)activeDevice->lockVertexBuffer( mVertices );
-   QMap<Geometry*,Bounding>::ConstIterator it;
-   for (it= mInstances.constBegin(); it!= mInstances.constEnd(); it++)
+   float z = 0.1f;
+   int count = 0;
+   Vector* dst = (Vector*)activeDevice->lockVertexBuffer(mVertices);
+   QMap<Geometry*, Bounding>::ConstIterator it;
+   for (it = mInstances.constBegin(); it != mInstances.constEnd(); it++)
    {
       // get vertex buffer
-      Geometry *geo= it.key();
-      const Bounding& bound= it.value();
+      Geometry* geo = it.key();
+      const Bounding& bound = it.value();
 
       if (geo->isVisible())
       {
          //         Vector osCam= geo->getParent()->getCamera2Obj().translation();
          //         activeDevice->setParameter(mParamCamera, osCam);
 
-         Matrix obj= geo->getTransform().normalized();
+         Matrix obj = geo->getTransform().normalized();
 
-         Vector bmin= bound.min + obj.translation();
-         Vector bmax= bound.max + obj.translation();
+         Vector bmin = bound.min + obj.translation();
+         Vector bmax = bound.max + obj.translation();
 
-         dst->x= bmin.x;
-         dst->y= bmin.y;
-         dst->z= z;
+         dst->x = bmin.x;
+         dst->y = bmin.y;
+         dst->z = z;
          dst++;
 
-         dst->x= bmax.x;
-         dst->y= bmin.y;
-         dst->z= z;
+         dst->x = bmax.x;
+         dst->y = bmin.y;
+         dst->z = z;
          dst++;
 
-         dst->x= bmax.x;
-         dst->y= bmax.y;
-         dst->z= z;
+         dst->x = bmax.x;
+         dst->y = bmax.y;
+         dst->z = z;
          dst++;
 
-         dst->x= bmin.x;
-         dst->y= bmax.y;
-         dst->z= z;
+         dst->x = bmin.x;
+         dst->y = bmax.y;
+         dst->z = z;
          dst++;
 
          count++;
       }
    }
-   activeDevice->unlockVertexBuffer( mVertices );
+   activeDevice->unlockVertexBuffer(mVertices);
 
-   glBindBuffer( GL_ARRAY_BUFFER, mVertices );
-   glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector), (GLvoid*)0  );
-   glBindBuffer( GL_ARRAY_BUFFER, mTexcoords );
-   glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, (GLvoid*)0  );
+   glBindBuffer(GL_ARRAY_BUFFER, mVertices);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector), (GLvoid*)0);
+   glBindBuffer(GL_ARRAY_BUFFER, mTexcoords);
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (GLvoid*)0);
 
-   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, mIndices );
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndices);
 
-   glDrawElements( GL_TRIANGLES, count*6, GL_UNSIGNED_SHORT, (void*)0 );
+   glDrawElements(GL_TRIANGLES, count * 6, GL_UNSIGNED_SHORT, (void*)0);
 
    end();
-//   printf("shadows [%d]: %f \n", mVB.size(), (t2-t1)/1000000.0);
+   //   printf("shadows [%d]: %f \n", mVB.size(), (t2-t1)/1000000.0);
 }

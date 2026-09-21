@@ -14,8 +14,7 @@ public:
    class PolyLine
    {
    public:
-      PolyLine()
-         : mFlags(0)
+      PolyLine() : mFlags(0)
       {
       }
 
@@ -24,12 +23,13 @@ public:
          return (mFlags & 1);
       }
 
-      void load(Stream *stream)
+      void load(Stream* stream)
       {
-         mFlags= stream->getInt();
+         mFlags = stream->getInt();
 
-         int count= stream->getInt();
-         while (count--) stream->getInt();
+         int count = stream->getInt();
+         while (count--)
+            stream->getInt();
 
          mVertices.load(stream);
       }
@@ -46,16 +46,16 @@ public:
 
    private:
       int mFlags;
-      Array<int>    mTypes;
+      Array<int> mTypes;
       List<Vector> mVertices;
    };
 
-           Shape(Node *parent = 0);
+   Shape(Node* parent = 0);
    virtual ~Shape();
-   void    load(Stream *stream);
-   void    write(Stream *stream);
+   void load(Stream* stream);
+   void write(Stream* stream);
 
-   int     getPolyCount() const;
+   int getPolyCount() const;
    PolyLine* getPoly(int count) const;
 
 private:

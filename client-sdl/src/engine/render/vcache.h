@@ -5,15 +5,16 @@
 class VCache
 {
 private:
-   unsigned short *mData;
+   unsigned short* mData;
    int mSize;
 
 public:
    VCache(int size)
    {
-      mData= new unsigned short[size];
-      mSize= size;
-      for (int i=0;i<size;i++) mData[i]=0xffff;
+      mData = new unsigned short[size];
+      mSize = size;
+      for (int i = 0; i < size; i++)
+         mData[i] = 0xffff;
    }
 
    ~VCache()
@@ -25,13 +26,16 @@ public:
    {
       int j;
 
-      for (j=0;j<mSize;j++) if (mData[j]==index) return true;
+      for (j = 0; j < mSize; j++)
+         if (mData[j] == index)
+            return true;
 
       // kick oldest element
-      for (j=0;j<mSize-1;j++) mData[j]= mData[j+1]; 
+      for (j = 0; j < mSize - 1; j++)
+         mData[j] = mData[j + 1];
 
       // add new index
-      mData[mSize-1]= index;
+      mData[mSize - 1] = index;
 
       return false;
    }
@@ -39,7 +43,9 @@ public:
    bool exist(unsigned short index)
    {
       int j;
-      for (j=0;j<mSize;j++) if (mData[j]==index) return true;
+      for (j = 0; j < mSize; j++)
+         if (mData[j] == index)
+            return true;
       return false;
    }
 
@@ -58,6 +64,5 @@ public:
       return mData;
    }
 };
-
 
 #endif

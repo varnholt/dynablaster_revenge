@@ -10,16 +10,16 @@ public:
    Weight(int id, float w);
    ~Weight();
 
-   void load(Stream *stream);
-   void write(Stream *stream);
-   void operator << (Stream& stream);
-   void operator >> (Stream& stream);
+   void load(Stream* stream);
+   void write(Stream* stream);
+   void operator<<(Stream& stream);
+   void operator>>(Stream& stream);
 
    float weight() const;
-   int   id() const;
+   int id() const;
 
 private:
-   int   mID;
+   int mID;
    float mWeight;
 };
 

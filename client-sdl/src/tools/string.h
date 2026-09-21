@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <cstring>
 #include "referenced.h"
 #include "streamable.h"
-#include <cstring>
 
 class String : public Referenced, public Streamable
 {
@@ -23,28 +23,28 @@ public:
    virtual ~String();
 
    //! assignment operator: reference given array
-   String& operator = (const String& other);
+   String& operator=(const String& other);
 
    //! cast to char*
-   operator const char* () const;
+   operator const char*() const;
 
    //! get char at index
    char operator[](int index) const;
 
    //! concat two strings, return new string
-   String operator + (const String& other) const;
+   String operator+(const String& other) const;
 
    //! append string
-   void operator += (const String& other);
+   void operator+=(const String& other);
 
    //! comparism
-   bool operator == (const String& other) const;
-   bool operator == (const char* other) const;
-   bool operator != (const String& other) const;
-   bool operator < (const String& other) const;
-   bool operator > (const String& other) const;
+   bool operator==(const String& other) const;
+   bool operator==(const char* other) const;
+   bool operator!=(const String& other) const;
+   bool operator<(const String& other) const;
+   bool operator>(const String& other) const;
 
-   String& operator << (Stream& stream);
+   String& operator<<(Stream& stream);
 
    //! is empty string?
    bool isEmpty() const;
@@ -76,13 +76,11 @@ public:
    //! write string to stream
    void write(Stream* stream);
 
-
 private:
-   void  alloc(int size);
-   void  dealloc();
+   void alloc(int size);
+   void dealloc();
    char* dataIntern() const;
-   void  setSize(int size);
+   void setSize(int size);
 
    char* mData;  //!< string data (null pointer for empty strings)
 };
-

@@ -1,8 +1,7 @@
 #include "dummy.h"
 #include "tools/stream.h"
 
-Dummy::Dummy(Node *parent)
-: Node(Node::idDummy, parent)
+Dummy::Dummy(Node* parent) : Node(Node::idDummy, parent)
 {
 }
 
@@ -10,7 +9,7 @@ Dummy::~Dummy()
 {
 }
 
-void Dummy::load(Stream *stream)
+void Dummy::load(Stream* stream)
 {
    Node::load(stream);
 
@@ -24,7 +23,7 @@ void Dummy::load(Stream *stream)
    anim.skip();
 }
 
-void Dummy::write(Stream *stream)
+void Dummy::write(Stream* stream)
 {
    Node::write(stream);
 

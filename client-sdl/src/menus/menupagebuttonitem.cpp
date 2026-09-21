@@ -3,16 +3,11 @@
 // math
 #include "math.h"
 
-
-MenuPageButtonItem::MenuPageButtonItem(QObject* parent)
-   : MenuPageItem(parent),
-     mFadeValue(0.0f),
-     mFadeOut(false)
+MenuPageButtonItem::MenuPageButtonItem(QObject* parent) : MenuPageItem(parent), mFadeValue(0.0f), mFadeOut(false)
 {
    mPageItemType = PageItemTypeButton;
    mInteractive = true;
 }
-
 
 void MenuPageButtonItem::setFocus(bool focus)
 {
@@ -30,7 +25,6 @@ void MenuPageButtonItem::setFocus(bool focus)
    }
 }
 
-
 void MenuPageButtonItem::setEnabled(bool enabled)
 {
    MenuPageItem::setEnabled(enabled);
@@ -39,7 +33,6 @@ void MenuPageButtonItem::setEnabled(bool enabled)
    if (!enabled)
       setFocus(false);
 }
-
 
 void MenuPageButtonItem::draw()
 {

@@ -18,150 +18,138 @@ class MenuPageComboBoxItem : public MenuPageListItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageComboBoxItem();
 
-      MenuPageComboBoxItem();
+   /*
 
-      /*
+      combobox_time_label              // finally displays value
 
-         combobox_time_label              // finally displays value
+      combobox_time_button_active      // clicked first
+      combobox_time_button_inactive    //
 
-         combobox_time_button_active      // clicked first
-         combobox_time_button_inactive    //
-
-         combobox_time_table_bg_first     // activated after button was clicked
-         combobox_time_table_bg_last      //
-         combobox_time_table_bg_default   //
-         combobox_time_table_gradient     //
-
-
-         concept
-
-         ----------------------
-         | dropdown_button \/ |     < standard menupagebuttonitem
-         ======================
-  /|\    | item 1 (first)     |     | menupagelistitem  | menupagelistitemelement 1
-   |     +--------------------+     |                   |
-   |     | item 2             |     |                   | menupagelistitemelement 2
- height  +--------------------+     |                   |
-   |     | item ...           |     |                   | menupagelistitemelement 3
-   |     +--------------------+     |                   |
-  \|/    | item n (last)      |     |                   | menupagelistitemelement 4 (last)
-         ----------------------
-         \--------------------/     < additional quad to terminate the selection (?)
+      combobox_time_table_bg_first     // activated after button was clicked
+      combobox_time_table_bg_last      //
+      combobox_time_table_bg_default   //
+      combobox_time_table_gradient     //
 
 
-      */
+      concept
 
-      //! extend base
-      virtual void draw();
-
-      //! extend base
-      virtual void animate(float time);
-
-      //! add combobox to id/ptr-map
-      static void addComboBox(const QString&, MenuPageComboBoxItem*);
-
-      //! add button to id/ptr-map
-      static void addButton(const QString&, MenuPageButtonItem*);
-
-      //! add label to id/ptr-map
-      static void addLabel(const QString&, MenuPageLabelItem*);
-
-      //! link combobox to related button
-      static void linkComboBoxToButton(
-         const QString& buttonKey,
-         const QString& comboBoxKey
-      );
-
-      //! link combobox to related label
-      static void linkComboBoxToLabel(
-         const QString& labelKey,
-         const QString& comboBoxKey
-      );
-
-      //! extend base
-      virtual void initialize();
-
-      //! extend base
-      virtual void setFocus(bool);
-
-      //! getter for modal flag
-      virtual bool isModal() const;
-
-      //! setter for button item
-      virtual void setButtonItem(MenuPageButtonItem* item);
-
-      //! getter for button item
-      MenuPageButtonItem* getButtonItem() const;
-
-      //! getter for button item
-      static MenuPageButtonItem* getButtonItem(const QString& name);
-
-      //! setter for label item
-      virtual void setLabelItem(MenuPageLabelItem* item);
-
-      //! getter for label item
-      MenuPageLabelItem* getLabelItem() const;
+      ----------------------
+      | dropdown_button \/ |     < standard menupagebuttonitem
+      ======================
+/|\    | item 1 (first)     |     | menupagelistitem  | menupagelistitemelement 1
+|     +--------------------+     |                   |
+|     | item 2             |     |                   | menupagelistitemelement 2
+height  +--------------------+     |                   |
+|     | item ...           |     |                   | menupagelistitemelement 3
+|     +--------------------+     |                   |
+\|/    | item n (last)      |     |                   | menupagelistitemelement 4 (last)
+      ----------------------
+      \--------------------/     < additional quad to terminate the selection (?)
 
 
-      //! extend base
-      virtual void mousePressed(int /*x*/, int y);
+   */
 
-      //! getter for value
-      QString getValue() const;
+   //! extend base
+   virtual void draw();
 
-      //! setter for value
-      void setValue(const QString&);
+   //! extend base
+   virtual void animate(float time);
 
+   //! add combobox to id/ptr-map
+   static void addComboBox(const QString&, MenuPageComboBoxItem*);
 
-   public slots:
+   //! add button to id/ptr-map
+   static void addButton(const QString&, MenuPageButtonItem*);
 
-      //! called when button pressed, item selected
-      virtual void setVisible(bool visible = true);
+   //! add label to id/ptr-map
+   static void addLabel(const QString&, MenuPageLabelItem*);
 
-      //! dropdown was enabled/disabled
-      virtual void dropDownEnabled(bool enabled);
+   //! link combobox to related button
+   static void linkComboBoxToButton(const QString& buttonKey, const QString& comboBoxKey);
 
+   //! link combobox to related label
+   static void linkComboBoxToLabel(const QString& labelKey, const QString& comboBoxKey);
 
-   signals:
+   //! extend base
+   virtual void initialize();
 
-      //! new value is passed to dropdown label on select
-      void updateDropDown(const QString&);
+   //! extend base
+   virtual void setFocus(bool);
 
-      //! value changed
-      void valueChanged(const QString&);
+   //! getter for modal flag
+   virtual bool isModal() const;
 
+   //! setter for button item
+   virtual void setButtonItem(MenuPageButtonItem* item);
 
-   protected:
+   //! getter for button item
+   MenuPageButtonItem* getButtonItem() const;
 
-      //! draws single quad
-      virtual void drawQuad(PSDLayer* layer, float x, float y, float width, float height, int opacity = 255);
+   //! getter for button item
+   static MenuPageButtonItem* getButtonItem(const QString& name);
 
-      //! get notified on table bound changes, resize layer
-      virtual void updateTableBounds();
+   //! setter for label item
+   virtual void setLabelItem(MenuPageLabelItem* item);
 
-      //! make combobox visible
-      float mVisibleAnimationTime;
+   //! getter for label item
+   MenuPageLabelItem* getLabelItem() const;
 
-      //! make combobox invisible again
-      float mInvisibleAnimationTime;
+   //! extend base
+   virtual void mousePressed(int /*x*/, int y);
 
-      //! linked button item
-      MenuPageButtonItem* mButtonItem;
+   //! getter for value
+   QString getValue() const;
 
-      //! linked label item
-      MenuPageLabelItem* mLabelItem;
+   //! setter for value
+   void setValue(const QString&);
 
-      //! dynamic vertex buffer reused by drawQuad() every call
-      unsigned int mQuadVertexBuffer;
+public slots:
 
-      //! map of comboboxes by id
-      static QMap<QString, MenuPageComboBoxItem*> sMapComboBoxes;
+   //! called when button pressed, item selected
+   virtual void setVisible(bool visible = true);
 
-      //! map of buttons by id
-      static QMap<QString, MenuPageButtonItem*> sMapButtons;
+   //! dropdown was enabled/disabled
+   virtual void dropDownEnabled(bool enabled);
 
-      //! map of labels by id
-      static QMap<QString, MenuPageLabelItem*> sMapLabels;
+signals:
+
+   //! new value is passed to dropdown label on select
+   void updateDropDown(const QString&);
+
+   //! value changed
+   void valueChanged(const QString&);
+
+protected:
+   //! draws single quad
+   virtual void drawQuad(PSDLayer* layer, float x, float y, float width, float height, int opacity = 255);
+
+   //! get notified on table bound changes, resize layer
+   virtual void updateTableBounds();
+
+   //! make combobox visible
+   float mVisibleAnimationTime;
+
+   //! make combobox invisible again
+   float mInvisibleAnimationTime;
+
+   //! linked button item
+   MenuPageButtonItem* mButtonItem;
+
+   //! linked label item
+   MenuPageLabelItem* mLabelItem;
+
+   //! dynamic vertex buffer reused by drawQuad() every call
+   unsigned int mQuadVertexBuffer;
+
+   //! map of comboboxes by id
+   static QMap<QString, MenuPageComboBoxItem*> sMapComboBoxes;
+
+   //! map of buttons by id
+   static QMap<QString, MenuPageButtonItem*> sMapButtons;
+
+   //! map of labels by id
+   static QMap<QString, MenuPageLabelItem*> sMapLabels;
 };

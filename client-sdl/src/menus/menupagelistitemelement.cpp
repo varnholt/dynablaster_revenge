@@ -1,26 +1,17 @@
 #include "menupagelistitemelement.h"
 
 // framework
-#include "framework/gldevice.h"
 #include "bitmapfont.h"
+#include "framework/gldevice.h"
 
 // math
 #include "math.h"
 
 MenuPageListItemElement::MenuPageListItemElement()
-   : MenuPageTextEditItem(),
-     mIndex(0),
-     mWidth(0),
-     mHeight(0),
-     mX(0.0f),
-     mY(0.0f),
-     mFadeOut(false),
-     mFadeValue(0.0f),
-     mOverrideAlpha(false)
+    : MenuPageTextEditItem(), mIndex(0), mWidth(0), mHeight(0), mX(0.0f), mY(0.0f), mFadeOut(false), mFadeValue(0.0f), mOverrideAlpha(false)
 {
    mPageItemType = PageItemTypeListElement;
 }
-
 
 MenuPageListItemElement::~MenuPageListItemElement()
 {
@@ -31,7 +22,6 @@ MenuPageListItemElement::~MenuPageListItemElement()
    mLayerInactive = 0;
 }
 
-
 void MenuPageListItemElement::initialize()
 {
    // create dummy layers
@@ -41,26 +31,13 @@ void MenuPageListItemElement::initialize()
    MenuPageTextEditItem::initialize();
 }
 
-
 void MenuPageListItemElement::draw(float x, float y, float opacity)
 {
    const QColor& rgb = getColor();
-   mFont->setColor(
-      rgb.red() / 255.0f,
-      rgb.green() / 255.0f,
-      rgb.blue() / 255.0f,
-      opacity
-   );
+   mFont->setColor(rgb.red() / 255.0f, rgb.green() / 255.0f, rgb.blue() / 255.0f, opacity);
 
    // draw item data
-   mFont->buildVertices(
-      mScale,
-      qPrintable(mText),
-      mX + x,
-      mY + y + mHeight,
-      -1,
-      mHeight
-   );
+   mFont->buildVertices(mScale, qPrintable(mText), mX + x, mY + y + mHeight, -1, mHeight);
 
    float r = 0.0f;
    float g = 0.0f;
@@ -69,12 +46,7 @@ void MenuPageListItemElement::draw(float x, float y, float opacity)
    if (mOutlineColor.isValid())
    {
       mFont->getOutlineColor(r, g, b, a);
-      mFont->setOutlineColor(
-         mOutlineColor.redF(),
-         mOutlineColor.greenF(),
-         mOutlineColor.blueF(),
-         mOutlineColor.alphaF()
-      );
+      mFont->setOutlineColor(mOutlineColor.redF(), mOutlineColor.greenF(), mOutlineColor.blueF(), mOutlineColor.alphaF());
    }
 
    mFont->draw();
@@ -82,8 +54,6 @@ void MenuPageListItemElement::draw(float x, float y, float opacity)
    if (mOutlineColor.isValid())
       mFont->setOutlineColor(r, g, b, a);
 }
-
-
 
 void MenuPageListItemElement::setFocus(bool focus)
 {
@@ -101,8 +71,6 @@ void MenuPageListItemElement::setFocus(bool focus)
    MenuPageTextEditItem::setFocus(focus);
 }
 
-
-
 void MenuPageListItemElement::setActive(bool active)
 {
    // active flag lost, then fade out
@@ -116,120 +84,75 @@ void MenuPageListItemElement::setActive(bool active)
    MenuPageTextEditItem::setActive(active);
 }
 
-
-
 void MenuPageListItemElement::setIndex(int index)
 {
    mIndex = index;
 }
-
 
 void MenuPageListItemElement::setHeight(int height)
 {
    mHeight = height;
 }
 
-
 void MenuPageListItemElement::setWidth(int width)
 {
    mWidth = width;
 }
-
 
 int MenuPageListItemElement::getHeight() const
 {
    return mHeight;
 }
 
-
 int MenuPageListItemElement::getWidth() const
 {
    return mWidth;
 }
-
 
 void MenuPageListItemElement::setX(float x)
 {
    mX = x;
 }
 
-
 void MenuPageListItemElement::setY(float y)
 {
    mY = y;
 }
-
 
 float MenuPageListItemElement::getX() const
 {
    return mX;
 }
 
-
 float MenuPageListItemElement::getY() const
 {
    return mY;
 }
 
-
-Array<Vertex> MenuPageListItemElement::getBoundingRectVertices(
-   float x,
-   float y
-)
+Array<Vertex> MenuPageListItemElement::getBoundingRectVertices(float x, float y)
 {
    Array<Vertex> arr(4);
 
-   arr.add(
-      Vertex(
-         x + mX,
-         y + mY + mHeight,
-         0.0f,
-         1.0f
-      )
-   );
+   arr.add(Vertex(x + mX, y + mY + mHeight, 0.0f, 1.0f));
 
-   arr.add(
-      Vertex(
-         x + mX + mWidth,
-         y + mY + mHeight,
-         1.0f,
-         1.0f
-      )
-   );
+   arr.add(Vertex(x + mX + mWidth, y + mY + mHeight, 1.0f, 1.0f));
 
-   arr.add(
-      Vertex(
-         x + mX + mWidth,
-         y + mY,
-         1.0f,
-         0.0f
-      )
-   );
+   arr.add(Vertex(x + mX + mWidth, y + mY, 1.0f, 0.0f));
 
-   arr.add(
-      Vertex(
-         x + mX,
-         y + mY,
-         0.0f,
-         0.0f
-      )
-   );
+   arr.add(Vertex(x + mX, y + mY, 0.0f, 0.0f));
 
    return arr;
 }
-
 
 void MenuPageListItemElement::stopFadeOut()
 {
    mFadeOut = false;
 }
 
-
 bool MenuPageListItemElement::isFadingOut()
 {
    return mFadeOut;
 }
-
 
 float MenuPageListItemElement::getFadeOutValue()
 {
@@ -241,20 +164,17 @@ float MenuPageListItemElement::getFadeOutValue()
    return val;
 }
 
-
 void MenuPageListItemElement::setOverrideAlpha(bool override)
 {
    mOverrideAlpha = override;
 }
-
 
 bool MenuPageListItemElement::isOverrideAlphaActive() const
 {
    return mOverrideAlpha;
 }
 
-
-const FrameTimer &MenuPageListItemElement::getFocusOutTime() const
+const FrameTimer& MenuPageListItemElement::getFocusOutTime() const
 {
    return mFocusOutTime;
 }

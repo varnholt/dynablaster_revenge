@@ -2,54 +2,43 @@
 #include "globaltime.h"
 #include "timerhandler.h"
 
-FrameTimer::FrameTimer()
-: QObject()
-, mStarted(false)
-, mSingleShot(false)
-, mStartTime(0.0f)
-, mInterval(0.0f)
-, mDelete(false)
+FrameTimer::FrameTimer() : QObject(), mStarted(false), mSingleShot(false), mStartTime(0.0f), mInterval(0.0f), mDelete(false)
 {
 }
 
 FrameTimer::FrameTimer(QObject* parent)
-: QObject(parent)
-, mStarted(false)
-, mSingleShot(false)
-, mStartTime(0.0f)
-, mInterval(0.0f)
-, mDelete(false)
+    : QObject(parent), mStarted(false), mSingleShot(false), mStartTime(0.0f), mInterval(0.0f), mDelete(false)
 {
 }
 
 FrameTimer::FrameTimer(const FrameTimer& other)
-: QObject()
-, mStarted( other.mStarted )
-, mSingleShot( other.mSingleShot )
-, mStartTime( other.mStartTime )
-, mInterval( other.mInterval )
-, mDelete(false)
+    : QObject(),
+      mStarted(other.mStarted),
+      mSingleShot(other.mSingleShot),
+      mStartTime(other.mStartTime),
+      mInterval(other.mInterval),
+      mDelete(false)
 {
    if (mStarted)
-      TimerHandler::Instance()->addTimer( this );
+      TimerHandler::Instance()->addTimer(this);
 }
 
 FrameTimer::~FrameTimer()
 {
    if (mStarted)
-      TimerHandler::Instance()->removeTimer( this );
+      TimerHandler::Instance()->removeTimer(this);
 }
 
-FrameTimer& FrameTimer::operator = (const FrameTimer& other)
+FrameTimer& FrameTimer::operator=(const FrameTimer& other)
 {
    if (&other != this)
    {
-      mStarted= other.mStarted;
-      mSingleShot= other.mSingleShot;
-      mStartTime= other.mStartTime;
+      mStarted = other.mStarted;
+      mSingleShot = other.mSingleShot;
+      mStartTime = other.mStartTime;
       mInterval = other.mInterval;
       if (mStarted)
-         TimerHandler::Instance()->addTimer( this );
+         TimerHandler::Instance()->addTimer(this);
    }
    return *this;
 }
@@ -57,7 +46,7 @@ FrameTimer& FrameTimer::operator = (const FrameTimer& other)
 FrameTimer FrameTimer::currentTime()
 {
    FrameTimer time;
-   time.mStartTime= GlobalTime::Instance()->getTime();
+   time.mStartTime = GlobalTime::Instance()->getTime();
    return time;
 }
 
@@ -68,13 +57,13 @@ bool FrameTimer::isValid() const
 
 void FrameTimer::setSingleShot(bool singleShot)
 {
-   mSingleShot= singleShot;
+   mSingleShot = singleShot;
 }
 
 FrameTimer FrameTimer::addMSecs(float ms) const
 {
    FrameTimer time;
-   time.mStartTime= mStartTime + ms * 0.001f;
+   time.mStartTime = mStartTime + ms * 0.001f;
    return time;
 }
 
@@ -85,7 +74,7 @@ float FrameTimer::msecsTo(const FrameTimer& other) const
 
 void FrameTimer::setInterval(float interval)
 {
-   mInterval= interval * 0.001f;
+   mInterval = interval * 0.001f;
 }
 
 float FrameTimer::interval() const
@@ -95,11 +84,11 @@ float FrameTimer::interval() const
 
 void FrameTimer::start()
 {
-   mStartTime= GlobalTime::Instance()->getTime();
+   mStartTime = GlobalTime::Instance()->getTime();
    if (!mStarted)
    {
-      mStarted= true;
-      TimerHandler::Instance()->addTimer( this );
+      mStarted = true;
+      TimerHandler::Instance()->addTimer(this);
    }
 }
 
@@ -118,8 +107,8 @@ void FrameTimer::stop()
 {
    if (mStarted)
    {
-      mStarted= false;
-      TimerHandler::Instance()->removeTimer( this );
+      mStarted = false;
+      TimerHandler::Instance()->removeTimer(this);
    }
 }
 
@@ -127,7 +116,7 @@ float FrameTimer::elapsed() const
 {
    if (mStarted)
    {
-      float curTime= GlobalTime::Instance()->getTime();
+      float curTime = GlobalTime::Instance()->getTime();
       return (curTime - mStartTime) * 1000.0f;
    }
    else
@@ -138,17 +127,17 @@ bool FrameTimer::update()
 {
    if (mStarted && mInterval > 0.0f)
    {
-      float curTime= GlobalTime::Instance()->getTime();
+      float curTime = GlobalTime::Instance()->getTime();
       if (curTime >= mStartTime + mInterval)
       {
          emit timeout();
          if (mSingleShot)
          {
-            mStarted= false;
+            mStarted = false;
             return true;
          }
          else
-            mStartTime= curTime;
+            mStartTime = curTime;
       }
    }
    return false;

@@ -21,17 +21,18 @@ public:
       Array<float*> mWeights;
    };
 
-   struct Vertex {
+   struct Vertex
+   {
       Vector pos;
       Vector normal;
-      UV     uv;
-      float  weight[8];
+      UV uv;
+      float weight[8];
    };
 
-   PlayerMaterialBase(SceneGraph *scene, int id);
+   PlayerMaterialBase(SceneGraph* scene, int id);
 
-   void update(float frame, Node **nodelist, const Matrix& cam);
-   void addGeometry(Geometry *geo);
+   void update(float frame, Node** nodelist, const Matrix& cam);
+   void addGeometry(Geometry* geo);
 
    virtual void getBoundingRect(Vector& min, Vector& max, const Matrix& projMat);
    virtual Vector getCenter2d(const Matrix& projMat) const;
@@ -40,7 +41,6 @@ private:
    Array<Cluster*> createSkinClusters(Geometry* geo, int limit);
 
 protected:
-   static Array< Cluster* > mClusters;
+   static Array<Cluster*> mClusters;
    Matrix mCamera;
 };
-

@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "stream.h"
-#include "objectname.h"
 #include "array.h"
+#include "objectname.h"
+#include "stream.h"
 #include "string.h"
 
 class Chunk : public Stream, public ObjectName
@@ -18,30 +18,29 @@ public:
    enum AccessMode
    {
       chunkRead = 0,
-      chunkWrite= 1,
+      chunkWrite = 1,
    };
 
-   Chunk(Stream *stream);
-   Chunk(Stream *stream, int id, const String& name);
+   Chunk(Stream* stream);
+   Chunk(Stream* stream, int id, const String& name);
    ~Chunk();
 
-   void        getData(void *src, int size);
-   void        writeData(void *src, int size);
+   void getData(void* src, int size);
+   void writeData(void* src, int size);
 
-   int         id() const;
+   int id() const;
 
-   int         dataLeft() const;
-   void        skip();
+   int dataLeft() const;
+   void skip();
 
 private:
-   Stream*          mStream;
-   AccessMode       mMode;
-   int              mID;
-   int              mSize;
-   int              mChunkPos;
+   Stream* mStream;
+   AccessMode mMode;
+   int mID;
+   int mSize;
+   int mChunkPos;
 
-   char*            mBuffer;
-   Array<char*>     mBuffers;
-   int              mBufferPos;
+   char* mBuffer;
+   Array<char*> mBuffers;
+   int mBufferPos;
 };
-

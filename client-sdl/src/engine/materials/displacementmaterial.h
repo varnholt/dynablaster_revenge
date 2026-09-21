@@ -1,10 +1,10 @@
 #ifndef DISPLACEMENTMATERIAL_H
 #define DISPLACEMENTMATERIAL_H
 
-#include "material.h"
-#include "math/matrix.h"
 #include "../render/renderbuffer.h"
 #include "../render/uv.h"
+#include "material.h"
+#include "math/matrix.h"
 
 class DisplacementMaterial : public Material
 {
@@ -15,12 +15,12 @@ public:
       UV uv;
    };
 
-   DisplacementMaterial(SceneGraph *scene);
-   DisplacementMaterial(SceneGraph *scene, const char *map, const char* diffusemap);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   DisplacementMaterial(SceneGraph* scene);
+   DisplacementMaterial(SceneGraph* scene, const char* map, const char* diffusemap);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
-   void update(float frame, Node **nodelist, const Matrix& cam);
+   void update(float frame, Node** nodelist, const Matrix& cam);
 
 private:
    void begin();

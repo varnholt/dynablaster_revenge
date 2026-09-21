@@ -9,68 +9,63 @@
 // forward declarations
 class BitmapFont;
 
-
 class MenuPageLabelItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageLabelItem();
 
-      MenuPageLabelItem();
+   // main
 
-       // main
+   virtual void draw();
 
-       virtual void draw();
+   virtual void initialize();
 
-       virtual void initialize();
+   QString getText() const;
 
-       QString getText() const;
+public slots:
 
+   void setFontName(const QString& fontName);
 
-   public slots:
+   void setText(const QString&);
 
-       void setFontName(const QString& fontName);
+   void setFontXOffset(int xOffset);
 
-       void setText(const QString&);
+   void setFontYOffset(int yOffset);
 
-       void setFontXOffset(int xOffset);
+   void setScale(float scale);
 
-       void setFontYOffset(int yOffset);
+   void setMaxChars(int maxChars);
 
-       void setScale(float scale);
+   void setColor(const QColor& color);
 
-       void setMaxChars(int maxChars);
+   void setAlpha(int alpha);
 
-       void setColor(const QColor& color);
+   void setCenterWidth(float width);
 
-       void setAlpha(int alpha);
+   void setCenterHeight(float height);
 
-       void setCenterWidth(float width);
+protected:
+   QString mFontName;
 
-       void setCenterHeight(float height);
+   BitmapFont* mFont;
 
+   QString mText;
 
-   protected:
+   int mFontXOffset;
 
-       QString mFontName;
+   int mFontYOffset;
 
-       BitmapFont* mFont;
+   int mMaxChars;
 
-       QString mText;
+   float mScale;
 
-       int mFontXOffset;
+   QColor mColor;
 
-       int mFontYOffset;
+   int mAlpha;
 
-       int mMaxChars;
+   float mCenterWidth;
 
-       float mScale;
-
-       QColor mColor;
-
-       int mAlpha;
-
-       float mCenterWidth;
-
-       float mCenterHeight;
+   float mCenterHeight;
 };

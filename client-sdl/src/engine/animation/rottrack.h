@@ -14,7 +14,6 @@ public:
 
    void add(int time, const Quat& scale);
 
-   virtual void load(Stream *stream);
-   virtual void write(Stream *stream);
+   virtual void load(Stream* stream);
+   virtual void write(Stream* stream);
 };
-

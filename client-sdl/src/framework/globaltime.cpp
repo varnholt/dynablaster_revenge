@@ -4,16 +4,15 @@ GlobalTime* GlobalTime::mInstance = 0;
 
 GlobalTime::GlobalTime()
 {
-    mInstance= this;
+   mInstance = this;
 }
 
 GlobalTime::~GlobalTime()
 {
-    mInstance= 0;
+   mInstance = 0;
 }
 
 GlobalTime* GlobalTime::Instance()
 {
    return mInstance;
 }
-

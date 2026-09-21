@@ -1,40 +1,39 @@
 #include "glowring.h"
-#include "tools/stream.h"
-#include "nodes/mesh.h"
 #include "gldevice.h"
-#include "render/renderbuffer.h"
 #include "image/tga.h"
+#include "nodes/mesh.h"
+#include "render/renderbuffer.h"
 #include "render/uv.h"
 #include "tools/profiling.h"
+#include "tools/stream.h"
 
-GlowRing::Buffer::Buffer(Geometry *geo) : RenderBuffer(geo)
+GlowRing::Buffer::Buffer(Geometry* geo) : RenderBuffer(geo)
 {
-   mSize=     geo->getIndexCount();
-   mVertexCount= geo->getVertexCount();
+   mSize = geo->getIndexCount();
+   mVertexCount = geo->getVertexCount();
 
-   mVertex= createVertexBuffer(geo->getVertices(), mVertexCount*sizeof(Vector));
-   mIndex=  createIndexBuffer(geo->getIndices(), mSize*sizeof(unsigned short));
-   mNormal= createVertexBuffer(geo->getNormals(), mVertexCount*sizeof(Vector));
+   mVertex = createVertexBuffer(geo->getVertices(), mVertexCount * sizeof(Vector));
+   mIndex = createIndexBuffer(geo->getIndices(), mSize * sizeof(unsigned short));
+   mNormal = createVertexBuffer(geo->getNormals(), mVertexCount * sizeof(Vector));
 
    geo->setVertexBuffer(mVertex);
 }
 
 unsigned int GlowRing::Buffer::getNormalBuffer()
-{ 
-   return mNormal; 
+{
+   return mNormal;
 }
 
-GlowRing::GlowRing(unsigned int col)
- : mAmount(0)
+GlowRing::GlowRing(unsigned int col) : mAmount(0)
 {
-   mColor= col;
-   mShader= activeDevice->loadShader("glowring.vsh", "glowring.psh");
+   mColor = col;
+   mShader = activeDevice->loadShader("glowring.vsh", "glowring.psh");
 }
 
-void GlowRing::load(Stream *stream)
+void GlowRing::load(Stream* stream)
 {
-   int x,y;
-   unsigned char *temp;
+   int x, y;
+   unsigned char* temp;
 
    loadDefault(stream);
 
@@ -47,16 +46,14 @@ void GlowRing::load(Stream *stream)
    */
 }
 
-
-void GlowRing::add(Geometry *geo)
+void GlowRing::add(Geometry* geo)
 {
-   Buffer *vb= new Buffer(geo);
+   Buffer* vb = new Buffer(geo);
 
    geo->setVertexBuffer(vb->getVertexBuffer());
 
    mVB.add(vb);
 }
-
 
 void GlowRing::renderAmbient()
 {
@@ -64,8 +61,6 @@ void GlowRing::renderAmbient()
 
    return;
 }
-
-
 
 void GlowRing::renderDiffuse()
 {
@@ -76,35 +71,34 @@ void GlowRing::renderDiffuse()
    activeDevice->setCulling(false);
 
    // enable required vertex arrays
-   glEnableVertexAttribArray(0); // vertex data
+   glEnableVertexAttribArray(0);  // vertex data
    glEnableVertexAttribArray(1);
 
-   glColor4f((mColor>>16&255)/255.0f, (mColor>>8&255)/255.0f, (mColor&255)/255.0f, 1.0f);
+   glColor4f((mColor >> 16 & 255) / 255.0f, (mColor >> 8 & 255) / 255.0f, (mColor & 255) / 255.0f, 1.0f);
    // enable vertex shader
    activeDevice->setShader(mShader);
 
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      Buffer *vb= (Buffer*)mVB[i];
+      Buffer* vb = (Buffer*)mVB[i];
 
       activeDevice->push(vb->getTransform());
 
       // draw mesh
-      glBindBufferARB( GL_ARRAY_BUFFER, vb->getVertexBuffer() );
-      glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL  );
+      glBindBufferARB(GL_ARRAY_BUFFER, vb->getVertexBuffer());
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-      glBindBufferARB( GL_ARRAY_BUFFER, vb->getNormalBuffer() );
-      glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, NULL  );  
+      glBindBufferARB(GL_ARRAY_BUFFER, vb->getNormalBuffer());
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-      glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer() );
-      glDrawElements( GL_TRIANGLES, vb->getSize(), GL_UNSIGNED_SHORT, NULL ); // render
+      glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer());
+      glDrawElements(GL_TRIANGLES, vb->getSize(), GL_UNSIGNED_SHORT, NULL);  // render
 
       activeDevice->pop();
    }
 
    glDisable(GL_TEXTURE_2D);
-   glDisableVertexAttribArray(0); // vertex data
+   glDisableVertexAttribArray(0);  // vertex data
    glDisableVertexAttribArray(1);
 }
-

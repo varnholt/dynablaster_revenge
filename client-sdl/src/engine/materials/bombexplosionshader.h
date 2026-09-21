@@ -2,9 +2,9 @@
 #define BOMBEXPLOSIONSHADER_H
 
 #include "material.h"
+#include "math/matrix.h"
 #include "render/renderbuffer.h"
 #include "render/uv.h"
-#include "math/matrix.h"
 
 class BombExplosionShader : public Material
 {
@@ -13,16 +13,16 @@ public:
    {
       Vector pos;
       Vector normal;
-      UV     uv;
+      UV uv;
    };
 
-   BombExplosionShader(SceneGraph *scene);
-   BombExplosionShader(SceneGraph *scene, const char *colormap, const char *envmap, const char *specmap);
+   BombExplosionShader(SceneGraph* scene);
+   BombExplosionShader(SceneGraph* scene, const char* colormap, const char* envmap, const char* specmap);
    virtual ~BombExplosionShader();
 
-   void update(float, Node **nodelist, const Matrix& cam);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   void update(float, Node** nodelist, const Matrix& cam);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
 
 private:

@@ -1,10 +1,10 @@
 #ifndef SHADOWBILLBOARD_H
 #define SHADOWBILLBOARD_H
 
-#include "material.h"
-#include "math/vector2.h"
 #include "../render/renderbuffer.h"
 #include "../render/uv.h"
+#include "material.h"
+#include "math/vector2.h"
 
 #include <QMap>
 
@@ -23,12 +23,12 @@ public:
       Vector max;
    };
 
-   ShadowBillboard(SceneGraph *scene);
-   ShadowBillboard(SceneGraph *scene, const char *map);
-   void load(Stream *stream);
-   void addGeometry(Geometry *geo);
+   ShadowBillboard(SceneGraph* scene);
+   ShadowBillboard(SceneGraph* scene, const char* map);
+   void load(Stream* stream);
+   void addGeometry(Geometry* geo);
    virtual void renderDiffuse();
-   void removeMesh(Mesh *mesh);
+   void removeMesh(Mesh* mesh);
    void setOffset(float x, float y);
 
 private:
@@ -43,7 +43,7 @@ private:
    unsigned int mIndices;
 
    int mParamTexture;
-   QMap<Geometry*,Bounding> mInstances;
+   QMap<Geometry*, Bounding> mInstances;
    Vector2 mOffset;
 };
 

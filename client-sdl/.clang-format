@@ -1,0 +1,19 @@
+﻿---
+Language: Cpp
+BasedOnStyle: Chromium
+AccessModifierOffset: -3
+AlignAfterOpenBracket: BlockIndent
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Allman
+ColumnLimit: 140
+ContinuationIndentWidth: 3
+IndentWidth: 3
+KeepEmptyLinesAtTheStartOfBlocks: false
+Standard: Latest
+SortIncludes: true
+SortUsingDeclarations: true
+...

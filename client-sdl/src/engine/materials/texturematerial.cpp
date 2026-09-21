@@ -1,31 +1,26 @@
 #include "texturematerial.h"
-#include "textureslot.h"
-#include "nodes/mesh.h"
 #include "gldevice.h"
-#include "render/renderbuffer.h"
+#include "image/image.h"
+#include "nodes/mesh.h"
 #include "render/geometry.h"
+#include "render/renderbuffer.h"
+#include "render/texturepool.h"
 #include "render/uv.h"
 #include "render/vertexbuffer.h"
-#include "render/texturepool.h"
-#include "image/image.h"
-#include "tools/stream.h"
-#include "tools/profiling.h"
 #include "textureslot.h"
+#include "tools/profiling.h"
+#include "tools/stream.h"
 
-TextureMaterial::TextureMaterial(SceneGraph *scene)
-: Material(scene, MAP_DIFFUSE),
-  mColorMap(0)
+TextureMaterial::TextureMaterial(SceneGraph* scene) : Material(scene, MAP_DIFFUSE), mColorMap(0)
 {
 }
 
-TextureMaterial::TextureMaterial(SceneGraph *scene, const char* texmap)
-   : Material(scene, MAP_DIFFUSE),
-   mColorMap(0)
+TextureMaterial::TextureMaterial(SceneGraph* scene, const char* texmap) : Material(scene, MAP_DIFFUSE), mColorMap(0)
 {
    addTexture(mColorMap, texmap);
 }
 
-void TextureMaterial::load(Stream *stream)
+void TextureMaterial::load(Stream* stream)
 {
    Material::load(stream);
 
@@ -35,46 +30,44 @@ void TextureMaterial::load(Stream *stream)
 
 void TextureMaterial::init()
 {
-   mShader= activeDevice->loadShader("texturemapping-vert.glsl", "texturemapping-frag.glsl");
-   mParamTexture= activeDevice->getParameterIndex("texturemap");
+   mShader = activeDevice->loadShader("texturemapping-vert.glsl", "texturemapping-frag.glsl");
+   mParamTexture = activeDevice->getParameterIndex("texturemap");
 }
 
-
-void TextureMaterial::addGeometry(Geometry *geo)
+void TextureMaterial::addGeometry(Geometry* geo)
 {
-   VertexBuffer *vb= mPool->get(geo);
+   VertexBuffer* vb = mPool->get(geo);
    if (!vb)
    {
-      vb= mPool->add(geo);
+      vb = mPool->add(geo);
 
-      Vector *vtx= geo->getVertices();
-      Vector *nrm= geo->getNormals();
-      UV *uv= geo->getUV(1);
+      Vector* vtx = geo->getVertices();
+      Vector* nrm = geo->getNormals();
+      UV* uv = geo->getUV(1);
 
-      activeDevice->allocateVertexBuffer( vb->getVertexBuffer(), sizeof(Vertex)*geo->getVertexCount() );
-      volatile Vertex *dst= (Vertex*)activeDevice->lockVertexBuffer( vb->getVertexBuffer() );
-      for (int i=0;i<geo->getVertexCount();i++)
+      activeDevice->allocateVertexBuffer(vb->getVertexBuffer(), sizeof(Vertex) * geo->getVertexCount());
+      volatile Vertex* dst = (Vertex*)activeDevice->lockVertexBuffer(vb->getVertexBuffer());
+      for (int i = 0; i < geo->getVertexCount(); i++)
       {
-         dst[i].pos.x= vtx[i].x;
-         dst[i].pos.y= vtx[i].y;
-         dst[i].pos.z= vtx[i].z;
-         dst[i].nrm.x= nrm[i].x;
-         dst[i].nrm.y= nrm[i].y;
-         dst[i].nrm.z= nrm[i].z;
+         dst[i].pos.x = vtx[i].x;
+         dst[i].pos.y = vtx[i].y;
+         dst[i].pos.z = vtx[i].z;
+         dst[i].nrm.x = nrm[i].x;
+         dst[i].nrm.y = nrm[i].y;
+         dst[i].nrm.z = nrm[i].z;
          if (uv)
          {
-            dst[i].uv.u= uv[i].u;
-            dst[i].uv.v= uv[i].v;
+            dst[i].uv.u = uv[i].u;
+            dst[i].uv.v = uv[i].v;
          }
       }
-      activeDevice->unlockVertexBuffer( vb->getVertexBuffer() );
+      activeDevice->unlockVertexBuffer(vb->getVertexBuffer());
 
-      vb->setIndexBuffer( geo->getIndices(), geo->getIndexCount() );
+      vb->setIndexBuffer(geo->getIndices(), geo->getIndexCount());
    }
 
-   mVB.add(Material::Buffer(geo,vb));
+   mVB.add(Material::Buffer(geo, vb));
 }
-
 
 void TextureMaterial::begin()
 {
@@ -82,7 +75,7 @@ void TextureMaterial::begin()
 
    // set material parameters
    //   activeDevice->setMaterial(mAmbient, mDiffuse, mSpecular, mShininess);
-   activeDevice->setShader( mShader );
+   activeDevice->setShader(mShader);
 
    glBindTexture(GL_TEXTURE_2D, mColorMap);
    activeDevice->bindSampler(mParamTexture, 0);
@@ -92,7 +85,6 @@ void TextureMaterial::begin()
    glEnableVertexAttribArray(1);
    glEnableVertexAttribArray(2);
 }
-
 
 void TextureMaterial::end()
 {
@@ -105,35 +97,35 @@ void TextureMaterial::end()
 
 void TextureMaterial::renderDiffuse()
 {
-   int count= 0;
+   int count = 0;
 
    begin();
 
-   for (int i=0;i<mVB.size();i++)
+   for (int i = 0; i < mVB.size(); i++)
    {
       // get vertex buffer
-      VertexBuffer *vb= mVB[i].vb;
-      Geometry *geo= mVB[i].geo;
+      VertexBuffer* vb = mVB[i].vb;
+      Geometry* geo = mVB[i].geo;
 
       if (geo->isVisible())
       {
-//         Vector osCam= geo->getParent()->getCamera2Obj().translation();
-//         activeDevice->setParameter(mParamCamera, osCam);
+         //         Vector osCam= geo->getParent()->getCamera2Obj().translation();
+         //         activeDevice->setParameter(mParamCamera, osCam);
 
          if (!geo->getBoneCount())
          {
-            const Matrix& tm= geo->getTransform();
+            const Matrix& tm = geo->getTransform();
             activeDevice->push(tm);
          }
 
          // draw mesh
-         glBindBuffer( GL_ARRAY_BUFFER, vb->getVertexBuffer() );
-         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0 );
-         glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector) );
-         glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector)*2) );
+         glBindBuffer(GL_ARRAY_BUFFER, vb->getVertexBuffer());
+         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)sizeof(Vector));
+         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(Vector) * 2));
 
-         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer() );
-         glDrawElements( GL_TRIANGLES, vb->getIndexCount(), GL_UNSIGNED_SHORT, 0 ); // render
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb->getIndexBuffer());
+         glDrawElements(GL_TRIANGLES, vb->getIndexCount(), GL_UNSIGNED_SHORT, 0);  // render
 
          if (!geo->getBoneCount())
             activeDevice->pop();
@@ -145,6 +137,6 @@ void TextureMaterial::renderDiffuse()
    end();
 }
 
-void TextureMaterial::update(float /*frame*/, Node ** /*nodelist*/, const Matrix&)
+void TextureMaterial::update(float /*frame*/, Node** /*nodelist*/, const Matrix&)
 {
 }

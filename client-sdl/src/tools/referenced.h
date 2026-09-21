@@ -10,15 +10,15 @@ public:
    Referenced(Referenced* r);
    virtual ~Referenced();
 
-   void addRef() const;       //! add reference
-   bool deref();              //! remove reference
-   bool copyRef();            //! copy reference if required
+   void addRef() const;  //! add reference
+   bool deref();         //! remove reference
+   bool copyRef();       //! copy reference if required
 
    int getRefCount() const;  //! get number of referencing objects
-   int* getRef() const;       //! get reference pointer
+   int* getRef() const;      //! get reference pointer
 
 protected:
-   int *mReferences;
+   int* mReferences;
 };
 
 #endif

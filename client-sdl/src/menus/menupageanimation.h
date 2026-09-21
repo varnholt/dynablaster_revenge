@@ -10,23 +10,20 @@ class MenuPageAnimation : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
+   MenuPageAnimation();
 
-      MenuPageAnimation();
+   ~MenuPageAnimation();
 
-      ~MenuPageAnimation();
+   virtual void initialize();
 
-      virtual void initialize();
+public slots:
 
+   virtual void start() = 0;
 
-   public slots:
+   virtual void animate() = 0;
 
-      virtual void start() = 0;
+signals:
 
-      virtual void animate() = 0;
-
-
-   signals:
-
-      void stopped();
+   void stopped();
 };

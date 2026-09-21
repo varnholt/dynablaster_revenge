@@ -9,48 +9,41 @@ class MenuPageBackgroundItem : public MenuPageItem
 {
    Q_OBJECT
 
-   public:
+public:
+   enum BackgroundColor
+   {
+      BackgroundColorRed = 0,
+      BackgroundColorGreen,
+      BackgroundColorBlue
+   };
 
-      enum BackgroundColor
-      {
-         BackgroundColorRed = 0,
-         BackgroundColorGreen,
-         BackgroundColorBlue
-      };
+   //! constructor
+   MenuPageBackgroundItem(QObject* parent = 0);
 
-      //! constructor
-      MenuPageBackgroundItem(QObject* parent = 0);
+   // main
 
-      // main
+   virtual void draw();
 
-      virtual void draw();
+   virtual void initialize();
 
-      virtual void initialize();
+   void addGradientLayer(PSDLayer* gradient, BackgroundColor color);
 
-      void addGradientLayer(
-         PSDLayer* gradient,
-         BackgroundColor color
-      );
+public slots:
 
+   void setBackgroundColor(BackgroundColor);
 
-   public slots:
+private:
+   FrameTimer mElapsed;
 
-      void setBackgroundColor(BackgroundColor);
+   float mX;
+   float mY;
 
+   FrameTimer mFlipBackgroundElapsed;
+   BackgroundColor mBackgroundColor;
+   BackgroundColor mBackgroundColorPrevious;
+   PSDLayer* mBackgroundLayers[BackgroundColorBlue + 1];
 
-   private:
-
-      FrameTimer mElapsed;
-
-      float mX;
-      float mY;
-
-      FrameTimer mFlipBackgroundElapsed;
-      BackgroundColor mBackgroundColor;
-      BackgroundColor mBackgroundColorPrevious;
-      PSDLayer* mBackgroundLayers[BackgroundColorBlue + 1];
-
-      // the scrolling quad this draws directly (not via PSDLayer, since its texcoords animate
-      // every frame) needs its own dynamically re-uploaded buffer - see draw().
-      unsigned int mVertexBuffer;
+   // the scrolling quad this draws directly (not via PSDLayer, since its texcoords animate
+   // every frame) needs its own dynamically re-uploaded buffer - see draw().
+   unsigned int mVertexBuffer;
 };
