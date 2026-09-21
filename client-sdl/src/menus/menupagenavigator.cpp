@@ -33,23 +33,51 @@ const char* const kOptionsActionGame = "button_game_active";
 
 const char* const kAbout = "data/menus/about.psd";
 const char* const kAboutActionBack = "button_back_active";
+const char* const kLoungeActionStart = "button_start_active";
+const char* const kLoungeActionBack = "button_leave_active";
+const char* const kLoungeActionAddPlayer = "button_addplayer_active";
+const char* const kLoungeLineeditSay = "lineedit_say";
+
+const char* const kMainMenuActionSingle = "button_single_active";
+const char* const kMainMenuActionMulti = "button_multi_active";
+const char* const kMainMenuActionPouet = "button_pouet_active";
+const char* const kMainMenuActionFacebook = "button_facebook_active";
+const char* const kMainMenuActionHome = "button_home_active";
+const char* const kGameSelectActionJoin = "button_join_active";
+const char* const kGameCreateActionOk = "button_ok_active";
 
 bool isOptionsPage(const QString& page)
 {
    return page == kOptionsVideo || page == kOptionsAudio || page == kOptionsControls || page == kOptionsGame;
 }
 
+// SINGLE/MULTI (and JOIN/CREATE-OK/LOUNGE_*, not individually named here) go through
+// BombermanClient::host()+loginRequest() in the real client - real client-server networking
+// (a local Server instance for single-player too, connected to over 127.0.0.1), not yet ported -
+// see project memory, Phase 4. This is a real, scoped, in-progress gap, not a missing capability.
+bool needsBombermanClient(const QString& action)
+{
+   return action == kMainMenuActionSingle || action == kMainMenuActionMulti || action == kGameSelectActionJoin ||
+          action == kGameCreateActionOk || action == kLoungeActionStart || action == kLoungeActionBack ||
+          action == kLoungeActionAddPlayer || action == kLoungeLineeditSay;
+}
+
+bool needsBrowser(const QString& action)
+{
+   return action == kMainMenuActionPouet || action == kMainMenuActionFacebook || action == kMainMenuActionHome;
+}
+
 void logUnhandled(const QString& page, const QString& action)
 {
-   if (!action.isEmpty())
-   {
-      qDebug(
-         "MenuPageNavigator: page=%s action=%s received but not wired up yet (needs real "
-         "networking/browser support this port doesn't have)",
-         qPrintable(page),
-         qPrintable(action)
-      );
-   }
+   if (action.isEmpty())
+      return;
+
+   if (needsBombermanClient(action))
+      qDebug("MenuPageNavigator: page=%s action=%s needs BombermanClient (Phase 4, not ported yet)", qPrintable(page), qPrintable(action));
+   else if (needsBrowser(action))
+      qDebug("MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", qPrintable(page), qPrintable(action));
+   // else: not a real menu action (e.g. an editablecombobox's own internal layer-name emission) -
+   // the real GameMenuWorkflow doesn't log these either, so neither do we.
 }
 
 }  // namespace
@@ -124,8 +152,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
    }
    else
    {
-      // LOUNGE and anything else: every real action there needs live game/network state
-      // (BombermanClient, GameStateMachine) that doesn't exist in this port yet.
+      // LOUNGE and anything else - logUnhandled() classifies known action names correctly.
       logUnhandled(page, action);
    }
 }
