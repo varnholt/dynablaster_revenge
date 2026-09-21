@@ -11,6 +11,7 @@
 
 #include "sdlglobaltime.h"
 
+#include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
 
 #include "menus/bitmapfont.h"
@@ -22,6 +23,7 @@
 #include "menus/menupagenavigator.h"
 
 #include "game/bombermanclient.h"
+#include "game/positioninterpolation.h"
 
 #include <QCoreApplication>
 #include <QKeyEvent>
@@ -55,6 +57,37 @@ int mapEditingKey(SDL_Keycode key)
          return Qt::Key_Return;
       case SDLK_KP_ENTER:
          return Qt::Key_Enter;
+      default:
+         return 0;
+   }
+}
+
+/// \brief maps the movement/bomb/zoom/start keys BombermanClient::keyPressed() checks against
+/// GameSettings::ControllerSettings' default keymap (client/src/game/gamesettings.cpp -
+/// initializeDefaultMap(): Up/Down/Left/Right arrows, Space for bomb, [ ] for zoom, F10 for
+/// start). Separate from mapEditingKey() below (menu text-field navigation) - only one of
+/// menuDrawable/gameDrawable is visible and receives key events at a time, so reusing the same
+/// Qt::Key values for both is fine.
+int mapGameKey(SDL_Keycode key)
+{
+   switch (key)
+   {
+      case SDLK_UP:
+         return Qt::Key_Up;
+      case SDLK_DOWN:
+         return Qt::Key_Down;
+      case SDLK_LEFT:
+         return Qt::Key_Left;
+      case SDLK_RIGHT:
+         return Qt::Key_Right;
+      case SDLK_SPACE:
+         return Qt::Key_Space;
+      case SDLK_LEFTBRACKET:
+         return Qt::Key_BracketLeft;
+      case SDLK_RIGHTBRACKET:
+         return Qt::Key_BracketRight;
+      case SDLK_F10:
+         return Qt::Key_F10;
       default:
          return 0;
    }
@@ -162,6 +195,70 @@ int main(int argc, char** argv)
    QObject::connect(menuDrawable.getMenu(), SIGNAL(actionRequest(QString, QString)), &navigator, SLOT(onActionRequest(QString, QString)));
    QObject::connect(&navigator, SIGNAL(pageChangeRequest(QString)), &menuDrawable, SLOT(pageChangeRequest(QString)));
 
+   // matches GameMenuWorkflow::pageChanged() - populates GAME_CREATE's dropdowns/checkboxes once
+   // the page actually becomes current (see MenuPageNavigator::onPageChanged()).
+   QObject::connect(&menuDrawable, SIGNAL(pageChanged(QString)), &navigator, SLOT(onPageChanged(QString)));
+
+   // GameDrawable (Phase 5, see project memory) - the real in-game rendering (map/players/bombs/
+   // extras). Starts hidden; BombermanClient::showGame()/showMenu() (see below) toggle it on/off
+   // against the menu, matching client/src/game/bombermanview.cpp's GameView::showGame()/
+   // showMenu() (that class itself isn't ported - main.cpp already does its job of owning/
+   // dispatching to each Drawable directly, same as it already does for the menu system).
+   GameDrawable gameDrawable(&device);
+   gameDrawable.initializeGL();
+   gameDrawable.setVisible(false);
+
+   // client<->game wiring - mirrors client/src/game/bombermanclientgui.cpp's
+   // BombermanClientGui::initConnections() (only the connections relevant to what's actually
+   // ported here; chat/stats/rounds/music-player/joystick wiring is still out of scope).
+   QObject::connect(&bombermanClient, SIGNAL(loadLevel(QString)), &gameDrawable, SLOT(loadLevel(QString)));
+   QObject::connect(&gameDrawable, SIGNAL(levelLoaded(QString)), &bombermanClient, SLOT(levelLoaded(QString)));
+   QObject::connect(&bombermanClient, SIGNAL(shakeBlock(MapItem*)), &gameDrawable, SLOT(shakeBlock(MapItem*)));
+   QObject::connect(&bombermanClient, SIGNAL(setPlayerPosition(int,float,float,float)), &gameDrawable, SLOT(setPlayerPosition(int,float,float,float)));
+   QObject::connect(&bombermanClient, SIGNAL(setPlayerSpeed(int,float,float,float)), &gameDrawable, SLOT(setPlayerSpeed(int,float,float,float)));
+   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setPlayerPosition(int,float,float,float)), &gameDrawable, SLOT(setPlayerPosition(int,float,float,float)));
+   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setPlayerSpeed(int,float,float,float)), &gameDrawable, SLOT(setPlayerSpeed(int,float,float,float)));
+   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setMapItemPosition(MapItem*,float,float,float)), &gameDrawable, SLOT(setMapItemPosition(MapItem*,float,float,float)));
+   QObject::connect(&bombermanClient, SIGNAL(removeMapItem(MapItem*)), bombermanClient.getPositionInterpolation(), SLOT(removeMapItem(MapItem*)));
+   QObject::connect(&bombermanClient, SIGNAL(playfieldScale(float,float)), &gameDrawable, SLOT(setPlayfieldScale(float,float)));
+   QObject::connect(&bombermanClient, SIGNAL(playfieldSize(int,int)), &gameDrawable, SLOT(setPlayfieldSize(int,int)));
+   QObject::connect(&gameDrawable, SIGNAL(keyPressed(QKeyEvent*)), &bombermanClient, SLOT(keyPressed(QKeyEvent*)));
+   QObject::connect(&gameDrawable, SIGNAL(keyReleased(QKeyEvent*)), &bombermanClient, SLOT(keyReleased(QKeyEvent*)));
+   QObject::connect(&bombermanClient, SIGNAL(createMapItem(MapItem*)), &gameDrawable, SLOT(createMapItem(MapItem*)));
+   QObject::connect(&bombermanClient, SIGNAL(removeMapItem(MapItem*)), &gameDrawable, SLOT(removeMapItem(MapItem*)));
+   QObject::connect(&bombermanClient, SIGNAL(destroyMapItem(MapItem*,float)), &gameDrawable, SLOT(destroyMapItem(MapItem*,float)));
+   QObject::connect(&bombermanClient, SIGNAL(addPlayer(int,QString,Constants::Color)), &gameDrawable, SLOT(addPlayer(int,QString,Constants::Color)));
+   QObject::connect(&bombermanClient, SIGNAL(removePlayer(int)), &gameDrawable, SLOT(removePlayer(int)));
+   QObject::connect(&bombermanClient, SIGNAL(extraRemoved(int,int,bool,Constants::ExtraType,int)), &gameDrawable, SLOT(extraRemoved(int,int,bool,Constants::ExtraType,int)));
+   QObject::connect(&bombermanClient, SIGNAL(detonation(int,int,int,int,int,int,float)), &gameDrawable, SLOT(addDetonation(int,int,int,int,int,int,float)));
+   QObject::connect(&bombermanClient, SIGNAL(playerInfected(int,Constants::SkullType,int,int,int)), &gameDrawable, SLOT(playerInfected(int,Constants::SkullType,int,int,int)));
+   QObject::connect(&bombermanClient, SIGNAL(playerId(int)), &gameDrawable, SLOT(setPlayerId(int)));
+
+   // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
+   // deferred GameStatsDrawable/GameMessagingDrawable/GameWinDrawable/MusicPlayerDrawable/
+   // GameHelpDrawable, none of which are ported). showMenuWithDelay()'s winner-screen pause
+   // (needs GameWinDrawable) is simplified to an immediate switch.
+   QObject::connect(&bombermanClient, &BombermanClient::showGame, [&]() {
+      menuDrawable.setVisible(false);
+      logoDrawable.setVisible(false);
+      menuCursor.setVisible(false);
+      gameDrawable.setVisible(true);
+   });
+   auto showMenuAgain = [&]() {
+      gameDrawable.setVisible(false);
+      menuDrawable.setVisible(true);
+      logoDrawable.setVisible(true);
+      menuCursor.setVisible(true);
+   };
+   QObject::connect(&bombermanClient, &BombermanClient::showMenu, showMenuAgain);
+   QObject::connect(&bombermanClient, &BombermanClient::gameStopped, showMenuAgain);
+   // pageChangeRequest is a protected slot (see the navigator wiring above) - invokeMethod goes
+   // through Qt's meta-object system, bypassing C++ access control the same way the string-based
+   // SIGNAL/SLOT connects elsewhere in this file already do.
+   QObject::connect(&bombermanClient, &BombermanClient::showMainMenu, [&]() {
+      QMetaObject::invokeMethod(&menuDrawable, "pageChangeRequest", Q_ARG(QString, QString("data/menus/mainmenu.psd")));
+   });
+
    bool running = true;
    QObject::connect(&navigator, &MenuPageNavigator::quitRequest, [&running]() { running = false; });
 
@@ -211,18 +308,46 @@ int main(int argc, char** argv)
                break;
             case SDL_EVENT_KEY_DOWN:
             {
-               const int qtKey = mapEditingKey(event.key.key);
-               if (qtKey != 0)
+               if (gameDrawable.isVisible())
                {
-                  QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier);
-                  menuDrawable.keyPressEvent(&keyEvent);
+                  const int qtKey = mapGameKey(event.key.key);
+                  if (qtKey != 0)
+                  {
+                     QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier, QString(), event.key.repeat);
+                     gameDrawable.keyPressEvent(&keyEvent);
+                  }
+               }
+               else
+               {
+                  const int qtKey = mapEditingKey(event.key.key);
+                  if (qtKey != 0)
+                  {
+                     QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier);
+                     menuDrawable.keyPressEvent(&keyEvent);
+                  }
+               }
+               break;
+            }
+            case SDL_EVENT_KEY_UP:
+            {
+               if (gameDrawable.isVisible())
+               {
+                  const int qtKey = mapGameKey(event.key.key);
+                  if (qtKey != 0)
+                  {
+                     QKeyEvent keyEvent(QEvent::KeyRelease, qtKey, Qt::NoModifier, QString(), event.key.repeat);
+                     gameDrawable.keyReleaseEvent(&keyEvent);
+                  }
                }
                break;
             }
             case SDL_EVENT_TEXT_INPUT:
             {
-               QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
-               menuDrawable.keyPressEvent(&keyEvent);
+               if (!gameDrawable.isVisible())
+               {
+                  QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
+                  menuDrawable.keyPressEvent(&keyEvent);
+               }
                break;
             }
             default:
@@ -243,8 +368,11 @@ int main(int argc, char** argv)
 
       const float timeMs = static_cast<float>(SDL_GetTicks());
 
-      menuDrawable.animate(timeMs);
-      menuDrawable.paintGL();
+      if (menuDrawable.isVisible())
+      {
+         menuDrawable.animate(timeMs);
+         menuDrawable.paintGL();
+      }
 
       if (menuCursor.isVisible())
       {
@@ -257,6 +385,13 @@ int main(int argc, char** argv)
          // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
          logoDrawable.animate(timeMs * 0.0625f);
          logoDrawable.paintGL();
+      }
+
+      if (gameDrawable.isVisible())
+      {
+         // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
+         gameDrawable.animate(timeMs * 0.0625f);
+         gameDrawable.paintGL();
       }
 
       context.swap();

@@ -232,6 +232,25 @@ add_library(dynablaster_core STATIC
     src/game/bombermanclient.cpp
     src/game/bombermanclient.h
 
+    # Phase 5 (real in-game rendering - map/players/bombs/extras/HUD) - see project memory for the
+    # full dependency-graph scoping this was based on and what's deliberately deferred (particle
+    # effects, joystick, chat, music player UI, etc).
+    src/game/skull.cpp
+    src/game/skull.h
+    src/game/playerboundingrect.cpp
+    src/game/playerboundingrect.h
+    src/game/playeritem.cpp
+    src/game/playeritem.h
+    src/game/extra.cpp
+    src/game/extra.h
+    src/levels/levelfactory.cpp
+    src/levels/levelfactory.h
+    src/levels/castle/levelcastle.cpp
+    src/levels/castle/levelcastle.h
+    src/game/detonationmanager.h
+    src/game/gamedrawable.cpp
+    src/game/gamedrawable.h
+
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
     ${DYNABLASTER_SERVER_SOURCES}

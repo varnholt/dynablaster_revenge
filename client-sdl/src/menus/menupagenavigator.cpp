@@ -2,7 +2,15 @@
 
 #include "game/bombermanclient.h"
 #include "game/gamesettings.h"
+#include "levels/level.h"
 #include "gameinformation.h"
+
+#include "menu.h"
+#include "menupage.h"
+#include "menupagecheckboxitem.h"
+#include "menupagecomboboxitem.h"
+#include "menupagepixmapitem.h"
+#include "menupagetextedit.h"
 
 #include <QDebug>
 #include <QHostAddress>
@@ -94,6 +102,15 @@ void logUnhandled(const QString& page, const QString& action)
 
 MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
 {
+   // matches GameMenuInterfaceCreate's constructor.
+   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelCastle));
+   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelMansion));
+   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelSpace));
+
+   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelCastle));
+   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelMansion));
+   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelSpace));
+
    // BombermanClient must already be constructed+initialize()'d by main.cpp before this runs -
    // getInstance() doesn't self-construct (matches the real client/src/game/bombermanclientgui.cpp
    // construction order).
@@ -170,11 +187,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
       }
       else if (action == kGameCreateActionOk)
       {
-         // real GameMenuInterfaceCreate reads the page's own controls (name/level/rounds/extras
-         // checkboxes) into a CreateGameRequestPacket - that UI readback isn't wired in this port
-         // yet, so this uses BombermanClient::createGameAutomatic() (the same dev/test convenience
-         // the original codebase already ships), not a reimplementation of the real defaults.
-         BombermanClient::getInstance()->createGameAutomatic();
+         createGame();
       }
       else
       {
@@ -271,4 +284,201 @@ void MenuPageNavigator::onGameStarted()
    // not-yet-scoped "Phase 5" - this proves the network state machine reaches GameActive for
    // real, nothing more.
    qDebug("MenuPageNavigator: gameStarted() - real gameplay handoff not implemented yet (Phase 5)");
+}
+
+void MenuPageNavigator::onPageChanged(const QString& page)
+{
+   // matches GameMenuWorkflow::pageChanged(): monitoring is disabled unconditionally first, then
+   // re-enabled only for the page actually being shown - only GAME_CREATE's monitoring is ported
+   // (video/audio/controls/game options monitoring is still out of scope).
+   setMonitorCreateGameOptionsEnabled(false);
+
+   if (page == kGameCreate)
+   {
+      initializeCreateGameOptions();
+      setMonitorCreateGameOptionsEnabled(true);
+   }
+}
+
+void MenuPageNavigator::initializeCreateGameOptions()
+{
+   // matches GameMenuInterfaceCreate::initializeCreateGameOptions().
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+
+   auto* timeCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_time_table"));
+   auto* maxPlayersCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_maxplayers_table"));
+   auto* botCountCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_bots_table"));
+   auto* levelCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_level_table"));
+   auto* roundsCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_rounds_table"));
+
+   auto* bombExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_bomb"));
+   auto* flameExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_flame"));
+   auto* speedUpExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_speedup"));
+   auto* kickExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_kick"));
+   auto* skullsExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_skull"));
+
+   if (!mCreateGamePagesInitialized.contains(page))
+   {
+      timeCombo->appendItem("2");
+      timeCombo->appendItem("3");
+      timeCombo->appendItem("5");
+      timeCombo->appendItem("7");
+
+      for (int i = 0; i < 5; i++)
+         roundsCombo->appendItem(QString("%1").arg(i + 1));
+
+      for (int i = 2; i <= 10; i++)
+         maxPlayersCombo->appendItem(QString("%1").arg(i));
+
+      for (const QString& name : mSortedLevelNames)
+         levelCombo->appendItem(name);
+
+      mCreateGamePagesInitialized.insert(page);
+   }
+
+   GameSettings::CreateGameSettings* cgs =
+      BombermanClient::getInstance()->isSinglePlayer()
+         ? GameSettings::getInstance()->getCreateGameSettingsSingle()
+         : GameSettings::getInstance()->getCreateGameSettingsMulti();
+
+   timeCombo->setValue(QString("%1").arg(cgs->getDuration()));
+   maxPlayersCombo->setValue(QString("%1").arg(cgs->getMaxPlayers()));
+   botCountCombo->setValue(QString("%1").arg(cgs->getBotCount()));
+
+   int levelIndex = cgs->getLevelIndex();
+   if (levelIndex >= mSortedLevelNames.size())
+      levelIndex = 0;
+
+   levelCombo->setValue(mSortedLevelNames[levelIndex]);
+   levelCombo->setActiveElement(levelIndex);
+   levelCombo->setFocussedElement(levelIndex);
+
+   roundsCombo->setValue(QString("%1").arg(cgs->getRounds()));
+   bombExtrasCb->setChecked(cgs->isExtraBombsEnabled());
+   flameExtrasCb->setChecked(cgs->isExtraFlamesEnabled());
+   speedUpExtrasCb->setChecked(cgs->isExtraSpeedUpsEnabled());
+   kickExtrasCb->setChecked(cgs->isExtraKicksEnabled());
+   skullsExtrasCb->setChecked(cgs->isExtraSkullsEnabled());
+
+   updateCreateGamePlayerCounts();
+   updateCreateGameLevelPreview();
+}
+
+void MenuPageNavigator::updateCreateGamePlayerCounts()
+{
+   // matches GameMenuInterfaceCreate::updateCreateGamePlayerCounts().
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+
+   auto* maxPlayersCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_maxplayers_table"));
+   auto* botCountCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_bots_table"));
+
+   const int maxPlayers = maxPlayersCombo->getValue().toInt();
+   const int botCount = botCountCombo->getValue().toInt();
+   const int maxBots = maxPlayers - 1;
+
+   botCountCombo->clear();
+
+   for (int i = 0; i <= maxBots; i++)
+      botCountCombo->appendItem(QString("%1").arg(i));
+
+   if (botCount > maxBots)
+      botCountCombo->setValue(QString("%1").arg(maxBots));
+}
+
+void MenuPageNavigator::updateCreateGameLevelPreview()
+{
+   // matches GameMenuInterfaceCreate::updateCreateGameLevelPreview().
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+
+   auto* previewCastle = dynamic_cast<MenuPagePixmapItem*>(page->getPageItem("pixmap_preview_castle"));
+   auto* previewMansion = dynamic_cast<MenuPagePixmapItem*>(page->getPageItem("pixmap_preview_mansion"));
+   auto* previewSpace = dynamic_cast<MenuPagePixmapItem*>(page->getPageItem("pixmap_preview_space"));
+   auto* levelCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_level_table"));
+
+   previewCastle->setVisible(levelCombo->getFocussedElement() <= 0);
+   previewMansion->setVisible(levelCombo->getFocussedElement() == 1);
+   previewSpace->setVisible(levelCombo->getFocussedElement() == 2);
+}
+
+void MenuPageNavigator::setMonitorCreateGameOptionsEnabled(bool enabled)
+{
+   // matches GameMenuInterfaceCreate::setMonitorCreateGameOptionsEnabled().
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+
+   auto* maxPlayersCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_maxplayers_table"));
+   auto* levelCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_level_table"));
+
+   if (enabled)
+   {
+      connect(maxPlayersCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGamePlayerCounts()));
+      connect(levelCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGameLevelPreview()));
+      connect(levelCombo, SIGNAL(elementFocussed(int)), this, SLOT(updateCreateGameLevelPreview()));
+   }
+   else
+   {
+      disconnect(maxPlayersCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGamePlayerCounts()));
+      disconnect(levelCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGameLevelPreview()));
+      disconnect(levelCombo, SIGNAL(elementFocussed(int)), this, SLOT(updateCreateGameLevelPreview()));
+   }
+}
+
+void MenuPageNavigator::createGame()
+{
+   // matches GameMenuInterfaceCreate::createGame().
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+
+   auto* gameNameItem = dynamic_cast<MenuPageTextEditItem*>(page->getPageItem("lineedit_name"));
+   auto* timeCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_time_table"));
+   auto* maxPlayersCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_maxplayers_table"));
+   auto* botCountCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_bots_table"));
+   auto* levelCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_level_table"));
+   auto* roundsCombo = dynamic_cast<MenuPageComboBoxItem*>(page->getPageItem("combobox_rounds_table"));
+
+   auto* bombExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_bomb"));
+   auto* flameExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_flame"));
+   auto* speedUpExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_speedup"));
+   auto* kickExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_kick"));
+   auto* skullsExtrasCb = dynamic_cast<MenuPageCheckBoxItem*>(page->getPageItem("checkbox_skull"));
+
+   const QString gameName = gameNameItem->getText();
+
+   int levelIndex = levelCombo->getActiveElement();
+   QString levelDirName = (levelIndex >= mSortedLevelDirNames.size()) ? mSortedLevelDirNames[0] : mSortedLevelDirNames[levelIndex];
+
+   const int durationMinutes = timeCombo->getValue().toInt();
+   const int durationSeconds = durationMinutes * 60;
+   const int maxPlayers = maxPlayersCombo->getValue().toInt();
+   const int botCount = botCountCombo->getValue().toInt();
+   const int rounds = roundsCombo->getValue().toInt();
+
+   const bool extraBombs = bombExtrasCb->isChecked();
+   const bool extraFlames = flameExtrasCb->isChecked();
+   const bool extraSpeedUps = speedUpExtrasCb->isChecked();
+   const bool extraKicks = kickExtrasCb->isChecked();
+   const bool extraSkulls = skullsExtrasCb->isChecked();
+
+   const Constants::Dimension dimension = (maxPlayers <= 5) ? Constants::Dimension13x11 : Constants::Dimension19x17;
+
+   GameSettings::CreateGameSettings* cgs =
+      BombermanClient::getInstance()->isSinglePlayer()
+         ? GameSettings::getInstance()->getCreateGameSettingsSingle()
+         : GameSettings::getInstance()->getCreateGameSettingsMulti();
+
+   cgs->setGameName(gameName);
+   cgs->setLevelIndex(levelIndex);
+   cgs->setRounds(rounds);
+   cgs->setDuration(durationMinutes);
+   cgs->setMaxPlayers(maxPlayers);
+   cgs->setExtraBombsEnabled(extraBombs);
+   cgs->setExtraFlamesEnabled(extraFlames);
+   cgs->setExtraKicksEnabled(extraKicks);
+   cgs->setExtraSpeedUpsEnabled(extraSpeedUps);
+   cgs->setExtraSkullsEnabled(extraSkulls);
+   cgs->setDimensions(dimension);
+   cgs->setBotCount(botCount);
+   cgs->serialize();
+
+   BombermanClient::getInstance()->createGame(
+      gameName, levelDirName, rounds, durationSeconds, maxPlayers, extraBombs, extraFlames, extraSpeedUps, extraKicks, extraSkulls, dimension
+   );
 }
