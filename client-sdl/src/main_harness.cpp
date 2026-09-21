@@ -129,7 +129,7 @@ int main(int argc, char** argv)
    const std::string page_name = argValue(args, "--page=");
 
    GlesContext context;
-   if (!context.init("dynablaster harness (SDL3 + GLES3)", 800, 600))
+   if (!context.init("dynablaster harness (SDL3 + GLES3)", 1280, 720))
    {
       return 1;
    }
