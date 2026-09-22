@@ -71,6 +71,61 @@ set(DYNABLASTER_SERVER_SOURCES
     ../server/src/serverversion.h
 )
 
+# ../ai (repo-root sibling directory) - the real bot AI (A* pathfinding + bot behavior state
+# machine), same set client.pro already embeds. Zero GL/rendering code - a bot is its own headless
+# QTcpSocket client (BotClient) that plays like a human would, same pattern as embedding server/src
+# above. botgui.{h,cpp} is a standalone QWidget debug tool - confirmed via grep that nothing in
+# client/src/ ever references BotGui, so it's dead code even in the original, excluded here (same
+# reasoning as server/src's dummyplayer.cpp/servergui.cpp exclusion) - also avoids pulling in
+# QtWidgets for a single unused file. aimain.cpp/astarmain.cpp are separate standalone test
+# executables (ai.pro/astar.pro), not part of client.pro, excluded the same way.
+set(DYNABLASTER_AI_SOURCES
+    ../ai/astarmap.cpp
+    ../ai/astarmap.h
+    ../ai/astarnode.cpp
+    ../ai/astarnode.h
+    ../ai/astarpathfinding.cpp
+    ../ai/astarpathfinding.h
+    ../ai/bombchainreaction.cpp
+    ../ai/bombchainreaction.h
+    ../ai/bot.cpp
+    ../ai/bot.h
+    ../ai/botaction.cpp
+    ../ai/botaction.h
+    ../ai/botbombaction.cpp
+    ../ai/botbombaction.h
+    ../ai/botbombmapitem.cpp
+    ../ai/botbombmapitem.h
+    ../ai/botcharacter.cpp
+    ../ai/botcharacter.h
+    ../ai/botclient.cpp
+    ../ai/botclient.h
+    ../ai/botconstants.cpp
+    ../ai/botconstants.h
+    ../ai/botfactory.cpp
+    ../ai/botfactory.h
+    ../ai/botidleaction.cpp
+    ../ai/botidleaction.h
+    ../ai/botmap.cpp
+    ../ai/botmap.h
+    ../ai/botoption.cpp
+    ../ai/botoption.h
+    ../ai/botplayerinfo.cpp
+    ../ai/botplayerinfo.h
+    ../ai/botwalkaction.cpp
+    ../ai/botwalkaction.h
+    ../ai/path.cpp
+    ../ai/path.h
+    ../ai/pathfinding.cpp
+    ../ai/pathfinding.h
+    ../ai/protobot.cpp
+    ../ai/protobot.h
+    ../ai/protobotinsults.cpp
+    ../ai/protobotinsults.h
+    ../ai/protobotmemory.cpp
+    ../ai/protobotmemory.h
+)
+
 # engine/helper/chunk.{cpp,h} is a second, unrelated Chunk class that collides by name with
 # tools/chunk.{cpp,h} - a genuine pre-existing duplicate in the legacy tree. Only tools/chunk.cpp
 # is in the real client.pro SOURCES list and nothing includes the engine/helper one, so it's
@@ -218,11 +273,10 @@ add_library(dynablaster_core STATIC
     src/levels/level.cpp
     src/levels/level.h
 
-    # Phase 4 continued: real client<->server networking. soundmanager.{h,cpp}/gameplayback.{h,cpp}/
-    # ai/botfactory.{h,cpp} are no-op stand-ins for still-unported subsystems (real audio backend,
-    # replay/record, AI bots) - see the "Deferred subsystem" comment in each for what's stubbed and why.
-    src/ai/botfactory.cpp
-    src/ai/botfactory.h
+    # Phase 4 continued: real client<->server networking. soundmanager.{h,cpp}/gameplayback.{h,cpp}
+    # are no-op stand-ins for still-unported subsystems (real audio backend, replay/record) - see
+    # the "Deferred subsystem" comment in each for what's stubbed and why. Bot AI is NOT a stub -
+    # see DYNABLASTER_AI_SOURCES above, the real ../ai/ tree is embedded like server/src is.
     src/game/gameplayback.cpp
     src/game/gameplayback.h
     src/game/soundmanager.cpp
@@ -254,6 +308,7 @@ add_library(dynablaster_core STATIC
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}
     ${DYNABLASTER_SERVER_SOURCES}
+    ${DYNABLASTER_AI_SOURCES}
 )
 
 # NOTE: do not add src/tools (or similar) directly as an include dir - tools/string.h vs the
@@ -267,6 +322,7 @@ target_include_directories(dynablaster_core PUBLIC
     src/engine
     ../shared
     ../server/src
+    ../ai
 )
 target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui Qt6::Network)
 

@@ -3,6 +3,7 @@
 // Qt
 #include <QDateTime>
 #include <QFile>
+#include <QRandomGenerator>
 #include <QtCore/QCoreApplication>
 #include <QStringList>
 
@@ -77,8 +78,6 @@ void BotFactory::createBotClientPair()
             << "eve" << "pneuman" << "optimus" << "robby" << "awesome-o";
    }
 
-   qsrand(QTime::currentTime().msec());
-
    QString nick;
 
    if (nicks.size() >= 9)
@@ -89,7 +88,7 @@ void BotFactory::createBotClientPair()
 
       while (duplicate)
       {
-         nick = nicks[qrand() % (nicks.size()-1)];
+         nick = nicks[QRandomGenerator::global()->bounded(nicks.size() - 1)];
          duplicate = mGivenNames.contains(nick);
       }
 
@@ -99,7 +98,7 @@ void BotFactory::createBotClientPair()
    {
       // if the nick list size is smaller than the possible bot maximum,
       // just choose any of the names
-      nick = nicks[qrand() % (nicks.size()-1)];
+      nick = nicks[QRandomGenerator::global()->bounded(nicks.size() - 1)];
    }
 
    client->setBot(bot);

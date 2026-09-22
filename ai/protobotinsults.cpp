@@ -1,5 +1,6 @@
 #include "protobotinsults.h"
 
+#include <QRandomGenerator>
 
 ProtoBotInsults::ProtoBotInsults(QObject *parent) :
    QObject(parent)
@@ -32,7 +33,7 @@ ProtoBotInsults::ProtoBotInsults(QObject *parent) :
 void ProtoBotInsults::shootAgain()
 {
    QTimer::singleShot(
-      20000 + (qrand() % 60000),
+      20000 + QRandomGenerator::global()->bounded(60000),
       this,
       SLOT(insult())
    );
@@ -44,7 +45,7 @@ void ProtoBotInsults::insult()
 {
    if (!mInsults.isEmpty())
    {
-      emit sendMessage(mInsults[qrand() % (mInsults.size()-1)]);
+      emit sendMessage(mInsults[QRandomGenerator::global()->bounded(mInsults.size() - 1)]);
       shootAgain();
    }
 }

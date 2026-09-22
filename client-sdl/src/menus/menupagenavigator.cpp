@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QHostAddress>
 #include <QNetworkInterface>
+#include <QTimer>
 
 namespace
 {
@@ -275,7 +276,14 @@ void MenuPageNavigator::onCreateGameResponse(bool granted, int gameId, bool owne
 void MenuPageNavigator::onJoinGameResponse(bool success)
 {
    if (success)
+   {
       emit pageChangeRequest(kLounge);
+
+      // matches GameMenuWorkflow::pageChanged()'s LOUNGE branch (real GameMenuWorkflow isn't
+      // ported - this is the only trigger for BombermanClient::initializeBots(), which was
+      // otherwise fully wired to BotFactory but never called from anywhere in this port).
+      QTimer::singleShot(1000, BombermanClient::getInstance(), SLOT(initializeBots()));
+   }
 }
 
 void MenuPageNavigator::onGameStarted()

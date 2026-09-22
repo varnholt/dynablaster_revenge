@@ -7,7 +7,7 @@
 #include "mapitem.h"
 
 // Qt
-#include <QApplication>
+#include <QCoreApplication>
 #include <QTcpSocket>
 
 // math

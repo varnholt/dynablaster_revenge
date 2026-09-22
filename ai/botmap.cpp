@@ -1,6 +1,7 @@
 #include "botmap.h"
 
 // Qt
+#include <QRandomGenerator>
 #include <QStringList>
 #include <QTime>
 
@@ -84,7 +85,7 @@ template<typename T> void randomize(QList<T>& list)
 {
    for (int index = list.count() - 1; index > 0; --index)
    {
-      const int swapIndex = qrand() % (index + 1);
+      const int swapIndex = QRandomGenerator::global()->bounded(index + 1);
       qSwap(list[index], list[swapIndex]);
    }
 }
@@ -1246,7 +1247,7 @@ void BotMap::debugMapItems()
 */
 void BotMap::createMapItemsfromAscii(const QString& ascii)
 {
-   QStringList lines = ascii.split("\n", QString::SkipEmptyParts);
+   QStringList lines = ascii.split("\n", Qt::SkipEmptyParts);
 
    int x = 0;
    int y = 0;

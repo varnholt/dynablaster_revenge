@@ -52,7 +52,7 @@
 #include "math/vector.h"
 
 // ai
-#include "../ai/botfactory.h"
+#include "botfactory.h"
 
 // server
 #include "server.h"

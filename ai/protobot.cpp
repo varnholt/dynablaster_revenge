@@ -28,8 +28,12 @@
 
 // Qt
 #include <QElapsedTimer>
+#include <QRandomGenerator>
 #include <QStringList>
 #include <QTime>
+
+// std
+#include <algorithm>
 
 // defines
 #define MANHATTAN_LENGTH_MAX_EXTRAS 8
@@ -72,8 +76,6 @@ ProtoBot::ProtoBot()
    mDebugWalkAction(DEBUG_WALK_ACTION),
    mDebugBombDrop(DEBUG_BOMB_DROP)
 {
-   qsrand(QTime::currentTime().msec());
-
    mBotCharacter = new BotCharacter();
    mBotCharacter->setCharacter(
       randomize(2, 4),  // extra (2 is minimum as the value is multiplied)
@@ -221,7 +223,7 @@ void ProtoBot::reset()
 */
 int ProtoBot::randomize(int min, int max)
 {
-   return qrand() % ((max + 1) - min) + min;
+   return QRandomGenerator::global()->bounded((max + 1) - min) + min;
 }
 
 
@@ -1257,7 +1259,7 @@ bool ProtoBot::updateEscapeScore()
 
    if (escape)
    {
-      qSort(weightedPoints);
+      std::sort(weightedPoints.begin(), weightedPoints.end());
       QPoint best = weightedPoints.last().getObject();
 
       // make a copy of the computed path
@@ -1842,7 +1844,7 @@ bool ProtoBot::updateBombStoneScore()
    delete[] stonesToBeBombed;
 
    // now sort the weighted positions
-   qSort(weightedPoints);
+   std::sort(weightedPoints.begin(), weightedPoints.end());
 
    // analyze current pos
    QPoint current = QPoint(getXField(), getYField());
@@ -1914,7 +1916,7 @@ bool ProtoBot::updateBombStoneScore()
             int manhattan = -(p - weightedPoint).manhattanLength();
             reachablePositionsByManhattanLength << Weighted<QPoint, int>(p, manhattan);
          }
-         qSort(reachablePositionsByManhattanLength);
+         std::sort(reachablePositionsByManhattanLength.begin(), reachablePositionsByManhattanLength.end());
          reachablePositionsFiltered.clear();
 
          int iterations = 0;
