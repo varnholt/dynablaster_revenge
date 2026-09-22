@@ -2,23 +2,54 @@
 
 #include <QList>
 
-// Deferred real GL port (see project memory - Phase 5): the real DetonationManager
-// (client/src/game/detonationmanager.cpp) is a volumetric flame-shader effect using GL_TEXTURE_1D
-// (which doesn't exist in GLES3 at all), raw glBegin/glVertex/glNormal immediate-mode box
-// geometry, and a GL_PROJECTION_MATRIX fixed-function query - a real GLES3 port (1D texture
-// emulated as 1xN 2D, attribute-array box geometry, ported flame-vert/flame-frag shaders) rather
-// than a mechanical copy. Not done in this pass. No-op stand-in with the exact real interface -
-// bomb detonations still destroy blocks/players for real (that flows through BombermanClient's
-// packet handling regardless of what renders here), there's just no flame visual yet.
+#include "math/matrix.h"
+
+class Detonation;
+
+// GLES3 port of client/src/game/detonationmanager.cpp's real volumetric flame effect (see
+// project memory for the "verify scope before deferring" correction that led to this - it turned
+// out to need a shader port + geometry port, not to be blocked by anything GLES3 architecturally
+// lacks). GL_TEXTURE_1D (gradient palette) becomes a 2D texture with height 1; GL_TEXTURE_3D
+// (procedural noise volume) is native in GLES3, ported as-is with an R8 instead of ALPHA internal
+// format (ALPHA isn't part of GLES3's texImage3D format table). Immediate-mode box geometry
+// becomes a dynamic attribute-array buffer, rebuilt per box per frame. glGetFloatv(GL_PROJECTION_
+// MATRIX, ...) becomes GLDevice::getProjectionMatrix() (an accessor added for exactly this legacy
+// pattern - see its own doc comment).
 class DetonationManager
 {
 public:
-   DetonationManager() = default;
+   DetonationManager();
+   ~DetonationManager();
 
-   void init() {}
-   void clear() {}
-   void addDetonation(int, int, int, int, int, int) {}
+   void init();
+   void clear();
+   void addDetonation(int x, int y, int top, int bottom, int left, int right);
 
-   void update(float) {}
-   void render() {}
+   void update(float time);
+   void render();
+
+private:
+   void drawExplosion(Detonation* det, float time);
+   void drawBox(float x, float y, float z, float left, float right, float bottom, float top, int sides);
+
+   float mTime;
+   unsigned int mShader;
+
+   unsigned int mNoiseMap;
+   unsigned int mGradientMap;
+
+   int mParamTime;
+   int mParamCamPos;
+   int mParamTop;
+   int mParamBottom;
+   int mParamLeft;
+   int mParamRight;
+   int mParamBoundMin;
+   int mParamBoundMax;
+   int mParamNoiseMap;
+   int mParamGradientMap;
+
+   unsigned int mBoxVertexBuffer;
+
+   QList<Detonation*> mDetonations;
 };

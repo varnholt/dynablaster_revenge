@@ -43,6 +43,7 @@ PFNGLDEPTHMASKPROC glDepthMask;
 PFNGLGENTEXTURESPROC glGenTextures;
 PFNGLBINDTEXTUREPROC glBindTexture;
 PFNGLTEXIMAGE2DPROC glTexImage2D;
+PFNGLTEXIMAGE3DPROC glTexImage3D;
 PFNGLTEXPARAMETERIPROC glTexParameteri;
 PFNGLDELETETEXTURESPROC glDeleteTextures;
 PFNGLACTIVETEXTUREPROC glActiveTexture;
@@ -136,6 +137,7 @@ bool loadGles3Functions()
    ok &= load(glGenTextures, "glGenTextures");
    ok &= load(glBindTexture, "glBindTexture");
    ok &= load(glTexImage2D, "glTexImage2D");
+   ok &= load(glTexImage3D, "glTexImage3D");
    ok &= load(glTexParameteri, "glTexParameteri");
    ok &= load(glDeleteTextures, "glDeleteTextures");
    ok &= load(glActiveTexture, "glActiveTexture");

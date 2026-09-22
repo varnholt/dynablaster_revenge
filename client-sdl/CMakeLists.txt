@@ -301,7 +301,10 @@ add_library(dynablaster_core STATIC
     src/levels/levelfactory.h
     src/levels/castle/levelcastle.cpp
     src/levels/castle/levelcastle.h
+    src/game/detonationmanager.cpp
     src/game/detonationmanager.h
+    src/game/detonation.cpp
+    src/game/detonation.h
     src/game/gamedrawable.cpp
     src/game/gamedrawable.h
 

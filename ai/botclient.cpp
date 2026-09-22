@@ -146,7 +146,7 @@ void BotClient::initialize()
 
    connect(
       mSocket,
-      SIGNAL(error(QAbstractSocket::SocketError)),
+      SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
       this,
       SLOT(clientDisconnect())
    );

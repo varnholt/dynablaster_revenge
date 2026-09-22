@@ -94,6 +94,13 @@ using GLsizeiptr = intptr_t;
 #define GL_RGBA 0x1908
 #define GL_RGB 0x1907
 #define GL_DEPTH_COMPONENT 0x1902
+#define GL_RED 0x1903
+#define GL_R8 0x8229
+
+// DetonationManager's procedural noise volume - GLES3 has native GL_TEXTURE_3D support (unlike
+// GL_TEXTURE_1D, which has no GLES equivalent at all).
+#define GL_TEXTURE_3D 0x806F
+#define GL_TEXTURE_WRAP_R 0x8072
 
 // GLES has no BGRA format; the one real caller (Material::uploadCubeMap) gets aliased to RGBA
 // rather than reordering channels - environment cubemaps come out with red/blue swapped until
@@ -202,6 +209,7 @@ using PFNGLDEPTHMASKPROC = void (*)(GLboolean);
 using PFNGLGENTEXTURESPROC = void (*)(GLsizei, GLuint*);
 using PFNGLBINDTEXTUREPROC = void (*)(GLenum, GLuint);
 using PFNGLTEXIMAGE2DPROC = void (*)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*);
+using PFNGLTEXIMAGE3DPROC = void (*)(GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const void*);
 using PFNGLTEXPARAMETERIPROC = void (*)(GLenum, GLenum, GLint);
 using PFNGLDELETETEXTURESPROC = void (*)(GLsizei, const GLuint*);
 using PFNGLACTIVETEXTUREPROC = void (*)(GLenum);
@@ -291,6 +299,7 @@ extern PFNGLDEPTHMASKPROC glDepthMask;
 extern PFNGLGENTEXTURESPROC glGenTextures;
 extern PFNGLBINDTEXTUREPROC glBindTexture;
 extern PFNGLTEXIMAGE2DPROC glTexImage2D;
+extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLTEXPARAMETERIPROC glTexParameteri;
 extern PFNGLDELETETEXTURESPROC glDeleteTextures;
 extern PFNGLACTIVETEXTUREPROC glActiveTexture;
