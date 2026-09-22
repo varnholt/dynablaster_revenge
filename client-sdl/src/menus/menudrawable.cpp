@@ -138,6 +138,17 @@ void MenuDrawable::drawMenuContents()
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+         // same reasoning as the blend state above, but for the projection matrix: the blit pass
+         // at the end of THIS SAME loop below sets an identity projection for the full-screen FBO
+         // quad and never restores it. On a real cross-fade (2 pages active), the second page's
+         // pass would then render its background/items with that stale identity projection still
+         // active - collapsing page-space coordinates (0..pageWidth/Height) directly into clip
+         // space, so only the sliver within [-1,1] survives clipping instead of the whole page.
+         // This is the root cause of the "fade only covers a small rect" bug - re-establish the
+         // real page-space ortho projection every iteration, not just once before the loop.
+         Matrix pageOrtho = Matrix::ortho(0.0f, page->getWidth(), page->getHeight(), 0.0f, -1.0f, 1.0f);
+         static_cast<GLDevice*>(activeDevice)->setProjectionMatrix(pageOrtho);
+
          // page cross-fade render target - see class comment for why this port owns it
          // directly (sized to the current page) instead of pulling one from MainDrawable.
          if (!mFrameBuffer)
