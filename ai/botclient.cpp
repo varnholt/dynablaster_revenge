@@ -405,7 +405,12 @@ void BotClient::createMap(Constants::Dimension dimensions)
 void BotClient::readData()
 {
    QDataStream in(mSocket);
-   in.setVersion(QDataStream::Qt_4_8);
+   // must match shared/packet.cpp's serialize() and every other reader (server.cpp,
+   // bombermanclient.cpp) - Qt_4_8 here was a genuine pre-existing mismatch, dormant until now
+   // because bots never actually exchanged packets over the wire before this port made
+   // BotFactory real (see project memory) - the version gap silently reencodes some field types
+   // differently, desyncing the stream permanently after the first affected packet.
+   in.setVersion(QDataStream::Qt_4_6);
 
    while (packetAvailable(in))
    {
