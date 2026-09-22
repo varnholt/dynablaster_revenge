@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QObject>
+#include <QMap>
 #include <QSet>
 
 class MenuPage;
+class PlayerInfo;
 
 /// \brief page-navigation + real BombermanClient wiring for the menu system.
 ///
@@ -51,6 +53,10 @@ private slots:
    void updateCreateGamePlayerCounts();
    void updateCreateGameLevelPreview();
 
+   //! mirrors GameMenuInterfaceLounge::playerInfoMapUpdated() - repopulates the lounge's player
+   //! rows (nick/wins/rank/owner-icon) whenever the player set changes (join/leave/bot added).
+   void onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo);
+
 private:
    //! mirrors GameMenuInterfaceCreate::initializeCreateGameOptions()
    void initializeCreateGameOptions();
@@ -60,7 +66,12 @@ private:
 
    void setMonitorCreateGameOptionsEnabled(bool enabled);
 
+   //! mirrors GameMenuInterfaceLounge::playerInfoMapUpdated() - the actual row-population logic,
+   //! factored out so it can be called both on the live signal and once on first reaching LOUNGE.
+   void updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInfo);
+
    QList<QString> mSortedLevelNames;
    QList<QString> mSortedLevelDirNames;
    QSet<MenuPage*> mCreateGamePagesInitialized;
+   QMap<int, int> mPlayerIdToIndexMap;
 };

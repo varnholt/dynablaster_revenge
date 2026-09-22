@@ -9,13 +9,18 @@
 #include "menupage.h"
 #include "menupagecheckboxitem.h"
 #include "menupagecomboboxitem.h"
+#include "menupagelabelitem.h"
 #include "menupagepixmapitem.h"
 #include "menupagetextedit.h"
+
+#include "playerinfo.h"
 
 #include <QDebug>
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QTimer>
+
+#include <algorithm>
 
 namespace
 {
@@ -119,6 +124,16 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
    connect(BombermanClient::getInstance(), SIGNAL(createGameResponse(bool, int, bool)), this, SLOT(onCreateGameResponse(bool, int, bool)));
    connect(BombermanClient::getInstance(), SIGNAL(joinGameResponse(bool)), this, SLOT(onJoinGameResponse(bool)));
    connect(BombermanClient::getInstance(), SIGNAL(gameStarted()), this, SLOT(onGameStarted()));
+
+   // matches GameMenuInterfaceLounge's constructor connection - keeps the lounge's player rows
+   // (nick/wins/rank/owner-icon) live-updated whenever the player set changes (join/leave/bot
+   // added). Without this, bots that join after the lounge page is already showing never appear.
+   connect(
+      BombermanClient::getInstance(),
+      SIGNAL(playerInfoMapUpdated(QMap<int, PlayerInfo*>*)),
+      this,
+      SLOT(onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>*))
+   );
 }
 
 void MenuPageNavigator::onActionRequest(const QString& page, const QString& action)
@@ -305,6 +320,116 @@ void MenuPageNavigator::onPageChanged(const QString& page)
    {
       initializeCreateGameOptions();
       setMonitorCreateGameOptionsEnabled(true);
+   }
+   else if (page == kLounge)
+   {
+      // matches GameMenuWorkflow::pageChanged()'s LOUNGE branch calling
+      // mGameMenuInterfaceLounge->playerInfoMapUpdated(...) directly once, on top of the live
+      // signal connection - populates the rows immediately instead of waiting for the next
+      // join/leave to trigger a redraw.
+      updateLoungePlayerList(BombermanClient::getInstance()->getPlayerInfoMap());
+   }
+}
+
+void MenuPageNavigator::onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo)
+{
+   updateLoungePlayerList(playerInfo);
+}
+
+void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInfo)
+{
+   // matches GameMenuInterfaceLounge::playerInfoMapUpdated() - only touches the UI while the
+   // lounge page is actually the one showing (mirrors the original's own currentPage == page
+   // guard, since this can also fire while some other page, e.g. main menu after leaving, is up).
+   MenuPage* currentPage = Menu::getInstance()->getCurrentPage();
+   MenuPage* page = Menu::getInstance()->getPageByName(kLounge);
+
+   if (currentPage != page || !playerInfo)
+      return;
+
+   mPlayerIdToIndexMap.clear();
+
+   struct ScoreEntry
+   {
+      PlayerInfo* player;
+      int score;
+   };
+
+   QList<ScoreEntry> scoreList;
+   for (PlayerInfo* info : *playerInfo)
+      scoreList.append({info, static_cast<int>(info->getOverallStats().getWins())});
+
+   std::sort(
+      scoreList.begin(),
+      scoreList.end(),
+      [](const ScoreEntry& a, const ScoreEntry& b) { return a.score > b.score; }
+   );
+
+   // initially hide all rows
+   for (int i = 1; i <= 10; i++)
+   {
+      auto* nickItem = dynamic_cast<MenuPageLabelItem*>(currentPage->getPageItem(QString("label_p%1").arg(i)));
+      auto* activeBoxItem = currentPage->getPageItem(QString("p%1_box_active").arg(i));
+      auto* ownerItem = currentPage->getPageItem(QString("p%1_leader_icon").arg(i));
+      auto* playerItem = currentPage->getPageItem(QString("p%1_icon").arg(i));
+      auto* rankItem = currentPage->getPageItem(QString("label_rank_%1").arg(i));
+      auto* winsItem = dynamic_cast<MenuPageLabelItem*>(currentPage->getPageItem(QString("label_p%1_wins").arg(i)));
+
+      if (nickItem)
+         nickItem->setText("");
+      if (activeBoxItem)
+         activeBoxItem->setVisible(false);
+      if (ownerItem)
+         ownerItem->setVisible(false);
+      if (playerItem)
+         playerItem->setVisible(false);
+      if (rankItem)
+         rankItem->setVisible(false);
+      if (winsItem)
+         winsItem->setVisible(false);
+   }
+
+   int counter = 0;
+   for (const ScoreEntry& entry : scoreList)
+   {
+      counter++;
+
+      PlayerInfo* player = entry.player;
+      const int color = static_cast<int>(player->getColor());
+      GameInformation* gameInfo = BombermanClient::getInstance()->getCurrentGameInformation();
+      const bool owner = gameInfo && (player->getId() == gameInfo->getCreatorId());
+
+      auto* nickItem = dynamic_cast<MenuPageLabelItem*>(currentPage->getPageItem(QString("label_p%1").arg(counter)));
+      auto* winsItem = dynamic_cast<MenuPageLabelItem*>(currentPage->getPageItem(QString("label_p%1_wins").arg(counter)));
+      auto* rankItem = currentPage->getPageItem(QString("label_rank_%1").arg(counter));
+      auto* activeBoxItem = currentPage->getPageItem(QString("p%1_box_active").arg(counter));
+      auto* ownerItem = currentPage->getPageItem(QString("p%1_leader_icon").arg(counter));
+      auto* playerItem = currentPage->getPageItem(QString("p%1_icon").arg(color));
+
+      // note: the original also nudges playerItem's active-layer Y to align with activeBoxItem's
+      // top (playerItem->getCurrentLayer()->setY(...)) - PSDLayer::setY() isn't ported in this
+      // port (only getters + setOpacity exist), so that pixel-alignment tweak is skipped; the row
+      // still shows correctly, just not pixel-perfect vertically.
+
+      mPlayerIdToIndexMap.insert(player->getId(), counter);
+
+      if (winsItem)
+      {
+         winsItem->setText(QString("%1").arg(entry.score));
+         winsItem->setColor(QColor(counter <= 3 ? "#fbfe00" : "#3b7d9d"));
+         winsItem->setVisible(true);
+      }
+
+      if (nickItem)
+         nickItem->setText(player->getNick());
+      if (activeBoxItem)
+         activeBoxItem->setVisible(true);
+      if (ownerItem)
+         ownerItem->setVisible(owner);
+      if (playerItem)
+         playerItem->setVisible(true);
+      if (rankItem)
+         rankItem->setVisible(true);
    }
 }
 
