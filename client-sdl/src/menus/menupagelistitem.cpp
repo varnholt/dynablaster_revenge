@@ -496,6 +496,20 @@ void MenuPageListItem::drawText()
 */
 void MenuPageListItem::drawRows()
 {
+   // a plain (non-combobox) list - e.g. the lounge's chat table_lounge_main - never gets first/
+   // last/default row-background layers assigned (see MenuPage::processTableMain() vs. the
+   // combobox-only setLayerFirstElement()/setLayerLastElement()/setLayerDefaultElement() calls),
+   // so bindRowTexture() would bind "no texture" (texture id 0) for every row. Under the original
+   // desktop-GL renderer this was harmless - bindShader()/releaseShader() below never bound a
+   // shader either, so the fixed-function pipeline just passed through untouched, rendering
+   // nothing extra. GLES3 has no such fallback: without an explicit early-out here, this loop
+   // would draw a fully opaque, garbage-shaded quad over every row using whatever shader was left
+   // bound by the previous draw call (BitmapFont's SDF text shader) - a real, previously-dormant
+   // bug that only ever showed up once a plain (non-combobox) list actually got real content
+   // (this port's chat feature, added later than the already-working combobox dropdown).
+   if (!getLayerFirstElement() && !getLayerLastElement())
+      return;
+
    bindShader();
 
    // draw rows

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "hosthistory.h"
+
 #include <QObject>
 #include <QMap>
 #include <QSet>
@@ -57,7 +59,26 @@ private slots:
    //! rows (nick/wins/rank/owner-icon) whenever the player set changes (join/leave/bot added).
    void onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo);
 
+   //! mirrors GameMenuWorkflow::messageReceived() - appends a finished chat line to the lounge's
+   //! message table. Typing-in-progress notifications (finished == false) are intentionally
+   //! ignored here (see the "typing bubble" comment in updateLoungePlayerList()).
+   void onMessageReceived(int senderId, const QString& message, bool finished);
+
 private:
+   //! mirrors GameMenuInterfaceMain::deserializeLoginData() - repopulates the main menu's host
+   //! combobox (from HostHistory) and nick/host text fields (from GameSettings) whenever the
+   //! main menu becomes current, including once at startup (see the constructor).
+   void deserializeLoginData();
+
+   //! mirrors GameMenuInterfaceMain::updateLoginData() - captures whatever's currently typed in
+   //! the nick/host fields into GameSettings + HostHistory, called before leaving the main menu.
+   void updateLoginData();
+
+   //! mirrors GameMenuInterfaceCreate::deserializeCreateGameData() - repopulates the "game name"
+   //! text field from GameSettings (defaults to "Default" the very first time, then whatever was
+   //! last typed) whenever the GAME_CREATE page becomes current.
+   void deserializeCreateGameData();
+
    //! mirrors GameMenuInterfaceCreate::initializeCreateGameOptions()
    void initializeCreateGameOptions();
 
@@ -70,8 +91,13 @@ private:
    //! factored out so it can be called both on the live signal and once on first reaching LOUNGE.
    void updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInfo);
 
+   //! mirrors GameMenuInterfaceLounge::addLoungeMessage() - word-wraps and appends one chat line
+   //! (already formatted as "nick: text" by the server) to the lounge's message table.
+   void addLoungeMessage(int senderId, const QString& message);
+
    QList<QString> mSortedLevelNames;
    QList<QString> mSortedLevelDirNames;
    QSet<MenuPage*> mCreateGamePagesInitialized;
    QMap<int, int> mPlayerIdToIndexMap;
+   HostHistory mHostHistory;
 };

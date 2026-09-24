@@ -2,14 +2,18 @@
 
 #include "game/bombermanclient.h"
 #include "game/gamesettings.h"
+#include "game/wordwrap.h"
 #include "levels/level.h"
 #include "gameinformation.h"
 
+#include "hosthistory.h"
 #include "menu.h"
 #include "menupage.h"
 #include "menupagecheckboxitem.h"
 #include "menupagecomboboxitem.h"
+#include "menupageeditablecomboboxitem.h"
 #include "menupagelabelitem.h"
+#include "menupagelistitem.h"
 #include "menupagepixmapitem.h"
 #include "menupagetextedit.h"
 
@@ -58,6 +62,7 @@ const char* const kLoungeActionStart = "button_start_active";
 const char* const kLoungeActionBack = "button_leave_active";
 const char* const kLoungeActionAddPlayer = "button_addplayer_active";
 const char* const kLoungeLineeditSay = "lineedit_say";
+const char* const kLoungeTableMain = "table_lounge_main";
 
 const char* const kMainMenuActionSingle = "button_single_active";
 const char* const kMainMenuActionMulti = "button_multi_active";
@@ -134,12 +139,30 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
       this,
       SLOT(onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>*))
    );
+
+   // matches GameMenuWorkflow's own connection to BombermanClient::messageReceived - lounge chat.
+   connect(
+      BombermanClient::getInstance(),
+      SIGNAL(messageReceived(int, QString, bool)),
+      this,
+      SLOT(onMessageReceived(int, QString, bool))
+   );
+
+   // matches MenuWorkflow::initialize() calling deserializeLoginData() once at startup - the
+   // main menu is already the current page by construction time (no pageChanged() fires for it
+   // the very first time), so this can't wait for onPageChanged()'s own kMainMenu branch below.
+   deserializeLoginData();
 }
 
 void MenuPageNavigator::onActionRequest(const QString& page, const QString& action)
 {
    if (page == kMainMenu)
    {
+      // matches GameMenuWorkflow's "extract login data from menu" calls before SINGLE/MULTI/
+      // OPTIONS/ABOUT - captures whatever's currently in the nick/host fields into GameSettings
+      // + HostHistory. Harmless to run for every mainmenu action (facebook/pouet/home/quit too).
+      updateLoginData();
+
       if (action == kMainMenuActionOptions)
          emit pageChangeRequest(kOptionsVideo);
       else if (action == kMainMenuActionAbout)
@@ -248,9 +271,31 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          BombermanClient::getInstance()->leaveGameRequest();
          emit pageChangeRequest(kGameSelect);
       }
-      else if (action == kLoungeActionAddPlayer || action == kLoungeLineeditSay)
+      else if (action == kLoungeLineeditSay)
       {
-         // real headless-player / chat handling - not ported yet, not required to prove the
+         // matches GameMenuWorkflow::onActionRequest()'s LOUNGE_LINEEDIT_SAY branch - MenuPage::
+         // keyPressed() (menupage.cpp) only emits this actionRequest on Return/Enter, so this is
+         // the "finished typing, send it" path. Per-keystroke "still typing" notifications would
+         // need MenuPage::actionKeyPressed() wired up too - not done here, matches the existing
+         // "typing bubble never shown" simplification (see updateLoungePlayerList()).
+         MenuPage* loungePage = Menu::getInstance()->getPageByName(kLounge);
+         auto* sayItem = dynamic_cast<MenuPageTextEditItem*>(loungePage->getPageItem(kLoungeLineeditSay));
+
+         if (sayItem)
+         {
+            const QString message = sayItem->getText();
+
+            if (!message.trimmed().isEmpty())
+            {
+               // lounge chat always broadcasts to everyone (receiverId -1)
+               BombermanClient::getInstance()->sendMessage(message, true);
+               sayItem->setText("");
+            }
+         }
+      }
+      else if (action == kLoungeActionAddPlayer)
+      {
+         // real headless-player handling - not ported yet, not required to prove the
          // login->create->join->lounge chain works.
          logUnhandled(page, action);
       }
@@ -316,8 +361,17 @@ void MenuPageNavigator::onPageChanged(const QString& page)
    // (video/audio/controls/game options monitoring is still out of scope).
    setMonitorCreateGameOptionsEnabled(false);
 
-   if (page == kGameCreate)
+   if (page == kMainMenu)
    {
+      // matches GameMenuWorkflow::pageChanged()'s MAINMENU branch calling
+      // mGameMenuInterfaceMain->deserializeLoginData() - repopulates the host combobox/nick
+      // field from the saved settings + host history every time the main menu is (re-)shown,
+      // not just on first app startup.
+      deserializeLoginData();
+   }
+   else if (page == kGameCreate)
+   {
+      deserializeCreateGameData();
       initializeCreateGameOptions();
       setMonitorCreateGameOptionsEnabled(true);
    }
@@ -374,6 +428,11 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
       auto* playerItem = currentPage->getPageItem(QString("p%1_icon").arg(i));
       auto* rankItem = currentPage->getPageItem(QString("label_rank_%1").arg(i));
       auto* winsItem = dynamic_cast<MenuPageLabelItem*>(currentPage->getPageItem(QString("label_p%1_wins").arg(i)));
+      // matches GameMenuInterfaceLounge::initializeLoungeStates() - only ever shown by the
+      // typing-indicator feature (updatePlayerTyping()/removePlayerTyping()), which isn't ported
+      // (see the deferred chat handling below) - so it must be force-hidden here instead, or the
+      // PSD's raw default visibility leaks through unmodified for every row.
+      auto* typingBoxItem = currentPage->getPageItem(QString("p%1_box_type").arg(i));
 
       if (nickItem)
          nickItem->setText("");
@@ -387,6 +446,8 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
          rankItem->setVisible(false);
       if (winsItem)
          winsItem->setVisible(false);
+      if (typingBoxItem)
+         typingBoxItem->setVisible(false);
    }
 
    int counter = 0;
@@ -431,6 +492,135 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
       if (rankItem)
          rankItem->setVisible(true);
    }
+}
+
+void MenuPageNavigator::onMessageReceived(int senderId, const QString& message, bool finished)
+{
+   // matches GameMenuWorkflow::messageReceived() - typing-in-progress notifications
+   // (finished == false) would drive the "typing bubble" via updatePlayerTyping(), which isn't
+   // ported (see the comment in updateLoungePlayerList()); only finished messages are displayed.
+   if (finished)
+   {
+      addLoungeMessage(senderId, message);
+   }
+}
+
+void MenuPageNavigator::addLoungeMessage(int senderId, const QString& message)
+{
+   // matches GameMenuInterfaceLounge::addLoungeMessage() - only touches the UI while the lounge
+   // page is actually showing.
+   MenuPage* loungePage = Menu::getInstance()->getPageByName(kLounge);
+   MenuPage* currentPage = Menu::getInstance()->getCurrentPage();
+
+   if (loungePage != currentPage)
+      return;
+
+   auto* sayItem = dynamic_cast<MenuPageTextEditItem*>(loungePage->getPageItem(kLoungeLineeditSay));
+   auto* tableItem = dynamic_cast<MenuPageListItem*>(currentPage->getPageItem(kLoungeTableMain));
+
+   if (!sayItem || !tableItem)
+      return;
+
+   // the server already prepends "nick: " to the message (see Game::processPacket's MESSAGE
+   // case) - split it back out here only to avoid repeating the nick on wrapped continuation
+   // lines, matching the original's own formatting.
+   QString nick;
+   const int nickEnd = message.indexOf(": ");
+   if (nickEnd != -1)
+      nick = message.left(nickEnd);
+
+   const Constants::Color playerColor = BombermanClient::getInstance()->getColor(senderId);
+   QColor color = GameSettings::getInstance()->getStyleSettings()->getColor(playerColor);
+   const QColor outlineColor(0, 0, 0, 255);
+
+   if (playerColor == Constants::ColorBlack)
+      color = QColor(128, 128, 128, 255);
+
+   const QStringList lines = WordWrap::wrap(message, sayItem->getFieldWidth());
+
+   int i = 0;
+   for (const QString& line : lines)
+   {
+      QString text;
+      if (i == 0 || nick.isEmpty())
+         text = line;
+      else
+         text = QString("%1: %2").arg(nick).arg(line);
+
+      const QString trimmed = line.trimmed();
+      if (trimmed != QString("%1:").arg(nick) && !trimmed.isEmpty())
+         tableItem->appendItem(text, color, true, outlineColor);
+
+      ++i;
+   }
+
+   tableItem->scrollToPercentage(100.0f, false);
+}
+
+void MenuPageNavigator::deserializeLoginData()
+{
+   // matches GameMenuInterfaceMain::deserializeLoginData().
+   MenuPage* page = Menu::getInstance()->getPageByName(kMainMenu);
+
+   auto* hostCombo = dynamic_cast<MenuPageEditableComboBoxItem*>(page->getPageItem("editablecombobox_host_table"));
+   auto* nickItem = dynamic_cast<MenuPageTextEditItem*>(page->getPageItem("lineedit_nick"));
+
+   if (!hostCombo)
+      return;
+
+   hostCombo->clear();
+
+   const QString savedHost = GameSettings::getInstance()->getLoginSettings()->getHost();
+
+   const QStringList hosts = mHostHistory.load(savedHost);
+   for (const QString& host : hosts)
+      hostCombo->appendItem(host);
+
+   if (nickItem)
+      nickItem->setText(GameSettings::getInstance()->getLoginSettings()->getNick());
+
+   // there is no use to deserialize the saved host when there's already a valid value set up
+   // (the game has been started before and a valid hostname restored) - don't overwrite whatever
+   // the user already typed.
+   auto* hostTextEdit = hostCombo->getTextEditItem();
+   if (hostTextEdit && hostTextEdit->getText().isEmpty())
+      hostTextEdit->setText(savedHost);
+}
+
+void MenuPageNavigator::updateLoginData()
+{
+   // matches GameMenuInterfaceMain::updateLoginData().
+   MenuPage* page = Menu::getInstance()->getPageByName(kMainMenu);
+
+   auto* hostCombo = dynamic_cast<MenuPageEditableComboBoxItem*>(page->getPageItem("editablecombobox_host_table"));
+   auto* nickItem = dynamic_cast<MenuPageTextEditItem*>(page->getPageItem("lineedit_nick"));
+
+   if (!hostCombo || !nickItem)
+      return;
+
+   auto* hostTextEdit = hostCombo->getTextEditItem();
+   if (!hostTextEdit)
+      return;
+
+   const QString host = hostTextEdit->getText();
+   const QString nick = nickItem->getText();
+
+   GameSettings::getInstance()->getLoginSettings()->setHost(host);
+   GameSettings::getInstance()->getLoginSettings()->setNick(nick);
+
+   mHostHistory.add(host);
+}
+
+void MenuPageNavigator::deserializeCreateGameData()
+{
+   // matches GameMenuInterfaceCreate::deserializeCreateGameData() - reads from
+   // getCreateGameSettingsSingle() unconditionally, unlike initializeCreateGameOptions() below
+   // (which does branch on isSinglePlayer()) - this is the original's own behavior, not a typo
+   // introduced by the port, so left as-is rather than "fixed" to branch.
+   MenuPage* page = Menu::getInstance()->getPageByName(kGameCreate);
+   auto* gameNameItem = dynamic_cast<MenuPageTextEditItem*>(page->getPageItem("lineedit_name"));
+
+   gameNameItem->setText(GameSettings::getInstance()->getCreateGameSettingsSingle()->getGameName());
 }
 
 void MenuPageNavigator::initializeCreateGameOptions()
