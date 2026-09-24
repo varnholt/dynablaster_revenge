@@ -14,6 +14,7 @@
 #include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
+#include "game/soundmanager.h"
 
 #include "menus/bitmapfont.h"
 #include "menus/fontmap.h"
@@ -278,6 +279,10 @@ int main(int argc, char** argv)
    QObject::connect(&bombermanClient, &BombermanClient::showMainMenu, [&]() {
       QMetaObject::invokeMethod(&menuDrawable, "pageChangeRequest", Q_ARG(QString, QString("data/menus/mainmenu.psd")));
    });
+
+   // matches BombermanClientGui's own startup sequence (SoundManager::getInstance()->
+   // startPlaylist(), called once real init is done) - background music.
+   SoundManager::getInstance()->startPlaylist();
 
    bool running = true;
    QObject::connect(&navigator, &MenuPageNavigator::quitRequest, [&running]() { running = false; });

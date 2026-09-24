@@ -2,6 +2,11 @@
 
 #include <SDL3/SDL.h>
 
+#define MINIMP3_IMPLEMENTATION
+#include "minimp3_ex.h"
+
+#include <algorithm>
+
 SoundManager* SoundManager::sInstance = nullptr;
 
 SoundManager::SoundManager() : QObject(nullptr)
@@ -25,9 +30,16 @@ SoundManager::SoundManager() : QObject(nullptr)
       channel = SDL_CreateAudioStream(nullptr, nullptr);
 
    SDL_BindAudioStreams(mDevice, mChannels.data(), static_cast<int>(mChannels.size()));
+
+   mMusicStream = SDL_CreateAudioStream(nullptr, nullptr);
+   SDL_BindAudioStream(mDevice, mMusicStream);
+
    SDL_ResumeAudioDevice(mDevice);
 
    initializeSamples();
+
+   connect(&mMusicTimer, &QTimer::timeout, this, &SoundManager::updateMusic);
+   mMusicTimer.start(50);
 }
 
 SoundManager::~SoundManager()
@@ -39,6 +51,12 @@ SoundManager::~SoundManager()
          SDL_UnbindAudioStream(channel);
          SDL_DestroyAudioStream(channel);
       }
+   }
+
+   if (mMusicStream)
+   {
+      SDL_UnbindAudioStream(mMusicStream);
+      SDL_DestroyAudioStream(mMusicStream);
    }
 
    for (auto& sample : mSamples)
@@ -115,14 +133,108 @@ void SoundManager::play(SampleId id)
    SDL_PutAudioStreamData(channel, sample.buffer, static_cast<int>(sample.length));
 }
 
-void SoundManager::fadeOut(float /*fadeOutTime*/)
+void SoundManager::fadeOut(float fadeOutTime)
 {
-   // music/playlist system not ported yet - see class comment.
+   if (mFading || !mMusicStream)
+      return;
+
+   mFading = true;
+   mFadeStartVolume = SDL_GetAudioStreamGain(mMusicStream);
+   mFadeDurationMs = fadeOutTime;
+   mFadeElapsedMs = 0.0f;
 }
 
-void SoundManager::restartPlayListAfterFadeOut(int /*delay*/)
+void SoundManager::restartPlayListAfterFadeOut(int delay)
 {
-   // music/playlist system not ported yet - see class comment.
+   if (mMusicStream)
+      SDL_ClearAudioStream(mMusicStream);
+
+   QTimer::singleShot(
+      delay,
+      this,
+      [this]()
+      {
+         SDL_SetAudioStreamGain(mMusicStream, 1.0f);
+         startPlaylist();
+      }
+   );
+}
+
+void SoundManager::startPlaylist()
+{
+   if (mPlaylist.empty())
+   {
+      for (const auto& entry : std::filesystem::directory_iterator("data/music"))
+      {
+         if (entry.path().extension() == ".mp3")
+            mPlaylist.push_back(entry.path());
+      }
+
+      std::sort(mPlaylist.begin(), mPlaylist.end());
+   }
+
+   if (mPlaylist.empty())
+   {
+      qWarning("SoundManager: no music found in data/music");
+      return;
+   }
+
+   mTrackIndex = 0;
+   playTrack(mTrackIndex);
+}
+
+void SoundManager::playTrack(std::size_t index)
+{
+   if (!mMusicStream || mPlaylist.empty())
+      return;
+
+   const std::string path = mPlaylist[index % mPlaylist.size()].string();
+
+   mp3dec_t decoder;
+   mp3dec_file_info_t info{};
+   if (mp3dec_load(&decoder, path.c_str(), &info, nullptr, nullptr) != 0 || !info.buffer)
+   {
+      qWarning("SoundManager: failed to decode %s", path.c_str());
+      return;
+   }
+
+   SDL_AudioSpec spec{};
+   spec.format = SDL_AUDIO_S16;
+   spec.channels = info.channels;
+   spec.freq = info.hz;
+
+   SDL_ClearAudioStream(mMusicStream);
+   SDL_SetAudioStreamFormat(mMusicStream, &spec, nullptr);
+   SDL_PutAudioStreamData(mMusicStream, info.buffer, static_cast<int>(info.samples * sizeof(mp3d_sample_t)));
+
+   free(info.buffer);
+}
+
+void SoundManager::updateMusic()
+{
+   if (!mMusicStream)
+      return;
+
+   if (mFading)
+   {
+      mFadeElapsedMs += 50.0f;
+      const float factor = (std::max)(1.0f - mFadeElapsedMs / mFadeDurationMs, 0.0f);
+      SDL_SetAudioStreamGain(mMusicStream, factor * mFadeStartVolume);
+
+      if (factor <= 0.0f)
+      {
+         SDL_ClearAudioStream(mMusicStream);
+         mFading = false;
+      }
+
+      return;
+   }
+
+   if (!mPlaylist.empty() && SDL_GetAudioStreamQueued(mMusicStream) == 0)
+   {
+      mTrackIndex = (mTrackIndex + 1) % mPlaylist.size();
+      playTrack(mTrackIndex);
+   }
 }
 
 void SoundManager::playSoundKilled()

@@ -40,6 +40,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3)
 
+# header-only MP3 decoder, used for music playback in SoundManager.
+FetchContent_Declare(
+    minimp3
+    GIT_REPOSITORY https://github.com/lieff/minimp3.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(minimp3)
+
 file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     CONFIGURE_DEPENDS
     src/tools/*.cpp src/tools/*.h
@@ -346,6 +355,7 @@ target_include_directories(dynablaster_core PUBLIC
     ../shared
     ../server/src
     ../ai
+    ${minimp3_SOURCE_DIR}
 )
 target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui Qt6::Network)
 

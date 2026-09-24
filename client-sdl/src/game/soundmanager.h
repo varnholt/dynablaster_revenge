@@ -1,17 +1,11 @@
 #pragma once
 
-// SDL3-backed sound effect manager - replaces the original's hand-rolled per-platform mixer
-// (client/src/soundsystem/: raw ALSA on Linux, raw Win32 waveOut on Windows) with SDL3's own
-// audio API, already a free dependency of this port. Public interface unchanged (same methods
-// BombermanClient/GameDrawable already call as fire-and-forget sfx triggers).
-//
-// Scope: sound EFFECTS only (the 19 short one-shot samples every play*() method below maps to).
-// Background music/playlist (client/src/sound/playlist.cpp, 15 mp3 tracks) is a separate, larger
-// piece of work - not attempted here - so fadeOut()/restartPlayListAfterFadeOut() (both
-// music-only in the original) stay no-ops for now.
+// SDL3-backed sound manager - replaces the original's hand-rolled per-platform mixer.
+// Music decoding uses minimp3 (see CMakeLists.txt).
 
 // Qt
 #include <QObject>
+#include <QTimer>
 
 // shared
 #include "constants.h"
@@ -20,6 +14,8 @@
 #include <SDL3/SDL_audio.h>
 
 #include <array>
+#include <filesystem>
+#include <vector>
 
 class SoundManager : public QObject
 {
@@ -30,6 +26,8 @@ public:
 
    void fadeOut(float fadeOutTime);
    void restartPlayListAfterFadeOut(int delay);
+
+   void startPlaylist();
 
 public slots:
 
@@ -48,6 +46,10 @@ public slots:
    void playSoundBoxShake();
    void playSoundExtraRevealed();
    void playSkullSound(Constants::SkullType skullType);
+
+private slots:
+   // ticks on mMusicTimer; auto-advances finished tracks and drives the fade-out ramp.
+   void updateMusic();
 
 protected:
    SoundManager();
@@ -93,12 +95,25 @@ protected:
    // trade-off any simple fixed-channel sfx mixer makes.
    void play(SampleId id);
 
+   // decodes the whole track up front via minimp3 and queues it in one go.
+   void playTrack(std::size_t index);
+
    static constexpr int channelCount = 8;
 
    SDL_AudioDeviceID mDevice = 0;
    std::array<SDL_AudioStream*, channelCount> mChannels{};
    int mNextChannel = 0;
    std::array<Sample, SampleCount> mSamples{};
+
+   SDL_AudioStream* mMusicStream = nullptr;
+   std::vector<std::filesystem::path> mPlaylist;
+   std::size_t mTrackIndex = 0;
+   QTimer mMusicTimer;
+
+   bool mFading = false;
+   float mFadeStartVolume = 1.0f;
+   float mFadeDurationMs = 1000.0f;
+   float mFadeElapsedMs = 0.0f;
 
    static SoundManager* sInstance;
 };
