@@ -11,6 +11,7 @@
 
 #include "sdlglobaltime.h"
 
+#include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
 
@@ -65,7 +66,11 @@ int mapEditingKey(SDL_Keycode key)
 /// \brief maps the movement/bomb/zoom/start keys BombermanClient::keyPressed() checks against
 /// GameSettings::ControllerSettings' default keymap (client/src/game/gamesettings.cpp -
 /// initializeDefaultMap(): Up/Down/Left/Right arrows, Space for bomb, [ ] for zoom, F10 for
-/// start). Separate from mapEditingKey() below (menu text-field navigation) - only one of
+/// start), plus Return/Enter/Escape - not part of that remappable keymap, but hardcoded special
+/// cases BombermanClient::processKeyPressed() checks directly (client/src/game/bombermanclient.cpp:
+/// Return/Enter toggles in-game chat, Escape closes chat if open or otherwise leaves the game).
+/// Both were missing here entirely, so neither ever reached BombermanClient while in-game.
+/// Separate from mapEditingKey() below (menu text-field navigation) - only one of
 /// menuDrawable/gameDrawable is visible and receives key events at a time, so reusing the same
 /// Qt::Key values for both is fine.
 int mapGameKey(SDL_Keycode key)
@@ -88,6 +93,12 @@ int mapGameKey(SDL_Keycode key)
          return Qt::Key_BracketRight;
       case SDLK_F10:
          return Qt::Key_F10;
+      case SDLK_RETURN:
+         return Qt::Key_Return;
+      case SDLK_KP_ENTER:
+         return Qt::Key_Enter;
+      case SDLK_ESCAPE:
+         return Qt::Key_Escape;
       default:
          return 0;
    }
@@ -208,6 +219,13 @@ int main(int argc, char** argv)
    gameDrawable.initializeGL();
    gameDrawable.setVisible(false);
 
+   // pre-round countdown HUD overlay (client/src/game/countdowndrawable.cpp) - drawn on top of
+   // GameDrawable each frame while a countdown is in progress, matching GameView's own draw
+   // order (CountdownDrawable is constructed/registered last in the original's GameView, so it
+   // renders after GameDrawable's own main scene).
+   CountdownDrawable countdownDrawable(&device);
+   countdownDrawable.initializeGL();
+
    // client<->game wiring - mirrors client/src/game/bombermanclientgui.cpp's
    // BombermanClientGui::initConnections() (only the connections relevant to what's actually
    // ported here; chat/stats/rounds/music-player/joystick wiring is still out of scope).
@@ -233,6 +251,7 @@ int main(int argc, char** argv)
    QObject::connect(&bombermanClient, SIGNAL(detonation(int,int,int,int,int,int,float)), &gameDrawable, SLOT(addDetonation(int,int,int,int,int,int,float)));
    QObject::connect(&bombermanClient, SIGNAL(playerInfected(int,Constants::SkullType,int,int,int)), &gameDrawable, SLOT(playerInfected(int,Constants::SkullType,int,int,int)));
    QObject::connect(&bombermanClient, SIGNAL(playerId(int)), &gameDrawable, SLOT(setPlayerId(int)));
+   QObject::connect(&bombermanClient, SIGNAL(countdown(int)), &countdownDrawable, SLOT(countdown(int)));
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
    // deferred GameStatsDrawable/GameMessagingDrawable/GameWinDrawable/MusicPlayerDrawable/
@@ -246,6 +265,7 @@ int main(int argc, char** argv)
    });
    auto showMenuAgain = [&]() {
       gameDrawable.setVisible(false);
+      countdownDrawable.setVisible(false);
       menuDrawable.setVisible(true);
       logoDrawable.setVisible(true);
       menuCursor.setVisible(true);
@@ -272,9 +292,23 @@ int main(int argc, char** argv)
             running = false;
          }
 
-         if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+         // Alt+Enter toggles fullscreen - matches the original's own global QShortcut
+         // (client/src/game/bombermanclientgui.cpp: mShortcutFullscreen->setKey(Qt::ALT +
+         // Qt::Key_Return)), works regardless of menu/game state, same as there.
+         if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & SDL_KMOD_ALT))
          {
-            running = false;
+            const bool isFullscreen = (SDL_GetWindowFlags(context.window()) & SDL_WINDOW_FULLSCREEN) != 0;
+            SDL_SetWindowFullscreen(context.window(), !isFullscreen);
+            continue;  // don't also forward the plain Return key to the menu/game below
+         }
+
+         // nothing previously re-queried the window's actual pixel size or re-ran
+         // device.resize() after startup, so a fullscreen toggle (or any window resize) kept
+         // rendering into the old, smaller viewport in a corner of the now-larger window.
+         if (event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
+         {
+            context.updateSize();
+            device.resize(context.width(), context.height());
          }
 
          // menu items live in 1920x1080 page space (see mainmenu.psd/background.psd), not window
@@ -392,6 +426,13 @@ int main(int argc, char** argv)
          // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
          gameDrawable.animate(timeMs * 0.0625f);
          gameDrawable.paintGL();
+      }
+
+      if (countdownDrawable.isVisible())
+      {
+         // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
+         countdownDrawable.animate(timeMs * 0.0625f);
+         countdownDrawable.paintGL();
       }
 
       context.swap();

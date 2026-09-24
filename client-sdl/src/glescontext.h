@@ -27,6 +27,12 @@ public:
    /// \brief presents the back buffer.
    void swap() const;
 
+   /// \brief re-queries the window's actual drawable pixel size - call after
+   /// SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED (e.g. fullscreen toggle, user resize) so width()/height()
+   /// stay correct; nothing does this automatically otherwise, since they're only set once in
+   /// init().
+   void updateSize();
+
    int width() const
    {
       return _width;

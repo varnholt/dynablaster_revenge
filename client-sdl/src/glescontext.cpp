@@ -55,6 +55,11 @@ void GlesContext::swap() const
    SDL_GL_SwapWindow(_window);
 }
 
+void GlesContext::updateSize()
+{
+   SDL_GetWindowSizeInPixels(_window, &_width, &_height);
+}
+
 GlesContext::~GlesContext()
 {
    if (_context != nullptr)
