@@ -80,8 +80,12 @@ QList<int> GameStatsPacket::getPlayerIds() const
 */
 void GameStatsPacket::enqueue(QDataStream & out)
 {
-   // write size
-   out << mOverallStats.size();
+   // write size - explicit qint32 cast: QList::size() returns qsizetype (8 bytes) in Qt6, but
+   // dequeue() below reads it back as a plain int (4 bytes) to match this wire format's
+   // QDataStream::Qt_4_6 version. Without the cast, the writer emits 8 bytes here while the
+   // reader only consumes 4, permanently desyncing the packet stream for every packet after this
+   // one - the exact "unknown packet received" flood/freeze bug.
+   out << (qint32)mOverallStats.size();
 
    // write list of ids
    foreach(int id, mPlayerIds)
