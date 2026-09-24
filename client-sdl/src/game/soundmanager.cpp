@@ -1,5 +1,7 @@
 #include "soundmanager.h"
 
+#include "gamesettings.h"
+
 #include <SDL3/SDL.h>
 
 #define MINIMP3_IMPLEMENTATION
@@ -37,6 +39,10 @@ SoundManager::SoundManager() : QObject(nullptr)
    SDL_ResumeAudioDevice(mDevice);
 
    initializeSamples();
+
+   mVolumeMusic = GameSettings::getInstance()->getAudioSettings()->getVolumeMusic();
+   mVolumeSfx = GameSettings::getInstance()->getAudioSettings()->getVolumeSfx();
+   SDL_SetAudioStreamGain(mMusicStream, mVolumeMusic);
 
    connect(&mMusicTimer, &QTimer::timeout, this, &SoundManager::updateMusic);
    mMusicTimer.start(50);
@@ -98,6 +104,8 @@ void SoundManager::initializeSamples()
    loadSample(SampleExtraMushroom, "data/sfx/extra_mushroom.wav");
    loadSample(SampleExtraInvisible, "data/sfx/extra_invisible.wav");
    loadSample(SampleExtraInvulnerable, "data/sfx/extra_invulnerable.wav");
+   loadSample(SampleMouseOver, "data/sfx/mouse_over.wav");
+   loadSample(SampleMouseClick, "data/sfx/mouse_click.wav");
 }
 
 void SoundManager::loadSample(SampleId id, const char* filename)
@@ -129,6 +137,7 @@ void SoundManager::play(SampleId id)
    mNextChannel = (mNextChannel + 1) % channelCount;
 
    SDL_ClearAudioStream(channel);
+   SDL_SetAudioStreamGain(channel, mVolumeSfx);
    SDL_SetAudioStreamFormat(channel, &sample.spec, nullptr);
    SDL_PutAudioStreamData(channel, sample.buffer, static_cast<int>(sample.length));
 }
@@ -154,10 +163,33 @@ void SoundManager::restartPlayListAfterFadeOut(int delay)
       this,
       [this]()
       {
-         SDL_SetAudioStreamGain(mMusicStream, 1.0f);
+         SDL_SetAudioStreamGain(mMusicStream, mVolumeMusic);
          startPlaylist();
       }
    );
+}
+
+float SoundManager::getVolumeMusic() const
+{
+   return mVolumeMusic;
+}
+
+float SoundManager::getVolumeSfx() const
+{
+   return mVolumeSfx;
+}
+
+void SoundManager::setVolumeMusic(float volume)
+{
+   mVolumeMusic = volume;
+
+   if (mMusicStream && !mFading)
+      SDL_SetAudioStreamGain(mMusicStream, mVolumeMusic);
+}
+
+void SoundManager::setVolumeSfx(float volume)
+{
+   mVolumeSfx = volume;
 }
 
 void SoundManager::startPlaylist()
@@ -331,4 +363,23 @@ void SoundManager::playSkullSound(Constants::SkullType skullType)
       default:
          break;
    }
+}
+
+void SoundManager::playSoundMouseOver(const QString& /*page*/, const QString& item)
+{
+   if (item.startsWith("button"))
+      play(SampleMouseOver);
+}
+
+void SoundManager::playSoundMouseClick(const QString& /*page*/)
+{
+   if (mMouseClickInitialized)
+      play(SampleMouseClick);
+   else
+      mMouseClickInitialized = true;
+}
+
+void SoundManager::playSoundTick()
+{
+   play(SampleMouseOver);
 }

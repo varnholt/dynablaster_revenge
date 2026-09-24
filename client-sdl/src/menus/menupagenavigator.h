@@ -59,6 +59,11 @@ private slots:
    //! rows (nick/wins/rank/owner-icon) whenever the player set changes (join/leave/bot added).
    void onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo);
 
+   //! mirrors GameMenuInterfaceOptions::applyVolumeMusic()/applyVolumeSfx() - forwards a dragged
+   //! slider's value straight to SoundManager (live volume change, not yet persisted).
+   void applyVolumeMusic(float volume);
+   void applyVolumeSfx(float volume);
+
    //! mirrors GameMenuWorkflow::messageReceived() - appends a finished chat line to the lounge's
    //! message table. Typing-in-progress notifications (finished == false) are intentionally
    //! ignored here (see the "typing bubble" comment in updateLoungePlayerList()).
@@ -86,6 +91,18 @@ private:
    void createGame();
 
    void setMonitorCreateGameOptionsEnabled(bool enabled);
+
+   //! mirrors GameMenuInterfaceOptions::deserializeAudioSettings() - seeds the audio options
+   //! page's sliders from SoundManager's current volume, called whenever OPTIONS_AUDIO becomes
+   //! current.
+   void deserializeAudioSettings();
+
+   //! mirrors GameMenuInterfaceOptions::setMonitorAudioSettingsEnabled().
+   void setMonitorAudioSettingsEnabled(bool enabled);
+
+   //! mirrors GameMenuInterfaceOptions::restoreAudioDefaults() - resets GameSettings' audio
+   //! volumes, re-applies them to SoundManager, and re-seeds the sliders' visual positions.
+   void restoreAudioDefaults();
 
    //! mirrors GameMenuInterfaceLounge::playerInfoMapUpdated() - the actual row-population logic,
    //! factored out so it can be called both on the live signal and once on first reaching LOUNGE.

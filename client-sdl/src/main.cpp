@@ -211,6 +211,22 @@ int main(int argc, char** argv)
    // the page actually becomes current (see MenuPageNavigator::onPageChanged()).
    QObject::connect(&menuDrawable, SIGNAL(pageChanged(QString)), &navigator, SLOT(onPageChanged(QString)));
 
+   // menu hover/click sound feedback - matches bombermanclientgui.cpp's own wiring.
+   QObject::connect(
+      menuDrawable.getMenu(),
+      SIGNAL(layerFocussed(QString, QString)),
+      SoundManager::getInstance(),
+      SLOT(playSoundMouseOver(QString, QString)),
+      Qt::QueuedConnection
+   );
+   QObject::connect(
+      &menuDrawable,
+      SIGNAL(pageChanged(QString)),
+      SoundManager::getInstance(),
+      SLOT(playSoundMouseClick(QString)),
+      Qt::QueuedConnection
+   );
+
    // GameDrawable (Phase 5, see project memory) - the real in-game rendering (map/players/bombs/
    // extras). Starts hidden; BombermanClient::showGame()/showMenu() (see below) toggle it on/off
    // against the menu, matching client/src/game/bombermanview.cpp's GameView::showGame()/

@@ -2,6 +2,7 @@
 
 #include "game/bombermanclient.h"
 #include "game/gamesettings.h"
+#include "game/soundmanager.h"
 #include "game/wordwrap.h"
 #include "levels/level.h"
 #include "gameinformation.h"
@@ -15,6 +16,7 @@
 #include "menupagelabelitem.h"
 #include "menupagelistitem.h"
 #include "menupagepixmapitem.h"
+#include "menupageslideritem.h"
 #include "menupagetextedit.h"
 
 #include "playerinfo.h"
@@ -54,6 +56,9 @@ const char* const kOptionsActionVideo = "button_video_active";
 const char* const kOptionsActionAudio = "button_audio_active";
 const char* const kOptionsActionControls = "button_controls_active";
 const char* const kOptionsActionGame = "button_game_active";
+const char* const kOptionsAudioActionRestoreDefaults = "button_default_active";
+const char* const kOptionsAudioSliderMusic = "slider_music";
+const char* const kOptionsAudioSliderSfx = "slider_game";
 
 const char* const kAbout = "data/menus/about.psd";
 const char* const kAboutActionBack = "button_back_active";
@@ -237,9 +242,28 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
    {
       if (action == kOptionsActionOk || action == kOptionsActionCancel)
       {
-         // the real workflow also stores/restores option values here (via
-         // mGameMenuInterfaceOptions) - not ported, since there's no persisted GameSettings
-         // backing these controls in this port yet. Just navigates back.
+         // audio: matches GameMenuInterfaceOptions::storeOptions()/restoreAudioOptions() - OK
+         // persists the (already live-applied) SoundManager volume to disk, Cancel reverts
+         // SoundManager back to whatever was last persisted, discarding an unsaved drag.
+         // video/controls/game options aren't backed by live-applied state yet, so they stay
+         // a plain navigate-back.
+         if (page == kOptionsAudio)
+         {
+            GameSettings::AudioSettings* audioSettings = GameSettings::getInstance()->getAudioSettings();
+
+            if (action == kOptionsActionOk)
+            {
+               audioSettings->setVolumeMusic(SoundManager::getInstance()->getVolumeMusic());
+               audioSettings->setVolumeSfx(SoundManager::getInstance()->getVolumeSfx());
+               audioSettings->serialize();
+            }
+            else
+            {
+               SoundManager::getInstance()->setVolumeMusic(audioSettings->getVolumeMusic());
+               SoundManager::getInstance()->setVolumeSfx(audioSettings->getVolumeSfx());
+            }
+         }
+
          emit pageChangeRequest(kMainMenu);
       }
       else if (action == kOptionsActionVideo)
@@ -250,6 +274,8 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          emit pageChangeRequest(kOptionsControls);
       else if (action == kOptionsActionGame)
          emit pageChangeRequest(kOptionsGame);
+      else if (page == kOptionsAudio && action == kOptionsAudioActionRestoreDefaults)
+         restoreAudioDefaults();
       else
          logUnhandled(page, action);
    }
@@ -357,9 +383,9 @@ void MenuPageNavigator::onGameStarted()
 void MenuPageNavigator::onPageChanged(const QString& page)
 {
    // matches GameMenuWorkflow::pageChanged(): monitoring is disabled unconditionally first, then
-   // re-enabled only for the page actually being shown - only GAME_CREATE's monitoring is ported
-   // (video/audio/controls/game options monitoring is still out of scope).
+   // re-enabled only for the page actually being shown.
    setMonitorCreateGameOptionsEnabled(false);
+   setMonitorAudioSettingsEnabled(false);
 
    if (page == kMainMenu)
    {
@@ -382,6 +408,11 @@ void MenuPageNavigator::onPageChanged(const QString& page)
       // signal connection - populates the rows immediately instead of waiting for the next
       // join/leave to trigger a redraw.
       updateLoungePlayerList(BombermanClient::getInstance()->getPlayerInfoMap());
+   }
+   else if (page == kOptionsAudio)
+   {
+      deserializeAudioSettings();
+      setMonitorAudioSettingsEnabled(true);
    }
 }
 
@@ -743,6 +774,66 @@ void MenuPageNavigator::setMonitorCreateGameOptionsEnabled(bool enabled)
       disconnect(levelCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGameLevelPreview()));
       disconnect(levelCombo, SIGNAL(elementFocussed(int)), this, SLOT(updateCreateGameLevelPreview()));
    }
+}
+
+void MenuPageNavigator::deserializeAudioSettings()
+{
+   // matches GameMenuInterfaceOptions::deserializeAudioSettings() - slider positions come from
+   // SoundManager's live volume, not GameSettings directly (SoundManager itself was seeded from
+   // GameSettings at startup).
+   MenuPage* page = Menu::getInstance()->getPageByName(kOptionsAudio);
+
+   auto* musicSlider = dynamic_cast<MenuPageSliderItem*>(page->getPageItem(kOptionsAudioSliderMusic));
+   auto* sfxSlider = dynamic_cast<MenuPageSliderItem*>(page->getPageItem(kOptionsAudioSliderSfx));
+
+   musicSlider->setValue(SoundManager::getInstance()->getVolumeMusic());
+   sfxSlider->setValue(SoundManager::getInstance()->getVolumeSfx());
+}
+
+void MenuPageNavigator::setMonitorAudioSettingsEnabled(bool enabled)
+{
+   // matches GameMenuInterfaceOptions::setMonitorAudioSettingsEnabled() - only the sfx slider
+   // gets a tick sound (audible feedback of the new sfx volume itself); the music slider doesn't.
+   MenuPage* page = Menu::getInstance()->getPageByName(kOptionsAudio);
+
+   auto* musicSlider = dynamic_cast<MenuPageSliderItem*>(page->getPageItem(kOptionsAudioSliderMusic));
+   auto* sfxSlider = dynamic_cast<MenuPageSliderItem*>(page->getPageItem(kOptionsAudioSliderSfx));
+
+   if (enabled)
+   {
+      connect(musicSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeMusic(float)));
+      connect(sfxSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeSfx(float)));
+      connect(sfxSlider, SIGNAL(valueChanged(float)), SoundManager::getInstance(), SLOT(playSoundTick()));
+   }
+   else
+   {
+      disconnect(musicSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeMusic(float)));
+      disconnect(sfxSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeSfx(float)));
+      disconnect(sfxSlider, SIGNAL(valueChanged(float)), SoundManager::getInstance(), SLOT(playSoundTick()));
+   }
+}
+
+void MenuPageNavigator::applyVolumeMusic(float volume)
+{
+   SoundManager::getInstance()->setVolumeMusic(volume);
+}
+
+void MenuPageNavigator::applyVolumeSfx(float volume)
+{
+   SoundManager::getInstance()->setVolumeSfx(volume);
+}
+
+void MenuPageNavigator::restoreAudioDefaults()
+{
+   // matches GameMenuInterfaceOptions::restoreAudioDefaults(): reset GameSettings, push the
+   // (now-default) values into SoundManager, then re-seed the sliders' visual positions.
+   GameSettings::AudioSettings* audioSettings = GameSettings::getInstance()->getAudioSettings();
+   audioSettings->restoreDefaults();
+
+   SoundManager::getInstance()->setVolumeMusic(audioSettings->getVolumeMusic());
+   SoundManager::getInstance()->setVolumeSfx(audioSettings->getVolumeSfx());
+
+   deserializeAudioSettings();
 }
 
 void MenuPageNavigator::createGame()

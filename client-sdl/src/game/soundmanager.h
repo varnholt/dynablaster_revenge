@@ -5,6 +5,7 @@
 
 // Qt
 #include <QObject>
+#include <QString>
 #include <QTimer>
 
 // shared
@@ -29,6 +30,11 @@ public:
 
    void startPlaylist();
 
+   float getVolumeMusic() const;
+   float getVolumeSfx() const;
+   void setVolumeMusic(float volume);
+   void setVolumeSfx(float volume);
+
 public slots:
 
    void playSoundKilled();
@@ -46,6 +52,10 @@ public slots:
    void playSoundBoxShake();
    void playSoundExtraRevealed();
    void playSkullSound(Constants::SkullType skullType);
+
+   void playSoundMouseOver(const QString& page, const QString& item);
+   void playSoundMouseClick(const QString& page);
+   void playSoundTick();
 
 private slots:
    // ticks on mMusicTimer; auto-advances finished tracks and drives the fade-out ramp.
@@ -76,6 +86,8 @@ protected:
       SampleExtraMushroom,
       SampleExtraInvisible,
       SampleExtraInvulnerable,
+      SampleMouseOver,
+      SampleMouseClick,
       SampleCount
    };
 
@@ -104,6 +116,12 @@ protected:
    std::array<SDL_AudioStream*, channelCount> mChannels{};
    int mNextChannel = 0;
    std::array<Sample, SampleCount> mSamples{};
+
+   // skips the click sound on the very first pageChanged (initial page load, not a real click).
+   bool mMouseClickInitialized = false;
+
+   float mVolumeMusic = 1.0f;
+   float mVolumeSfx = 1.0f;
 
    SDL_AudioStream* mMusicStream = nullptr;
    std::vector<std::filesystem::path> mPlaylist;
