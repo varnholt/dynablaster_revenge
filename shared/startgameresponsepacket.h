@@ -39,7 +39,7 @@ class StartGameResponsePacket : public Packet
    private:
 
       //! game id
-      qint32 mId;
+      int32_t mId;
 
       //! game was started
       bool mStarted;

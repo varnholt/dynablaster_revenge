@@ -15,8 +15,8 @@ public:
    //! write constructor
    JoinGameResponsePacket(
       bool success,
-      qint32 gameid,
-      qint32 id,
+      int32_t gameid,
+      int32_t id,
       const QString& nick,
       Constants::Color color
    );
@@ -37,16 +37,16 @@ public:
    void dequeue(QDataStream&);
 
    //! setter for the game id
-   void setGameId(qint32 id);
+   void setGameId(int32_t id);
 
    //! getter for the game id
-   qint32 getGameId() const;
+   int32_t getGameId() const;
 
    //! setter for the player id
-   void setPlayerId(qint32 id);
+   void setPlayerId(int32_t id);
 
    //! getter for the player id
-   qint32 getPlayerId() const;
+   int32_t getPlayerId() const;
 
    //! getter for player nick
    const QString& getNick() const;
@@ -67,10 +67,10 @@ private:
    bool mSuccess;
 
    //! game's id
-   qint32 mGameId;
+   int32_t mGameId;
 
    //! player's
-   qint32 mPlayerId;
+   int32_t mPlayerId;
 
    //! player nick
    QString mNick;

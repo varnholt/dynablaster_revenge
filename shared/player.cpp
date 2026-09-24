@@ -183,7 +183,7 @@ float Player::getSpeed()
 /*!
    \return id
 */
-qint8 Player::getId()
+int8_t Player::getId()
 {
    return mId;
 }
@@ -235,7 +235,7 @@ const QString& Player::getNick()
 /*!
    \param count bomb count
 */
-void Player::setBombCount(qint8 count)
+void Player::setBombCount(int8_t count)
 {
    mBombCount = count;
 }
@@ -245,9 +245,9 @@ void Player::setBombCount(qint8 count)
 /*!
    \return bombs count
 */
-qint8 Player::getBombCount()
+int8_t Player::getBombCount()
 {
-   qint8 bombCount = mBombCount;
+   int8_t bombCount = mBombCount;
 
    if (isInfected())
    {
@@ -269,7 +269,7 @@ qint8 Player::getBombCount()
 /*!
    \param count flame count
 */
-void Player::setFlameCount(qint8 count)
+void Player::setFlameCount(int8_t count)
 {
    mFlameCount = count;
 }
@@ -279,9 +279,9 @@ void Player::setFlameCount(qint8 count)
 /*!
    \return flame count
 */
-qint8 Player::getFlameCount()
+int8_t Player::getFlameCount()
 {
-   qint8 flameCount = mFlameCount;
+   int8_t flameCount = mFlameCount;
 
    if (isInfected())
    {
@@ -301,7 +301,7 @@ qint8 Player::getFlameCount()
 /*!
    \param count bombs dropped
 */
-void Player::setBombsDroppedCount(qint8 count)
+void Player::setBombsDroppedCount(int8_t count)
 {
    mBombsDroppedCount = count;
 }
@@ -311,7 +311,7 @@ void Player::setBombsDroppedCount(qint8 count)
 /*!
    \return bombs dropped count
 */
-qint8 Player::getBombsDroppedCount()
+int8_t Player::getBombsDroppedCount()
 {
    return mBombsDroppedCount;
 }
@@ -341,7 +341,7 @@ bool Player::isKilled()
 /*!
    \return bomb count default
 */
-qint8 Player::getBombCountDefault()
+int8_t Player::getBombCountDefault()
 {
    return SERVER_DEFAULT_BOMBCOUNT;
 }
@@ -351,7 +351,7 @@ qint8 Player::getBombCountDefault()
 /*!
    \return flame count default
 */
-qint8 Player::getFlameCountDefault()
+int8_t Player::getFlameCountDefault()
 {
    return SERVER_DEFAULT_FLAMECOUNT;
 }

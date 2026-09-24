@@ -10,7 +10,7 @@ class MapItemCreatedPacket : public MapItemPacket
    public:
 
       //! write constructor
-      MapItemCreatedPacket(MapItem*, qint8 creator = -1);
+      MapItemCreatedPacket(MapItem*, int8_t creator = -1);
 
       //! read constructor
       MapItemCreatedPacket();
@@ -25,19 +25,19 @@ class MapItemCreatedPacket : public MapItemPacket
       virtual void dequeue(QDataStream&);
 
       //! getter for the mapitem's appearance
-      qint32 getAppearance() const;
+      int32_t getAppearance() const;
 
       //! getter for mapitem's creator
-      qint8 getPlayerId() const;
+      int8_t getPlayerId() const;
 
 
    private:
 
       //! the mapitem's appearance
-      qint32 mAppearance;
+      int32_t mAppearance;
 
       //! the mapitem's creator
-      qint8 mPlayerId;
+      int8_t mPlayerId;
 };
 
 #endif // MAPITEMCREATEDPACKET_H

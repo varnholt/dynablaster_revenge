@@ -25,7 +25,7 @@ class ExtraMapItemCreatedPacket : public MapItemCreatedPacket
       virtual void dequeue(QDataStream&);
 
       //! getter for extra type
-      qint32 getExtraType() const;
+      int32_t getExtraType() const;
 
       //! setter for different skull sides
       void setSkullFaces(const QList<Constants::SkullType>& faces);
@@ -37,7 +37,7 @@ class ExtraMapItemCreatedPacket : public MapItemCreatedPacket
    private:
 
       //! extra type
-      qint32 mExtraType;
+      int32_t mExtraType;
 
       //! skull sides
       QList<Constants::SkullType> mSkullFaces;

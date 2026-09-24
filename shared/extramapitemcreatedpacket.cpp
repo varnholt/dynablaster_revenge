@@ -50,7 +50,7 @@ ExtraMapItemCreatedPacket::ExtraMapItemCreatedPacket()
 /*!
    \return the extra map item's type
 */
-qint32 ExtraMapItemCreatedPacket::getExtraType() const
+int32_t ExtraMapItemCreatedPacket::getExtraType() const
 {
    return mExtraType;
 }
@@ -84,7 +84,7 @@ QList<Constants::SkullType> ExtraMapItemCreatedPacket::getSkullFaces() const
 */
 void ExtraMapItemCreatedPacket::enqueue(QDataStream& out)
 {
-   quint32 faces =
+   uint32_t faces =
         (mSkullFaces[0] << 20)
       | (mSkullFaces[1] << 16)
       | (mSkullFaces[2] << 12)
@@ -109,8 +109,8 @@ void ExtraMapItemCreatedPacket::dequeue(QDataStream& in)
    MapItemCreatedPacket::dequeue(in);
 
    // read members
-   qint32 extraType = 0;
-   quint32 faces = 0;
+   int32_t extraType = 0;
+   uint32_t faces = 0;
 
    in >> extraType;
    in >> faces;

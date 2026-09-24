@@ -1651,7 +1651,7 @@ QList<QPoint> ProtoBot::getLivingEnemyFuturePositions() const
    int y = 0;
 
    QPoint current;
-   qint8 dirs = 0;
+   int8_t dirs = 0;
 
    foreach (BotPlayerInfo* enemy, enemies)
    {
@@ -2376,7 +2376,7 @@ BotWalkAction* ProtoBot::getWalkActionInstance()
 {
    BotWalkAction* action = 0;
 
-   qint8 keysPressed = computeWalkKeys();
+   int8_t keysPressed = computeWalkKeys();
 
    action = new BotWalkAction();
    action->setWalkKeys(keysPressed);   

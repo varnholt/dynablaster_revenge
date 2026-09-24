@@ -11,8 +11,8 @@ public:
 
    //! write constructor
    PositionPacket(
-      qint8 playerId,
-      qint8 directions,
+      int8_t playerId,
+      int8_t directions,
       float x,
       float y,
       float angle = 0.0f,
@@ -39,7 +39,7 @@ public:
 
 
    //! getter for player id
-   qint8 getPlayerId();
+   int8_t getPlayerId();
 
    //! getter for player x position
    float getX() const;
@@ -51,7 +51,7 @@ public:
    float getAngle() const;
 
    //! getter for the player's directions
-   qint8 getDirections();
+   int8_t getDirections();
 
    //! getter for player's x delta
    float getDeltaX() const;
@@ -76,10 +76,10 @@ public:
 private:
 
    //! player id
-   qint8 mPlayerId;
+   int8_t mPlayerId;
 
    //! player's directions
-   qint8 mDirections;
+   int8_t mDirections;
 
    //! player x position
    float mX;

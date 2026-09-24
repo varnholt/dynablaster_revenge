@@ -17,8 +17,8 @@ class PlayerKilledPacket : public Packet
 
       //! write constructor
       PlayerKilledPacket(
-         qint32 playerId,
-         qint32 playerKilledById,
+         int32_t playerId,
+         int32_t playerKilledById,
          Constants::Direction direction,
          float intensity
       );
@@ -33,16 +33,16 @@ class PlayerKilledPacket : public Packet
       void dequeue(QDataStream&);
 
 	  //! getter for player id
-	  qint32 getPlayerId() const;
+	  int32_t getPlayerId() const;
 
 
    private:
 
       //! player id
-      qint32 mPlayerId;
+      int32_t mPlayerId;
 
       //! killed by id
-      qint32 mPlayerKilledById;
+      int32_t mPlayerKilledById;
 
       //! direction the player was killed from
       Constants::Direction mDirection;

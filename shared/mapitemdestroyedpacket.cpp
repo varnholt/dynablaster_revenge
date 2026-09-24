@@ -13,7 +13,7 @@
 */
 MapItemDestroyedPacket::MapItemDestroyedPacket(
    MapItem *item,
-   qint32 playerId,
+   int32_t playerId,
    Constants::Direction direction,
    float intensity
 )
@@ -63,7 +63,7 @@ void MapItemDestroyedPacket::dequeue(QDataStream & in)
 {
    MapItemPacket::dequeue(in);
 
-   qint32 direction = 0;
+   int32_t direction = 0;
 
    // read members
    in
@@ -96,7 +96,7 @@ void MapItemDestroyedPacket::debug()
 /*!
    \return player id
 */
-qint32 MapItemDestroyedPacket::getPlayerId() const
+int32_t MapItemDestroyedPacket::getPlayerId() const
 {
    return mPlayerId;
 }

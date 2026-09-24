@@ -315,7 +315,7 @@ bool BotClient::packetAvailable(QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mSocket->bytesAvailable() < (int)sizeof(quint16))
+      if (mSocket->bytesAvailable() < (int)sizeof(uint16_t))
         return false;
 
      // read blocksize
@@ -1208,7 +1208,7 @@ void BotClient::processStopGameResponse(Packet *packet)
 /*!
    \param keysPressed walk direction and bomb drop
 */
-void BotClient::walk(qint8 keysPressed)
+void BotClient::walk(int8_t keysPressed)
 {
    // keysPressed and mKeysPressed had the same value (up) but the
    // bot was not moving at all.. no further key packets were sent
@@ -1269,7 +1269,7 @@ void BotClient::bomb()
    // because the server might be placing the bomb into
    // an undesired field otherwise
    mKeysPressed = 0;
-   qint8 keys = 0;
+   int8_t keys = 0;
    int x = mBot->getXField();
    int y = mBot->getYField();
 //   float relX = mBot->getX() - x;

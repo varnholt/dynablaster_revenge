@@ -14,7 +14,7 @@ BotWalkAction::BotWalkAction()
 /*!
    \param direction walk direction
 */
-void BotWalkAction::setWalkKeys(qint8 direction)
+void BotWalkAction::setWalkKeys(int8_t direction)
 {
    mWalkKeys = direction;
 }
@@ -24,7 +24,7 @@ void BotWalkAction::setWalkKeys(qint8 direction)
 /*!
    \return walk direction
 */
-qint8 BotWalkAction::getWalkKeys() const
+int8_t BotWalkAction::getWalkKeys() const
 {
    return mWalkKeys;
 }

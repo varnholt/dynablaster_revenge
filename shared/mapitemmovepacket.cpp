@@ -118,7 +118,7 @@ void MapItemMovePacket::enqueue(QDataStream & out)
    // write player id
    out << mMapItemId;
    out << mSpeed;
-   out << (qint8)mDirection;
+   out << (int8_t)mDirection;
    out << mNominalX;
    out << mNominalY;
 }
@@ -130,7 +130,7 @@ void MapItemMovePacket::enqueue(QDataStream & out)
 */
 void MapItemMovePacket::dequeue(QDataStream & in)
 {
-   qint8 direction = 0;
+   int8_t direction = 0;
 
    in
       >> mMapItemId

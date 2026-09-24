@@ -150,9 +150,9 @@ void BotFactory::createBotClientPair()
 
    connect(
       bot,
-      SIGNAL(walk(qint8)),
+      SIGNAL(walk(int8_t)),
       client,
-      SLOT(walk(qint8))
+      SLOT(walk(int8_t))
    );
 
    connect(

@@ -69,10 +69,10 @@ public:
    // skull type implementations
 
    //! apply autofire
-   void applyAutofire(qint8 &keysPressed);
+   void applyAutofire(int8_t &keysPressed);
 
    //! apply keyboard invert
-   void applyKeyboardInvert(qint8& keysPressed);
+   void applyKeyboardInvert(int8_t& keysPressed);
 
 
 public slots:

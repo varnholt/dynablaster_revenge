@@ -18,12 +18,12 @@
    \param fieldsRight fields the bomb goes to the right
 */
 DetonationPacket::DetonationPacket(
-   qint32 x,
-   qint32 y,
-   qint8 fieldsUp,
-   qint8 fieldsDown,
-   qint8 fieldsLeft,
-   qint8 fieldsRight,
+   int32_t x,
+   int32_t y,
+   int8_t fieldsUp,
+   int8_t fieldsDown,
+   int8_t fieldsLeft,
+   int8_t fieldsRight,
    float intensity
 )
    : Packet(Packet::DETONATION),
@@ -92,32 +92,32 @@ void DetonationPacket::dequeue(QDataStream & in)
       >> mIntensity;
 }
 
-qint32 DetonationPacket::getX() const
+int32_t DetonationPacket::getX() const
 {
 	return mX;
 }
 
-qint32 DetonationPacket::getY() const
+int32_t DetonationPacket::getY() const
 {
 	return mY;
 }
 
-qint8 DetonationPacket::getUp() const
+int8_t DetonationPacket::getUp() const
 {
 	return mFieldsUp;
 }
 
-qint8 DetonationPacket::getDown() const
+int8_t DetonationPacket::getDown() const
 {
 	return mFieldsDown;
 }
 
-qint8 DetonationPacket::getLeft() const
+int8_t DetonationPacket::getLeft() const
 {
 	return mFieldsLeft;
 }
 
-qint8 DetonationPacket::getRight() const
+int8_t DetonationPacket::getRight() const
 {
    return mFieldsRight;
 }

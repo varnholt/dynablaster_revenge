@@ -9,10 +9,10 @@ class MessagePacket : public Packet
 
       //! write constructor
       MessagePacket(
-         qint8 senderId,
+         int8_t senderId,
          const QString& message,
          bool finishedTyping,
-         qint8 receiverId = -1
+         int8_t receiverId = -1
       );
 
       //! read constructor
@@ -31,13 +31,13 @@ class MessagePacket : public Packet
       void dequeue(QDataStream&);
 
       //! getter for sender id
-      qint8 getSenderId() const;
+      int8_t getSenderId() const;
 
       //! getter for the message
       QString getMessage() const;
 
       //! getter for the receiver's id
-      qint8 getReceiverId() const;
+      int8_t getReceiverId() const;
 
       //! getter for finished-typing flag
       bool isTypingFinished() const;
@@ -46,13 +46,13 @@ class MessagePacket : public Packet
    private:
 
       //! sender id
-      qint8 mSenderId;
+      int8_t mSenderId;
 
       //! message to send
       QString mMessage;
 
       //! receiver id
-      qint8 mReceiverId;
+      int8_t mReceiverId;
 
       //! player finished typing
       bool mFinishedTyping;

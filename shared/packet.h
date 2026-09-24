@@ -77,7 +77,7 @@ public:
    virtual void dequeue(QDataStream&) = 0;
 
    //! getter for packet size
-   qint16 getSize();
+   int16_t getSize();
 
    //! getter for packet type
    TYPE getType();
@@ -95,7 +95,7 @@ public:
 protected:
 
    //! packet size
-   qint16 mPacketSize;
+   int16_t mPacketSize;
 
    //! packet type
    TYPE mPacketType;

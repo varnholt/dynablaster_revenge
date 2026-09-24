@@ -15,9 +15,9 @@
    \param yPos player y position
 */
 BombPacket::BombPacket(
-   qint8 pId,
-   quint8 xPos,
-   quint8 yPos
+   int8_t pId,
+   uint8_t xPos,
+   uint8_t yPos
 )
  : Packet(Packet::BOMB),
    playerId(pId),
@@ -52,7 +52,7 @@ BombPacket::~BombPacket()
 /*!----------------------------------------------------------------------------
    \return bomb x position
 */
-quint8 BombPacket::getX()
+uint8_t BombPacket::getX()
 {
    return x;
 }
@@ -61,7 +61,7 @@ quint8 BombPacket::getX()
 /*!----------------------------------------------------------------------------
    \return player id
 */
-qint8 BombPacket::getPlayerId()
+int8_t BombPacket::getPlayerId()
 {
    return playerId;
 }
@@ -70,7 +70,7 @@ qint8 BombPacket::getPlayerId()
 /*!----------------------------------------------------------------------------
    \return bomb y position
 */
-quint8 BombPacket::getY()
+uint8_t BombPacket::getY()
 {
    return y;
 }

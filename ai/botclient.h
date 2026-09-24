@@ -141,7 +141,7 @@ signals:
    public slots:
 
       //! send walk packet
-      void walk(qint8);
+      void walk(int8_t);
 
       //! drop a bomb
       void bomb();
@@ -317,7 +317,7 @@ signals:
       bool mConnected;
 
       //! expected block size of current packet
-      quint16 mBlockSize;
+      uint16_t mBlockSize;
 
       //! bot
       Bot* mBot;

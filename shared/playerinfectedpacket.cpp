@@ -12,7 +12,7 @@
 /*!
 */
 PlayerInfectedPacket::PlayerInfectedPacket(
-   qint32 playerId,
+   int32_t playerId,
    Constants::SkullType type
 )
    : Packet(Packet::PLAYERINFECTEDPACKET),
@@ -46,7 +46,7 @@ PlayerInfectedPacket::PlayerInfectedPacket()
 /*!
    \return player id
 */
-qint32 PlayerInfectedPacket::getPlayerId() const
+int32_t PlayerInfectedPacket::getPlayerId() const
 {
     return mPlayerId;
 }
@@ -83,7 +83,7 @@ void PlayerInfectedPacket::enqueue(QDataStream & out)
 */
 void PlayerInfectedPacket::dequeue(QDataStream & in)
 {
-   qint32 skull = 0;
+   int32_t skull = 0;
 
    // read members
    in
@@ -117,7 +117,7 @@ void PlayerInfectedPacket::debug()
 /*!
   \return y position of extra
 */
-quint8 PlayerInfectedPacket::getExtraPosY() const
+uint8_t PlayerInfectedPacket::getExtraPosY() const
 {
    return mExtraPosY;
 }
@@ -127,7 +127,7 @@ quint8 PlayerInfectedPacket::getExtraPosY() const
 /*!
   \return x position of extra
 */
-quint8 PlayerInfectedPacket::getExtraPosX() const
+uint8_t PlayerInfectedPacket::getExtraPosX() const
 {
    return mExtraPosX;
 }
@@ -138,7 +138,7 @@ quint8 PlayerInfectedPacket::getExtraPosX() const
   \param x x position of extra
   \param y y position of extra
 */
-void PlayerInfectedPacket::setExtraPos(quint8 x, quint8 y)
+void PlayerInfectedPacket::setExtraPos(uint8_t x, uint8_t y)
 {
    mExtraPosX = x;
    mExtraPosY = y;
@@ -149,7 +149,7 @@ void PlayerInfectedPacket::setExtraPos(quint8 x, quint8 y)
 /*!
    \return infector id
 */
-qint32 PlayerInfectedPacket::getInfectorId() const
+int32_t PlayerInfectedPacket::getInfectorId() const
 {
    return mInfectorId;
 }
@@ -159,7 +159,7 @@ qint32 PlayerInfectedPacket::getInfectorId() const
 /*!
    \param value infector id
 */
-void PlayerInfectedPacket::setInfectorId(const qint32 &value)
+void PlayerInfectedPacket::setInfectorId(const int32_t &value)
 {
    mInfectorId = value;
 }

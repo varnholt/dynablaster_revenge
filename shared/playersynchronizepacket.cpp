@@ -70,7 +70,7 @@ PlayerSynchronizePacket::SynchronizeProcess PlayerSynchronizePacket::getSynchron
 */
 void PlayerSynchronizePacket::enqueue(QDataStream & out)
 {
-   out << (quint8)getSynchronizeProcess();
+   out << (uint8_t)getSynchronizeProcess();
 }
 
 
@@ -80,7 +80,7 @@ void PlayerSynchronizePacket::enqueue(QDataStream & out)
 */
 void PlayerSynchronizePacket::dequeue(QDataStream & in)
 {
-   quint8 process = 0;
+   uint8_t process = 0;
 
    in >> process;
 

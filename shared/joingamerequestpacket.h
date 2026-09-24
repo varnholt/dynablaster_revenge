@@ -33,7 +33,7 @@ class JoinGameRequestPacket : public Packet
    private:
 
       //! game's id
-      qint8 mId;
+      int8_t mId;
 };
 
 #endif // JOINGAMEREQUESTPACKET_H

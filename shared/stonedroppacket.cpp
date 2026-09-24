@@ -16,8 +16,8 @@
    \param x stone y position
 */
 StoneDropPacket::StoneDropPacket(
-   qint8 x,
-   qint8 y
+   int8_t x,
+   int8_t y
 )
  : Packet(Packet::STONEDROP),
    mX(x),
@@ -53,7 +53,7 @@ StoneDropPacket::~StoneDropPacket()
 /*!
    \return stone x position
 */
-qint8 StoneDropPacket::getX() const
+int8_t StoneDropPacket::getX() const
 {
    return mX;
 }
@@ -63,7 +63,7 @@ qint8 StoneDropPacket::getX() const
 /*!
    \return stone y position
 */
-qint8 StoneDropPacket::getY() const
+int8_t StoneDropPacket::getY() const
 {
    return mY;
 }

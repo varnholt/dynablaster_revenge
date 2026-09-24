@@ -90,10 +90,10 @@ Q_OBJECT
       PlayerDisease* getDisease() const;
 
       //! getter for directions
-      qint8 getDirections() const;
+      int8_t getDirections() const;
 
       //! setter for directions
-      void setDirections(qint8 directions);
+      void setDirections(int8_t directions);
 
 
    protected:
@@ -132,7 +132,7 @@ Q_OBJECT
       QPointer<PlayerDisease> mDisease;
 
       //! player's directions
-      qint8 mDirections;
+      int8_t mDirections;
 };
 
 #endif // PLAYERINFO_H

@@ -32,7 +32,7 @@ void CollisionDetection::process(Player *player)
    bool moved = false;
    float desiredXPos = player->getX();
    float desiredYPos = player->getY();
-   qint8 directions = 0;
+   int8_t directions = 0;
 
    // ----------------------------------------------------------------------
    // drunken helli course correction (tm) mueslee 2012
@@ -414,7 +414,7 @@ void CollisionDetection::process(Player *player)
 void CollisionDetection::updatePlayerDirections(
    Player* player,
    int keysPressed,
-   qint8& directions,
+   int8_t& directions,
    float& desiredXPos,
    float& desiredYPos
 )

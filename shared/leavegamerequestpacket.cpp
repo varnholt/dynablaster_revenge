@@ -23,8 +23,8 @@ LeaveGameRequestPacket::LeaveGameRequestPacket()
 /*!
 */
 LeaveGameRequestPacket::LeaveGameRequestPacket(
-   qint32 gameId,
-   qint32 playerId
+   int32_t gameId,
+   int32_t playerId
 )
    : Packet(Packet::LEAVEGAMEREQUEST),
      mGameId(gameId),
@@ -86,7 +86,7 @@ void LeaveGameRequestPacket::debug()
 /*!
    \param id player id to set
 */
-void LeaveGameRequestPacket::setPlayerId(qint32 tmpId)
+void LeaveGameRequestPacket::setPlayerId(int32_t tmpId)
 {
    mPlayerId = tmpId;
 }
@@ -96,7 +96,7 @@ void LeaveGameRequestPacket::setPlayerId(qint32 tmpId)
 /*!
    \return player's id
 */
-qint32 LeaveGameRequestPacket::getPlayerId() const
+int32_t LeaveGameRequestPacket::getPlayerId() const
 {
    return mPlayerId;
 }
@@ -106,7 +106,7 @@ qint32 LeaveGameRequestPacket::getPlayerId() const
 /*!
    \param id game id to set
 */
-void LeaveGameRequestPacket::setGameId(qint32 id)
+void LeaveGameRequestPacket::setGameId(int32_t id)
 {
    mGameId = id;
 }
@@ -116,7 +116,7 @@ void LeaveGameRequestPacket::setGameId(qint32 id)
 /*!
    \return game's id
 */
-qint32 LeaveGameRequestPacket::getGameId() const
+int32_t LeaveGameRequestPacket::getGameId() const
 {
    return mGameId;
 }

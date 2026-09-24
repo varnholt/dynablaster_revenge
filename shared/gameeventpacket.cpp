@@ -90,8 +90,8 @@ void GameEventPacket::enqueue(QDataStream & out)
 */
 void GameEventPacket::dequeue(QDataStream & in)
 {
-   qint32 event = 0;
-   qint32 extra = 0;
+   int32_t event = 0;
+   int32_t extra = 0;
 
    // read members
    in
@@ -126,7 +126,7 @@ void GameEventPacket::debug()
 /*!
    \param id player id
 */
-void GameEventPacket::setPlayerId(qint32 id)
+void GameEventPacket::setPlayerId(int32_t id)
 {
    mPlayerId = id;
 }
@@ -147,7 +147,7 @@ void GameEventPacket::setExtraType(Constants::ExtraType extra)
 /*!
    \return player id
 */
-qint32 GameEventPacket::getPlayerId() const
+int32_t GameEventPacket::getPlayerId() const
 {
    return mPlayerId;
 }

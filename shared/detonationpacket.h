@@ -13,12 +13,12 @@ public:
 
    //! write constructor
    DetonationPacket(
-      qint32 x,
-      qint32 y,
-      qint8 fieldsUp,
-      qint8 fieldsDown,
-      qint8 fieldsLeft,
-      qint8 fieldsRight,
+      int32_t x,
+      int32_t y,
+      int8_t fieldsUp,
+      int8_t fieldsDown,
+      int8_t fieldsLeft,
+      int8_t fieldsRight,
       float intensity
    );
 
@@ -32,22 +32,22 @@ public:
     void dequeue(QDataStream&);
 
 	//! x center
-    qint32 getX() const;
+    int32_t getX() const;
 
     //! y center
-    qint32 getY() const;
+    int32_t getY() const;
 
     //! number of fields the bomb goes up
-    qint8 getUp() const;
+    int8_t getUp() const;
 
     //! number of fields the bomb goes down
-    qint8 getDown() const;
+    int8_t getDown() const;
 
     //! number of fields the bomb goes to the left
-    qint8 getLeft() const;
+    int8_t getLeft() const;
 
     //! number of fields the bomb goes to the right
-    qint8 getRight() const;
+    int8_t getRight() const;
 
     //! number of flames / flame intensity
     float getIntensity() const;
@@ -56,22 +56,22 @@ public:
 private:
 
     //! x center
-    qint32 mX;
+    int32_t mX;
 
     //! y center
-    qint32 mY;
+    int32_t mY;
 
     //! number of fields the bomb goes up
-    qint8 mFieldsUp;
+    int8_t mFieldsUp;
 
     //! number of fields the bomb goes down
-    qint8 mFieldsDown;
+    int8_t mFieldsDown;
 
     //! number of fields the bomb goes to the left
-    qint8 mFieldsLeft;
+    int8_t mFieldsLeft;
 
     //! number of fields the bomb goes to the right
-    qint8 mFieldsRight;
+    int8_t mFieldsRight;
 
     //! number of flames / intensity
     float mIntensity;

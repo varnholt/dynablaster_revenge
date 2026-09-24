@@ -107,7 +107,7 @@ private:
    QTcpServer* mTcpServer;
 
    //! map of expected packet sizes
-   QMap<QTcpSocket*, quint16> mPacketSizes;
+   QMap<QTcpSocket*, uint16_t> mPacketSizes;
 
    //! map socket <-> player
    QMap<QTcpSocket*, Player*> mPlayerSockets;

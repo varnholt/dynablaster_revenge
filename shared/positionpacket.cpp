@@ -16,8 +16,8 @@
    \param yPos player y position
 */
 PositionPacket::PositionPacket(
-   qint8 pId,
-   qint8 dirs,
+   int8_t pId,
+   int8_t dirs,
    float xPos,
    float yPos,
    float angle,
@@ -161,7 +161,7 @@ float PositionPacket::getSpeed() const
 /*!
    \return player directions
 */
-qint8 PositionPacket::getDirections()
+int8_t PositionPacket::getDirections()
 {
    return mDirections;
 }
@@ -171,7 +171,7 @@ qint8 PositionPacket::getDirections()
 /*!
    \return player id
 */
-qint8 PositionPacket::getPlayerId()
+int8_t PositionPacket::getPlayerId()
 {
    return mPlayerId;
 }

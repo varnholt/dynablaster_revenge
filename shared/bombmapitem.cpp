@@ -61,7 +61,7 @@ BombMapItem::~BombMapItem()
 /*!
    \return player id
 */
-qint8 BombMapItem::getPlayerId() const
+int8_t BombMapItem::getPlayerId() const
 {
    return mPlayerId;
 }
@@ -71,7 +71,7 @@ qint8 BombMapItem::getPlayerId() const
 /*!
    \return flames
 */
-qint8 BombMapItem::getFlames() const
+int8_t BombMapItem::getFlames() const
 {
    return mFlames;
 }
@@ -248,7 +248,7 @@ void BombMapItem::setShadowedItem(MapItem *shadowedItem)
 /*!
    \param id igniter id
 */
-void BombMapItem::setIgniterId(qint8 id)
+void BombMapItem::setIgniterId(int8_t id)
 {
    mIgniterId = id;
 }
@@ -258,7 +258,7 @@ void BombMapItem::setIgniterId(qint8 id)
 /*!
    \return igniter id
 */
-qint8 BombMapItem::getIgniterId() const
+int8_t BombMapItem::getIgniterId() const
 {
    return mIgniterId;
 }

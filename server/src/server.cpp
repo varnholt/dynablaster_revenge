@@ -532,12 +532,12 @@ void Server::data()
 
    while (true)
    {
-      quint16 blockSize = mPacketSizes[tcpSocket];
+      uint16_t blockSize = mPacketSizes[tcpSocket];
 
       // blocksize not initialized yet
       if (blockSize == 0)
       {
-         if (tcpSocket->bytesAvailable() < static_cast<int32_t>(sizeof(quint16)))
+         if (tcpSocket->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
          {
             // qDebug("Server::data(): cannot read packet size, packet too small");
             return;

@@ -34,7 +34,7 @@ class TimePacket : public Packet
    private:
 
       //! elapsed time in ms
-      qint32 mTimeLeft;
+      int32_t mTimeLeft;
 };
 
 #endif // TIMEPACKET_H

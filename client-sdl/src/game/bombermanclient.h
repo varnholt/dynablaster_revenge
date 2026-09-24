@@ -511,7 +511,7 @@ class BombermanClient : public QObject
       QTcpSocket *mSocket;
 
       //! blocksize of packet which is received from server
-      quint16 mBlockSize;
+      uint16_t mBlockSize;
 
       //! player id
       int mId;

@@ -9,8 +9,8 @@ class StoneDropPacket : public Packet
 
       //! write constructor
       StoneDropPacket(
-         qint8 x,
-         qint8 y
+         int8_t x,
+         int8_t y
       );
 
       //! read constructor
@@ -30,19 +30,19 @@ class StoneDropPacket : public Packet
 
 
       //! getter for stone x position
-      qint8 getX() const;
+      int8_t getX() const;
 
       //! getter for stone y position
-      qint8 getY() const;
+      int8_t getY() const;
 
 
    private:
 
       //! x position
-      qint8 mX;
+      int8_t mX;
 
       //! y position
-      qint8 mY;
+      int8_t mY;
 };
 
 #endif // STONEDROPPACKET_H

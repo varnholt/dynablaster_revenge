@@ -33,7 +33,7 @@ class CountdownPacket : public Packet
    private:
 
       //! countdown
-      qint8 mTimeLeft;
+      int8_t mTimeLeft;
 };
 
 #endif // COUNTDOWNPACKET_H

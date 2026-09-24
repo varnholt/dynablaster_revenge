@@ -82,7 +82,7 @@ Packet::~Packet()
 /*!
    \return packet size
 */
-qint16 Packet::getSize()
+int16_t Packet::getSize()
 {
    return mPacketSize;
 }
@@ -139,10 +139,10 @@ void Packet::serialize()
    out.setVersion(QDataStream::Qt_4_6);
 
    // reserve 16 bits for the packet packetSize
-   out << (quint16)0;
+   out << (uint16_t)0;
 
    // write packet packetType
-   out << (quint8)mPacketType;
+   out << (uint8_t)mPacketType;
 
    // write timestamp to packet
    out << mTimestamp;
@@ -151,7 +151,7 @@ void Packet::serialize()
 
    // write the blocksize at the beginning of the bytearray
    out.device()->seek(0);
-   out << (quint16)(size() - sizeof(quint16));
+   out << (uint16_t)(size() - sizeof(uint16_t));
 }
 
 
@@ -163,7 +163,7 @@ void Packet::serialize()
 */
 Packet* Packet::deserialize(QDataStream& in)
 {
-   qint8 pType;
+   int8_t pType;
 
    // read the serialized data
    in >> pType;

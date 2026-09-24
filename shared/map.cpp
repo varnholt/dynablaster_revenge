@@ -224,7 +224,7 @@ void Map::initializeTestMap()
 /*!
    \return map width
 */
-qint32 Map::getWidth() const
+int32_t Map::getWidth() const
 {
    return mWidth;
 }
@@ -234,7 +234,7 @@ qint32 Map::getWidth() const
 /*!
    \return map height
 */
-qint32 Map::getHeight() const
+int32_t Map::getHeight() const
 {
    return mHeight;
 }

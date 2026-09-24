@@ -34,7 +34,7 @@ class PlayerModifiedPacket : public Packet
    private:
 
       //! player color
-      qint32 mColor;
+      int32_t mColor;
 };
 
 #endif // PLAYERMODIFIEDPACKET_H

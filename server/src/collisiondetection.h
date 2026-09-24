@@ -47,14 +47,14 @@ signals:
    );
    
    //! send an idle packet
-   void playerIdle(qint8 directions, Player* player);
+   void playerIdle(int8_t directions, Player* player);
 
    //! move player
    void playerMove(
       Player* player,
       float assignedXPos,
       float assignedYPos,
-      qint8 directions
+      int8_t directions
    );
 
    //! player position was updated
@@ -76,7 +76,7 @@ protected:
    void updatePlayerDirections(
       Player* player,
       int keysPressed,
-      qint8& directions,
+      int8_t& directions,
       float& desiredXPos,
       float& desiredYPos
    );

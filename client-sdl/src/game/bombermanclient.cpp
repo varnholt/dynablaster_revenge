@@ -473,7 +473,7 @@ bool BombermanClient::packetAvailable(QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mSocket->bytesAvailable() < static_cast<int32_t>(sizeof(quint16)))
+      if (mSocket->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
         return false;
 
      // read blocksize

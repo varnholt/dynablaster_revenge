@@ -477,7 +477,7 @@ bool Bot::isPlayerPositionValid() const
 /*!
    \param keysPressed bot's keys pressed
 */
-void Bot::setBotKeysPressed(qint8 keysPressed)
+void Bot::setBotKeysPressed(int8_t keysPressed)
 {
    mBotKeysPressed = keysPressed;
 }
@@ -487,7 +487,7 @@ void Bot::setBotKeysPressed(qint8 keysPressed)
 /*!
    \return bot's keys pressed
 */
-qint8 Bot::getBotKeysPressed() const
+int8_t Bot::getBotKeysPressed() const
 {
    return mBotKeysPressed;
 }
@@ -612,9 +612,9 @@ const ServerConfiguration &Bot::getServerConfiguration() const
 /*!
    \return walk keys
 */
-qint8 Bot::computeWalkKeys() const
+int8_t Bot::computeWalkKeys() const
 {
-   qint8 keysPressed = 0;
+   int8_t keysPressed = 0;
    float fieldCenter = 0.5f;
 
    if (mX - fieldCenter < mTransiterateTargetX)

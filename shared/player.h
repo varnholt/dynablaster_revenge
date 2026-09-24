@@ -60,7 +60,7 @@ public:
    float getSpeed();
 
    //! getter for id
-   qint8 getId();
+   int8_t getId();
 
    //! getter for the player's rotation
    PlayerRotation* getPlayerRotation();
@@ -72,22 +72,22 @@ public:
    const QString& getNick();
 
    //! setter for bombs
-   void setBombCount(qint8 count);
+   void setBombCount(int8_t count);
 
    //! getter for bombs
-   qint8 getBombCount();
+   int8_t getBombCount();
 
    //! setter for flames
-   void setFlameCount(qint8 count);
+   void setFlameCount(int8_t count);
 
    //! getter for flames
-   qint8 getFlameCount();
+   int8_t getFlameCount();
 
    //! setter for bombs dropped
-   void setBombsDroppedCount(qint8 count);
+   void setBombsDroppedCount(int8_t count);
 
    //! getter for bombs dropped
-   qint8 getBombsDroppedCount();
+   int8_t getBombsDroppedCount();
 
    //! setter for killed flag
    void setKilled(bool);
@@ -102,10 +102,10 @@ public:
    bool isKickEnabled();
 
    //! getter for bomb count default
-   static qint8 getBombCountDefault();
+   static int8_t getBombCountDefault();
 
    //! getter for flame count default
-   static qint8 getFlameCountDefault();
+   static int8_t getFlameCountDefault();
 
    //! getter for position skip counter
    int getPositionSkipCounter() const;
@@ -183,7 +183,7 @@ public:
 private:
 
    //! id
-   qint8 mId;
+   int8_t mId;
 
    //! player logged in
    bool mLoggedIn;

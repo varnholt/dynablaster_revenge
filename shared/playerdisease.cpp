@@ -105,7 +105,7 @@ void PlayerDisease::randomizeType()
 /*!
    \param keysPressed keys to modify
 */
-void PlayerDisease::applyAutofire(qint8 &keysPressed)
+void PlayerDisease::applyAutofire(int8_t &keysPressed)
 {
    keysPressed |= Constants::KeyBomb;
 }
@@ -115,9 +115,9 @@ void PlayerDisease::applyAutofire(qint8 &keysPressed)
 /*!
    \param keysPressed keys to modify
 */
-void PlayerDisease::applyKeyboardInvert(qint8 &keysPressed)
+void PlayerDisease::applyKeyboardInvert(int8_t &keysPressed)
 {
-   qint8 invertedKeys = 0;
+   int8_t invertedKeys = 0;
 
    // pass bomb bit
    if (keysPressed & Constants::KeyBomb)

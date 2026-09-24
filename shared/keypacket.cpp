@@ -27,8 +27,8 @@ KeyPacket::KeyPacket()
    \param key keys pressed
 */
 KeyPacket::KeyPacket(
-   qint8 id,
-   qint8 k
+   int8_t id,
+   int8_t k
 )
  : Packet(Packet::KEY),
    playerId(id),
@@ -72,7 +72,7 @@ void KeyPacket::dequeue(QDataStream & in)
 /*!----------------------------------------------------------------------------
    \return pressed keys
 */
-qint8 KeyPacket::getKeys()
+int8_t KeyPacket::getKeys()
 {
    return keys;
 }
@@ -81,7 +81,7 @@ qint8 KeyPacket::getKeys()
 /*!----------------------------------------------------------------------------
    \return player id
 */
-qint8 KeyPacket::getPlayerId()
+int8_t KeyPacket::getPlayerId()
 {
    return playerId;
 }

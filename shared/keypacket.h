@@ -18,8 +18,8 @@ public:
 
    //! write constructor
    KeyPacket(
-      qint8 playerId,
-      qint8 keys
+      int8_t playerId,
+      int8_t keys
    );
 
    //! destructor
@@ -32,10 +32,10 @@ public:
    void dequeue(QDataStream&);
 
    //! getter for key combination
-   qint8 getKeys();
+   int8_t getKeys();
 
    //! getter for player id
-   qint8 getPlayerId();
+   int8_t getPlayerId();
 
    //! debug function
    void debug();
@@ -43,10 +43,10 @@ public:
 private:
 
    //! player id
-   qint8 playerId;
+   int8_t playerId;
 
    //! key combination
-   qint8 keys;
+   int8_t keys;
 
 };
 

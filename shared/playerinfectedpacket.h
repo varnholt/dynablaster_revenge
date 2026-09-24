@@ -17,7 +17,7 @@ public:
 
     //! write constructor
     PlayerInfectedPacket(
-       qint32 playerId,
+       int32_t playerId,
        Constants::SkullType type
     );
 
@@ -31,43 +31,43 @@ public:
     void dequeue(QDataStream&);
 
    //! getter for player id
-   qint32 getPlayerId() const;
+   int32_t getPlayerId() const;
 
    //! getter for skull type
    Constants::SkullType getSkullType() const;
 
    //! getter for infector id
-   qint32 getInfectorId() const;
+   int32_t getInfectorId() const;
 
    //! setter for infector id
-   void setInfectorId(const qint32 &value);
+   void setInfectorId(const int32_t &value);
 
    //! setter for extra position
-   void setExtraPos(quint8 x, quint8 y);
+   void setExtraPos(uint8_t x, uint8_t y);
 
    //! getter for extra position x
-   quint8 getExtraPosX() const;
+   uint8_t getExtraPosX() const;
 
    //! getter for extra position y
-   quint8 getExtraPosY() const;
+   uint8_t getExtraPosY() const;
 
 
 private:
 
    //! player id
-   qint32 mPlayerId;
+   int32_t mPlayerId;
 
    //! skull type
    Constants::SkullType mSkullType;
 
    //! player id of infector
-   qint32 mInfectorId;
+   int32_t mInfectorId;
 
    //! x position where extra has been picked up
-   quint8 mExtraPosX;
+   uint8_t mExtraPosX;
 
    //! x position where extra has been picked up
-   quint8 mExtraPosY;
+   uint8_t mExtraPosY;
 };
 
 #endif // PLAYERINFECTEDPACKET_H

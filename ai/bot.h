@@ -76,13 +76,13 @@ class Bot : public QThread
       void setStopped(bool value);
 
       //! setter for bot keys pressed
-      void setBotKeysPressed(qint8 keysPressed);
+      void setBotKeysPressed(int8_t keysPressed);
 
       //! getter for bot keys pressed
-      qint8 getBotKeysPressed() const;
+      int8_t getBotKeysPressed() const;
 
       //! compute walk keys
-      qint8 computeWalkKeys() const;
+      int8_t computeWalkKeys() const;
 
 
    signals:
@@ -91,7 +91,7 @@ class Bot : public QThread
       void bomb();
 
       //! send walk keys
-      void walk(qint8 keysPressed);
+      void walk(int8_t keysPressed);
 
       //! time to sync
       void sync();

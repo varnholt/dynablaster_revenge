@@ -15,8 +15,8 @@
 */
 JoinGameResponsePacket::JoinGameResponsePacket(
    bool success,
-   qint32 gameId,
-   qint32 playerId,
+   int32_t gameId,
+   int32_t playerId,
    const QString& nick,
    Constants::Color color
 )
@@ -59,7 +59,7 @@ JoinGameResponsePacket::~JoinGameResponsePacket()
 /*!
    \param id player id to set
 */
-void JoinGameResponsePacket::setPlayerId(qint32 tmpId)
+void JoinGameResponsePacket::setPlayerId(int32_t tmpId)
 {
    mPlayerId = tmpId;
 }
@@ -69,7 +69,7 @@ void JoinGameResponsePacket::setPlayerId(qint32 tmpId)
 /*!
    \return player's id
 */
-qint32 JoinGameResponsePacket::getPlayerId() const
+int32_t JoinGameResponsePacket::getPlayerId() const
 {
    return mPlayerId;
 }
@@ -79,7 +79,7 @@ qint32 JoinGameResponsePacket::getPlayerId() const
 /*!
    \param id game id to set
 */
-void JoinGameResponsePacket::setGameId(qint32 id)
+void JoinGameResponsePacket::setGameId(int32_t id)
 {
    mGameId = id;
 }
@@ -89,7 +89,7 @@ void JoinGameResponsePacket::setGameId(qint32 id)
 /*!
    \return game's id
 */
-qint32 JoinGameResponsePacket::getGameId() const
+int32_t JoinGameResponsePacket::getGameId() const
 {
    return mGameId;
 }
@@ -107,7 +107,7 @@ void JoinGameResponsePacket::enqueue(QDataStream & out)
       << mGameId
       << mPlayerId
       << mNick
-      << (qint32)mColor;
+      << (int32_t)mColor;
 }
 
 
@@ -117,7 +117,7 @@ void JoinGameResponsePacket::enqueue(QDataStream & out)
 */
 void JoinGameResponsePacket::dequeue(QDataStream & in)
 {
-   qint32 color = 0;
+   int32_t color = 0;
 
    // read player data
    in

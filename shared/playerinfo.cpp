@@ -235,7 +235,7 @@ PlayerDisease *PlayerInfo::getDisease() const
 /*!
    \return player directions
 */
-qint8 PlayerInfo::getDirections() const
+int8_t PlayerInfo::getDirections() const
 {
    return mDirections;
 }
@@ -245,7 +245,7 @@ qint8 PlayerInfo::getDirections() const
 /*!
    \param directions player directions
 */
-void PlayerInfo::setDirections(qint8 directions)
+void PlayerInfo::setDirections(int8_t directions)
 {
    mDirections = directions;
 }

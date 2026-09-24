@@ -142,16 +142,16 @@ Game::Game()
 
    connect(
       mCollisionDetection,
-      SIGNAL(playerIdle(qint8,Player*)),
+      SIGNAL(playerIdle(int8_t,Player*)),
       this,
-      SLOT(playerIdle(qint8,Player*))
+      SLOT(playerIdle(int8_t,Player*))
    );
 
    connect(
       mCollisionDetection,
-      SIGNAL(playerMove(Player*,float,float,qint8)),
+      SIGNAL(playerMove(Player*,float,float,int8_t)),
       this,
-      SLOT(playerMove(Player*,float,float,qint8))
+      SLOT(playerMove(Player*,float,float,int8_t))
    );
 
    // init skulls
@@ -1142,7 +1142,7 @@ void Game::playerMove(
    Player* player,
    float assignedXPos,
    float assignedYPos,
-   qint8 directions
+   int8_t directions
 )
 {
    float speedX = 0.0;
@@ -1181,7 +1181,7 @@ void Game::playerMove(
    \param directions player's directions
    \param player affected player
 */
-void Game::playerIdle(qint8 directions, Player* player)
+void Game::playerIdle(int8_t directions, Player* player)
 {
    if (!mIdlePacketSentSet.contains(player))
    {
@@ -1890,7 +1890,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
             )
             {
                // check for players that are eventually killed
-               QMapIterator<qint8, Player*> p(mPlayers);
+               QMapIterator<int8_t, Player*> p(mPlayers);
                while (p.hasNext())
                {
                   p.next();
@@ -2310,7 +2310,7 @@ bool Game::isGamePopulatedByBots() const
    bool botsOnly = true;
 
    Player* currentPlayer = nullptr;
-   QMapIterator<qint8, Player*> p(mPlayers);
+   QMapIterator<int8_t, Player*> p(mPlayers);
    while (p.hasNext())
    {
       p.next();
@@ -2341,7 +2341,7 @@ void Game::updateGameoverCondition()
    Player* potentialWinner = nullptr;
 
    // check for players that are eventually killed
-   QMapIterator<qint8, Player*> p(mPlayers);
+   QMapIterator<int8_t, Player*> p(mPlayers);
    while (p.hasNext())
    {
       p.next();
@@ -2375,7 +2375,7 @@ void Game::updateGameoverCondition()
 */
 void Game::resetRoundStats()
 {
-   QMapIterator<qint8, Player*> p(mPlayers);
+   QMapIterator<int8_t, Player*> p(mPlayers);
    while (p.hasNext())
    {
       p.next();
@@ -2819,8 +2819,8 @@ void Game::processPacket(
             // fix up the player's inputs to not get confused in
             // any way (the player may to go to the left and to
             // the right at the same time for example)
-            qint8 keys = keyPacket->getKeys();
-            qint8 previousKeys = static_cast<qint8>(player->getKeysPressed());
+            int8_t keys = keyPacket->getKeys();
+            int8_t previousKeys = static_cast<int8_t>(player->getKeysPressed());
 
             if (
                   (previousKeys & Constants::KeyRight)
@@ -3045,7 +3045,7 @@ bool Game::joinGame(Player* player, QTcpSocket* playerSocket)
       player->setKilled(true);
 
       // send join information to all other players
-      QMapIterator<qint8, Player*> p(mPlayers);
+      QMapIterator<int8_t, Player*> p(mPlayers);
 
       while (p.hasNext())
       {

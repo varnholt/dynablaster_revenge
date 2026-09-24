@@ -18,16 +18,16 @@ class BotWalkAction : public BotAction
       BotWalkAction();
 
       //! setter for walk direction
-      void setWalkKeys(qint8);
+      void setWalkKeys(int8_t);
 
       //! getter for walk direction
-      qint8 getWalkKeys() const;
+      int8_t getWalkKeys() const;
 
 
    protected:
 
       //! walk direction
-      qint8 mWalkKeys;
+      int8_t mWalkKeys;
 
 
       // Path or target point

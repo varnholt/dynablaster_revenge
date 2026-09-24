@@ -13,7 +13,7 @@
 */
 MapItemCreatedPacket::MapItemCreatedPacket(
    MapItem *item,
-   qint8 creator
+   int8_t creator
 )
    : MapItemPacket(Packet::MAPITEMCREATED, item),
      mAppearance(item->getAppearance()),
@@ -39,7 +39,7 @@ MapItemCreatedPacket::MapItemCreatedPacket()
 /*!
    \return mapitem's appearance
 */
-qint32 MapItemCreatedPacket::getAppearance() const
+int32_t MapItemCreatedPacket::getAppearance() const
 {
    return mAppearance;
 }
@@ -49,7 +49,7 @@ qint32 MapItemCreatedPacket::getAppearance() const
 /*!
    \return mapitem's creator
 */
-qint8 MapItemCreatedPacket::getPlayerId() const
+int8_t MapItemCreatedPacket::getPlayerId() const
 {
    return mPlayerId;
 }

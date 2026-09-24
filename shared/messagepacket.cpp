@@ -13,10 +13,10 @@
    \param receiverId id of the receiver
 */
 MessagePacket::MessagePacket(
-   qint8 senderId,
+   int8_t senderId,
    const QString& message,
    bool finishedTyping,
-   qint8 receiverId
+   int8_t receiverId
 )
  : Packet(Packet::MESSAGE),
    mSenderId(senderId),
@@ -61,7 +61,7 @@ QString MessagePacket::getMessage() const
 /*!
    \return receiver's id
 */
-qint8 MessagePacket::getReceiverId() const
+int8_t MessagePacket::getReceiverId() const
 {
    return mReceiverId;
 }
@@ -115,7 +115,7 @@ void MessagePacket::dequeue(QDataStream & in)
 /*!
    \return sender id
 */
-qint8 MessagePacket::getSenderId() const
+int8_t MessagePacket::getSenderId() const
 {
    return mSenderId;
 }

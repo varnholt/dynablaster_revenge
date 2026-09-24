@@ -17,7 +17,7 @@ class MapItemDestroyedPacket : public MapItemPacket
       //! write constructor
       MapItemDestroyedPacket(
          MapItem* item,
-         qint32 playerId,
+         int32_t playerId,
          Constants::Direction direction,
          float intensity
       );
@@ -32,7 +32,7 @@ class MapItemDestroyedPacket : public MapItemPacket
       void dequeue(QDataStream&);
 
       //! getter for destroyer id
-      qint32 getPlayerId() const;
+      int32_t getPlayerId() const;
 
       //! getter for direction
       Constants::Direction getDirection() const;
@@ -44,7 +44,7 @@ class MapItemDestroyedPacket : public MapItemPacket
    private:
 
       //! player id
-      qint32 mPlayerId;
+      int32_t mPlayerId;
 
       //! direction the item was destroyed from
       Constants::Direction mDirection;

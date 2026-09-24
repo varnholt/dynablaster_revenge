@@ -42,19 +42,19 @@ class MapCreateRequestPacket : public Packet
    private:
 
       //! map width
-      qint32 mWidth;
+      int32_t mWidth;
 
       //! map height
-      qint32 mHeight;
+      int32_t mHeight;
 
       //! number of stones
-      qint32 mStoneCount;
+      int32_t mStoneCount;
 
       //! number of bomb extras
-      qint32 mExtraBombCount;
+      int32_t mExtraBombCount;
 
       //! number of flame extras
-      qint32 mExtraFlameCount;
+      int32_t mExtraFlameCount;
 
       //! player start positions
       QList<QPoint> mStartPositions;

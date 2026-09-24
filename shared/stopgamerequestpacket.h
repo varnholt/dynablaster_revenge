@@ -36,7 +36,7 @@ class StopGameRequestPacket : public Packet
    private:
 
       //! game id
-      qint32 mId;
+      int32_t mId;
 
 };
 

@@ -42,10 +42,10 @@ class BombMapItem : public MapItem
       virtual ~BombMapItem();
 
       //! getter for player id
-      qint8 getPlayerId() const;
+      int8_t getPlayerId() const;
 
       //! getter for flames
-      qint8 getFlames() const;
+      int8_t getFlames() const;
 
       //! bomb is kicked
       void kick();
@@ -75,10 +75,10 @@ class BombMapItem : public MapItem
       void setShadowedItem(MapItem* shadowedItem);
 
       //! setter for igniter id
-      void setIgniterId(qint8 id);
+      void setIgniterId(int8_t id);
 
       //! getter for igniter id
-      qint8 getIgniterId() const;
+      int8_t getIgniterId() const;
 
       //! getter for shadowed item
       MapItem* getShadowedItem();
@@ -132,10 +132,10 @@ class BombMapItem : public MapItem
       QTimer mTimer;
 
       //! bomb owner
-      qint8 mPlayerId;
+      int8_t mPlayerId;
 
       //! bomb flames
-      qint8 mFlames;
+      int8_t mFlames;
 
       //! kicked flag
       bool mKicked;
@@ -153,7 +153,7 @@ class BombMapItem : public MapItem
       static int sTickTime;
 
       //! bomb igniter
-      qint8 mIgniterId;
+      int8_t mIgniterId;
 };
 
 #endif // BOMBMAPITEM_H

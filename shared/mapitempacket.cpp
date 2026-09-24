@@ -65,7 +65,7 @@ void MapItemPacket::enqueue(QDataStream & out)
 void MapItemPacket::dequeue(QDataStream & in)
 {
    // read members
-   qint32 itemType = 0;
+   int32_t itemType = 0;
    in >> itemType;
    mItemType = (MapItem::ItemType)itemType;
 

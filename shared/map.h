@@ -51,10 +51,10 @@ class Map
       bool isHiddenExtraAvailable() const;
 
       //! getter for the field's width
-      qint32 getWidth() const;
+      int32_t getWidth() const;
 
       //! getter for the field's height
-      qint32 getHeight() const;
+      int32_t getHeight() const;
 
       //! getter for the maximum player count
       int getMaxPlayers();
@@ -102,10 +102,10 @@ class Map
    protected:
 
       //! width of the map
-      qint32 mWidth;
+      int32_t mWidth;
 
       //! height of the map
-      qint32 mHeight;
+      int32_t mHeight;
 
       //! the map itself
       MapItem** mMap;

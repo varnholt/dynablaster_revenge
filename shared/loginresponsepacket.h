@@ -15,7 +15,7 @@ public:
    //! write constructor
    LoginResponsePacket(
       bool broadcasted,
-      qint32 id,
+      int32_t id,
       const QString& nick,
       const ServerConfiguration& serverConfig
    );
@@ -36,10 +36,10 @@ public:
    void dequeue(QDataStream&);
 
    //! setter for the id
-   void setId(qint32 id);
+   void setId(int32_t id);
 
    //! getter for the id
-   qint32 getId() const;
+   int32_t getId() const;
 
    //! getter for player nick
    const QString& getNick() const;
@@ -57,7 +57,7 @@ private:
    bool mBroadcast;
 
    //! player's
-   qint32 mId;
+   int32_t mId;
 
    //! player nick
    QString mNick;

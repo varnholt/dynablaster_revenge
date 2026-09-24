@@ -220,14 +220,14 @@ class Game : public QObject
       void bombKickedAnimation(Constants::Direction, float speed);
 
       //! send an idle packet
-      void playerIdle(qint8 directions, Player* player);
+      void playerIdle(int8_t directions, Player* player);
 
       //! move player
       void playerMove(
          Player* player,
          float assignedXPos,
          float assignedYPos,
-         qint8 directions
+         int8_t directions
       );
 
       //! player kicks a bomb
@@ -391,10 +391,10 @@ class Game : public QObject
       QMap<QTcpSocket*, Player*> mPlayerSockets;
 
       //! map id <-> player
-      QMap<qint8, Player*> mPlayers;
+      QMap<int8_t, Player*> mPlayers;
 
       //! map of expected packet sizes
-      QMap<QTcpSocket*, quint16> mPacketSizes;
+      QMap<QTcpSocket*, uint16_t> mPacketSizes;
 
       //! outgoing packages
       QList<Packet*> mOutgoingPackets;

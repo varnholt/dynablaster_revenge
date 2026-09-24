@@ -10,9 +10,9 @@ public:
 
    //! write constructor
    BombPacket(
-      qint8 playerId,
-      quint8 x,
-      quint8 y
+      int8_t playerId,
+      uint8_t x,
+      uint8_t y
    );
 
    //! read constructor
@@ -31,25 +31,25 @@ public:
    void dequeue(QDataStream&);
 
    //! getter for player id
-   qint8 getPlayerId();
+   int8_t getPlayerId();
 
    //! getter for the bomb's x field position
-   quint8 getX();
+   uint8_t getX();
 
    //! getter for the bomb's y field position
-   quint8 getY();
+   uint8_t getY();
 
 
 private:
 
    //! player id
-   qint8 playerId;
+   int8_t playerId;
 
    //! the bomb's x field position
-   quint8 x;
+   uint8_t x;
 
    //! the bomb's x field position
-   quint8 y;
+   uint8_t y;
 
 };
 

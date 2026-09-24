@@ -12,8 +12,8 @@
 /*!
 */
 PlayerKilledPacket::PlayerKilledPacket(
-   qint32 playerId,
-   qint32 playerKilledById,
+   int32_t playerId,
+   int32_t playerKilledById,
    Constants::Direction direction,
    float intensity
 )
@@ -46,7 +46,7 @@ PlayerKilledPacket::PlayerKilledPacket()
 /*!
    \param out datastream to write members to
 */
-qint32 PlayerKilledPacket::getPlayerId() const
+int32_t PlayerKilledPacket::getPlayerId() const
 {
 	return mPlayerId;
 }
@@ -71,7 +71,7 @@ void PlayerKilledPacket::enqueue(QDataStream & out)
 */
 void PlayerKilledPacket::dequeue(QDataStream & in)
 {
-   qint32 direction = 0;
+   int32_t direction = 0;
 
    // read members
    in

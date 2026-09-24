@@ -16,8 +16,8 @@ class LeaveGameResponsePacket : public Packet
 
       //! constructor
       LeaveGameResponsePacket(
-         qint32 gameId,
-         qint32 playerId
+         int32_t gameId,
+         int32_t playerId
       );
 
       //! destructor
@@ -36,25 +36,25 @@ class LeaveGameResponsePacket : public Packet
       // getters and setters
 
       //! setter for the game id
-      void setGameId(qint32 id);
+      void setGameId(int32_t id);
 
       //! getter for the game id
-      qint32 getGameId() const;
+      int32_t getGameId() const;
 
       //! setter for the player id
-      void setPlayerId(qint32 id);
+      void setPlayerId(int32_t id);
 
       //! getter for the player id
-      qint32 getPlayerId() const;
+      int32_t getPlayerId() const;
 
 
    protected:
 
       //! game's id
-      qint32 mGameId;
+      int32_t mGameId;
 
       //! player's
-      qint32 mPlayerId;
+      int32_t mPlayerId;
 
 
 };

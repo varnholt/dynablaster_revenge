@@ -17,7 +17,7 @@
 */
 LoginResponsePacket::LoginResponsePacket(
    bool broadcast,
-   qint32 id,
+   int32_t id,
    const QString& nick,
    const ServerConfiguration& serverConfig
 )
@@ -57,7 +57,7 @@ LoginResponsePacket::~LoginResponsePacket()
 /*!
    \param id id to set
 */
-void LoginResponsePacket::setId(qint32 tmpId)
+void LoginResponsePacket::setId(int32_t tmpId)
 {
    mId = tmpId;
 }
@@ -67,7 +67,7 @@ void LoginResponsePacket::setId(qint32 tmpId)
 /*!
    \return player's id
 */
-qint32 LoginResponsePacket::getId() const
+int32_t LoginResponsePacket::getId() const
 {
    return mId;
 }

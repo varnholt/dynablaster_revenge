@@ -52,13 +52,13 @@ class GameEventPacket : public Packet
       // ExtraCollectedPacket
 
       //! setter for player id
-      void setPlayerId(qint32);
+      void setPlayerId(int32_t);
 
       //! setter for extra type
       void setExtraType(Constants::ExtraType);
 
       //! getter for player id
-      qint32 getPlayerId() const;
+      int32_t getPlayerId() const;
 
       //! getter for extra type
       Constants::ExtraType getExtraType() const;
@@ -93,7 +93,7 @@ class GameEventPacket : public Packet
       // extra attributes for extra collected
 
       //! player's id
-      qint32 mPlayerId;
+      int32_t mPlayerId;
 
       //! extra that was collected
       Constants::ExtraType mExtraType;
