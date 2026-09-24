@@ -207,6 +207,14 @@ void ShadowBillboard::renderDiffuse()
    float z = 0.1f;
    int count = 0;
    Vector* dst = (Vector*)activeDevice->lockVertexBuffer(mVertices);
+   if (!dst)
+   {
+      // glMapBufferRange can fail (buffer still mapped from a prior call, GL error pending,
+      // etc.) - skip this frame's shadows rather than dereference a null pointer.
+      end();
+      return;
+   }
+
    QMap<Geometry*, Bounding>::ConstIterator it;
    for (it = mInstances.constBegin(); it != mInstances.constEnd(); it++)
    {

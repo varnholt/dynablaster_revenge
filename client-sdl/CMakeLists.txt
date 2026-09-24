@@ -8,10 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # dumps from real playtests (WER's %LOCALAPPDATA%\CrashDumps) unsymbolized/unusable - see project
 # memory on the countdown/camera crash investigation. Adding /Zi + /DEBUG here doesn't change
 # runtime codegen (still full /O2), just emits a separate .pdb alongside the .exe/.dll.
+# Deliberately NOT /OPT:ICF: it folds byte-identical function bodies into one, so a crash dump's
+# innermost frame can be misattributed to whichever function the linker picked to represent the
+# fold - actively harmful for trustworthy crash symbolication, which is the whole point here.
 if (MSVC)
     string(APPEND CMAKE_CXX_FLAGS_RELEASE " /Zi")
-    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF")
-    string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF")
+    string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF")
 endif()
 
 # Material still derives from QObject (hot-reload via QFileSystemWatcher) and a couple of
