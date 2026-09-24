@@ -4,17 +4,16 @@
 
 /// \brief GLES3 port of client/src/framework/framebuffer.cpp.
 ///
-/// The legacy multisample-resolve path (EXT_framebuffer_object era), the DepthTexture/FloatColor
-/// format flags, and copyTexture() are dropped - none of them are used by the one consumer so far
-/// (MenuDrawable's page cross-fade), which only ever constructs a plain single-sample RGBA
-/// framebuffer with an ordinary depth renderbuffer. Re-add whichever of these a real caller
-/// needs once one shows up, rather than guessing at requirements now.
+/// The legacy multisample-resolve path (EXT_framebuffer_object era) and copyTexture() are
+/// dropped - unused by any real caller so far. DepthTexture (needed by PlayerDeathEffect, which
+/// samples a dying player's depth buffer to seed its particle positions) is ported for real.
 class FrameBuffer
 {
 public:
    enum FormatFlags
    {
-      NoDepthBuffer = 1
+      NoDepthBuffer = 1,
+      DepthTexture = 2
    };
 
    FrameBuffer(int width, int height, int multiSample = 0, int formatFlags = 0);
@@ -26,10 +25,14 @@ public:
 
    int width() const;
    int height() const;
+   // matches the original's mWidth * sqrt(mSamples) / refWidth - this port has no multisampling
+   // (mSamples is always effectively 1), so the sqrt(mSamples) term simplifies away.
+   float getSizeFactor(float refWidth) const;
    bool setResolution(int width, int height);
    bool resolutionChanged(int width, int height) const;
    unsigned int texture() const;
    unsigned int target() const;
+   unsigned int depthTexture() const;
    void bind(int width = 0, int height = 0);
    void unbind();
 
@@ -41,6 +44,7 @@ private:
    unsigned int mTarget;
    unsigned int mTexture;
    unsigned int mDepthBuffer;
+   unsigned int mDepthTexture;
    int mWidth;
    int mHeight;
    int mFormatFlags;

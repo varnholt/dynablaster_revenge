@@ -4,6 +4,16 @@ project(dynablaster_sdl LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Release builds emit no PDB by default under the Visual Studio generator, which makes crash
+# dumps from real playtests (WER's %LOCALAPPDATA%\CrashDumps) unsymbolized/unusable - see project
+# memory on the countdown/camera crash investigation. Adding /Zi + /DEBUG here doesn't change
+# runtime codegen (still full /O2), just emits a separate .pdb alongside the .exe/.dll.
+if (MSVC)
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE " /Zi")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF")
+    string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF")
+endif()
+
 # Material still derives from QObject (hot-reload via QFileSystemWatcher) and a couple of
 # QMap/QMutex uses survive in the ported engine core. That Qt dependency is intentionally kept
 # for now - see the phase split in README.md - and gets stripped in a later pass once the
@@ -285,6 +295,10 @@ add_library(dynablaster_core STATIC
     src/game/positioninterpolation.h
     src/game/bombermanclient.cpp
     src/game/bombermanclient.h
+    src/game/wordwrap.cpp
+    src/game/wordwrap.h
+    src/menus/hosthistory.cpp
+    src/menus/hosthistory.h
 
     # Phase 5 (real in-game rendering - map/players/bombs/extras/HUD) - see project memory for the
     # full dependency-graph scoping this was based on and what's deliberately deferred (particle
@@ -305,8 +319,14 @@ add_library(dynablaster_core STATIC
     src/game/detonationmanager.h
     src/game/detonation.cpp
     src/game/detonation.h
+    src/game/deathflowfieldanimation.cpp
+    src/game/deathflowfieldanimation.h
+    src/game/playerdeatheffect.cpp
+    src/game/playerdeatheffect.h
     src/game/gamedrawable.cpp
     src/game/gamedrawable.h
+    src/game/countdowndrawable.cpp
+    src/game/countdowndrawable.h
 
     ${DYNABLASTER_ENGINE_SOURCES}
     ${DYNABLASTER_SHARED_SOURCES}

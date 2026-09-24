@@ -15,6 +15,7 @@
 #include "animation/motionmixer.h"
 #include "bombermanclient.h"
 #include "detonationmanager.h"
+#include "playerdeatheffect.h"
 #include "extra.h"
 #include "extramapitem.h"
 #include "gamesettings.h"
@@ -45,6 +46,7 @@ GameDrawable::GameDrawable(RenderDevice* device)
    mPlayers(nullptr),
    mDestructAnim(),
    mDetonations(nullptr),
+   mPlayerDeathEffect(nullptr),
    mTime(0.0f),
    mTimePrev(0.0f),
    mStones(nullptr),
@@ -95,6 +97,7 @@ GameDrawable::~GameDrawable()
 
    deleteLevelData();
    delete mDetonations;
+   delete mPlayerDeathEffect;
 }
 
 
@@ -346,6 +349,8 @@ void GameDrawable::initializeGL()
 {
    mDetonations= new DetonationManager();
    mDetonations->init();
+
+   mPlayerDeathEffect = new PlayerDeathEffect();
 }
 
 
@@ -1122,6 +1127,9 @@ void GameDrawable::animate(float time)
    float delta= time - mTime;
    mTime= time;
 
+   if (mPlayerDeathEffect)
+      mPlayerDeathEffect->animate(delta);
+
    mCameraAnim+=delta*60.0f;
 
    if (mBounce > delta*0.01f)
@@ -1323,6 +1331,32 @@ void GameDrawable::paintGL()
    }
 
    mDetonations->render();
+
+   // start flow fields when a player got killed (and the kill anim is over) - matches the
+   // original's own "playerMesh->getFrame() > 10000.0f" convention: PlayerItem::animate() only
+   // wraps the frame counter back to 0 while alive, so it climbs unbounded once mKilled is set,
+   // naturally crossing 10000 once the one-shot death animation has long finished playing.
+   foreach (PlayerItem* player, mPlayerList)
+   {
+      if (player->isKilled())
+      {
+         Mesh* playerMesh = player->getMesh();
+
+         if (playerMesh->getFrame() > 10000.0f)
+         {
+            Geometry* playerGeometry = playerMesh->getPart(0);
+
+            if (playerGeometry->isVisible())
+            {
+               Material* material = mPlayers->getMaterial(static_cast<int32_t>(player->getColor()) - 1);
+               mPlayerDeathEffect->add(material);
+               playerGeometry->setVisible(false);
+            }
+         }
+      }
+   }
+
+   mPlayerDeathEffect->render();
 
    // draw level specific stuff
    if (mLevel)

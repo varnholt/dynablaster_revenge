@@ -30,6 +30,7 @@ using GLsizeiptr = intptr_t;
 #define GL_COLOR_BUFFER_BIT 0x00004000
 #define GL_DEPTH_BUFFER_BIT 0x00000100
 
+#define GL_POINTS 0x0000
 #define GL_LINES 0x0001
 #define GL_TRIANGLES 0x0004
 #define GL_TRIANGLE_STRIP 0x0005
@@ -44,6 +45,11 @@ using GLsizeiptr = intptr_t;
 #define GL_ELEMENT_ARRAY_BUFFER 0x8893
 #define GL_STATIC_DRAW 0x88E4
 #define GL_DYNAMIC_DRAW 0x88E8
+
+// PlayerDeathEffect::draw() reads the GPU-computed particle positions straight into a VBO via
+// glReadPixels (no transform feedback in this GL version) - needs a buffer bound as the pixel
+// pack target rather than a plain client-memory pointer.
+#define GL_PIXEL_PACK_BUFFER 0x88EB
 
 // The legacy renderer bound buffers via the old ARB-suffixed enums (same values, pre-promotion
 // to core). Aliased here so ported .cpp files compile unchanged; safe to drop once every call
@@ -96,6 +102,11 @@ using GLsizeiptr = intptr_t;
 #define GL_DEPTH_COMPONENT 0x1902
 #define GL_RED 0x1903
 #define GL_R8 0x8229
+
+// PlayerDeathEffect's GPU particle simulation stores particle positions/params as pixel data in
+// float render targets (a GPGPU technique) - needs a floating-point-sampleable/renderable format,
+// unlike every other texture in this port so far.
+#define GL_RGBA32F 0x8814
 
 // DetonationManager's procedural noise volume - GLES3 has native GL_TEXTURE_3D support (unlike
 // GL_TEXTURE_1D, which has no GLES equivalent at all).
@@ -213,6 +224,7 @@ using PFNGLTEXIMAGE3DPROC = void (*)(GLenum, GLint, GLint, GLsizei, GLsizei, GLs
 using PFNGLTEXPARAMETERIPROC = void (*)(GLenum, GLenum, GLint);
 using PFNGLDELETETEXTURESPROC = void (*)(GLsizei, const GLuint*);
 using PFNGLACTIVETEXTUREPROC = void (*)(GLenum);
+using PFNGLCOPYTEXIMAGE2DPROC = void (*)(GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint);
 
 using PFNGLGETUNIFORMLOCATIONPROC = GLint (*)(GLuint, const GLchar*);
 using PFNGLUNIFORM1IPROC = void (*)(GLint, GLint);
@@ -303,6 +315,7 @@ extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLTEXPARAMETERIPROC glTexParameteri;
 extern PFNGLDELETETEXTURESPROC glDeleteTextures;
 extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+extern PFNGLCOPYTEXIMAGE2DPROC glCopyTexImage2D;
 
 extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLUNIFORM1IPROC glUniform1i;

@@ -6,7 +6,7 @@ Array<FrameBuffer*> FrameBuffer::mStack;
 unsigned int FrameBuffer::mQuadVertexBuffer = 0;
 
 FrameBuffer::FrameBuffer(int width, int height, int /*multiSample*/, int formatFlags)
-    : mTarget(0), mTexture(0), mDepthBuffer(0), mWidth(0), mHeight(0), mFormatFlags(formatFlags)
+    : mTarget(0), mTexture(0), mDepthBuffer(0), mDepthTexture(0), mWidth(0), mHeight(0), mFormatFlags(formatFlags)
 {
    if (setResolution(width, height))
    {
@@ -33,6 +33,9 @@ void FrameBuffer::discard()
    if (mDepthBuffer)
       glDeleteRenderbuffers(1, &mDepthBuffer);
 
+   if (mDepthTexture)
+      glDeleteTextures(1, &mDepthTexture);
+
    if (mTexture)
       glDeleteTextures(1, &mTexture);
 }
@@ -58,10 +61,28 @@ bool FrameBuffer::setResolution(int width, int height)
 
    if ((mFormatFlags & NoDepthBuffer) == 0)
    {
-      glGenRenderbuffers(1, &mDepthBuffer);
-      glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
-      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+      if (mFormatFlags & DepthTexture)
+      {
+         // sampleable depth buffer (PlayerDeathEffect reads it back to seed particle positions) -
+         // downsampling a multisampled depth texture gives questionable results, so this is only
+         // ever meaningful for a plain single-sample framebuffer like this one.
+         glGenTextures(1, &mDepthTexture);
+         glBindTexture(GL_TEXTURE_2D, mDepthTexture);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+         glBindTexture(GL_TEXTURE_2D, 0);
+         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture, 0);
+      }
+      else
+      {
+         glGenRenderbuffers(1, &mDepthBuffer);
+         glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
+         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+      }
    }
 
    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture, 0);
@@ -137,6 +158,11 @@ int FrameBuffer::height() const
    return mHeight;
 }
 
+float FrameBuffer::getSizeFactor(float refWidth) const
+{
+   return static_cast<float>(mWidth) / refWidth;
+}
+
 bool FrameBuffer::resolutionChanged(int width, int height) const
 {
    return (mWidth != width || mHeight != height);
@@ -150,6 +176,11 @@ unsigned int FrameBuffer::texture() const
 unsigned int FrameBuffer::target() const
 {
    return mTarget;
+}
+
+unsigned int FrameBuffer::depthTexture() const
+{
+   return mDepthTexture;
 }
 
 void FrameBuffer::draw(float alpha)

@@ -47,6 +47,7 @@ PFNGLTEXIMAGE3DPROC glTexImage3D;
 PFNGLTEXPARAMETERIPROC glTexParameteri;
 PFNGLDELETETEXTURESPROC glDeleteTextures;
 PFNGLACTIVETEXTUREPROC glActiveTexture;
+PFNGLCOPYTEXIMAGE2DPROC glCopyTexImage2D;
 
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 PFNGLUNIFORM1IPROC glUniform1i;
@@ -141,6 +142,7 @@ bool loadGles3Functions()
    ok &= load(glTexParameteri, "glTexParameteri");
    ok &= load(glDeleteTextures, "glDeleteTextures");
    ok &= load(glActiveTexture, "glActiveTexture");
+   ok &= load(glCopyTexImage2D, "glCopyTexImage2D");
 
    ok &= load(glGetUniformLocation, "glGetUniformLocation");
    ok &= load(glUniform1i, "glUniform1i");

@@ -28,6 +28,7 @@ class MapItem;
 class Material;
 class Mesh;
 class Node;
+class PlayerDeathEffect;
 class PlayerItem;
 class QKeyEvent;
 class RenderDevice;
@@ -35,12 +36,13 @@ class SceneGraph;
 class Skull;
 
 // Trimmed GLES3 port of client/src/game/gamedrawable.{h,cpp} (see project memory - Phase 5).
-// Real map/players/bombs/extras/HUD rendering. Deliberately dropped (see project memory for the
-// full reasoning per item, all deferred - not missing by oversight): ExtraAnimation/
-// ExtraRevealAnimation (immediate-mode-GL particle reveal effects), MushroomAnimation+
-// ShroomFilter, InvisiblePlayerEffect, PlayerDeathEffect/PlayerInfectedEffect/
-// PlayerInvincibleEffect (flowfield-particle status-effect visuals - the actual game state still
-// flows through BombermanClient regardless), RibbonAnimationFactory/StarTalersFactory/
+// Real map/players/bombs/extras/HUD rendering. PlayerDeathEffect (the GPU flowfield-particle
+// death burst) was ported for real - see playerdeatheffect.{h,cpp}. Still deliberately dropped
+// (see project memory for the full reasoning per item, all deferred - not missing by oversight):
+// ExtraAnimation/ExtraRevealAnimation (immediate-mode-GL particle reveal effects), MushroomAnimation+
+// ShroomFilter, InvisiblePlayerEffect, PlayerInfectedEffect/PlayerInvincibleEffect (the same class
+// of flowfield-particle status-effect visual, just for infection/invincibility instead of death -
+// the actual game state still flows through BombermanClient regardless), RibbonAnimationFactory/StarTalersFactory/
 // LensFlareFactory (round-end/bonus visual flourishes), GamePlaybackDisplay (moot - GamePlayback
 // is a no-op stub), GamePlayerNameDisplay, FuseParticle/FuseParticleEmitter (bomb fuse sparks),
 // HeadlessIntegration (bot/multi-instance tooling), the MainDrawable-owned offscreen
@@ -188,6 +190,7 @@ private:
    SceneGraph* mPlayers;
    Array<Node*> mDestructAnim;
    DetonationManager* mDetonations;
+   PlayerDeathEffect* mPlayerDeathEffect;
 
    float mTime;
    float mTimePrev;
