@@ -11,6 +11,8 @@
 
 #include "sdlglobaltime.h"
 
+#include "framework/timerhandler.h"
+
 #include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
@@ -420,6 +422,12 @@ int main(int argc, char** argv)
       // (via FrameTimer), so updating it after paintGL() makes every frame's fade calc use last
       // frame's stale time instead of this frame's.
       globalTime.update();
+
+      // drives every FrameTimer's timeout() signal (client/src/game/bombermanview.cpp:385's
+      // TimerHandler::Instance()->update() - never carried over to this port). Without this,
+      // FrameTimer::start()'s timer never fires at all - broke PositionInterpolation's own
+      // FrameTimer-based update loop, which is why kicked bombs never visually moved.
+      TimerHandler::Instance()->update();
 
       const float timeMs = static_cast<float>(SDL_GetTicks());
 

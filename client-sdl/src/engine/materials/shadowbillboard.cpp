@@ -206,7 +206,11 @@ void ShadowBillboard::renderDiffuse()
 
    float z = 0.1f;
    int count = 0;
-   Vector* dst = (Vector*)activeDevice->lockVertexBuffer(mVertices);
+   // explicit size - lockVertexBuffer()'s size-less overload falls back to GLDevice's single
+   // shared "last created buffer" size, which by this point in the frame belongs to whatever
+   // other material most recently created a buffer, not this one. Silently mapped the wrong byte
+   // range on every frame after the first, so this never rendered anything beyond one lucky frame.
+   Vector* dst = (Vector*)activeDevice->lockVertexBuffer(mVertices, sizeof(Vector) * 4 * 1000);
    if (!dst)
    {
       // glMapBufferRange can fail (buffer still mapped from a prior call, GL error pending,
