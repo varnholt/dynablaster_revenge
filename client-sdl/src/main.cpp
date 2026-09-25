@@ -16,6 +16,7 @@
 #include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
+#include "game/gamemessagingdrawable.h"
 #include "game/gamewindrawable.h"
 #include "game/soundmanager.h"
 
@@ -77,7 +78,10 @@ int mapEditingKey(SDL_Keycode key)
 /// Both were missing here entirely, so neither ever reached BombermanClient while in-game.
 /// Separate from mapEditingKey() below (menu text-field navigation) - only one of
 /// menuDrawable/gameDrawable is visible and receives key events at a time, so reusing the same
-/// Qt::Key values for both is fine.
+/// Qt::Key values for both is fine. Backspace/Delete/Home/End are for GameMessagingDrawable's own
+/// in-game chat text editing - same key event reaches both BombermanClient and
+/// GameMessagingDrawable each frame (matches the original's GameView::keyPressEvent(), which
+/// forwards to every visible Drawable), each independently gated on its own "chat active" flag.
 int mapGameKey(SDL_Keycode key)
 {
    switch (key)
@@ -106,6 +110,14 @@ int mapGameKey(SDL_Keycode key)
          return Qt::Key_Escape;
       case SDLK_TAB:
          return Qt::Key_Tab;
+      case SDLK_BACKSPACE:
+         return Qt::Key_Backspace;
+      case SDLK_DELETE:
+         return Qt::Key_Delete;
+      case SDLK_HOME:
+         return Qt::Key_Home;
+      case SDLK_END:
+         return Qt::Key_End;
       default:
          return 0;
    }
@@ -257,6 +269,13 @@ int main(int argc, char** argv)
    gameDrawable.initializeGL();
    gameDrawable.setVisible(false);
 
+   // in-game chat (client/src/game/gamemessagingdrawable.cpp) - toggled visible/hidden together
+   // with GameDrawable (see showGame/showMenuAgain below), matching GameView::showGame()/
+   // showMenuDisableGame().
+   GameMessagingDrawable gameMessagingDrawable(&device);
+   gameMessagingDrawable.initializeGL();
+   gameMessagingDrawable.setVisible(false);
+
    // pre-round countdown HUD overlay (client/src/game/countdowndrawable.cpp) - drawn on top of
    // GameDrawable each frame while a countdown is in progress, matching GameView's own draw
    // order (CountdownDrawable is constructed/registered last in the original's GameView, so it
@@ -296,17 +315,25 @@ int main(int argc, char** argv)
    QObject::connect(&bombermanClient, SIGNAL(playerInfected(int,Constants::SkullType,int,int,int)), &gameDrawable, SLOT(playerInfected(int,Constants::SkullType,int,int,int)));
    QObject::connect(&bombermanClient, SIGNAL(playerId(int)), &gameDrawable, SLOT(setPlayerId(int)));
    QObject::connect(&bombermanClient, SIGNAL(countdown(int)), &countdownDrawable, SLOT(countdown(int)));
+   QObject::connect(
+      &bombermanClient,
+      SIGNAL(messageReceived(int, QString, bool)),
+      &gameMessagingDrawable,
+      SLOT(messageReceived(int, QString, bool))
+   );
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
-   // still-deferred GameStatsDrawable/GameMessagingDrawable/MusicPlayerDrawable/GameHelpDrawable).
+   // still-deferred GameStatsDrawable/MusicPlayerDrawable/GameHelpDrawable).
    QObject::connect(&bombermanClient, &BombermanClient::showGame, [&]() {
       menuDrawable.setVisible(false);
       logoDrawable.setVisible(false);
       menuCursor.setVisible(false);
       gameDrawable.setVisible(true);
+      gameMessagingDrawable.setVisible(true);
    });
    auto showMenuAgain = [&]() {
       gameDrawable.setVisible(false);
+      gameMessagingDrawable.setVisible(false);
       countdownDrawable.setVisible(false);
       menuDrawable.setVisible(true);
       logoDrawable.setVisible(true);
@@ -400,8 +427,13 @@ int main(int argc, char** argv)
                   const int qtKey = mapGameKey(event.key.key);
                   if (qtKey != 0)
                   {
+                     // same key event reaches both - matches GameView::keyPressEvent() forwarding
+                     // to every visible Drawable; each side's own "chat active" gate (see
+                     // BombermanClient::processKeyPressed()/GameMessagingDrawable::isActive())
+                     // keeps movement and chat text entry from double-handling it.
                      QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier, QString(), event.key.repeat);
                      gameDrawable.keyPressEvent(&keyEvent);
+                     gameMessagingDrawable.keyPressEvent(&keyEvent);
                   }
                }
                else
@@ -430,11 +462,13 @@ int main(int argc, char** argv)
             }
             case SDL_EVENT_TEXT_INPUT:
             {
-               if (!gameDrawable.isVisible())
-               {
-                  QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
+               QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
+
+               if (gameDrawable.isVisible())
+                  gameMessagingDrawable.keyPressEvent(&keyEvent);
+               else
                   menuDrawable.keyPressEvent(&keyEvent);
-               }
+
                break;
             }
             default:
@@ -485,6 +519,11 @@ int main(int argc, char** argv)
          // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
          gameDrawable.animate(timeMs * 0.0625f);
          gameDrawable.paintGL();
+      }
+
+      if (gameMessagingDrawable.isVisible())
+      {
+         gameMessagingDrawable.paintGL();
       }
 
       if (countdownDrawable.isVisible())

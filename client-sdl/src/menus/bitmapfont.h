@@ -47,6 +47,7 @@ public:
    void getOutlineColor(float& r, float& g, float& b, float& a);
    void setColor(float r, float g, float b, float a);
    float buildVertices(float size, const char* text, float x, float y, float centerWidth = -1.0f, float centerHeight = -1.0f);
+   const Array<Vertex>& getVertices() const;
    void draw(const Array<Vertex>& vertices);
    void draw();
    unsigned int getTexture();

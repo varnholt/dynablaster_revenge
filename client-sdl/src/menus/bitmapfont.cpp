@@ -162,6 +162,11 @@ float BitmapFont::buildVertices(float size, const char* text, float x, float y, 
    return x;
 }
 
+const Array<Vertex>& BitmapFont::getVertices() const
+{
+   return mVertices;
+}
+
 void BitmapFont::draw()
 {
    draw(mVertices);

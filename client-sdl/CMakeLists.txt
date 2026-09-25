@@ -339,6 +339,12 @@ add_library(dynablaster_core STATIC
     src/game/gameplayernamedisplay.h
     src/game/gamewindrawable.cpp
     src/game/gamewindrawable.h
+    src/game/gamemessage.cpp
+    src/game/gamemessage.h
+    src/game/animatedgamemessage.cpp
+    src/game/animatedgamemessage.h
+    src/game/gamemessagingdrawable.cpp
+    src/game/gamemessagingdrawable.h
     src/game/gamedrawable.cpp
     src/game/gamedrawable.h
     src/game/countdowndrawable.cpp
