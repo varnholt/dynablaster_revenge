@@ -15,6 +15,7 @@
 #include "animation/motionmixer.h"
 #include "bombermanclient.h"
 #include "detonationmanager.h"
+#include "gameplayernamedisplay.h"
 #include "playerdeatheffect.h"
 #include "extra.h"
 #include "extramapitem.h"
@@ -47,6 +48,7 @@ GameDrawable::GameDrawable(RenderDevice* device)
    mDestructAnim(),
    mDetonations(nullptr),
    mPlayerDeathEffect(nullptr),
+   mPlayerNameDisplay(nullptr),
    mTime(0.0f),
    mTimePrev(0.0f),
    mStones(nullptr),
@@ -98,6 +100,7 @@ GameDrawable::~GameDrawable()
    deleteLevelData();
    delete mDetonations;
    delete mPlayerDeathEffect;
+   delete mPlayerNameDisplay;
 }
 
 
@@ -163,7 +166,21 @@ void GameDrawable::setVisible(bool visible)
 */
 void GameDrawable::keyPressEvent(QKeyEvent* event)
 {
+   if (event->key() == Qt::Key_Tab)
+   {
+      displayPlayerNames();
+   }
+
    emit keyPressed(event);
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+*/
+void GameDrawable::displayPlayerNames()
+{
+   mPlayerNameDisplay->start();
 }
 
 
@@ -351,6 +368,9 @@ void GameDrawable::initializeGL()
    mDetonations->init();
 
    mPlayerDeathEffect = new PlayerDeathEffect();
+
+   mPlayerNameDisplay = new GamePlayerNameDisplay(this);
+   mPlayerNameDisplay->initialize();
 }
 
 
@@ -1357,6 +1377,13 @@ void GameDrawable::paintGL()
    }
 
    mPlayerDeathEffect->render();
+
+   // draw player names
+   if (mPlayerNameDisplay->isActive())
+   {
+      mPlayerNameDisplay->setPlayerData(mPlayerList);
+      mPlayerNameDisplay->draw();
+   }
 
    // draw level specific stuff
    if (mLevel)

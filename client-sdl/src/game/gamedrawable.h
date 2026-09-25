@@ -23,6 +23,7 @@
 // forward declarations
 class DetonationManager;
 class ExtraMapItem;
+class GamePlayerNameDisplay;
 class Level;
 class MapItem;
 class Material;
@@ -37,14 +38,15 @@ class Skull;
 
 // Trimmed GLES3 port of client/src/game/gamedrawable.{h,cpp} (see project memory - Phase 5).
 // Real map/players/bombs/extras/HUD rendering. PlayerDeathEffect (the GPU flowfield-particle
-// death burst) was ported for real - see playerdeatheffect.{h,cpp}. Still deliberately dropped
+// death burst) and GamePlayerNameDisplay (Tab overlay) were ported for real - see
+// playerdeatheffect.{h,cpp} / gameplayernamedisplay.{h,cpp}. Still deliberately dropped
 // (see project memory for the full reasoning per item, all deferred - not missing by oversight):
 // ExtraAnimation/ExtraRevealAnimation (immediate-mode-GL particle reveal effects), MushroomAnimation+
 // ShroomFilter, InvisiblePlayerEffect, PlayerInfectedEffect/PlayerInvincibleEffect (the same class
 // of flowfield-particle status-effect visual, just for infection/invincibility instead of death -
 // the actual game state still flows through BombermanClient regardless), RibbonAnimationFactory/StarTalersFactory/
 // LensFlareFactory (round-end/bonus visual flourishes), GamePlaybackDisplay (moot - GamePlayback
-// is a no-op stub), GamePlayerNameDisplay, FuseParticle/FuseParticleEmitter (bomb fuse sparks),
+// is a no-op stub), FuseParticle/FuseParticleEmitter (bomb fuse sparks),
 // HeadlessIntegration (bot/multi-instance tooling), the MainDrawable-owned offscreen
 // gameFb/BlendQuad blit (MainDrawable doesn't exist in this port - renders straight to the
 // default framebuffer instead, which is safe now that the mushroom/invisibility effects that
@@ -86,6 +88,9 @@ public:
 
    //! key press event
    void keyReleaseEvent(QKeyEvent* event);
+
+   //! show player-name overlay + own-position arrow (Tab key)
+   void displayPlayerNames();
 
    //! getter for camera following player
    bool isCameraFollowingPlayer() const;
@@ -191,6 +196,7 @@ private:
    Array<Node*> mDestructAnim;
    DetonationManager* mDetonations;
    PlayerDeathEffect* mPlayerDeathEffect;
+   GamePlayerNameDisplay* mPlayerNameDisplay;
 
    float mTime;
    float mTimePrev;

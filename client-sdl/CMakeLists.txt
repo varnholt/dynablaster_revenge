@@ -335,6 +335,8 @@ add_library(dynablaster_core STATIC
     src/game/deathflowfieldanimation.h
     src/game/playerdeatheffect.cpp
     src/game/playerdeatheffect.h
+    src/game/gameplayernamedisplay.cpp
+    src/game/gameplayernamedisplay.h
     src/game/gamedrawable.cpp
     src/game/gamedrawable.h
     src/game/countdowndrawable.cpp

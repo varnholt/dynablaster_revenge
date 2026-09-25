@@ -102,14 +102,16 @@ int mapGameKey(SDL_Keycode key)
          return Qt::Key_Enter;
       case SDLK_ESCAPE:
          return Qt::Key_Escape;
+      case SDLK_TAB:
+         return Qt::Key_Tab;
       default:
          return 0;
    }
 }
 
-/// \brief registers the BitmapFonts the ported menu pages actually need (see project memory -
-/// "outlined"/"time"/"large"/"large-outlined" are for in-game HUD text, not menus, and are
-/// deferred until something that needs them is ported).
+/// \brief registers the BitmapFonts the ported menu pages + in-game HUD actually need (see
+/// project memory - "time"/"large"/"large-outlined" are for HUD text nothing here uses yet, and
+/// stay deferred until something needs them).
 void registerMenuFont()
 {
    BitmapFont* fontDefault =
@@ -118,8 +120,14 @@ void registerMenuFont()
    BitmapFont* fontLounge =
       new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.2f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.1f, 0.05f, -0.025f);
 
+   // Tab overlay (GamePlayerNameDisplay) - matches the original's own outline params exactly
+   // (client/src/game/bombermanview.cpp).
+   BitmapFont* fontOutlined =
+      new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.0f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.35f, 0.03f, -0.025f);
+
    FontPool::Instance()->add("default", fontDefault);
    FontPool::Instance()->add("lounge", fontLounge);
+   FontPool::Instance()->add("outlined", fontOutlined);
 }
 
 }  // namespace
