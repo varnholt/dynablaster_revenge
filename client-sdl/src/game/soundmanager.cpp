@@ -106,6 +106,8 @@ void SoundManager::initializeSamples()
    loadSample(SampleExtraInvulnerable, "data/sfx/extra_invulnerable.wav");
    loadSample(SampleMouseOver, "data/sfx/mouse_over.wav");
    loadSample(SampleMouseClick, "data/sfx/mouse_click.wav");
+   loadSample(SampleGameWin, "data/sfx/win.wav");
+   loadSample(SampleGameDraw, "data/sfx/draw.wav");
 }
 
 void SoundManager::loadSample(SampleId id, const char* filename)
@@ -277,6 +279,16 @@ void SoundManager::playSoundKilled()
 void SoundManager::playSoundBomb()
 {
    play(SampleBomb);
+}
+
+void SoundManager::playSoundGameWin()
+{
+   play(SampleGameWin);
+}
+
+void SoundManager::playSoundGameDraw()
+{
+   play(SampleGameDraw);
 }
 
 void SoundManager::playSoundStart()

@@ -16,6 +16,7 @@
 #include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
 #include "game/gamelogodrawable.h"
+#include "game/gamewindrawable.h"
 #include "game/soundmanager.h"
 
 #include "menus/bitmapfont.h"
@@ -32,6 +33,7 @@
 #include <QCoreApplication>
 #include <QKeyEvent>
 #include <QObject>
+#include <QTimer>
 
 #include <SDL3/SDL.h>
 
@@ -110,8 +112,8 @@ int mapGameKey(SDL_Keycode key)
 }
 
 /// \brief registers the BitmapFonts the ported menu pages + in-game HUD actually need (see
-/// project memory - "time"/"large"/"large-outlined" are for HUD text nothing here uses yet, and
-/// stay deferred until something needs them).
+/// project memory - "time" is for HUD text nothing here uses yet, and stays deferred until
+/// something needs it).
 void registerMenuFont()
 {
    BitmapFont* fontDefault =
@@ -125,9 +127,18 @@ void registerMenuFont()
    BitmapFont* fontOutlined =
       new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.0f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.35f, 0.03f, -0.025f);
 
+   // win/trophy screen (GameWinDrawable) - "wins!"/"draw game" headline and the scoreboard rows.
+   BitmapFont* fontLarge =
+      new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.0f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.04f, 0.0025f, -0.01f);
+
+   BitmapFont* fontLargeOutlined =
+      new BitmapFont("data/fonts/font", MenuFont::sMenuChars, 2.0f, 4.0f, 32.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.15f, 0.03f, -0.025f);
+
    FontPool::Instance()->add("default", fontDefault);
    FontPool::Instance()->add("lounge", fontLounge);
    FontPool::Instance()->add("outlined", fontOutlined);
+   FontPool::Instance()->add("large", fontLarge);
+   FontPool::Instance()->add("large-outlined", fontLargeOutlined);
 }
 
 }  // namespace
@@ -253,6 +264,12 @@ int main(int argc, char** argv)
    CountdownDrawable countdownDrawable(&device);
    countdownDrawable.initializeGL();
 
+   // win/trophy screen (client/src/game/gamewindrawable.cpp) - self-governs its own visibility
+   // via GameStateMachine's stateChanged signal (connected in its own constructor), so it needs
+   // no explicit wiring here beyond construction + the animate/paintGL calls below.
+   GameWinDrawable gameWinDrawable(&device);
+   gameWinDrawable.initializeGL();
+
    // client<->game wiring - mirrors client/src/game/bombermanclientgui.cpp's
    // BombermanClientGui::initConnections() (only the connections relevant to what's actually
    // ported here; chat/stats/rounds/music-player/joystick wiring is still out of scope).
@@ -281,9 +298,7 @@ int main(int argc, char** argv)
    QObject::connect(&bombermanClient, SIGNAL(countdown(int)), &countdownDrawable, SLOT(countdown(int)));
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
-   // deferred GameStatsDrawable/GameMessagingDrawable/GameWinDrawable/MusicPlayerDrawable/
-   // GameHelpDrawable, none of which are ported). showMenuWithDelay()'s winner-screen pause
-   // (needs GameWinDrawable) is simplified to an immediate switch.
+   // still-deferred GameStatsDrawable/GameMessagingDrawable/MusicPlayerDrawable/GameHelpDrawable).
    QObject::connect(&bombermanClient, &BombermanClient::showGame, [&]() {
       menuDrawable.setVisible(false);
       logoDrawable.setVisible(false);
@@ -298,7 +313,14 @@ int main(int argc, char** argv)
       menuCursor.setVisible(true);
    };
    QObject::connect(&bombermanClient, &BombermanClient::showMenu, showMenuAgain);
-   QObject::connect(&bombermanClient, &BombermanClient::gameStopped, showMenuAgain);
+   // matches GameView::showMenuWithDelay(): a round ending naturally shows the win/trophy screen
+   // first (GameWinDrawable, still rendered on top of the - now blurred - game scene), only
+   // switching to the menu once its own fade-out sequence finishes. showMenu() above (early
+   // leave/ESC, no valid game id) stays an immediate switch - matches GameWinDrawable's own
+   // isGameIdValid() gate, which skips showing itself in exactly that case.
+   QObject::connect(&bombermanClient, &BombermanClient::gameStopped, [&]() {
+      QTimer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain);
+   });
    // pageChangeRequest is a protected slot (see the navigator wiring above) - invokeMethod goes
    // through Qt's meta-object system, bypassing C++ access control the same way the string-based
    // SIGNAL/SLOT connects elsewhere in this file already do.
@@ -470,6 +492,13 @@ int main(int argc, char** argv)
          // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
          countdownDrawable.animate(timeMs * 0.0625f);
          countdownDrawable.paintGL();
+      }
+
+      if (gameWinDrawable.isVisible())
+      {
+         // real seconds * 62.5, matching client/src/game/bombermanview.cpp's Drawable::animate() convention.
+         gameWinDrawable.animate(timeMs * 0.0625f);
+         gameWinDrawable.paintGL();
       }
 
       context.swap();

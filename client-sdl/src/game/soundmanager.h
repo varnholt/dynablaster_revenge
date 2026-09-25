@@ -52,6 +52,8 @@ public slots:
    void playSoundBoxShake();
    void playSoundExtraRevealed();
    void playSkullSound(Constants::SkullType skullType);
+   void playSoundGameWin();
+   void playSoundGameDraw();
 
    void playSoundMouseOver(const QString& page, const QString& item);
    void playSoundMouseClick(const QString& page);
@@ -88,6 +90,8 @@ protected:
       SampleExtraInvulnerable,
       SampleMouseOver,
       SampleMouseClick,
+      SampleGameWin,
+      SampleGameDraw,
       SampleCount
    };
 
