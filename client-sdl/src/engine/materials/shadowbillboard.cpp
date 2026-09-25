@@ -268,7 +268,15 @@ void ShadowBillboard::renderDiffuse()
 
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndices);
 
+   // vertices above are already baked in world space (bound.min/max + obj.translation()), unlike
+   // every other material here which pushes per-geometry transforms - so this is the one material
+   // that needs an explicit identity push. Without it, this shader's u_modelViewProjection uniform
+   // is never uploaded at all (push() is the only thing that uploads it), leaving it at GLSL's
+   // zero-initialized default and collapsing every shadow vertex to the origin - invisible, even
+   // though the draw call itself succeeds.
+   activeDevice->push(Matrix());
    glDrawElements(GL_TRIANGLES, count * 6, GL_UNSIGNED_SHORT, (void*)0);
+   activeDevice->pop();
 
    end();
    //   printf("shadows [%d]: %f \n", mVB.size(), (t2-t1)/1000000.0);
