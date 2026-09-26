@@ -8,13 +8,13 @@
 #include "collisiondetection.h"
 #include "countdownpacket.h"
 #include "detonationpacket.h"
-#include "gameeventpacket.h"
-#include "gamestatspacket.h"
 #include "errorpacket.h"
 #include "extramapitem.h"
 #include "extramapitemcreatedpacket.h"
 #include "extrashakepackethandler.h"
 #include "extraspawn.h"
+#include "gameeventpacket.h"
+#include "gamestatspacket.h"
 #include "joingamerequestpacket.h"
 #include "joingameresponsepacket.h"
 #include "keypacket.h"
@@ -35,9 +35,9 @@
 #include "positionpacket.h"
 #include "startgamerequestpacket.h"
 #include "startgameresponsepacket.h"
+#include "stonemapitem.h"
 #include "stopgamerequestpacket.h"
 #include "stopgameresponsepacket.h"
-#include "stonemapitem.h"
 #include "timepacket.h"
 
 // Qt
@@ -57,58 +57,50 @@
 // static variables
 int Game::sGameId = 0;
 
-
 //-----------------------------------------------------------------------------
 /*!
    constructor
 */
 Game::Game()
-   : mUpdateTimer(nullptr),
-     mMap(nullptr),
-     mGameId(++sGameId),
-     mRunning(false),
-     mIdlePacketSent(false),
-     mGameTimeUpdateTimer(nullptr),
-     mDuration(0),
-     mCreator(nullptr),
-     mState(Constants::GameStopped),
-     mPreparationTimer(nullptr),
-     mPreparationCounter(0),
-     mCheckGameOver(false),
-     mSkipCountdown(false),
-     mPositionSkipCount(0),
-     mGamesPlayed(0),
-     mSynchronizationActive(false),
-     mMaxSpeed(0.0),
-     mSyncMaxTime(0),
-     mCollisionDetection(nullptr),
-     mImmuneTimes(nullptr),
-     mPlayerLeftTheGameCount(0),
-     mStartPositionsInitialized(false),
-     mGameOnlyPopulatedByBotsMessageShown(false),
-     mExtraSpawn(nullptr),
-     mExtraSpawnEnabled(false)
+    : mUpdateTimer(nullptr),
+      mMap(nullptr),
+      mGameId(++sGameId),
+      mRunning(false),
+      mIdlePacketSent(false),
+      mGameTimeUpdateTimer(nullptr),
+      mDuration(0),
+      mCreator(nullptr),
+      mState(Constants::GameStopped),
+      mPreparationTimer(nullptr),
+      mPreparationCounter(0),
+      mCheckGameOver(false),
+      mSkipCountdown(false),
+      mPositionSkipCount(0),
+      mGamesPlayed(0),
+      mSynchronizationActive(false),
+      mMaxSpeed(0.0),
+      mSyncMaxTime(0),
+      mCollisionDetection(nullptr),
+      mImmuneTimes(nullptr),
+      mPlayerLeftTheGameCount(0),
+      mStartPositionsInitialized(false),
+      mGameOnlyPopulatedByBotsMessageShown(false),
+      mExtraSpawn(nullptr),
+      mExtraSpawnEnabled(false)
 {
    qDebug("Game::Game: initializing");
 
    // init config
-   QSettings settings (
-      SERVER_CONFIG_FILE_SERVER,
-      QSettings::IniFormat
-   );
+   QSettings settings(SERVER_CONFIG_FILE_SERVER, QSettings::IniFormat);
 
    mPositionSkipCount = settings.value("skip_positions", 1).toInt();
    mSkipCountdown = settings.value("skip_countdown", false).toBool();
-   BombMapItem::setTickTime(
-      settings.value("tick_count", SERVER_BOMB_TICKTIME_DEFAULT).toInt()
-   );
+   BombMapItem::setTickTime(settings.value("tick_count", SERVER_BOMB_TICKTIME_DEFAULT).toInt());
    bool shakePacketsEnabled = settings.value("shake_packets", true).toBool();
 
-   mMaxSpeed =
-      SERVER_DEFAULT_SPEED + (SERVER_SPEEDUP_INCREMENT * SERVER_MAX_SPEEDUPS);
+   mMaxSpeed = SERVER_DEFAULT_SPEED + (SERVER_SPEEDUP_INCREMENT * SERVER_MAX_SPEEDUPS);
 
-   mSyncMaxTime =
-      settings.value("player_sync_max_time", SERVER_PLAYER_SYNC_MAX_TIME).toInt();
+   mSyncMaxTime = settings.value("player_sync_max_time", SERVER_PLAYER_SYNC_MAX_TIME).toInt();
 
    // create timers
    mUpdateTimer = new QTimer(this);
@@ -134,31 +126,17 @@ Game::Game()
    mCollisionDetection = new CollisionDetection(this);
    mCollisionDetection->setGame(this);
 
-   connect(
-      mCollisionDetection,
-      SIGNAL(playerKicksBomb(Player*,MapItem*,bool,int)),
-      this,
-      SLOT(playerKicksBomb(Player*,MapItem*,bool,int))
-   );
+   mCollisionDetection->playerKicksBombSignal.connect([this](Player* player, MapItem* item, bool verticallyKicked, int keysPressed)
+                                                      { playerKicksBomb(player, item, verticallyKicked, keysPressed); });
 
-   connect(
-      mCollisionDetection,
-      SIGNAL(playerIdle(int8_t,Player*)),
-      this,
-      SLOT(playerIdle(int8_t,Player*))
-   );
+   mCollisionDetection->playerIdleSignal.connect([this](int8_t directions, Player* player) { playerIdle(directions, player); });
 
-   connect(
-      mCollisionDetection,
-      SIGNAL(playerMove(Player*,float,float,int8_t)),
-      this,
-      SLOT(playerMove(Player*,float,float,int8_t))
-   );
+   mCollisionDetection->playerMoveSignal.connect([this](Player* player, float assignedXPos, float assignedYPos, int8_t directions)
+                                                 { playerMove(player, assignedXPos, assignedYPos, directions); });
 
    // init skulls
    initSkullSetup();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -177,7 +155,6 @@ Game::~Game()
    mMap = nullptr;
    mImmuneTimes = nullptr;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -199,18 +176,18 @@ void Game::initSkullSetup()
    // supported skulls
 
    // used skulls
-   bool skullAutofire       = true; // settings.value("skull_autofire", true).toBool();
-   bool skullMinimumBomb    = true; // settings.value("skull_minimum_bomb", true).toBool();
-   bool skullKeyboardInvert = true; // settings.value("skull_keyboard_invert", true).toBool();
-   bool skullMushroom       = true; // settings.value("skull_mushroom", true).toBool();
-   bool skullInvisible      = true; // settings.value("skull_invisible", true).toBool();
-   bool skullInvincible     = true; // settings.value("skull_invincible", true).toBool();
+   bool skullAutofire = true;        // settings.value("skull_autofire", true).toBool();
+   bool skullMinimumBomb = true;     // settings.value("skull_minimum_bomb", true).toBool();
+   bool skullKeyboardInvert = true;  // settings.value("skull_keyboard_invert", true).toBool();
+   bool skullMushroom = true;        // settings.value("skull_mushroom", true).toBool();
+   bool skullInvisible = true;       // settings.value("skull_invisible", true).toBool();
+   bool skullInvincible = true;      // settings.value("skull_invincible", true).toBool();
 
    // unused for now
-   bool skullMaximumBomb    = false; // settings.value("skull_maximum_bomb", false).toBool();
-   bool skullSlow           = false; // settings.value("skull_slow", false).toBool();
-   bool skullFast           = false; // settings.value("skull_fast", false).toBool();
-   bool skullNoBomb         = false; // settings.value("skull_nobomb", false).toBool();
+   bool skullMaximumBomb = false;  // settings.value("skull_maximum_bomb", false).toBool();
+   bool skullSlow = false;         // settings.value("skull_slow", false).toBool();
+   bool skullFast = false;         // settings.value("skull_fast", false).toBool();
+   bool skullNoBomb = false;       // settings.value("skull_nobomb", false).toBool();
 
    // skull face ordering
 
@@ -224,52 +201,52 @@ void Game::initSkullSetup()
    */
 
    // used sides
-   int skullAutofireSide       = 0; // settings.value("skull_autofire_side", 0).toInt();
-   int skullMinimumBombSide    = 1; // settings.value("skull_minimum_bomb_side", 1).toInt();
-   int skullKeyboardInvertSide = 2; // settings.value("skull_keyboard_invert_side", 2).toInt();
-   int skullMushroomSide       = 3; // settings.value("skull_mushroom_side", 3).toInt();
-   int skullInvisibleSide      = 4; // settings.value("skull_invisible_side", 4).toInt();
-   int skullInvincibleSide     = 5; // settings.value("skull_invincible_side", 5).toInt();
+   int skullAutofireSide = 0;        // settings.value("skull_autofire_side", 0).toInt();
+   int skullMinimumBombSide = 1;     // settings.value("skull_minimum_bomb_side", 1).toInt();
+   int skullKeyboardInvertSide = 2;  // settings.value("skull_keyboard_invert_side", 2).toInt();
+   int skullMushroomSide = 3;        // settings.value("skull_mushroom_side", 3).toInt();
+   int skullInvisibleSide = 4;       // settings.value("skull_invisible_side", 4).toInt();
+   int skullInvincibleSide = 5;      // settings.value("skull_invincible_side", 5).toInt();
 
    // unused for now
-   int skullMaximumBombSide    = -1; // settings.value("skull_maximum_bomb_side", -1).toInt();
-   int skullSlowSide           = -1; // settings.value("skull_slow_side", -1).toInt();
-   int skullFastSide           = -1; // settings.value("skull_fast_side", -1).toInt();
-   int skullNoBombSide         = -1; // settings.value("skull_nobomb_side", -1).toInt();
+   int skullMaximumBombSide = -1;  // settings.value("skull_maximum_bomb_side", -1).toInt();
+   int skullSlowSide = -1;         // settings.value("skull_slow_side", -1).toInt();
+   int skullFastSide = -1;         // settings.value("skull_fast_side", -1).toInt();
+   int skullNoBombSide = -1;       // settings.value("skull_nobomb_side", -1).toInt();
 
    QList<Constants::SkullType> faces;
    for (int i = 0; i < 6; i++)
       faces.push_back(Constants::SkullReset);
 
    if (skullAutofireSide > -1 && skullAutofireSide < 6)
-      faces[skullAutofireSide]=Constants::SkullAutofire;
+      faces[skullAutofireSide] = Constants::SkullAutofire;
 
    if (skullKeyboardInvertSide > -1 && skullKeyboardInvertSide < 6)
-      faces[skullKeyboardInvertSide]=Constants::SkullKeyboardInvert;
+      faces[skullKeyboardInvertSide] = Constants::SkullKeyboardInvert;
 
    if (skullMushroomSide > -1 && skullMushroomSide < 6)
-      faces[skullMushroomSide]=Constants::SkullMushroom;
+      faces[skullMushroomSide] = Constants::SkullMushroom;
 
    if (skullInvisibleSide > -1 && skullInvisibleSide < 6)
-      faces[skullInvisibleSide]=Constants::SkullInvisible;
+      faces[skullInvisibleSide] = Constants::SkullInvisible;
 
    if (skullInvincibleSide > -1 && skullInvincibleSide < 6)
-      faces[skullInvincibleSide]=Constants::SkullInvincible;
+      faces[skullInvincibleSide] = Constants::SkullInvincible;
 
    if (skullMinimumBombSide > -1 && skullMinimumBombSide < 6)
-      faces[skullMinimumBombSide]=Constants::SkullMinimumBomb;
+      faces[skullMinimumBombSide] = Constants::SkullMinimumBomb;
 
    if (skullMaximumBombSide > -1 && skullMaximumBombSide < 6)
-      faces[skullMaximumBombSide]=Constants::SkullMaximumBomb;
+      faces[skullMaximumBombSide] = Constants::SkullMaximumBomb;
 
    if (skullSlowSide > -1 && skullSlowSide < 6)
-      faces[skullSlowSide]=Constants::SkullSlow;
+      faces[skullSlowSide] = Constants::SkullSlow;
 
    if (skullFastSide > -1 && skullFastSide < 6)
-      faces[skullFastSide]=Constants::SkullFast;
+      faces[skullFastSide] = Constants::SkullFast;
 
    if (skullNoBombSide > -1 && skullNoBombSide < 6)
-      faces[skullNoBombSide]=Constants::SkullNoBomb;
+      faces[skullNoBombSide] = Constants::SkullNoBomb;
 
    PlayerDisease::setSkullFaces(faces);
 
@@ -309,7 +286,6 @@ void Game::initSkullSetup()
    PlayerDisease::setSupportedSkulls(supportedSkulls);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    initialize server
@@ -321,8 +297,6 @@ void Game::initialize()
    initializeMap();
    initializeTimers();
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -345,18 +319,14 @@ void Game::initializeMap()
    int stones = 0;
 
    float extraCount = 0.0f;
-   int extraBombs    = static_cast<int32_t>(mCreateGameData.mExtraBombEnabled);
-   int extraFlames   = static_cast<int32_t>(mCreateGameData.mExtraFlameEnabled);
-   int extraKicks    = static_cast<int32_t>(mCreateGameData.mExtraKickEnabled);
+   int extraBombs = static_cast<int32_t>(mCreateGameData.mExtraBombEnabled);
+   int extraFlames = static_cast<int32_t>(mCreateGameData.mExtraFlameEnabled);
+   int extraKicks = static_cast<int32_t>(mCreateGameData.mExtraKickEnabled);
    int extraSpeedUps = static_cast<int32_t>(mCreateGameData.mExtraSpeedupEnabled);
-   int extraSkulls   = static_cast<int32_t>(mCreateGameData.mExtraSkullsEnabled);
+   int extraSkulls = static_cast<int32_t>(mCreateGameData.mExtraSkullsEnabled);
 
-   float extraSum =
-        (extraBombs    * SERVER_WEIGHT_BOMBS)
-      + (extraFlames   * SERVER_WEIGHT_FLAMES)
-      + (extraKicks    * SERVER_WEIGHT_KICKS)
-      + (extraSpeedUps * SERVER_WEIGHT_SPEEDUPS)
-      + (extraSkulls   * SERVER_WEIGHT_SKULLS);
+   float extraSum = (extraBombs * SERVER_WEIGHT_BOMBS) + (extraFlames * SERVER_WEIGHT_FLAMES) + (extraKicks * SERVER_WEIGHT_KICKS) +
+                    (extraSpeedUps * SERVER_WEIGHT_SPEEDUPS) + (extraSkulls * SERVER_WEIGHT_SKULLS);
 
    // 13x11 field: 16 extras
    // 26x22 field: 32 extras
@@ -372,12 +342,7 @@ void Game::initializeMap()
       height = 11;
       stones = 60;
 
-      startPositions
-         << QPoint(0,0)
-         << QPoint(12,10)
-         << QPoint(12,0)
-         << QPoint(0,10)
-         << QPoint(6,5);
+      startPositions << QPoint(0, 0) << QPoint(12, 10) << QPoint(12, 0) << QPoint(0, 10) << QPoint(6, 5);
    }
 
    else if (mCreateGameData.mDimension == Constants::Dimension19x17)
@@ -388,17 +353,13 @@ void Game::initializeMap()
       height = 17;
       stones = 120;
 
-      startPositions
-         << QPoint(0, 0)
-         << QPoint(width - 1, height - 1)
-         << QPoint(width - 1, 0)
-         << QPoint(0, height - 1)
-         << QPoint(0, 8)             // center left
-         << QPoint(18, 8)            // center right
-         << QPoint(6, 4)             // center quad top left
-         << QPoint(12, 4)            // center quad top right
-         << QPoint(6, 12)            // center quad bottom left
-         << QPoint(12, 12);          // center quad bottom right
+      startPositions << QPoint(0, 0) << QPoint(width - 1, height - 1) << QPoint(width - 1, 0) << QPoint(0, height - 1)
+                     << QPoint(0, 8)     // center left
+                     << QPoint(18, 8)    // center right
+                     << QPoint(6, 4)     // center quad top left
+                     << QPoint(12, 4)    // center quad top right
+                     << QPoint(6, 12)    // center quad bottom left
+                     << QPoint(12, 12);  // center quad bottom right
    }
 
    else if (mCreateGameData.mDimension == Constants::Dimension25x21)
@@ -409,24 +370,20 @@ void Game::initializeMap()
       height = 21;
       stones = 140;
 
-      startPositions
-         << QPoint(0, 0)
-         << QPoint(width - 1, height - 1)
-         << QPoint(width - 1, 0)
-         << QPoint(0, height - 1)
-         << QPoint(12, 0)           // center top
-         << QPoint(12, 20)          // center bottom
-         << QPoint(7, 6)            // center quad top left
-         << QPoint(17, 6)           // center quad top right
-         << QPoint(7, 14)           // center quad bottom left
-         << QPoint(17, 14);         // center quad bottom right
+      startPositions << QPoint(0, 0) << QPoint(width - 1, height - 1) << QPoint(width - 1, 0) << QPoint(0, height - 1)
+                     << QPoint(12, 0)    // center top
+                     << QPoint(12, 20)   // center bottom
+                     << QPoint(7, 6)     // center quad top left
+                     << QPoint(17, 6)    // center quad top right
+                     << QPoint(7, 14)    // center quad bottom left
+                     << QPoint(17, 14);  // center quad bottom right
    }
 
-   float valBombs    = 0.0f;
-   float valFlames   = 0.0f;
-   float valKicks    = 0.0f;
+   float valBombs = 0.0f;
+   float valFlames = 0.0f;
+   float valKicks = 0.0f;
    float valSpeedUps = 0.0f;
-   float valSkulls   = 0.0f;
+   float valSkulls = 0.0f;
 
    if (extraBombs > 0)
       valBombs = extraCount * (SERVER_WEIGHT_BOMBS / extraSum);
@@ -443,22 +400,14 @@ void Game::initializeMap()
    if (extraSkulls > 0)
       valSkulls = extraCount * (SERVER_WEIGHT_SKULLS / extraSum);
 
-   extraBombs    = static_cast<int32_t>(valBombs);
-   extraFlames   = static_cast<int32_t>(valFlames);
-   extraKicks    = static_cast<int32_t>(valKicks);
+   extraBombs = static_cast<int32_t>(valBombs);
+   extraFlames = static_cast<int32_t>(valFlames);
+   extraKicks = static_cast<int32_t>(valKicks);
    extraSpeedUps = static_cast<int32_t>(valSpeedUps);
-   extraSkulls   = static_cast<int32_t>(valSkulls);
+   extraSkulls = static_cast<int32_t>(valSkulls);
 
    int loop = 0;
-   while ((
-          extraBombs
-        + extraFlames
-        + extraKicks
-        + extraSpeedUps
-        + extraSkulls
-      ) < extraCount
-      && loop < 5
-   )
+   while ((extraBombs + extraFlames + extraKicks + extraSpeedUps + extraSkulls) < extraCount && loop < 5)
    {
       if (loop == 0)
          extraBombs = static_cast<int32_t>(ceil(valBombs));
@@ -475,24 +424,22 @@ void Game::initializeMap()
    }
 
    mMap = Map::generateMap(
-      width,         // width
-      height,        // height
-      stones,        // stones
-      extraBombs,    // bombs
-      extraFlames,   // flames
-      extraSpeedUps, // speedups
-      extraKicks,    // kicks
-      extraSkulls,   // skulls
-      startPositions // start positions
+      width,          // width
+      height,         // height
+      stones,         // stones
+      extraBombs,     // bombs
+      extraFlames,    // flames
+      extraSpeedUps,  // speedups
+      extraKicks,     // kicks
+      extraSkulls,    // skulls
+      startPositions  // start positions
    );
-
 
    delete mImmuneTimes;
    uint32_t fieldCount = static_cast<uint32_t>(width * height);
    mImmuneTimes = new int[fieldCount];
    memset(mImmuneTimes, 0, fieldCount * sizeof(int));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -503,60 +450,39 @@ void Game::initializeTimers()
    qDebug("Game::initializeTimers");
 
    // update timer
-   connect(
-      mUpdateTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(update())
-   );
+   connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(update()));
 
    mUpdateTimer->start(1000 / SERVER_HEARTBEAT_IN_HZ);
 
    // game time timer
-   connect(
-      mGameTimeUpdateTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(processGameTime())
-   );
+   connect(mGameTimeUpdateTimer, SIGNAL(timeout()), this, SLOT(processGameTime()));
 
    mGameTimeUpdateTimer->start(1000);
 
    // game preparation timer
    mPreparationTimer->setInterval(1000);
 
-   connect(
-      mPreparationTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(updatePrepareGame())
-   );
+   connect(mPreparationTimer, SIGNAL(timeout()), this, SLOT(updatePrepareGame()));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastStartPositions()
 {
    foreach (Player* currentPlayer, mPlayers)
    {
       PositionPacket* positionPacket = new PositionPacket(
-         currentPlayer->getId(),
-         Constants::KeyDown,
-         currentPlayer->getX(),
-         currentPlayer->getY(),
-         static_cast<float>(M_PI) * 1.5f
+         currentPlayer->getId(), Constants::KeyDown, currentPlayer->getX(), currentPlayer->getY(), static_cast<float>(M_PI) * 1.5f
       );
 
       mOutgoingPackets.append(positionPacket);
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::initializePlayerStartPositions()
 {
    int startPositionIndex = 0;
@@ -577,10 +503,9 @@ void Game::initializePlayerStartPositions()
    setStartPositionsInitialized(true);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastCreateMapItems()
 {
    QList<MapItemCreatedPacket*> createPackets = mMap->getMapItemCreatedPackets();
@@ -588,10 +513,9 @@ void Game::broadcastCreateMapItems()
       mOutgoingPackets.append(createPackets[i]);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastClearMapItems()
 {
    QList<MapItemRemovedPacket*> removePackets = mMap->getMapItemRemovedPackets();
@@ -599,10 +523,9 @@ void Game::broadcastClearMapItems()
       mOutgoingPackets.append(removePackets[i]);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::initMapRelatedItems()
 {
    broadcastClearMapItems();
@@ -618,40 +541,27 @@ void Game::initMapRelatedItems()
    broadcastCreateMapItems();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastGameInformation()
 {
    QList<GameInformation> games;
    games << getGameInformation();
-   mOutgoingPackets.append(
-      new ListGamesResponsePacket(
-         games,
-         true
-      )
-   );
+   mOutgoingPackets.append(new ListGamesResponsePacket(games, true));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastStartGame()
 {
-   mOutgoingPackets.append(
-      new StartGameResponsePacket(
-         mGameId,
-         true
-      )
-   );
+   mOutgoingPackets.append(new StartGameResponsePacket(mGameId, true));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::startGame()
 {
    qDebug("Game::startNewGame");
@@ -682,7 +592,6 @@ void Game::startGame()
    broadcastStartGame();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game information object
@@ -707,7 +616,6 @@ GameInformation Game::getGameInformation()
 
    return gameInformation;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -741,7 +649,6 @@ void Game::update()
    sendBroadcastPackets();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    update all positions
@@ -751,7 +658,6 @@ void Game::updatePositions()
    // update player positions
    updatePlayerPositions();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -812,15 +718,10 @@ void Game::updatePlayerPositions()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-bool Game::isKickPossible(
-   int x,
-   int y,
-   Constants::Direction kickDir
-)
+ */
+bool Game::isKickPossible(int x, int y, Constants::Direction kickDir)
 {
    // kick if possible if level dimensions not exceeded and
    // if there's no bomb, stone or block located in the kick
@@ -849,10 +750,7 @@ bool Game::isKickPossible(
          break;
    }
 
-   if (
-         checkOffsetX >= 0 && checkOffsetX < getMap()->getWidth()
-      && checkOffsetY >= 0 && checkOffsetY < getMap()->getHeight()
-   )
+   if (checkOffsetX >= 0 && checkOffsetX < getMap()->getWidth() && checkOffsetY >= 0 && checkOffsetY < getMap()->getHeight())
    {
       // check if there is an obstructing map item
       MapItem* item = getMap()->getItem(checkOffsetX, checkOffsetY);
@@ -883,10 +781,7 @@ bool Game::isKickPossible(
                py = static_cast<int32_t>(floor(p->getY()));
 
                // there is an obstructing player
-               if (
-                     px == checkOffsetX
-                  && py == checkOffsetY
-               )
+               if (px == checkOffsetX && py == checkOffsetY)
                {
                   /*
                      only block the kick bomb if the obstructing player
@@ -910,10 +805,7 @@ bool Game::isKickPossible(
                   */
 
                   // horizontal kick movement
-                  if (
-                        kickDir == Constants::DirectionLeft
-                     || kickDir == Constants::DirectionRight
-                  )
+                  if (kickDir == Constants::DirectionLeft || kickDir == Constants::DirectionRight)
                   {
                      float dx = fabs(p->getX() - x);
 
@@ -924,10 +816,7 @@ bool Game::isKickPossible(
                   }
 
                   // vertical kick movement
-                  if (
-                        kickDir == Constants::DirectionUp
-                     || kickDir == Constants::DirectionDown
-                  )
+                  if (kickDir == Constants::DirectionUp || kickDir == Constants::DirectionDown)
                   {
                      float dy = fabs(p->getY() - y);
 
@@ -945,23 +834,14 @@ bool Game::isKickPossible(
    return kickPossible;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param kickedBomb bomb the kick animation is based on
    \param kickDir kick direction
 */
-void Game::createKickAnimation(
-   BombMapItem* kickedBomb,
-   Constants::Direction kickDir
-)
+void Game::createKickAnimation(BombMapItem* kickedBomb, Constants::Direction kickDir)
 {
-   connect(
-      kickedBomb,
-      SIGNAL(kickAnimation(Constants::Direction,float)),
-      this,
-      SLOT(bombKickedAnimation(Constants::Direction,float))
-   );
+   kickedBomb->kickAnimationSignal.connect([this](Constants::Direction direction, float speed) { bombKickedAnimation(direction, speed); });
 
    // init kick animation
    // also a kick animation needs the playfield map
@@ -972,7 +852,7 @@ void Game::createKickAnimation(
 
    // a kick animations needs to "know" about current player
    // positions so they bounce back once they hit another player
-   foreach(Player* p, mPlayers)
+   foreach (Player* p, mPlayers)
    {
       if (!p->isKilled())
       {
@@ -980,34 +860,30 @@ void Game::createKickAnimation(
       }
    }
 
-   connect(
-      mCollisionDetection,
-      SIGNAL(playerPositionChanged(int,float,float)),
-      bka,
-      SLOT(updatePlayerPosition(int,float,float))
-   );
+   // bka is short-lived (destroyed once the kick/explosion finishes) but the 3 signals below
+   // live for the whole match - unlike Qt's connect(), Signal<> won't auto-disconnect a
+   // destroyed subscriber, so bka has to disconnect itself on the way out (see
+   // BombKickAnimation::addDestroyCallback()).
+   auto positionChangedConnection =
+      mCollisionDetection->playerPositionChangedSignal.connect([bka](int id, float x, float y) { bka->updatePlayerPosition(id, x, y); });
+   auto playerKilledConnection = playerKilledSignal.connect([bka](int id) { bka->removePlayerPosition(id); });
+   auto playerLeavesConnection = playerLeavesSignal.connect([bka](int id) { bka->removePlayerPosition(id); });
 
-   connect(
-      this,
-      SIGNAL(playerKilled(int)),
-      bka,
-      SLOT(removePlayerPosition(int))
-   );
-
-   connect(
-      this,
-      SIGNAL(playerLeaves(int)),
-      bka,
-      SLOT(removePlayerPosition(int))
+   bka->addDestroyCallback(
+      [this, positionChangedConnection, playerKilledConnection, playerLeavesConnection]()
+      {
+         mCollisionDetection->playerPositionChangedSignal.disconnect(positionChangedConnection);
+         playerKilledSignal.disconnect(playerKilledConnection);
+         playerLeavesSignal.disconnect(playerLeavesConnection);
+      }
    );
 
    kickedBomb->setBombKickAnimation(bka);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updateImmuneTimes()
 {
    int val = 0;
@@ -1019,11 +895,10 @@ void Game::updateImmuneTimes()
          pos = y * mMap->getWidth() + x;
          val = mImmuneTimes[pos];
          val -= (1000 / SERVER_HEARTBEAT_IN_HZ);
-         mImmuneTimes[pos]=qMax(0, val);
+         mImmuneTimes[pos] = qMax(0, val);
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1034,7 +909,6 @@ void Game::makeFieldImmune(int x, int y)
 {
    mImmuneTimes[y * mMap->getWidth() + x] = SERVER_IMMUNE_FIELD_DELAY;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1047,25 +921,14 @@ bool Game::isFieldImmune(int x, int y) const
    return mImmuneTimes[y * mMap->getWidth() + x] > 0;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param player affected player
    \param item mapitem
 */
-void Game::playerKicksBomb(
-   Player* player,
-   MapItem* item,
-   bool verticallyKicked,
-   int keysPressed
-)
+void Game::playerKicksBomb(Player* player, MapItem* item, bool verticallyKicked, int keysPressed)
 {
-   if (
-         item
-      && item->getType() == MapItem::Bomb
-      && !player->isKilled()
-      && player->isKickEnabled()
-   )
+   if (item && item->getType() == MapItem::Bomb && !player->isKilled() && player->isKickEnabled())
    {
       BombMapItem* kickedBomb = dynamic_cast<BombMapItem*>(item);
 
@@ -1076,17 +939,11 @@ void Game::playerKicksBomb(
 
          if (verticallyKicked)
          {
-            kickDir =
-               (keysPressed & Constants::KeyUp)
-                  ? Constants::DirectionUp
-                  : Constants::DirectionDown;
+            kickDir = (keysPressed & Constants::KeyUp) ? Constants::DirectionUp : Constants::DirectionDown;
          }
          else
          {
-            kickDir =
-               (keysPressed & Constants::KeyLeft)
-                  ? Constants::DirectionLeft
-                  : Constants::DirectionRight;
+            kickDir = (keysPressed & Constants::KeyLeft) ? Constants::DirectionLeft : Constants::DirectionRight;
          }
 
          if (isKickPossible(item->getX(), item->getY(), kickDir))
@@ -1097,11 +954,16 @@ void Game::playerKicksBomb(
             }
             else
             {
-               // bomb has already been kicked once
+               // bomb has already been kicked once - getBombKickAnimation() can be null if the
+               // animation already finished/exploded between kicks (QPointer-guarded, see
+               // project_full_qt_removal_scope memory)
                BombKickAnimation* bka = kickedBomb->getBombKickAnimation();
 
-               // update kick-direction
-               bka->setDirection(kickDir);
+               if (bka)
+               {
+                  // update kick-direction
+                  bka->setDirection(kickDir);
+               }
             }
 
             // kick it
@@ -1110,7 +972,6 @@ void Game::playerKicksBomb(
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1122,15 +983,9 @@ void Game::playerDiseaseStopped()
 
    if (disease)
    {
-      mOutgoingPackets.append(
-         new PlayerInfectedPacket(
-            disease->getPlayerId(),
-            Constants::SkullReset
-         )
-      );
+      mOutgoingPackets.append(new PlayerInfectedPacket(disease->getPlayerId(), Constants::SkullReset));
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1139,12 +994,7 @@ void Game::playerDiseaseStopped()
    \param assignedYPos assigned y position
    \param directions player directions
 */
-void Game::playerMove(
-   Player* player,
-   float assignedXPos,
-   float assignedYPos,
-   int8_t directions
-)
+void Game::playerMove(Player* player, float assignedXPos, float assignedYPos, int8_t directions)
 {
    float speedX = 0.0;
    float speedY = 0.0;
@@ -1155,19 +1005,17 @@ void Game::playerMove(
       speedY = assignedYPos - player->getY();
    }
 
-   mOutgoingPackets.append(
-      new PositionPacket(
-         player->getId(),
-         directions,
-         assignedXPos,
-         assignedYPos,
-         player->getPlayerRotation()->getAngle(),
-         speedX,
-         speedY,
-         player->getPlayerRotation()->getAngleDelta(),
-         player->getSpeed()
-      )
-   );
+   mOutgoingPackets.append(new PositionPacket(
+      player->getId(),
+      directions,
+      assignedXPos,
+      assignedYPos,
+      player->getPlayerRotation()->getAngle(),
+      speedX,
+      speedY,
+      player->getPlayerRotation()->getAngleDelta(),
+      player->getSpeed()
+   ));
 
    player->setPositionSkipCounter(0);
    player->setKeysPressed(player->getKeysPressed());
@@ -1175,7 +1023,6 @@ void Game::playerMove(
    // reset idle packet flag
    mIdlePacketSentSet.remove(player);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1187,35 +1034,27 @@ void Game::playerIdle(int8_t directions, Player* player)
    if (!mIdlePacketSentSet.contains(player))
    {
       // send a zero-distance (speed=0.0 packet)
-      mOutgoingPackets.append(
-         new PositionPacket(
-            player->getId(),
-            directions,
-            player->getX(),
-            player->getY(),
-            player->getPlayerRotation()->getAngle(),
-            0.0f,
-            0.0f,
-            player->getPlayerRotation()->getAngleDelta(),
-            0.0f
-         )
-      );
+      mOutgoingPackets.append(new PositionPacket(
+         player->getId(),
+         directions,
+         player->getX(),
+         player->getY(),
+         player->getPlayerRotation()->getAngle(),
+         0.0f,
+         0.0f,
+         player->getPlayerRotation()->getAngleDelta(),
+         0.0f
+      ));
 
       mIdlePacketSentSet.insert(player);
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param player infected player
 */
-void Game::createInfection(
-   Player* infectedPlayer,
-   Player* infectingPlayer,
-   ExtraMapItem* extra,
-   const QList<Constants::SkullType> &faces
-)
+void Game::createInfection(Player* infectedPlayer, Player* infectingPlayer, ExtraMapItem* extra, const QList<Constants::SkullType>& faces)
 {
    float extraElapsedTime = 0.0f;
 
@@ -1246,25 +1085,17 @@ void Game::createInfection(
    infectedPlayer->infect(disease);
 
    // whenever the game changes to 'stopped' state we want to delete the
-   // disease and send an according packet to the client
-   connect(
-      this,
-      SIGNAL(stateChanged(Constants::GameState)),
-      disease.data(),
-      SLOT(abort())
-   );
+   // disease and send an according packet to the client - disease is short-lived (destroyed
+   // once cured/aborted, or directly by ~Player() on disconnect - see project_full_qt_removal_scope
+   // memory), stateChangedSignal lives for the whole match, so disease has to disconnect
+   // itself on the way out (Signal<> has no auto-disconnect-on-destroy the way Qt's connect() did).
+   PlayerDisease* diseasePtr = disease.data();
+   auto stateChangedConnection = stateChangedSignal.connect([diseasePtr](Constants::GameState) { diseasePtr->abort(); });
+   diseasePtr->addDestroyCallback([this, stateChangedConnection]() { stateChangedSignal.disconnect(stateChangedConnection); });
 
-   connect(
-      disease.data(),
-      SIGNAL(stopped()),
-      this,
-      SLOT(playerDiseaseStopped())
-   );
+   disease.data()->stoppedSignal.connect([this]() { playerDiseaseStopped(); });
 
-   PlayerInfectedPacket* packet = new PlayerInfectedPacket(
-      infectedPlayer->getId(),
-      disease.data()->getType()
-   );
+   PlayerInfectedPacket* packet = new PlayerInfectedPacket(infectedPlayer->getId(), disease.data()->getType());
 
    // either add the id of the player that infected the other
    // or add the position of the extra the extra is contained in
@@ -1280,10 +1111,9 @@ void Game::createInfection(
    mOutgoingPackets.append(packet);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updateExtras()
 {
    QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
@@ -1299,10 +1129,7 @@ void Game::updateExtras()
 
       MapItem* mapItem = mMap->getItem(x, y);
 
-      if (
-            mapItem
-         && mapItem->getType() == MapItem::Extra
-      )
+      if (mapItem && mapItem->getType() == MapItem::Extra)
       {
          // update player stats
          player->increaseExtrasCollected();
@@ -1326,12 +1153,7 @@ void Game::updateExtras()
 
             case Constants::ExtraSpeedup:
             {
-               player->setSpeed(
-                  qMin(
-                     player->getSpeed() + SERVER_SPEEDUP_INCREMENT,
-                     mMaxSpeed
-                  )
-               );
+               player->setSpeed(qMin(player->getSpeed() + SERVER_SPEEDUP_INCREMENT, mMaxSpeed));
 
                break;
             }
@@ -1351,12 +1173,7 @@ void Game::updateExtras()
          }
 
          // play that lovely coin sample
-         GameEventPacket* gameEventPacket = new GameEventPacket(
-            GameEventPacket::ExtraCollected,
-            1.0f,
-            x,
-            y
-         );
+         GameEventPacket* gameEventPacket = new GameEventPacket(GameEventPacket::ExtraCollected, 1.0f, x, y);
 
          gameEventPacket->setPlayerId(player->getId());
          gameEventPacket->setExtraType(extra->getExtraType());
@@ -1364,16 +1181,10 @@ void Game::updateExtras()
          mOutgoingPackets.append(gameEventPacket);
 
          // remove extramapitem
-         mOutgoingPackets.append(
-            new MapItemRemovedPacket(extra)
-         );
+         mOutgoingPackets.append(new MapItemRemovedPacket(extra));
 
          // remove extra from the map
-         mMap->setItem(
-            x,
-            y,
-            nullptr
-         );
+         mMap->setItem(x, y, nullptr);
 
          delete extra;
 
@@ -1384,10 +1195,9 @@ void Game::updateExtras()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updateInfections()
 {
    // it is only required to go through here if skulls are used
@@ -1430,10 +1240,9 @@ void Game::updateInfections()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updateBombs()
 {
    QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
@@ -1456,43 +1265,25 @@ void Game::updateBombs()
             // if player is allowed to drop more bombs
             if (player->getBombsDroppedCount() < player->getBombCount())
             {
-               player->setBombsDroppedCount(
-                  player->getBombsDroppedCount() + 1
-               );
+               player->setBombsDroppedCount(player->getBombsDroppedCount() + 1);
 
-               BombMapItem* bomb = new BombMapItem(
-                  player->getId(),
-                  player->getFlameCount(),
-                  -1,
-                  x,
-                  y
-               );
+               BombMapItem* bomb = new BombMapItem(player->getId(), player->getFlameCount(), -1, x, y);
 
-               connect(
-                  bomb,
-                  SIGNAL(exploded(BombMapItem*, bool)),
-                  this,
-                  SLOT(bombExploded(BombMapItem*, bool))
-               );
+               bomb->explodedSignal.connect([this](BombMapItem* b, bool recursive) { bombExploded(b, recursive); });
 
                mMap->setItem(x, y, bomb);
 
-               mOutgoingPackets.append(
-                  new MapItemCreatedPacket(bomb, player->getId())
-               );
+               mOutgoingPackets.append(new MapItemCreatedPacket(bomb, player->getId()));
             }
          }
 
          // remove bomb key once a bomb has been dropped
-         player->setKeysPressed(
-            player->getKeysPressed() &~ Constants::KeyBomb
-         );
+         player->setKeysPressed(player->getKeysPressed() & ~Constants::KeyBomb);
 
          player->setBombKeyLocked(false);
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1501,10 +1292,7 @@ void Game::updateBombs()
 */
 void Game::updateStatsPlayerKilled(Player* killer, Player* victim)
 {
-   if (
-         killer
-      && killer != victim
-   )
+   if (killer && killer != victim)
    {
       killer->increaseKills();
    }
@@ -1517,7 +1305,6 @@ void Game::updateStatsPlayerKilled(Player* killer, Player* victim)
 
    broadcastGameStats();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1535,25 +1322,18 @@ void Game::processPlayerWon(Player* player)
    broadcastGameStats();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param message message to send
 */
 void Game::sendMessageToOwner(const QString& message)
 {
-   MessagePacket* messagePacket =
-      new MessagePacket(
-         mCreator->getId(),
-         message,
-         true
-      );
+   MessagePacket* messagePacket = new MessagePacket(mCreator->getId(), message, true);
 
    NET_StreamSocket* socket = mPlayerSockets.key(mCreator);
 
    sendPacket(socket, messagePacket);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1573,16 +1353,14 @@ void Game::setGameOnlyPopulatedByBotsMessageShown(bool value)
    mGameOnlyPopulatedByBotsMessageShown = value;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::processOnlyBotsLeft()
 {
    qDebug("Game::processOnlyBotsLeft: the game is now only populated by bots");
 
-   QString message =
-      tr("The game is now only populated by bots. Press F10 to abort.");
+   QString message = tr("The game is now only populated by bots. Press F10 to abort.");
 
    if (!isGameOnlyPopulatedByBotsMessageShown())
    {
@@ -1597,10 +1375,9 @@ void Game::processOnlyBotsLeft()
    */
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::broadcastGameStats()
 {
    QList<int> ids;
@@ -1614,27 +1391,15 @@ void Game::broadcastGameStats()
       roundStats << (*p->getRoundStats());
    }
 
-   mOutgoingPackets.append(
-      new GameStatsPacket(
-         ids,
-         overallStats,
-         roundStats
-      )
-   );
+   mOutgoingPackets.append(new GameStatsPacket(ids, overallStats, roundStats));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param direction the bomb direction
    \param player the player who was killed
 */
-void Game::rotateDeadPlayerTowardsBomb(
-   Constants::Direction detonationDirection,
-   Player* player,
-   int x,
-   int y
-)
+void Game::rotateDeadPlayerTowardsBomb(Constants::Direction detonationDirection, Player* player, int x, int y)
 {
    QList<Constants::Direction> dirs;
 
@@ -1693,10 +1458,7 @@ void Game::rotateDeadPlayerTowardsBomb(
       }
 
       // check if the dead player will hit something
-      if (
-            checkX >= 0 && checkX < mMap->getWidth()
-         && checkY >= 0 && checkY < mMap->getHeight()
-      )
+      if (checkX >= 0 && checkX < mMap->getWidth() && checkY >= 0 && checkY < mMap->getHeight())
       {
          checkItem = mMap->getItem(checkX, checkY);
 
@@ -1745,7 +1507,6 @@ void Game::rotateDeadPlayerTowardsBomb(
       player->setKeysPressed(Constants::KeyUp);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param bomb bomp map item
@@ -1764,9 +1525,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
 
       // player may already be killed :)
       if (player)
-         player->setBombsDroppedCount(
-            player->getBombsDroppedCount() - 1
-         );
+         player->setBombsDroppedCount(player->getBombsDroppedCount() - 1);
 
       int flameCount = bomb->getFlames();
       int x = bomb->getX();
@@ -1775,17 +1534,17 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       QList<Constants::Direction>* directions;
       directions = &mDirectionCheckCenter;
 
-      bool doneUp    = (bomb->getDetonationOrigin() == BombMapItem::Top);
-      bool doneDown  = (bomb->getDetonationOrigin() == BombMapItem::Bottom);
-      bool doneLeft  = (bomb->getDetonationOrigin() == BombMapItem::Left);
+      bool doneUp = (bomb->getDetonationOrigin() == BombMapItem::Top);
+      bool doneDown = (bomb->getDetonationOrigin() == BombMapItem::Bottom);
+      bool doneLeft = (bomb->getDetonationOrigin() == BombMapItem::Left);
       bool doneRight = (bomb->getDetonationOrigin() == BombMapItem::Right);
 
       bool checkGameOver = false;
 
       // init detonation packet information
-      int detonationUp    = flameCount;
-      int detonationDown  = flameCount;
-      int detonationLeft  = flameCount;
+      int detonationUp = flameCount;
+      int detonationDown = flameCount;
+      int detonationLeft = flameCount;
       int detonationRight = flameCount;
 
       int xDist = 0;
@@ -1795,25 +1554,13 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       MapItem* shadowedItem = bomb->getShadowedItem();
       if (shadowedItem)
       {
-         removeItems.append(
-            new MapItemDestroyedPacket(
-               shadowedItem,
-               bomb->getPlayerId(),
-               Constants::DirectionUnknown,
-               flameCount
-            )
-         );
+         removeItems.append(new MapItemDestroyedPacket(shadowedItem, bomb->getPlayerId(), Constants::DirectionUnknown, flameCount));
 
          shadowedItem->setCurrentlyDestroyed(true);
          mDestroyedMapItems.insert(shadowedItem);
 
          // create appropriate game event
-         GameEventPacket* gameEventPacket = new GameEventPacket(
-            GameEventPacket::ExtraDestroyed,
-            1.0f,
-            x,
-            y
-         );
+         GameEventPacket* gameEventPacket = new GameEventPacket(GameEventPacket::ExtraDestroyed, 1.0f, x, y);
 
          mOutgoingPackets.append(gameEventPacket);
       }
@@ -1882,13 +1629,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                }
             }
 
-            if (
-                  processDirection
-               && xDist >= 0
-               && yDist >= 0
-               && xDist < mMap->getWidth()
-               && yDist < mMap->getHeight()
-            )
+            if (processDirection && xDist >= 0 && yDist >= 0 && xDist < mMap->getWidth() && yDist < mMap->getHeight())
             {
                // check for players that are eventually killed
                QMapIterator<int8_t, Player*> p(mPlayers);
@@ -1937,21 +1678,21 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
 
                   */
 
-   //               float playerPosX = currentPlayer->getX();
-   //               float playerPosY = currentPlayer->getY();
-   //
-   //               int pXminusE = floor(playerPosX - 0.001);
-   //               int pX       = floor(playerPosX);
-   //               int pXplusE  = floor(playerPosX + 0.001);
-   //
-   //               int pYminusE = floor(playerPosY - 0.001);
-   //               int pY       = floor(playerPosY);
-   //               int pYplusE  = floor(playerPosY + 0.001);
-   //
-   //               if (
-   //                     xDist == pXminusE && xDist == pX && xDist == pXplusE
-   //                  && yDist == pYminusE && yDist == pY && yDist == pYplusE
-   //              )
+                  //               float playerPosX = currentPlayer->getX();
+                  //               float playerPosY = currentPlayer->getY();
+                  //
+                  //               int pXminusE = floor(playerPosX - 0.001);
+                  //               int pX       = floor(playerPosX);
+                  //               int pXplusE  = floor(playerPosX + 0.001);
+                  //
+                  //               int pYminusE = floor(playerPosY - 0.001);
+                  //               int pY       = floor(playerPosY);
+                  //               int pYplusE  = floor(playerPosY + 0.001);
+                  //
+                  //               if (
+                  //                     xDist == pXminusE && xDist == pX && xDist == pXplusE
+                  //                  && yDist == pYminusE && yDist == pY && yDist == pYplusE
+                  //              )
 
                   float pX = currentPlayer->getX();
                   float pY = currentPlayer->getY();
@@ -1969,10 +1710,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                   int currentPlayerX = static_cast<int32_t>(floor(pX));
                   int currentPlayerY = static_cast<int32_t>(floor(pY));
 
-                  if (
-                        currentPlayerX == xDist
-                     && currentPlayerY == yDist
-                  )
+                  if (currentPlayerX == xDist && currentPlayerY == yDist)
                   {
                      // kill player - once ;)
                      if (!currentPlayer->isKilled())
@@ -1982,48 +1720,30 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                            currentPlayer->setKilled(true);
 
                            // rotate killed player towards the bomb that killed him
-                           rotateDeadPlayerTowardsBomb(
-                              direction,
-                              currentPlayer,
-                              xDist,
-                              yDist
-                           );
+                           rotateDeadPlayerTowardsBomb(direction, currentPlayer, xDist, yDist);
 
                            // if the bomb has been originally detonated by another player, then
                            // we have a different killer. the player who dropped the first bomb
                            // in the detonation chain is considered "the killer".
                            Player* killer = player;
 
-                           if (
-                                 bomb->getIgniterId() != -1
-                              && bomb->getIgniterId() != player->getId()
-                           )
+                           if (bomb->getIgniterId() != -1 && bomb->getIgniterId() != player->getId())
                            {
                               killer = mPlayers.value(bomb->getIgniterId(), nullptr);
                            }
 
                            // update stats
-                           updateStatsPlayerKilled(
-                              killer,
-                              currentPlayer
-                           );
+                           updateStatsPlayerKilled(killer, currentPlayer);
 
-                           emit playerKilled(currentPlayer->getId());
+                           playerKilledSignal(currentPlayer->getId());
 
                            // create player killed packet
                            mOutgoingPackets.append(
-                              new PlayerKilledPacket(
-                                 currentPlayer->getId(),
-                                 bomb->getPlayerId(),
-                                 direction,
-                                 bomb->getFlames()
-                              )
+                              new PlayerKilledPacket(currentPlayer->getId(), bomb->getPlayerId(), direction, bomb->getFlames())
                            );
 
                            // show player killed message
-                           broadcastMessage(
-                              tr("%1 was killed.").arg(currentPlayer->getNick())
-                           );
+                           broadcastMessage(tr("%1 was killed.").arg(currentPlayer->getNick()));
 
                            // check if game is over
                            checkGameOver = true;
@@ -2046,38 +1766,20 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
 
                // if there is a mapitem in the way
                // which is not the bomb that just exploded, then continue
-               else if (
-                     mapItem
-                  && mapItem != bomb
-               )
+               else if (mapItem && mapItem != bomb)
                {
                   stopDetonation = true;
 
-                  if (
-                        mapItem->isDestroyable()
-                     && !mapItem->isCurrentlyDestroyed()
-                     && mapItem->getType() != MapItem::Bomb
-                  )
+                  if (mapItem->isDestroyable() && !mapItem->isCurrentlyDestroyed() && mapItem->getType() != MapItem::Bomb)
                   {
                      // map item was destroyed
-                     removeItems.append(
-                        new MapItemDestroyedPacket(
-                           mapItem,
-                           bomb->getPlayerId(),
-                           direction,
-                           flameCount
-                        )
-                     );
+                     removeItems.append(new MapItemDestroyedPacket(mapItem, bomb->getPlayerId(), direction, flameCount));
 
                      if (mapItem->getType() == MapItem::Extra)
                      {
                         // create appropriate game event
-                        GameEventPacket* gameEventPacket = new GameEventPacket(
-                           GameEventPacket::ExtraDestroyed,
-                           1.0f,
-                           mapItem->getX(),
-                           mapItem->getY()
-                        );
+                        GameEventPacket* gameEventPacket =
+                           new GameEventPacket(GameEventPacket::ExtraDestroyed, 1.0f, mapItem->getX(), mapItem->getY());
 
                         mOutgoingPackets.append(gameEventPacket);
                      }
@@ -2097,10 +1799,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                   }
 
                   // initiate surrounding bombs
-                  if (
-                        mapItem->getType() == MapItem::Bomb
-                     && !mapItem->isCurrentlyDestroyed()
-                  )
+                  if (mapItem->getType() == MapItem::Bomb && !mapItem->isCurrentlyDestroyed())
                   {
                      // neighboured bombs explode from another bomb's explosion
                      BombMapItem* neighbourBomb = dynamic_cast<BombMapItem*>(mapItem);
@@ -2210,34 +1909,21 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       // cleanup map when all explosions are finished
       foreach (MapItem* destroyedItem, mDestroyedMapItems)
       {
-         mMap->setItem(
-            destroyedItem->getX(),
-            destroyedItem->getY(),
-            nullptr
-         );
+         mMap->setItem(destroyedItem->getX(), destroyedItem->getY(), nullptr);
 
          if (destroyedItem->getType() == MapItem::Stone)
          {
-            makeFieldImmune(
-               destroyedItem->getX(),
-               destroyedItem->getY()
-            );
+            makeFieldImmune(destroyedItem->getX(), destroyedItem->getY());
 
             StoneMapItem* stone = dynamic_cast<StoneMapItem*>(destroyedItem);
             ExtraMapItem* extra = stone->getExtraMapItem();
 
             if (extra)
             {
-               mMap->setItem(
-                  destroyedItem->getX(),
-                  destroyedItem->getY(),
-                  extra
-               );
+               mMap->setItem(destroyedItem->getX(), destroyedItem->getY(), extra);
 
                // send mapitem
-               mOutgoingPackets.append(
-                  new ExtraMapItemCreatedPacket(extra)
-               );
+               mOutgoingPackets.append(new ExtraMapItemCreatedPacket(extra));
 
                extra->initializeStartTime();
             }
@@ -2254,45 +1940,20 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       }
 
       // play a bomb sample
-      float intensity =
-           detonationUp
-         + detonationDown
-         + detonationLeft
-         + detonationRight;
+      float intensity = detonationUp + detonationDown + detonationLeft + detonationRight;
 
       intensity *= 0.03125f;
 
-      mOutgoingPackets.append(
-         new GameEventPacket(
-            GameEventPacket::BombExploded,
-            intensity
-         )
-      );
+      mOutgoingPackets.append(new GameEventPacket(GameEventPacket::BombExploded, intensity));
 
       // first the detonation packet
-      mOutgoingPackets.append(
-         new DetonationPacket(
-            x,
-            y,
-            detonationUp,
-            detonationDown,
-            detonationLeft,
-            detonationRight,
-            flameCount
-         )
-      );
+      mOutgoingPackets.append(new DetonationPacket(x, y, detonationUp, detonationDown, detonationLeft, detonationRight, flameCount));
 
       // remove bombmapitem
-      mOutgoingPackets.append(
-         new MapItemRemovedPacket(bomb)
-      );
+      mOutgoingPackets.append(new MapItemRemovedPacket(bomb));
 
       // remove bomb from the map
-      mMap->setItem(
-         bomb->getX(),
-         bomb->getY(),
-         nullptr
-      );
+      mMap->setItem(bomb->getX(), bomb->getY(), nullptr);
 
       bomb->deleteLater();
 
@@ -2300,7 +1961,6 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       mOutgoingPackets.append(removeItems);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2318,10 +1978,7 @@ bool Game::isGamePopulatedByBots() const
 
       currentPlayer = p.value();
 
-      if (
-            !currentPlayer->isBot()
-         && !currentPlayer->isKilled()
-      )
+      if (!currentPlayer->isBot() && !currentPlayer->isKilled())
       {
          botsOnly = false;
          break;
@@ -2331,10 +1988,9 @@ bool Game::isGamePopulatedByBots() const
    return botsOnly;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updateGameoverCondition()
 {
    int alivePlayerCount = 0;
@@ -2370,10 +2026,9 @@ void Game::updateGameoverCondition()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::resetRoundStats()
 {
    QMapIterator<int8_t, Player*> p(mPlayers);
@@ -2384,10 +2039,9 @@ void Game::resetRoundStats()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::prepareGame()
 {
    // tell clients to clear their maps
@@ -2414,10 +2068,9 @@ void Game::prepareGame()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::updatePrepareGame()
 {
    mPreparationCounter--;
@@ -2436,17 +2089,13 @@ void Game::updatePrepareGame()
    }
    else
    {
-      qDebug(
-         "Game::updatePrepareGame: starting game in %d secs",
-         mPreparationCounter
-      );
+      qDebug("Game::updatePrepareGame: starting game in %d secs", mPreparationCounter);
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::finishGame()
 {
    if (getState() != Constants::GameFinishing)
@@ -2457,18 +2106,13 @@ void Game::finishGame()
 
       // this is the time to display some sort of finish animation
 
-      QTimer::singleShot(
-         SERVER_FINISHING_TIME,
-         this,
-         SLOT(stopGame())
-      );
+      QTimer::singleShot(SERVER_FINISHING_TIME, this, SLOT(stopGame()));
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::stopGame()
 {
    setState(Constants::GameStopped);
@@ -2513,18 +2157,12 @@ void Game::stopGame()
    // broadcast "gameover" to all players
    // the "finished" flag is added to let the client know whether to switch
    // back to the lounge or to stay in the win drawable
-   mOutgoingPackets.append(
-      new StopGameResponsePacket(
-         mGameId,
-         finished
-      )
-   );
+   mOutgoingPackets.append(new StopGameResponsePacket(mGameId, finished));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::nextRound()
 {
    mGameRound.next();
@@ -2532,24 +2170,15 @@ void Game::nextRound()
    // restart game until all rounds are finished
    if (!mGameRound.isFinished())
    {
-      int delay =
-            SHOW_WINNER_DISPLAY_TIME
-          + SHOW_WINNER_FADE_IN_TIME
-          + SHOW_WINNER_FADE_OUT_TIME
-          + SHOW_WINNER_ADDITIONAL_TIME;
+      int delay = SHOW_WINNER_DISPLAY_TIME + SHOW_WINNER_FADE_IN_TIME + SHOW_WINNER_FADE_OUT_TIME + SHOW_WINNER_ADDITIONAL_TIME;
 
-      QTimer::singleShot(
-         delay,
-         this,
-         SLOT(prepareGame())
-      );
+      QTimer::singleShot(delay, this, SLOT(prepareGame()));
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::startSynchronization()
 {
    if (!isSynchronizationActive())
@@ -2561,7 +2190,6 @@ void Game::startSynchronization()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param active synchronization active flag
@@ -2570,7 +2198,6 @@ void Game::setSynchronizationActive(bool active)
 {
    mSynchronizationActive = active;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2581,10 +2208,9 @@ bool Game::isSynchronizationActive() const
    return mSynchronizationActive;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::synchronize()
 {
    bool synchronized = true;
@@ -2601,10 +2227,10 @@ void Game::synchronize()
 
       if (!player->isLoadingSynchronized())
       {
-//         qDebug(
-//            "Game::synchronize(): waiting for '%s'",
-//            qPrintable(player->getNick())
-//         );
+         //         qDebug(
+         //            "Game::synchronize(): waiting for '%s'",
+         //            qPrintable(player->getNick())
+         //         );
 
          synchronized = false;
          criticalPlayers << player;
@@ -2630,17 +2256,12 @@ void Game::synchronize()
          // time has elapsed, kick those who died trying
          foreach (Player* player, criticalPlayers)
          {
-            qDebug(
-               "Game::synchronize: time to kick '%s' out of the game",
-               qPrintable(player->getNick())
-            );
+            qDebug("Game::synchronize: time to kick '%s' out of the game", qPrintable(player->getNick()));
 
             NET_StreamSocket* socket = mPlayerSockets.key(player);
-            emit forceLeaveGame(socket);
+            forceLeaveGameSignal(socket);
 
-            ErrorPacket* errorPacket = new ErrorPacket(
-               Constants::ErrorSyncTimeout, tr("sync aborted.;your pc is too slow.")
-            );
+            ErrorPacket* errorPacket = new ErrorPacket(Constants::ErrorSyncTimeout, tr("sync aborted.;your pc is too slow."));
 
             sendPacket(socket, errorPacket);
          }
@@ -2649,10 +2270,7 @@ void Game::synchronize()
          int humanPlayersLeftCount = playersLeftCount - botCount;
 
          // let the others play (if they're more than 2 guys and not only bots)
-         if (
-               playersLeftCount > 1
-            && playersLeftCount > botCount
-         )
+         if (playersLeftCount > 1 && playersLeftCount > botCount)
          {
             prepareGame();
          }
@@ -2668,7 +2286,6 @@ void Game::synchronize()
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2694,7 +2311,6 @@ void Game::sendPacket(NET_StreamSocket* socket, Packet* packet)
    // clean up
    delete packet;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2727,11 +2343,7 @@ void Game::sendBroadcastPackets()
                packet = mOutgoingPackets.at(i);
                pType = packet->getType();
 
-               if (
-                     synced
-                  || pType == Packet::JOINGAMERESPONSE
-                  || pType == Packet::MESSAGE
-               )
+               if (synced || pType == Packet::JOINGAMERESPONSE || pType == Packet::MESSAGE)
                {
                   NET_WriteToStreamSocket(socket, packet->constData(), static_cast<int>(packet->size()));
                }
@@ -2747,18 +2359,14 @@ void Game::sendBroadcastPackets()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param tcpSocket tcp socket
    \param packet packet to process
 */
-void Game::processPacket(
-   NET_StreamSocket* tcpSocket,
-   Packet* packet
-)
+void Game::processPacket(NET_StreamSocket* tcpSocket, Packet* packet)
 {
-   switch(packet->getType())
+   switch (packet->getType())
    {
       case Packet::MESSAGE:
       {
@@ -2766,9 +2374,7 @@ void Game::processPacket(
 
          // during the game we don't care if any of the players is currently
          // typing something. this is just relevant for the lounge
-         bool broadcastAllowed =
-               (mRunning && senderPacket->isTypingFinished())
-            || !mRunning;
+         bool broadcastAllowed = (mRunning && senderPacket->isTypingFinished()) || !mRunning;
 
          if (broadcastAllowed)
          {
@@ -2782,20 +2388,14 @@ void Game::processPacket(
                NET_StreamSocket* currentSocket = p.key();
 
                // send message to all players unless it's private
-               if (
-                     senderPacket->getReceiverId() == -1
-                  || senderPacket->getReceiverId() == p.value()->getId()
-               )
+               if (senderPacket->getReceiverId() == -1 || senderPacket->getReceiverId() == p.value()->getId())
                {
-                  MessagePacket* messagePacket =
-                     new MessagePacket(
-                        senderId,
-                        QString("%1: %2")
-                           .arg(mPlayerSockets[tcpSocket]->getNick())
-                           .arg(senderPacket->getMessage().trimmed()),
-                        senderPacket->isTypingFinished(),
-                        senderPacket->getReceiverId()
-                     );
+                  MessagePacket* messagePacket = new MessagePacket(
+                     senderId,
+                     QString("%1: %2").arg(mPlayerSockets[tcpSocket]->getNick()).arg(senderPacket->getMessage().trimmed()),
+                     senderPacket->isTypingFinished(),
+                     senderPacket->getReceiverId()
+                  );
 
                   sendPacket(currentSocket, messagePacket);
                }
@@ -2811,11 +2411,7 @@ void Game::processPacket(
 
          Player* player = mPlayerSockets[tcpSocket];
 
-         if (
-               player
-            && !player->isKilled()
-            && getState() == Constants::GameActive
-         )
+         if (player && !player->isKilled() && getState() == Constants::GameActive)
          {
             // fix up the player's inputs to not get confused in
             // any way (the player may to go to the left and to
@@ -2823,34 +2419,22 @@ void Game::processPacket(
             int8_t keys = keyPacket->getKeys();
             int8_t previousKeys = static_cast<int8_t>(player->getKeysPressed());
 
-            if (
-                  (previousKeys & Constants::KeyRight)
-               && (keys & Constants::KeyLeft)
-            )
+            if ((previousKeys & Constants::KeyRight) && (keys & Constants::KeyLeft))
             {
                keys &= ~(Constants::KeyRight);
             }
 
-            if (
-                  (previousKeys & Constants::KeyLeft)
-               && (keys & Constants::KeyRight)
-            )
+            if ((previousKeys & Constants::KeyLeft) && (keys & Constants::KeyRight))
             {
                keys &= ~(Constants::KeyLeft);
             }
 
-            if (
-                  (previousKeys & Constants::KeyUp)
-               && (keys & Constants::KeyDown)
-            )
+            if ((previousKeys & Constants::KeyUp) && (keys & Constants::KeyDown))
             {
                keys &= ~(Constants::KeyUp);
             }
 
-            if (
-                  (previousKeys & Constants::KeyDown)
-               && (keys & Constants::KeyUp)
-            )
+            if ((previousKeys & Constants::KeyDown) && (keys & Constants::KeyUp))
             {
                keys &= ~(Constants::KeyDown);
             }
@@ -2896,7 +2480,6 @@ void Game::processPacket(
                "long story short" => lock the bomb key until it is processed!
             */
 
-
             if (keys & Constants::KeyBomb)
             {
                player->setBombKeyLocked(true);
@@ -2904,12 +2487,12 @@ void Game::processPacket(
 
             player->setKeysPressed(keys);
 
-//            qDebug(
-//               "Game::data: key packet processed: pid: %d, keys: %d, prev: %d",
-//               keyPacket->getPlayerId(),
-//               keys,
-//               previousKeys
-//            );
+            //            qDebug(
+            //               "Game::data: key packet processed: pid: %d, keys: %d, prev: %d",
+            //               keyPacket->getPlayerId(),
+            //               keys,
+            //               previousKeys
+            //            );
          }
 
          break;
@@ -2936,10 +2519,7 @@ void Game::processPacket(
                   finishGame();
 
                   // show player killed message
-                  broadcastMessage(
-                     tr("%1 aborted the game.").arg(player->getNick())
-                  );
-
+                  broadcastMessage(tr("%1 aborted the game.").arg(player->getNick()));
                }
             }
          }
@@ -2958,7 +2538,6 @@ void Game::processPacket(
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return game id
@@ -2967,7 +2546,6 @@ int Game::getId() const
 {
    return mGameId;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -2978,7 +2556,6 @@ const QString& Game::getName() const
    return mCreateGameData.mName;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return level name
@@ -2987,7 +2564,6 @@ const QString& Game::getLevelName() const
 {
    return mCreateGameData.mLevel;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -2998,7 +2574,6 @@ int Game::getPlayerCount() const
    return mPlayers.count();
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return maximum player count
@@ -3008,12 +2583,11 @@ int Game::getMaximumPlayerCount() const
    return mMap->getMaxPlayers();
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param data create game data
 */
-void Game::setCreateGameData(const CreateGameData &data)
+void Game::setCreateGameData(const CreateGameData& data)
 {
    mCreateGameData = data;
 }
@@ -3022,11 +2596,10 @@ void Game::setCreateGameData(const CreateGameData &data)
 /*!
    \param name new game name
 */
-void Game::setName(const QString &name)
+void Game::setName(const QString& name)
 {
    mCreateGameData.mName = name;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3055,37 +2628,17 @@ bool Game::joinGame(Player* player, NET_StreamSocket* playerSocket)
          Player* existingPlayer = p.value();
 
          JoinGameResponsePacket* existingPlayerPacket =
-            new JoinGameResponsePacket(
-               true,
-               mGameId,
-               existingPlayer->getId(),
-               existingPlayer->getNick(),
-               existingPlayer->getColor()
-            );
+            new JoinGameResponsePacket(true, mGameId, existingPlayer->getId(), existingPlayer->getNick(), existingPlayer->getColor());
 
          sendPacket(playerSocket, existingPlayerPacket);
       }
 
       // insert the new player and send him his granted packet
-      mPlayers.insert(
-         player->getId(),
-         player
-      );
+      mPlayers.insert(player->getId(), player);
 
-      mPlayerSockets.insert(
-         playerSocket,
-         player
-      );
+      mPlayerSockets.insert(playerSocket, player);
 
-      mOutgoingPackets.append(
-         new JoinGameResponsePacket(
-            true,
-            mGameId,
-            player->getId(),
-            player->getNick(),
-            player->getColor()
-         )
-      );
+      mOutgoingPackets.append(new JoinGameResponsePacket(true, mGameId, player->getId(), player->getNick(), player->getColor()));
 
       joiningAllowed = true;
 
@@ -3113,21 +2666,11 @@ bool Game::joinGame(Player* player, NET_StreamSocket* playerSocket)
    else
    {
       // game is full
-      sendPacket(
-         playerSocket,
-         new JoinGameResponsePacket(
-            false,
-            mGameId,
-            player->getId(),
-            player->getNick(),
-            player->getColor()
-         )
-      );
+      sendPacket(playerSocket, new JoinGameResponsePacket(false, mGameId, player->getId(), player->getNick(), player->getColor()));
    }
 
    return joiningAllowed;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -3137,10 +2680,7 @@ bool Game::joinGame(Player* player, NET_StreamSocket* playerSocket)
 */
 void Game::processSpectator(NET_StreamSocket* tcpSocket)
 {
-   if (
-         getState() == Constants::GameActive
-      || getState() == Constants::GamePreparing
-   )
+   if (getState() == Constants::GameActive || getState() == Constants::GamePreparing)
    {
       int timeLeft = getTimeLeft();
 
@@ -3197,19 +2737,14 @@ void Game::processSpectator(NET_StreamSocket* tcpSocket)
       {
          mSpectators.push_back(tcpSocket);
 
-         QTimer::singleShot(
-            SERVER_SPECTATOR_DELAY,
-            this,
-            SLOT(processSpectatorMessage())
-         );
+         QTimer::singleShot(SERVER_SPECTATOR_DELAY, this, SLOT(processSpectatorMessage()));
       }
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::processSpectatorMessage()
 {
    if (!mSpectators.isEmpty())
@@ -3221,28 +2756,20 @@ void Game::processSpectatorMessage()
          int timeLeft = getTimeLeft();
 
          // tell player next round will start in n seconds
-         MessagePacket* message1 =
-            new MessagePacket(
-              -1,
-               tr("Please wait, the game is currently active."),
-               true
-            );
+         MessagePacket* message1 = new MessagePacket(-1, tr("Please wait, the game is currently active."), true);
 
-         MessagePacket* message2 =
-            new MessagePacket(
-              -1,
-              (timeLeft == 1)
-                 ? tr("The next game will start in about 1 second.")
-                 : tr("The next game will start in about %1 seconds.").arg(timeLeft),
-               true
-            );
+         MessagePacket* message2 = new MessagePacket(
+            -1,
+            (timeLeft == 1) ? tr("The next game will start in about 1 second.")
+                            : tr("The next game will start in about %1 seconds.").arg(timeLeft),
+            true
+         );
 
          sendPacket(tcpSocket, message1);
          sendPacket(tcpSocket, message2);
       }
    }
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3252,7 +2779,6 @@ int Game::getPositionSkipCount() const
 {
    return mPositionSkipCount;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3269,34 +2795,30 @@ int Game::getBotCount() const
    return bots;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return ptr to game round instance
 */
-GameRound *Game::getGameRound()
+GameRound* Game::getGameRound()
 {
    return &mGameRound;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::increasePlayersLeftTheGameCount()
 {
    mPlayerLeftTheGameCount++;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::resetPlayersLeftTheGameCount()
 {
-   mPlayerLeftTheGameCount=0;
+   mPlayerLeftTheGameCount = 0;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3307,7 +2829,6 @@ int Game::getPlayersLeftTheGameCount() const
    return mPlayerLeftTheGameCount;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return \c true if start position is initialized
@@ -3317,7 +2838,6 @@ bool Game::isStartPositionInitialized() const
    return mStartPositionsInitialized;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param value start position initialized flag
@@ -3326,7 +2846,6 @@ void Game::setStartPositionsInitialized(bool value)
 {
    mStartPositionsInitialized = value;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3350,19 +2869,17 @@ void Game::removePlayer(Player* player, NET_StreamSocket* playerSocket)
    // the next time he's joining a game
    player->setLoadingSynchronized(false);
 
-   emit playerLeaves(player->getId());
+   playerLeavesSignal(player->getId());
 }
-
 
 //----------------------------------------------------------------------------
 /*!
    \param packet packet to send
 */
-void Game::addOutgoingPacket(Packet *packet)
+void Game::addOutgoingPacket(Packet* packet)
 {
    mOutgoingPackets << packet;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3373,10 +2890,9 @@ int Game::getTimeLeft()
    return static_cast<int32_t>(mCreateGameData.mDuration - (mGameTime.elapsed() * 0.001f));
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::processGameTime()
 {
    if (getState() == Constants::GameActive)
@@ -3388,21 +2904,17 @@ void Game::processGameTime()
          finishGame();
       }
 
-      mOutgoingPackets.append(
-         new TimePacket(timeLeft)
-      );
+      mOutgoingPackets.append(new TimePacket(timeLeft));
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::setCreator(Player* creator)
 {
    mCreator = creator;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3413,16 +2925,14 @@ Player* Game::getCreator() const
    return mCreator;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return list of players
 */
-QList<Player *> Game::getPlayers() const
+QList<Player*> Game::getPlayers() const
 {
    return mPlayers.values();
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3431,9 +2941,8 @@ QList<Player *> Game::getPlayers() const
 void Game::setState(Constants::GameState state)
 {
    mState = state;
-   emit stateChanged(state);
+   stateChangedSignal(state);
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3444,15 +2953,13 @@ Constants::GameState Game::getState() const
    return mState;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::increaseGamesPlayed()
 {
    mGamesPlayed++;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3462,7 +2969,6 @@ int Game::getGamesPlayed() const
 {
    return mGamesPlayed;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3488,7 +2994,6 @@ Constants::Color Game::getColorForNextPlayer() const
    return color;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return ptr to player socket map
@@ -3498,16 +3003,14 @@ QMap<NET_StreamSocket*, Player*>* Game::getPlayerSockets()
    return &mPlayerSockets;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return ptr to game map
 */
-Map *Game::getMap() const
+Map* Game::getMap() const
 {
    return mMap;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3518,22 +3021,14 @@ Constants::Dimension Game::getMapDimension() const
    return mCreateGameData.mDimension;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param message message to broadcast
 */
-void Game::broadcastMessage(const QString & message)
+void Game::broadcastMessage(const QString& message)
 {
-   mOutgoingPackets.append(
-      new MessagePacket(
-         -1,
-         message,
-         true
-      )
-   );
+   mOutgoingPackets.append(new MessagePacket(-1, message, true));
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -3561,8 +3056,6 @@ int Game::getExtras() const
    return extras;
 }
 
-
-
 //----------------------------------------------------------------------------
 /*!
    \return game duration
@@ -3571,7 +3064,6 @@ int Game::getDuration() const
 {
    return mCreateGameData.mDuration;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -3584,39 +3076,24 @@ void Game::bombKickedAnimation(Constants::Direction direction, float speed)
 
    if (item)
    {
-      mOutgoingPackets.append(
-         new MapItemMovePacket(
-            item->getUniqueId(),
-            speed,
-            direction,
-            item->getX(),
-            item->getY()
-         )
-      );
+      mOutgoingPackets.append(new MapItemMovePacket(item->getUniqueId(), speed, direction, item->getX(), item->getY()));
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::initializeExtraSpawn()
 {
    mExtraSpawn = new ExtraSpawn(this);
    mExtraSpawn->setMap(getMap());
 
-   connect(
-      mExtraSpawn,
-      SIGNAL(spawn()),
-      this,
-      SLOT(spawn())
-   );
+   connect(mExtraSpawn, SIGNAL(spawn()), this, SLOT(spawn()));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Game::spawn()
 {
    // only spawn extras in active state
@@ -3653,10 +3130,7 @@ void Game::spawn()
                   px = static_cast<int32_t>(floor(p->getX()));
                   py = static_cast<int32_t>(floor(p->getY()));
 
-                  if (
-                        px == x
-                     && py == y
-                  )
+                  if (px == x && py == y)
                   {
                      // nope, neeeeeext!
                      done = false;
@@ -3668,7 +3142,6 @@ void Game::spawn()
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!

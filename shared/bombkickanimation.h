@@ -8,6 +8,10 @@
 
 // shared
 #include "constants.h"
+#include "signal.h"
+
+#include <functional>
+#include <vector>
 
 // forward declarations
 class BombMapItem;
@@ -15,177 +19,173 @@ class Map;
 class MapItem;
 class QTimer;
 
-
 class BombKickAnimation : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   BombKickAnimation(QObject* parent = 0);
 
-      //! constructor
-      BombKickAnimation(QObject *parent = 0);
+   //! destructor
+   virtual ~BombKickAnimation();
 
-      //! destructor
-      virtual ~BombKickAnimation();
+   //! remove all animations
+   static void deleteAll();
 
-      //! remove all animations
-      static void deleteAll();
+   //! run an arbitrary callback right before this animation is destroyed - used by whoever
+   //! subscribed a Signal<> connected against a longer-lived signal (Game's own signals live
+   //! for the whole match, this animation doesn't) to disconnect itself, since Signal<> has
+   //! no automatic disconnect-on-destroy the way Qt's own connect() did
+   void addDestroyCallback(std::function<void()> callback);
 
-      //! start animation
-      void start();
+   //! start animation
+   void start();
 
-      //! setter for map
-      void setMap(Map* map);
+   //! setter for map
+   void setMap(Map* map);
 
-      //! setter for x position
-      void setX(float x);
+   //! setter for x position
+   void setX(float x);
 
-      //! setter for y position
-      void setY(float y);
+   //! setter for y position
+   void setY(float y);
 
-      //! getter for x position
-      float getX() const;
+   //! getter for x position
+   float getX() const;
 
-      //! getter for y position
-      float getY() const;
+   //! getter for y position
+   float getY() const;
 
-      //! getter for map
-      Map* getMap() const;
+   //! getter for map
+   Map* getMap() const;
 
-      //! check if ready to explode
-      bool isReadyToExplode() const;
+   //! check if ready to explode
+   bool isReadyToExplode() const;
 
-      //! set bomb to "ready" to explode
-      void setReadyToExplode(bool ready);
+   //! set bomb to "ready" to explode
+   void setReadyToExplode(bool ready);
 
-      //! setter for direction
-      void setDirection(Constants::Direction dir);
+   //! setter for direction
+   void setDirection(Constants::Direction dir);
 
-      //! ignite animation at x, y
-      static void ignite(int x, int y);
+   //! ignite animation at x, y
+   static void ignite(int x, int y);
 
+public:
+   // Signal<> replacements for BombKickAnimation's former Qt signals (see
+   // project_full_qt_removal_scope memory).
 
-   signals:
+   //! bomb may explode now
+   Signal<> explodeSignal;
 
-      //! bomb may explode now
-      void explode();
+   //! animation started
+   Signal<Constants::Direction, float> startedSignal;
 
-      //! animation started
-      void started(
-         Constants::Direction direction,
-         float speed
-      );
+   //! animation stopped
+   Signal<> stoppedSignal;
 
-      //! animation stopped
-      void stopped();
+public slots:
 
+   //! enable mReadyToExplode flag
+   void readyToExplode();
 
-   public slots:
+   //! update a player position
+   void updatePlayerPosition(int id, float x, float y);
 
-      //! enable mReadyToExplode flag
-      void readyToExplode();
+   //! remove player position if player died
+   void removePlayerPosition(int id);
 
-      //! update a player position
-      void updatePlayerPosition(int id, float x, float y);
+protected slots:
 
-      //! remove player position if player died
-      void removePlayerPosition(int id);
+   //! update the bomb's position
+   void updatePosition();
 
+protected:
+   //! check if values are in range
+   bool isInRange(float value1, float value2, float epsilon);
 
-   protected slots:
+   //! movement may be continued
+   bool isMoveAllowed();
 
-      //! update the bomb's position
-      void updatePosition();
+   //! getter for step speed
+   float getStepSize() const;
 
+   //! getter for direction
+   Constants::Direction getDirection() const;
 
-   protected:
+   //! getter for x direction
+   int getDirectionX() const;
 
-      //! check if values are in range
-      bool isInRange(float value1, float value2, float epsilon);
+   //! getter for y direction
+   int getDirectionY() const;
 
-      //! movement may be continued
-      bool isMoveAllowed();
+   //! unmap bomb
+   void unmapBomb();
 
-      //! getter for step speed
-      float getStepSize() const;
+   //! remap bomb
+   void remapBomb();
 
-      //! getter for direction
-      Constants::Direction getDirection() const;
+   //! reset animation state
+   void reset();
 
-      //! getter for x direction
-      int getDirectionX() const;
+   // inter-bomb-collisions
 
-      //! getter for y direction
-      int getDirectionY() const;
+   //! add animation to static list
+   static void addAnimation(BombKickAnimation* animation);
 
-      //! unmap bomb
-      void unmapBomb();
+   //! remove animation from static list
+   static void removeAnimation(BombKickAnimation* animation);
 
-      //! remap bomb
-      void remapBomb();
+   //! check if bomb collides with another bomb
+   bool checkCollision(BombKickAnimation* animation);
 
-      //! reset animation state
-      void reset();
+   //! getter for colliding flag
+   bool isColliding() const;
 
+   //! setter for colliding flag
+   void setColliding(bool colliding);
 
-      // inter-bomb-collisions
+   //! update collisions
+   void updateCollisions();
 
-      //! add animation to static list
-      static void addAnimation(BombKickAnimation* animation);
+   //! animation update timer
+   QTimer* mTimer;
 
-      //! remove animation from static list
-      static void removeAnimation(BombKickAnimation* animation);
+   //! intensity factor
+   float mFactor;
 
-      //! check if bomb collides with another bomb
-      bool checkCollision(BombKickAnimation* animation);
+   //! irection
+   Constants::Direction mDirection;
 
-      //! getter for colliding flag
-      bool isColliding() const;
+   //! x position
+   float mX;
 
-      //! setter for colliding flag
-      void setColliding(bool colliding);
+   //! y position
+   float mY;
 
-      //! update collisions
-      void updateCollisions();
+   //! ready to explode flag
+   bool mReadyToExplode;
 
+   //! ptr to game
+   Map* mMap;
 
-      //! animation update timer
-      QTimer* mTimer;
+   //! bomb map item
+   BombMapItem* mBombMapItem;
 
-      //! intensity factor
-      float mFactor;
+   //! player positions to collide with
+   QMap<int, QPoint> mPlayerPositions;
 
-      //! irection
-      Constants::Direction mDirection;
+   //! run in the destructor - see addDestroyCallback()
+   std::vector<std::function<void()>> mDestroyCallbacks;
 
-      //! x position
-      float mX;
+   // inter-bomb-collisions
 
-      //! y position
-      float mY;
+   //! list of kick animations
+   static QList<BombKickAnimation*> sAnimations;
 
-      //! ready to explode flag
-      bool mReadyToExplode;
-
-      //! ptr to game
-      Map* mMap;
-
-      //! bomb map item
-      BombMapItem* mBombMapItem;
-
-      //! player positions to collide with
-      QMap<int, QPoint> mPlayerPositions;
-
-
-      // inter-bomb-collisions
-
-      //! list of kick animations
-      static QList<BombKickAnimation*> sAnimations;
-
-      //! bomb is colliding with another bomb
-      bool mColliding;
+   //! bomb is colliding with another bomb
+   bool mColliding;
 };
 
-#endif // BOMBKICKANIMATION_H
-
-
+#endif  // BOMBKICKANIMATION_H

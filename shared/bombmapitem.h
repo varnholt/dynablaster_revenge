@@ -3,6 +3,7 @@
 
 // base
 #include "mapitem.h"
+#include "signal.h"
 
 // Qt
 #include <QObject>
@@ -17,144 +18,127 @@ class BombMapItem : public MapItem
 {
    Q_OBJECT
 
-   public:
+public:
+   //! detonation origin if bomb detonates passively
+   enum DetonationOrigin
+   {
+      Active = 0,
+      Left = 1,
+      Right = 2,
+      Top = 3,
+      Bottom = 4
+   };
 
-      //! detonation origin if bomb detonates passively
-      enum DetonationOrigin
-      {
-         Active = 0,
-         Left   = 1,
-         Right  = 2,
-         Top    = 3,
-         Bottom = 4
-      };
+   //! constructor
+   BombMapItem(int playerId, int flames, int id, int x, int y);
 
-      //! constructor
-      BombMapItem(
-         int playerId,
-         int flames,
-         int id,
-         int x,
-         int y
-      );
+   //! destructor
+   virtual ~BombMapItem();
 
-      //! destructor
-      virtual ~BombMapItem();
+   //! getter for player id
+   int8_t getPlayerId() const;
 
-      //! getter for player id
-      int8_t getPlayerId() const;
+   //! getter for flames
+   int8_t getFlames() const;
 
-      //! getter for flames
-      int8_t getFlames() const;
+   //! bomb is kicked
+   void kick();
 
-      //! bomb is kicked
-      void kick();
+   //! setter for detonation origin
+   void setDetonationOrigin(DetonationOrigin origin);
 
-      //! setter for detonation origin
-      void setDetonationOrigin(DetonationOrigin origin);
+   //! getter for detonation origin
+   DetonationOrigin getDetonationOrigin() const;
 
-      //! getter for detonation origin
-      DetonationOrigin getDetonationOrigin() const;
+   //! set detonation interval
+   void setInterval(int ms);
 
-      //! set detonation interval
-      void setInterval(int ms);
+   //! get detonation interval
+   int getInterval() const;
 
-      //! get detonation interval
-      int getInterval() const;
+   //! setter for owner id
+   void setPlayerId(int id);
 
-      //! setter for owner id
-      void setPlayerId(int id);
+   //! getter for kicked flag
+   bool isKicked() const;
 
-      //! getter for kicked flag
-      bool isKicked() const;
+   //! setter for kicked flag
+   void setKicked(bool kicked);
 
-      //! setter for kicked flag
-      void setKicked(bool kicked);
+   //! setter for shadowed item
+   void setShadowedItem(MapItem* shadowedItem);
 
-      //! setter for shadowed item
-      void setShadowedItem(MapItem* shadowedItem);
+   //! setter for igniter id
+   void setIgniterId(int8_t id);
 
-      //! setter for igniter id
-      void setIgniterId(int8_t id);
+   //! getter for igniter id
+   int8_t getIgniterId() const;
 
-      //! getter for igniter id
-      int8_t getIgniterId() const;
+   //! getter for shadowed item
+   MapItem* getShadowedItem();
 
-      //! getter for shadowed item
-      MapItem* getShadowedItem();
+   //! getter for kick animation
+   BombKickAnimation* getBombKickAnimation() const;
 
-      //! getter for kick animation
-      BombKickAnimation* getBombKickAnimation() const;
+   //! setter for bomb kick animation
+   void setBombKickAnimation(BombKickAnimation* animation);
 
-      //! setter for bomb kick animation
-      void setBombKickAnimation(BombKickAnimation* animation);
+   //! setter for tick time
+   static void setTickTime(int time);
 
-      //! setter for tick time
-      static void setTickTime(int time);
+   //! getter for tick time
+   static int getTickTime();
 
-      //! getter for tick time
-      static int getTickTime();
+public slots:
 
+   //! let the bomb explode now
+   void stopTimer();
 
-   public slots:
+public:
+   // Signal<> replacements for BombMapItem's former Qt signals (see
+   // project_full_qt_removal_scope memory).
 
-      //! let the bomb explode now
-      void stopTimer();
+   //! bomb exploded
+   Signal<BombMapItem*, bool> explodedSignal;
 
+   //! kick animation was started or stopped
+   Signal<Constants::Direction, float> kickAnimationSignal;
 
-   signals:
+protected slots:
 
-      //! bomb exploded
-      void exploded(
-         BombMapItem* bomb,
-         bool recursive = false
-      );
+   //! active explosion
+   void explodeActive();
 
-      //! kick animation was started or stopped
-      void kickAnimation(
-         Constants::Direction direction = Constants::DirectionUnknown,
-         float speed = 0.0f
-      );
+   //! delayed explosion triggered from animation
+   void explodeDelayed();
 
+protected:
+   //! bomb's timer
+   QTimer mTimer;
 
-   protected slots:
+   //! bomb owner
+   int8_t mPlayerId;
 
-      //! active explosion
-      void explodeActive();
+   //! bomb flames
+   int8_t mFlames;
 
-      //! delayed explosion triggered from animation
-      void explodeDelayed();
+   //! kicked flag
+   bool mKicked;
 
+   //! bomb kick animation
+   QPointer<BombKickAnimation> mAnimation;
 
-   protected:
+   //! detonation origin
+   DetonationOrigin mDetonationOrigin;
 
-      //! bomb's timer
-      QTimer mTimer;
+   //! mapitem that may be shadowed by a kicked bomb
+   QPointer<MapItem> mShadowedItem;
 
-      //! bomb owner
-      int8_t mPlayerId;
+   //! tick time
+   static int sTickTime;
 
-      //! bomb flames
-      int8_t mFlames;
-
-      //! kicked flag
-      bool mKicked;
-
-      //! bomb kick animation
-      QPointer<BombKickAnimation> mAnimation;
-
-      //! detonation origin
-      DetonationOrigin mDetonationOrigin;
-
-      //! mapitem that may be shadowed by a kicked bomb
-      QPointer<MapItem> mShadowedItem;
-
-      //! tick time
-      static int sTickTime;
-
-      //! bomb igniter
-      int8_t mIgniterId;
+   //! bomb igniter
+   int8_t mIgniterId;
 };
 
-#endif // BOMBMAPITEM_H
-
+#endif  // BOMBMAPITEM_H

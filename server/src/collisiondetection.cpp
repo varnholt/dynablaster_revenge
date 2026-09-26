@@ -12,21 +12,15 @@
 // math
 #include "math.h"
 
-
-
-#define SERVER_CENTER_EPSILON       0.2f
+#define SERVER_CENTER_EPSILON 0.2f
 #define SERVER_CORNER_EPSILON_MINOR 0.30f
 #define SERVER_CORNER_EPSILON_MAJOR 0.70f
 
-
-CollisionDetection::CollisionDetection(QObject *parent)
- : QObject(parent),
-   mGame(0)
+CollisionDetection::CollisionDetection(QObject* parent) : QObject(parent), mGame(0)
 {
 }
 
-
-void CollisionDetection::process(Player *player)
+void CollisionDetection::process(Player* player)
 {
    int keysPressed = player->getKeysPressed();
    bool moved = false;
@@ -36,22 +30,22 @@ void CollisionDetection::process(Player *player)
 
    // ----------------------------------------------------------------------
    // drunken helli course correction (tm) mueslee 2012
-   bool upPressed    = keysPressed & Constants::KeyUp;
-   bool downPressed  = keysPressed & Constants::KeyDown;
-   bool leftPressed  = keysPressed & Constants::KeyLeft;
+   bool upPressed = keysPressed & Constants::KeyUp;
+   bool downPressed = keysPressed & Constants::KeyDown;
+   bool leftPressed = keysPressed & Constants::KeyLeft;
    bool rightPressed = keysPressed & Constants::KeyRight;
 
-   int field[2] = { (int)floor(player->getX()), (int)floor(player->getY()) };
+   int field[2] = {(int)floor(player->getX()), (int)floor(player->getY())};
 
-   int left[2]  = { field[0] - 1, field[1]    };
-   int right[2] = { field[0] + 1, field[1]    };
-   int up[2]    = { field[0],     field[1] - 1};
-   int down[2]  = { field[0],     field[1] + 1};
+   int left[2] = {field[0] - 1, field[1]};
+   int right[2] = {field[0] + 1, field[1]};
+   int up[2] = {field[0], field[1] - 1};
+   int down[2] = {field[0], field[1] + 1};
 
-   bool fieldLeftAllowed   = !isFieldBlocked(left);
-   bool fieldRightAllowed  = !isFieldBlocked(right);
-   bool fieldUpAllowed     = !isFieldBlocked(up);
-   bool fieldDownAllowed   = !isFieldBlocked(down);
+   bool fieldLeftAllowed = !isFieldBlocked(left);
+   bool fieldRightAllowed = !isFieldBlocked(right);
+   bool fieldUpAllowed = !isFieldBlocked(up);
+   bool fieldDownAllowed = !isFieldBlocked(down);
 
    float absoluteX = player->getX();
    float absoluteY = player->getY();
@@ -79,35 +73,29 @@ void CollisionDetection::process(Player *player)
 
    */
 
-        if (downPressed &&! leftPressed && !rightPressed &&! upPressed && fieldDownAllowed && relativeX > SERVER_CORNER_EPSILON_MAJOR)
+   if (downPressed && !leftPressed && !rightPressed && !upPressed && fieldDownAllowed && relativeX > SERVER_CORNER_EPSILON_MAJOR)
       keysPressed |= Constants::KeyLeft;
-   else if (downPressed &&! leftPressed && !rightPressed &&! upPressed && fieldDownAllowed && relativeX < SERVER_CORNER_EPSILON_MINOR)
+   else if (downPressed && !leftPressed && !rightPressed && !upPressed && fieldDownAllowed && relativeX < SERVER_CORNER_EPSILON_MINOR)
       keysPressed |= Constants::KeyRight;
 
-   else if (upPressed && !leftPressed &&! rightPressed &&!downPressed && fieldUpAllowed && relativeX > SERVER_CORNER_EPSILON_MAJOR)
+   else if (upPressed && !leftPressed && !rightPressed && !downPressed && fieldUpAllowed && relativeX > SERVER_CORNER_EPSILON_MAJOR)
       keysPressed |= Constants::KeyLeft;
-   else if (upPressed && !leftPressed &&! rightPressed &&!downPressed && fieldUpAllowed && relativeX < SERVER_CORNER_EPSILON_MINOR)
+   else if (upPressed && !leftPressed && !rightPressed && !downPressed && fieldUpAllowed && relativeX < SERVER_CORNER_EPSILON_MINOR)
       keysPressed |= Constants::KeyRight;
 
-   else if (leftPressed &&! rightPressed &&! upPressed &&! downPressed && fieldLeftAllowed && relativeY > SERVER_CORNER_EPSILON_MAJOR)
+   else if (leftPressed && !rightPressed && !upPressed && !downPressed && fieldLeftAllowed && relativeY > SERVER_CORNER_EPSILON_MAJOR)
       keysPressed |= Constants::KeyUp;
-   else if (leftPressed &&! rightPressed &&! upPressed &&! downPressed && fieldLeftAllowed && relativeY < SERVER_CORNER_EPSILON_MINOR)
+   else if (leftPressed && !rightPressed && !upPressed && !downPressed && fieldLeftAllowed && relativeY < SERVER_CORNER_EPSILON_MINOR)
       keysPressed |= Constants::KeyDown;
 
-   else if (rightPressed &&! leftPressed &&! upPressed &&! downPressed && fieldRightAllowed && relativeY > SERVER_CORNER_EPSILON_MAJOR)
+   else if (rightPressed && !leftPressed && !upPressed && !downPressed && fieldRightAllowed && relativeY > SERVER_CORNER_EPSILON_MAJOR)
       keysPressed |= Constants::KeyUp;
-   else if (rightPressed &&! leftPressed &&! upPressed &&! downPressed && fieldRightAllowed && relativeY < SERVER_CORNER_EPSILON_MINOR)
+   else if (rightPressed && !leftPressed && !upPressed && !downPressed && fieldRightAllowed && relativeY < SERVER_CORNER_EPSILON_MINOR)
       keysPressed |= Constants::KeyDown;
 
    // ----------------------------------------------------------------------
 
-   updatePlayerDirections(
-      player,
-      keysPressed,
-      directions,
-      desiredXPos,
-      desiredYPos
-   );
+   updatePlayerDirections(player, keysPressed, directions, desiredXPos, desiredYPos);
 
    // collision control
    int fieldX = floor(desiredXPos);
@@ -129,50 +117,25 @@ void CollisionDetection::process(Player *player)
    MapItem* kickedBomb1 = 0;
    MapItem* kickedBomb2 = 0;
 
-   hBlocked =
-      isPositionBlocked(
-         desiredXPos,
-         desiredYPos,
-         keysPressed,
-         true,
-         fieldX,
-         fieldY,
-         &kickedBomb1
-      );
+   hBlocked = isPositionBlocked(desiredXPos, desiredYPos, keysPressed, true, fieldX, fieldY, &kickedBomb1);
 
-   vBlocked =
-      isPositionBlocked(
-         desiredXPos,
-         desiredYPos,
-         keysPressed,
-         false,
-         fieldX,
-         fieldY,
-         &kickedBomb2
-      );
+   vBlocked = isPositionBlocked(desiredXPos, desiredYPos, keysPressed, false, fieldX, fieldY, &kickedBomb2);
 
    xInField = desiredXPos - floor(desiredXPos);
    yInField = desiredYPos - floor(desiredYPos);
 
-   xInEpsilon =
-         xInField <= 0.5 + SERVER_MOVE_EPSILON
-      && xInField >= 0.5 - SERVER_MOVE_EPSILON;
+   xInEpsilon = xInField <= 0.5 + SERVER_MOVE_EPSILON && xInField >= 0.5 - SERVER_MOVE_EPSILON;
 
-   yInEpsilon =
-         yInField <= 0.5 + SERVER_MOVE_EPSILON
-      && yInField >= 0.5 - SERVER_MOVE_EPSILON;
+   yInEpsilon = yInField <= 0.5 + SERVER_MOVE_EPSILON && yInField >= 0.5 - SERVER_MOVE_EPSILON;
 
    // kick bombs if possible
-   emit playerKicksBomb(player, kickedBomb1, true, keysPressed);
-   emit playerKicksBomb(player, kickedBomb2, false, keysPressed);
+   playerKicksBombSignal(player, kickedBomb1, true, keysPressed);
+   playerKicksBombSignal(player, kickedBomb2, false, keysPressed);
 
    // ----------------------------------------------------------------------
    // experimental position correction
 
-   if (
-         !xInEpsilon
-      && !yInEpsilon
-   )
+   if (!xInEpsilon && !yInEpsilon)
    {
       // retry horizontal
       desiredXPos = player->getX();
@@ -185,13 +148,7 @@ void CollisionDetection::process(Player *player)
       if (keysFixedHorizontal & Constants::KeyDown)
          keysFixedHorizontal &= ~(Constants::KeyDown);
 
-      updatePlayerDirections(
-         player,
-         keysFixedHorizontal,
-         directions,
-         desiredXPos,
-         desiredYPos
-      );
+      updatePlayerDirections(player, keysFixedHorizontal, directions, desiredXPos, desiredYPos);
 
       fieldX = floor(desiredXPos);
       fieldY = floor(desiredYPos);
@@ -199,30 +156,13 @@ void CollisionDetection::process(Player *player)
       xInField = desiredXPos - floor(desiredXPos);
       yInField = desiredYPos - floor(desiredYPos);
 
-      hBlocked =
-         isPositionBlocked(
-            desiredXPos,
-            desiredYPos,
-            keysFixedHorizontal,
-            false,
-            fieldX,
-            fieldY
-         );
+      hBlocked = isPositionBlocked(desiredXPos, desiredYPos, keysFixedHorizontal, false, fieldX, fieldY);
 
+      xInEpsilon = xInField <= 0.5 + SERVER_MOVE_EPSILON && xInField >= 0.5 - SERVER_MOVE_EPSILON;
 
-      xInEpsilon =
-            xInField <= 0.5 + SERVER_MOVE_EPSILON
-         && xInField >= 0.5 - SERVER_MOVE_EPSILON;
+      yInEpsilon = yInField <= 0.5 + SERVER_MOVE_EPSILON && yInField >= 0.5 - SERVER_MOVE_EPSILON;
 
-      yInEpsilon =
-            yInField <= 0.5 + SERVER_MOVE_EPSILON
-         && yInField >= 0.5 - SERVER_MOVE_EPSILON;
-
-
-      if (
-            !xInEpsilon
-         && !yInEpsilon
-      )
+      if (!xInEpsilon && !yInEpsilon)
       {
          desiredXPos = player->getX();
          desiredYPos = player->getY();
@@ -234,76 +174,38 @@ void CollisionDetection::process(Player *player)
          if (keysFixedVertical & Constants::KeyLeft)
             keysFixedVertical &= ~(Constants::KeyLeft);
 
-         updatePlayerDirections(
-            player,
-            keysFixedVertical,
-            directions,
-            desiredXPos,
-            desiredYPos
-         );
+         updatePlayerDirections(player, keysFixedVertical, directions, desiredXPos, desiredYPos);
 
          fieldX = floor(desiredXPos);
          fieldY = floor(desiredYPos);
 
          // check if vertical movement is now possible
-         vBlocked =
-            isPositionBlocked(
-               desiredXPos,
-               desiredYPos,
-               keysFixedVertical,
-               true,
-               fieldX,
-               fieldY
-            );
+         vBlocked = isPositionBlocked(desiredXPos, desiredYPos, keysFixedVertical, true, fieldX, fieldY);
       }
 
       xInField = desiredXPos - floor(desiredXPos);
       yInField = desiredYPos - floor(desiredYPos);
 
       // x should be in epsilon now
-      xInEpsilon =
-            xInField <= 0.5 + SERVER_MOVE_EPSILON
-         && xInField >= 0.5 - SERVER_MOVE_EPSILON;
+      xInEpsilon = xInField <= 0.5 + SERVER_MOVE_EPSILON && xInField >= 0.5 - SERVER_MOVE_EPSILON;
 
-      yInEpsilon =
-            yInField <= 0.5 + SERVER_MOVE_EPSILON
-         && yInField >= 0.5 - SERVER_MOVE_EPSILON;
+      yInEpsilon = yInField <= 0.5 + SERVER_MOVE_EPSILON && yInField >= 0.5 - SERVER_MOVE_EPSILON;
    }
 
    // ----------------------------------------------------------------------
-
 
    // allow vertical movement only when
    // - position is changed
    // - x position is within 0.5 +- tolerance
    // - desired position is not blocked
-   if (
-         playerMovesVertically
-      && xInEpsilon
-      && !hBlocked
-   )
+   if (playerMovesVertically && xInEpsilon && !hBlocked)
    {
       // correct position until the player reached the middle of a field
       // or move the player to its desired position
-      horizontalMovementForbidden =
-         isPositionBlocked(
-            desiredXPos,
-            desiredYPos,
-            keysPressed,
-            false,
-            fieldX,
-            fieldY
-         );
+      horizontalMovementForbidden = isPositionBlocked(desiredXPos, desiredYPos, keysPressed, false, fieldX, fieldY);
 
       // x position is above the movement-path
-      assignedXPos =
-         adjustXPosition(
-            player,
-            xInField,
-            desiredXPos,
-            playerMovesHorizontally,
-            horizontalMovementForbidden
-         );
+      assignedXPos = adjustXPosition(player, xInField, desiredXPos, playerMovesHorizontally, horizontalMovementForbidden);
 
       assignedYPos = desiredYPos;
 
@@ -315,33 +217,14 @@ void CollisionDetection::process(Player *player)
    // - position is changed
    // - x position is within 0.5 +- tolerance
    // - desired position is not blocked
-   if (
-         playerMovesHorizontally
-      && yInEpsilon
-      && !vBlocked
-   )
+   if (playerMovesHorizontally && yInEpsilon && !vBlocked)
    {
       // correct position until the player reached the middle of a field
       // or move the player to its desired position
-      verticalMovementForbidden =
-         isPositionBlocked(
-            desiredXPos,
-            desiredYPos,
-            keysPressed,
-            true,
-            fieldX,
-            fieldY
-         );
+      verticalMovementForbidden = isPositionBlocked(desiredXPos, desiredYPos, keysPressed, true, fieldX, fieldY);
 
       // y position is above the movement-path
-      assignedYPos =
-         adjustYPosition(
-            player,
-            yInField,
-            desiredYPos,
-            playerMovesVertically,
-            verticalMovementForbidden
-         );
+      assignedYPos = adjustYPosition(player, yInField, desiredYPos, playerMovesVertically, verticalMovementForbidden);
 
       assignedXPos = desiredXPos;
 
@@ -350,34 +233,22 @@ void CollisionDetection::process(Player *player)
    }
 
    // update player rotation (if required)
-   bool rotationChanged = updateRotation(
-      player,
-      keysPressed,
-      moved,
-      assignedXPos,
-      assignedYPos
-   );
+   bool rotationChanged = updateRotation(player, keysPressed, moved, assignedXPos, assignedYPos);
 
    if (moved || rotationChanged)
    {
       int skipCount = player->getPositionSkipCounter();
 
-      if (
-            !moved // <- TODO: always set! why?
-         || (getGame()->getState() != Constants::GameActive)
-         || player->isKilled()
-      )
+      if (!moved  // <- TODO: always set! why?
+          || (getGame()->getState() != Constants::GameActive) || player->isKilled())
       {
          assignedXPos = player->getX();
          assignedYPos = player->getY();
       }
 
-      if (
-            (player->getKeysPressed() != player->getKeysPressedPreviously())
-         || (skipCount >=  getGame()->getPositionSkipCount())
-      )
+      if ((player->getKeysPressed() != player->getKeysPressedPreviously()) || (skipCount >= getGame()->getPositionSkipCount()))
       {
-         emit playerMove(player, assignedXPos, assignedYPos, directions);
+         playerMoveSignal(player, assignedXPos, assignedYPos, directions);
       }
       else
       {
@@ -390,19 +261,14 @@ void CollisionDetection::process(Player *player)
       // notify kick animations about player positions
       if (!player->isKilled())
       {
-         emit playerPositionChanged(
-            player->getId(),
-            player->getX(),
-            player->getY()
-         );
+         playerPositionChangedSignal(player->getId(), player->getX(), player->getY());
       }
    }
    else
    {
-      emit playerIdle(directions, player);
+      playerIdleSignal(directions, player);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -411,13 +277,7 @@ void CollisionDetection::process(Player *player)
    \param desiredXPos next desired x position
    \param desiredYPos next desired y position
 */
-void CollisionDetection::updatePlayerDirections(
-   Player* player,
-   int keysPressed,
-   int8_t& directions,
-   float& desiredXPos,
-   float& desiredYPos
-)
+void CollisionDetection::updatePlayerDirections(Player* player, int keysPressed, int8_t& directions, float& desiredXPos, float& desiredYPos)
 {
    float speed = player->getSpeed();
 
@@ -446,8 +306,6 @@ void CollisionDetection::updatePlayerDirections(
    }
 }
 
-
-
 //-----------------------------------------------------------------------------
 /*!
    \param player affected player
@@ -467,13 +325,7 @@ float CollisionDetection::adjustXPosition(
    float assignedXPos = 0.0;
    float speed = player->getSpeed();
 
-   if (
-         xInField > 0.5
-      && (
-            horizontalMovementForbidden
-         || !playerMovesHorizontally
-      )
-   )
+   if (xInField > 0.5 && (horizontalMovementForbidden || !playerMovesHorizontally))
    {
       if (xInField - 0.5 < (SERVER_SPEED * speed))
          assignedXPos = floor(desiredXPos) + 0.5;
@@ -482,13 +334,7 @@ float CollisionDetection::adjustXPosition(
    }
 
    // x position is below the movement-path
-   else if (
-         xInField < 0.5
-      && (
-            horizontalMovementForbidden
-         || !playerMovesHorizontally
-      )
-   )
+   else if (xInField < 0.5 && (horizontalMovementForbidden || !playerMovesHorizontally))
    {
       if (0.5 - xInField < (SERVER_SPEED * speed))
          assignedXPos = floor(desiredXPos) + 0.5;
@@ -504,7 +350,6 @@ float CollisionDetection::adjustXPosition(
 
    return assignedXPos;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -525,13 +370,7 @@ float CollisionDetection::adjustYPosition(
    float assignedYPos = 0.0;
    float speed = player->getSpeed();
 
-   if (
-         yInField > 0.5
-      && (
-            verticalMovementForbidden
-         || !playerMovesVertically
-      )
-   )
+   if (yInField > 0.5 && (verticalMovementForbidden || !playerMovesVertically))
    {
       if (yInField - 0.5 < (SERVER_SPEED * speed))
          assignedYPos = floor(desiredYPos) + 0.5;
@@ -540,13 +379,7 @@ float CollisionDetection::adjustYPosition(
    }
 
    // y position is below the movement-path
-   else if (
-         yInField < 0.5
-      && (
-            verticalMovementForbidden
-         || !playerMovesVertically
-      )
-   )
+   else if (yInField < 0.5 && (verticalMovementForbidden || !playerMovesVertically))
    {
       if (0.5 - yInField < (SERVER_SPEED * speed))
          assignedYPos = floor(desiredYPos) + 0.5;
@@ -562,8 +395,6 @@ float CollisionDetection::adjustYPosition(
 
    return assignedYPos;
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -607,11 +438,7 @@ bool CollisionDetection::isPositionBlocked(
    int fieldYPos = floor(y);
 
    // block if map bounds are exceeded
-   if (  fieldXPos < 0
-      || fieldYPos < 0
-      || fieldXPos > getMap()->getWidth() - 1
-      || fieldYPos > getMap()->getHeight() - 1
-   )
+   if (fieldXPos < 0 || fieldYPos < 0 || fieldXPos > getMap()->getWidth() - 1 || fieldYPos > getMap()->getHeight() - 1)
    {
       blocked = true;
    }
@@ -621,14 +448,7 @@ bool CollisionDetection::isPositionBlocked(
    {
       MapItem* item = getMap()->getItem(fieldXPos, fieldYPos);
 
-      if (
-            item
-         && item->isBlocking()
-         && !(
-               item->getX() == fieldX
-            && item->getY() == fieldY
-         )
-      )
+      if (item && item->isBlocking() && !(item->getX() == fieldX && item->getY() == fieldY))
       {
          if (blockingItem)
          {
@@ -642,18 +462,11 @@ bool CollisionDetection::isPositionBlocked(
    return blocked;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return true if a rotation update was required
 */
-bool CollisionDetection::updateRotation(
-   Player* player,
-   int keysPressed,
-   bool moved,
-   float assignedXPos,
-   float assignedYPos
-)
+bool CollisionDetection::updateRotation(Player* player, int keysPressed, bool moved, float assignedXPos, float assignedYPos)
 {
    bool rotationChanged = false;
    bool xMoved = false;
@@ -667,11 +480,8 @@ bool CollisionDetection::updateRotation(
    // the previous target vector directions
    Vec2 direction;
 
-   bool cursorKeysPressed =
-         (keysPressed & Constants::KeyUp)
-      || (keysPressed & Constants::KeyDown)
-      || (keysPressed & Constants::KeyLeft)
-      || (keysPressed & Constants::KeyRight);
+   bool cursorKeysPressed = (keysPressed & Constants::KeyUp) || (keysPressed & Constants::KeyDown) || (keysPressed & Constants::KeyLeft) ||
+                            (keysPressed & Constants::KeyRight);
 
    if (keysPressed & Constants::KeyUp)
       direction.setY(1.0f);
@@ -704,15 +514,10 @@ bool CollisionDetection::updateRotation(
 
    player->getPlayerRotation()->updateAngle();
 
-   rotationChanged =
-      !qFuzzyCompare(
-         previousRotationAngle,
-         rotation->getAngle()
-      );
+   rotationChanged = !qFuzzyCompare(previousRotationAngle, rotation->getAngle());
 
    return rotationChanged;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -721,10 +526,7 @@ bool CollisionDetection::updateRotation(
    \param keysPressed keys pressed
    \return true is position is blocked
 */
-bool CollisionDetection::isFieldBlocked(
-   int *field,
-   MapItem** blockingItem
-)
+bool CollisionDetection::isFieldBlocked(int* field, MapItem** blockingItem)
 {
    int x = field[0];
    int y = field[1];
@@ -732,11 +534,7 @@ bool CollisionDetection::isFieldBlocked(
    bool blocked = false;
 
    // block if map bounds are exceeded
-   if (  x < 0
-      || y < 0
-      || x > getMap()->getWidth() - 1
-      || y > getMap()->getHeight() - 1
-   )
+   if (x < 0 || y < 0 || x > getMap()->getWidth() - 1 || y > getMap()->getHeight() - 1)
    {
       blocked = true;
    }
@@ -746,10 +544,7 @@ bool CollisionDetection::isFieldBlocked(
    {
       MapItem* item = getMap()->getItem(x, y);
 
-      if (
-            item
-         && item->isBlocking()
-      )
+      if (item && item->isBlocking())
       {
          if (blockingItem)
          {
@@ -763,21 +558,17 @@ bool CollisionDetection::isFieldBlocked(
    return blocked;
 }
 
-
-Game *CollisionDetection::getGame() const
+Game* CollisionDetection::getGame() const
 {
    return mGame;
 }
 
-
-void CollisionDetection::setGame(Game *game)
+void CollisionDetection::setGame(Game* game)
 {
    mGame = game;
 }
 
-
-Map *CollisionDetection::getMap() const
+Map* CollisionDetection::getMap() const
 {
    return getGame()->getMap();
 }
-

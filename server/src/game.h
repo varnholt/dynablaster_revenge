@@ -15,6 +15,7 @@
 #include "gameinformation.h"
 #include "gameround.h"
 #include "packet.h"
+#include "signal.h"
 
 // forward declarations
 class BombMapItem;
@@ -31,481 +32,451 @@ struct NET_StreamSocket;
 
 class Game : public QObject
 {
-
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   Game();
 
-      //! constructor
-      Game();
+   //! destructor
+   ~Game();
 
-      //! destructor
-      ~Game();
+   //! initialize everything
+   void initialize();
 
-      //! initialize everything
-      void initialize();
+   //! getter for the game's id
+   int getId() const;
 
-      //! getter for the game's id
-      int getId() const;
+   //! getter for the player count
+   int getPlayerCount() const;
 
-      //! getter for the player count
-      int getPlayerCount() const;
+   //! getter for the maximum player count
+   int getMaximumPlayerCount() const;
 
-      //! getter for the maximum player count
-      int getMaximumPlayerCount() const;
+   //! setter for create game data
+   void setCreateGameData(const CreateGameData& data);
 
-      //! setter for create game data
-      void setCreateGameData(const CreateGameData& data);
+   //! setter for game name
+   void setName(const QString& name);
 
-      //! setter for game name
-      void setName(const QString& name);
+   //! getter for the game's name
+   const QString& getName() const;
 
-      //! getter for the game's name
-      const QString& getName() const;
+   //! getter for the level's name
+   const QString& getLevelName() const;
 
-      //! getter for the level's name
-      const QString& getLevelName() const;
+   //! process a packet
+   void processPacket(NET_StreamSocket* tcpSocket, Packet* packet);
 
-      //! process a packet
-      void processPacket(
-         NET_StreamSocket* tcpSocket,
-         Packet* packet
-      );
+   //! getter for map socket <-> player
+   QMap<NET_StreamSocket*, Player*>* getPlayerSockets();
 
-      //! getter for map socket <-> player
-      QMap<NET_StreamSocket*, Player*>* getPlayerSockets();
+   //! setter for the game's creator
+   void setCreator(Player*);
 
-      //! setter for the game's creator
-      void setCreator(Player*);
+   //! getter for the game's creator
+   Player* getCreator() const;
 
-      //! getter for the game's creator
-      Player* getCreator() const;
+   //! getter for list of players
+   QList<Player*> getPlayers() const;
 
-      //! getter for list of players
-      QList<Player*> getPlayers() const;
+   //! setter for the game's duration
+   void setDuration(int);
 
-      //! setter for the game's duration
-      void setDuration(int);
+   //! getter for the game's map
+   Map* getMap() const;
 
-      //! getter for the game's map
-      Map* getMap() const;
+   //! getter for map dimension
+   Constants::Dimension getMapDimension() const;
 
-      //! getter for map dimension
-      Constants::Dimension getMapDimension() const;
+   //! get combined extra enum
+   int getExtras() const;
 
-      //! get combined extra enum
-      int getExtras() const;
+   //! getter for game duration
+   int getDuration() const;
 
-      //! getter for game duration
-      int getDuration() const;
+   //! broadcast a message to all players in the game
+   void broadcastMessage(const QString&);
 
-      //! broadcast a message to all players in the game
-      void broadcastMessage(const QString&);
+   //! broadcast start game
+   void broadcastStartGame();
 
-      //! broadcast start game
-      void broadcastStartGame();
+   //! check gameover condition
+   void updateGameoverCondition();
 
-      //! check gameover condition
-      void updateGameoverCondition();
+   //! getter for rounds played
+   int getGamesPlayed() const;
 
-      //! getter for rounds played
-      int getGamesPlayed() const;
+   //! check if game is only populated by bots
+   bool isGamePopulatedByBots() const;
 
-      //! check if game is only populated by bots
-      bool isGamePopulatedByBots() const;
+   //! getter for free player color
+   Constants::Color getColorForNextPlayer() const;
 
-      //! getter for free player color
-      Constants::Color getColorForNextPlayer() const;
+   //! getter for game information object
+   GameInformation getGameInformation();
 
-      //! getter for game information object
-      GameInformation getGameInformation();
+   //! getter for the current game state
+   Constants::GameState getState() const;
 
-      //! getter for the current game state
-      Constants::GameState getState() const;
+   //! set synchronization active
+   void setSynchronizationActive(bool active);
 
-      //! set synchronization active
-      void setSynchronizationActive(bool active);
+   //! return synchronization flag
+   bool isSynchronizationActive() const;
 
-      //! return synchronization flag
-      bool isSynchronizationActive() const;
+   //! player joins a game
+   bool joinGame(Player* player, NET_StreamSocket* socket);
 
-      //! player joins a game
-      bool joinGame(Player* player, NET_StreamSocket* socket);
+   //! getter for position skip count
+   int getPositionSkipCount() const;
 
-      //! getter for position skip count
-      int getPositionSkipCount() const;
+   //! get the actual number of bots in this game
+   int getBotCount() const;
 
-      //! get the actual number of bots in this game
-      int getBotCount() const;
+   //! getter for gameround ptr
+   GameRound* getGameRound();
 
-      //! getter for gameround ptr
-      GameRound* getGameRound();
+   //! getter for time left
+   int getTimeLeft();
 
-      //! getter for time left
-      int getTimeLeft();
+   //! check if start positions are initialized
+   bool isStartPositionInitialized() const;
 
-      //! check if start positions are initialized
-      bool isStartPositionInitialized() const;
+   //! set start positions to initialized
+   void setStartPositionsInitialized(bool value);
 
-      //! set start positions to initialized
-      void setStartPositionsInitialized(bool value);
+   //! getter for message shown flag
+   bool isGameOnlyPopulatedByBotsMessageShown() const;
 
-      //! getter for message shown flag
-      bool isGameOnlyPopulatedByBotsMessageShown() const;
+   //! setter for message shown flag
+   void setGameOnlyPopulatedByBotsMessageShown(bool value);
 
-      //! setter for message shown flag
-      void setGameOnlyPopulatedByBotsMessageShown(bool value);
+   //! process spectator client
+   void processSpectator(NET_StreamSocket* tcpSocket);
 
-      //! process spectator client
-      void processSpectator(NET_StreamSocket* tcpSocket);
+public slots:
 
+   //! start new game
+   void startGame();
 
-   public slots:
+   //! (force) stop the game
+   void stopGame();
 
-      //! start new game
-      void startGame();
+   //! start game synchronization
+   void startSynchronization();
 
-      //! (force) stop the game
-      void stopGame();
+   //! game synchronization step
+   void synchronize();
 
-      //! start game synchronization
-      void startSynchronization();
+   //! prepare game
+   void prepareGame();
 
-      //! game synchronization step
-      void synchronize();
+   //! game finished
+   void finishGame();
 
-      //! prepare game
-      void prepareGame();
+   //! player left the game
+   void removePlayer(Player* player, NET_StreamSocket* playerSocket);
 
-      //! game finished
-      void finishGame();
+   //! add packet to list of outgoing packets
+   void addOutgoingPacket(Packet* packet);
 
-      //! player left the game
-      void removePlayer(Player* player, NET_StreamSocket* playerSocket);
+public:
+   // Signal<> replacements for Game's former Qt signals (see
+   // project_full_qt_removal_scope memory) - Q_OBJECT/QTimer stay for now, only the
+   // signals: block itself is converted this pass.
 
-      //! add packet to list of outgoing packets
-      void addOutgoingPacket(Packet* packet);
+   //! player was killed
+   Signal<int> playerKilledSignal;
 
+   //! player leaves game
+   Signal<int> playerLeavesSignal;
 
-   signals:
+   //! player is forced to leave game
+   Signal<NET_StreamSocket*> forceLeaveGameSignal;
 
-      //! player was killed
-      void playerKilled(int id);
+   //! state changed
+   Signal<Constants::GameState> stateChangedSignal;
 
-      //! player leaves game
-      void playerLeaves(int id);
+private slots:
 
-      //! player is forced to leave game
-      void forceLeaveGame(NET_StreamSocket* socket);
+   //! update everything
+   void update();
 
-      //! state changed
-      void stateChanged(Constants::GameState);
+   //! bomb exploded (newschool, iterative detonations)
+   void bombExploded(BombMapItem* bomb, bool);
 
+   //! send game time packets
+   void processGameTime();
 
-   private slots:
+   //! update prepare game countdown
+   void updatePrepareGame();
 
-      //! update everything
-      void update();
+   //! bomb kick animation triggered
+   void bombKickedAnimation(Constants::Direction, float speed);
 
-      //! bomb exploded (newschool, iterative detonations)
-      void bombExploded(BombMapItem *bomb, bool);
+   //! send an idle packet
+   void playerIdle(int8_t directions, Player* player);
 
-      //! send game time packets
-      void processGameTime();
+   //! move player
+   void playerMove(Player* player, float assignedXPos, float assignedYPos, int8_t directions);
 
-      //! update prepare game countdown
-      void updatePrepareGame();
+   //! player kicks a bomb
+   void playerKicksBomb(Player* player, MapItem* item, bool verticallyKicked, int keysPressed);
 
-      //! bomb kick animation triggered
-      void bombKickedAnimation(Constants::Direction, float speed);
+   //! player disease stopped
+   void playerDiseaseStopped();
 
-      //! send an idle packet
-      void playerIdle(int8_t directions, Player* player);
+   //! send a message to the spectator that the game is currently running
+   void processSpectatorMessage();
 
-      //! move player
-      void playerMove(
-         Player* player,
-         float assignedXPos,
-         float assignedYPos,
-         int8_t directions
-      );
+   //! spawn an extra
+   void spawn();
 
-      //! player kicks a bomb
-      void playerKicksBomb(
-         Player* player,
-         MapItem* item,
-         bool verticallyKicked,
-         int keysPressed
-      );
+private:
+   //! initialize skull setup
+   void initSkullSetup();
 
-      //! player disease stopped
-      void playerDiseaseStopped();
+   //! initialize the map
+   void initializeMap();
 
-      //! send a message to the spectator that the game is currently running
-      void processSpectatorMessage();
+   //! initialize timers
+   void initializeTimers();
 
-      //! spawn an extra
-      void spawn();
+   //! initialize players
+   void initializePlayerStartPositions();
 
+   //! initialize extra spawn
+   void initializeExtraSpawn();
 
-   private:
+   //! broadcast map
+   void broadcastCreateMapItems();
 
-      //! initialize skull setup
-      void initSkullSetup();
+   //! broadcast and clear map
+   void broadcastClearMapItems();
 
-      //! initialize the map
-      void initializeMap();
+   //! broadcast start positions
+   void broadcastStartPositions();
 
-      //! initialize timers
-      void initializeTimers();
+   //! update positions
+   void updatePositions();
 
-      //! initialize players
-      void initializePlayerStartPositions();
+   //! update player positions
+   void updatePlayerPositions();
 
-      //! initialize extra spawn
-      void initializeExtraSpawn();
+   //! update bombs
+   void updateBombs();
 
-      //! broadcast map
-      void broadcastCreateMapItems();
+   //! check if player collects an extra
+   void updateExtras();
 
-      //! broadcast and clear map
-      void broadcastClearMapItems();
+   //! check if infected players collide
+   void updateInfections();
 
-      //! broadcast start positions
-      void broadcastStartPositions();
+   //! send all packets from the outgoing-vector
+   void sendBroadcastPackets();
 
-      //! update positions
-      void updatePositions();
+   //! send single packet
+   void sendPacket(NET_StreamSocket* socket, Packet* packet);
 
-      //! update player positions
-      void updatePlayerPositions();
+   //! get directions for given player
+   int getPlayerDirections(Player* p);
 
-      //! update bombs
-      void updateBombs();
+   //! setter for the current game state
+   void setState(Constants::GameState);
 
-      //! check if player collects an extra
-      void updateExtras();
+   //! update stats on player kill event
+   void updateStatsPlayerKilled(Player* killer, Player* victim);
 
-      //! check if infected players collide
-      void updateInfections();
+   //! update stats on player won event
+   void processPlayerWon(Player*);
 
-      //! send all packets from the outgoing-vector
-      void sendBroadcastPackets();
+   //! only bots left
+   void processOnlyBotsLeft();
 
-      //! send single packet
-      void sendPacket(NET_StreamSocket* socket, Packet* packet);
+   //! broadcast game stats
+   void broadcastGameStats();
 
-      //! get directions for given player
-      int getPlayerDirections(Player* p);
+   //! increase the number of rounds played
+   void increaseGamesPlayed();
 
-      //! setter for the current game state
-      void setState(Constants::GameState);
+   //! init all map related items on prepare-game-phase
+   void initMapRelatedItems();
 
-      //! update stats on player kill event
-      void updateStatsPlayerKilled(Player* killer, Player* victim);
+   //! check if kicking is possible
+   bool isKickPossible(int x, int y, Constants::Direction kickDir);
 
-      //! update stats on player won event
-      void processPlayerWon(Player*);
+   //! next game round
+   void nextRound();
 
-      //! only bots left
-      void processOnlyBotsLeft();
+   //! reset round stats
+   void resetRoundStats();
 
-      //! broadcast game stats
-      void broadcastGameStats();
+   //! broadcast game information
+   void broadcastGameInformation();
 
-      //! increase the number of rounds played
-      void increaseGamesPlayed();
+   //! create extra skull
+   void createInfection(
+      Player* infectingPlayer,
+      Player* infectedPlayer = 0,
+      ExtraMapItem* extra = 0,
+      const QList<Constants::SkullType>& faces = QList<Constants::SkullType>()
+   );
 
-      //! init all map related items on prepare-game-phase
-      void initMapRelatedItems();
+   //! create kick animation
+   void createKickAnimation(BombMapItem* kickedBomb, Constants::Direction kickDir);
 
-      //! check if kicking is possible
-      bool isKickPossible(
-         int x,
-         int y,
-         Constants::Direction kickDir
-      );
+   //! decrease immune times
+   void updateImmuneTimes();
 
-      //! next game round
-      void nextRound();
+   //! make field immune
+   void makeFieldImmune(int x, int y);
 
-      //! reset round stats
-      void resetRoundStats();
+   //! check if field is immune
+   bool isFieldImmune(int x, int y) const;
 
-      //! broadcast game information
-      void broadcastGameInformation();
+   //! a counter checking how many players left the game during the running round
+   void increasePlayersLeftTheGameCount();
 
-      //! create extra skull
-      void createInfection(
-         Player* infectingPlayer,
-         Player* infectedPlayer = 0,
-         ExtraMapItem *extra = 0,
-         const QList<Constants::SkullType>& faces = QList<Constants::SkullType>()
-      );
+   //! reset the player left game counter
+   void resetPlayersLeftTheGameCount();
 
-      //! create kick animation
-      void createKickAnimation(
-         BombMapItem* kickedBomb,
-         Constants::Direction kickDir
-      );
+   //! read players left game counter
+   int getPlayersLeftTheGameCount() const;
 
-      //! decrease immune times
-      void updateImmuneTimes();
+   //! send a message to game owner
+   void sendMessageToOwner(const QString& message);
 
-      //! make field immune
-      void makeFieldImmune(int x, int y);
+   //! do not rotate dead player into stones
+   void rotateDeadPlayerTowardsBomb(Constants::Direction direction, Player* player, int x, int y);
 
-      //! check if field is immune
-      bool isFieldImmune(int x, int y) const;
+   //! check if extra spawning is enabled
+   bool isSpawnExtrasEnabled() const;
 
-      //! a counter checking how many players left the game during the running round
-      void increasePlayersLeftTheGameCount();
+   // members
 
-      //! reset the player left game counter
-      void resetPlayersLeftTheGameCount();
+   //! calls the update loop
+   QTimer* mUpdateTimer;
 
-      //! read players left game counter
-      int getPlayersLeftTheGameCount() const;
+   //! map socket <-> player
+   QMap<NET_StreamSocket*, Player*> mPlayerSockets;
 
-      //! send a message to game owner
-      void sendMessageToOwner(const QString& message);
+   //! map id <-> player
+   QMap<int8_t, Player*> mPlayers;
 
-      //! do not rotate dead player into stones
-      void rotateDeadPlayerTowardsBomb(
-         Constants::Direction direction,
-         Player* player,
-         int x,
-         int y
-      );
+   //! map of expected packet sizes
+   QMap<NET_StreamSocket*, uint16_t> mPacketSizes;
 
-      //! check if extra spawning is enabled
-      bool isSpawnExtrasEnabled() const;
+   //! outgoing packages
+   QList<Packet*> mOutgoingPackets;
 
+   //! playfield
+   Map* mMap;
 
-      // members
+   //! map items to delete after destruction
+   QSet<MapItem*> mDestroyedMapItems;
 
-      //! calls the update loop
-      QTimer* mUpdateTimer;
+   //! one direction to check
+   QList<Constants::Direction> mDirectionCheckCenter;
 
-      //! map socket <-> player
-      QMap<NET_StreamSocket*, Player*> mPlayerSockets;
+   //! all 4 directions to check
+   QList<Constants::Direction> mDirectionCheckAll;
 
-      //! map id <-> player
-      QMap<int8_t, Player*> mPlayers;
+   //! game id
+   int mGameId;
 
-      //! map of expected packet sizes
-      QMap<NET_StreamSocket*, uint16_t> mPacketSizes;
+   //! static game id counter
+   static int sGameId;
 
-      //! outgoing packages
-      QList<Packet*> mOutgoingPackets;
+   //! game create data
+   CreateGameData mCreateGameData;
 
-      //! playfield
-      Map* mMap;
+   //! flag to indicate game is running
+   bool mRunning;
 
-      //! map items to delete after destruction
-      QSet<MapItem*> mDestroyedMapItems;
+   //! idle packet sent flag
+   bool mIdlePacketSent;
 
-      //! one direction to check
-      QList<Constants::Direction> mDirectionCheckCenter;
+   //! server time update timer
+   QTimer* mGameTimeUpdateTimer;
 
-      //! all 4 directions to check
-      QList<Constants::Direction> mDirectionCheckAll;
+   //! game time
+   QElapsedTimer mGameTime;
 
-      //! game id
-      int mGameId;
+   //! game duration
+   int mDuration;
 
-      //! static game id counter
-      static int sGameId;
+   //! game owner
+   Player* mCreator;
 
-      //! game create data
-      CreateGameData mCreateGameData;
+   //! game state
+   Constants::GameState mState;
 
-      //! flag to indicate game is running
-      bool mRunning;
+   //! preparation timer
+   QTimer* mPreparationTimer;
 
-      //! idle packet sent flag
-      bool mIdlePacketSent;
+   //! prepration time
+   QElapsedTimer mPreparationTime;
 
-      //! server time update timer
-      QTimer* mGameTimeUpdateTimer;
+   //! preparation counter
+   int mPreparationCounter;
 
-      //! game time
-      QElapsedTimer mGameTime;
+   //! idle packet map
+   QSet<Player*> mIdlePacketSentSet;
 
-      //! game duration
-      int mDuration;
+   //! game over condition needs to be checked in (recursive) detonation
+   bool mCheckGameOver;
 
-      //! game owner
-      Player* mCreator;
+   //! skip countdown
+   bool mSkipCountdown;
 
-      //! game state
-      Constants::GameState mState;
+   //! position skips
+   int mPositionSkipCount;
 
-      //! preparation timer
-      QTimer* mPreparationTimer;
+   //! number of rounds played
+   int mGamesPlayed;
 
-      //! prepration time
-      QElapsedTimer mPreparationTime;
+   //! game synchronization time
+   QElapsedTimer mSynchronizationTime;
 
-      //! preparation counter
-      int mPreparationCounter;
+   //! synchronization is active or not
+   bool mSynchronizationActive;
 
-      //! idle packet map
-      QSet<Player*> mIdlePacketSentSet;
+   //! shake packet handler
+   ExtraShakePacketHandler* mShakePacketHandler;
 
-      //! game over condition needs to be checked in (recursive) detonation
-      bool mCheckGameOver;
+   //! maximum player speed
+   float mMaxSpeed;
 
-      //! skip countdown
-      bool mSkipCountdown;
+   //! sync max time
+   int mSyncMaxTime;
 
-      //! position skips
-      int mPositionSkipCount;
+   //! collision detection
+   CollisionDetection* mCollisionDetection;
 
-      //! number of rounds played
-      int mGamesPlayed;
+   //! game round instance
+   GameRound mGameRound;
 
-      //! game synchronization time
-      QElapsedTimer mSynchronizationTime;
+   //! immune times
+   int* mImmuneTimes;
 
-      //! synchronization is active or not
-      bool mSynchronizationActive;
+   //! counter of players left per round
+   int mPlayerLeftTheGameCount;
 
-      //! shake packet handler
-      ExtraShakePacketHandler* mShakePacketHandler;
+   //! start positions are initialized
+   bool mStartPositionsInitialized;
 
-      //! maximum player speed
-      float mMaxSpeed;
+   //! only populated message shown flag
+   bool mGameOnlyPopulatedByBotsMessageShown;
 
-      //! sync max time
-      int mSyncMaxTime;
+   //! list of spectators - cleared explicitly in removePlayer() when a socket goes away
+   QList<NET_StreamSocket*> mSpectators;
 
-      //! collision detection
-      CollisionDetection* mCollisionDetection;
+   //! extra spawning
+   ExtraSpawn* mExtraSpawn;
 
-      //! game round instance
-      GameRound mGameRound;
-
-      //! immune times
-      int* mImmuneTimes;
-
-      //! counter of players left per round
-      int mPlayerLeftTheGameCount;
-
-      //! start positions are initialized
-      bool mStartPositionsInitialized;
-
-      //! only populated message shown flag
-      bool mGameOnlyPopulatedByBotsMessageShown;
-
-      //! list of spectators - cleared explicitly in removePlayer() when a socket goes away
-      QList<NET_StreamSocket*> mSpectators;
-
-      //! extra spawning
-      ExtraSpawn* mExtraSpawn;
-
-      //! extra spawning enabled
-      bool mExtraSpawnEnabled;
+   //! extra spawning enabled
+   bool mExtraSpawnEnabled;
 };
 
 #endif

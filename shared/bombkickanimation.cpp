@@ -25,17 +25,17 @@ QList<BombKickAnimation*> BombKickAnimation::sAnimations;
 /*!
    \param parent parent object
 */
-BombKickAnimation::BombKickAnimation(QObject *parent)
-  : QObject(parent),
-    mTimer(nullptr),
-    mFactor(BOMB_MOVE_SPEED),
-    mDirection(Constants::DirectionUnknown),
-    mX(0.0f),
-    mY(0.0f),
-    mReadyToExplode(false),
-    mMap(nullptr),
-    mBombMapItem(nullptr),
-    mColliding(false)
+BombKickAnimation::BombKickAnimation(QObject* parent)
+    : QObject(parent),
+      mTimer(nullptr),
+      mFactor(BOMB_MOVE_SPEED),
+      mDirection(Constants::DirectionUnknown),
+      mX(0.0f),
+      mY(0.0f),
+      mReadyToExplode(false),
+      mMap(nullptr),
+      mBombMapItem(nullptr),
+      mColliding(false)
 {
    mTimer = new QTimer(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -43,39 +43,45 @@ BombKickAnimation::BombKickAnimation(QObject *parent)
 #endif
    mTimer->setInterval(1000 / SERVER_HEARTBEAT_IN_HZ);
 
-   connect(
-      mTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(updatePosition())
-   );
+   connect(mTimer, SIGNAL(timeout()), this, SLOT(updatePosition()));
 
    addAnimation(this);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 BombKickAnimation::~BombKickAnimation()
 {
+   for (const auto& callback : mDestroyCallbacks)
+   {
+      callback();
+   }
+
    removeAnimation(this);
 }
 
+//-----------------------------------------------------------------------------
+/*!
+   \param callback run once, right before this object is destroyed
+*/
+void BombKickAnimation::addDestroyCallback(std::function<void()> callback)
+{
+   mDestroyCallbacks.push_back(std::move(callback));
+}
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::deleteAll()
 {
    while (!sAnimations.empty())
       delete sAnimations.first();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::start()
 {
    reset();
@@ -85,22 +91,17 @@ void BombKickAnimation::start()
    if (!mTimer->isActive())
       mTimer->start();
 
-   emit started(
-      getDirection(),
-      getStepSize()
-   );
+   startedSignal(getDirection(), getStepSize());
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param map ptr to map
 */
-void BombKickAnimation::setMap(Map *map)
+void BombKickAnimation::setMap(Map* map)
 {
    mMap = map;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -111,7 +112,6 @@ void BombKickAnimation::setX(float x)
    mX = x;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param y y position
@@ -120,7 +120,6 @@ void BombKickAnimation::setY(float y)
 {
    mY = y;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -131,7 +130,6 @@ float BombKickAnimation::getX() const
    return mX;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return y position
@@ -141,16 +139,14 @@ float BombKickAnimation::getY() const
    return mY;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return ptr to map
 */
-Map *BombKickAnimation::getMap() const
+Map* BombKickAnimation::getMap() const
 {
    return mMap;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -161,7 +157,6 @@ bool BombKickAnimation::isReadyToExplode() const
    return mReadyToExplode;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param read \c true if bomb is ready to explode
@@ -171,7 +166,6 @@ void BombKickAnimation::setReadyToExplode(bool ready)
    mReadyToExplode = ready;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param direction dir
@@ -180,7 +174,6 @@ void BombKickAnimation::setDirection(Constants::Direction dir)
 {
    mDirection = dir;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -206,10 +199,9 @@ void BombKickAnimation::ignite(int x, int y)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::unmapBomb()
 {
    int x = 0;
@@ -221,11 +213,7 @@ void BombKickAnimation::unmapBomb()
    mBombMapItem = dynamic_cast<BombMapItem*>(getMap()->getItem(x, y));
 
    // either clear the field or re-set the shadowed item
-   getMap()->setItem(
-      x,
-      y,
-      mBombMapItem->getShadowedItem()
-   );
+   getMap()->setItem(x, y, mBombMapItem->getShadowedItem());
 
    /*
    qDebug(
@@ -237,10 +225,9 @@ void BombKickAnimation::unmapBomb()
    */
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::remapBomb()
 {
    int x = 0;
@@ -253,18 +240,9 @@ void BombKickAnimation::remapBomb()
    mBombMapItem->setY(y);
 
    // item may have shadowed an extra
-   mBombMapItem->setShadowedItem(
-      getMap()->getItem(
-         x,
-         y
-      )
-   );
+   mBombMapItem->setShadowedItem(getMap()->getItem(x, y));
 
-   getMap()->setItem(
-      x,
-      y,
-      mBombMapItem
-   );
+   getMap()->setItem(x, y, mBombMapItem);
 
    /*
    qDebug(
@@ -276,15 +254,13 @@ void BombKickAnimation::remapBomb()
    */
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::reset()
 {
    mReadyToExplode = false;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -300,7 +276,6 @@ bool BombKickAnimation::isInRange(float value1, float value2, float epsilon)
    return inRange;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return direction
@@ -309,7 +284,6 @@ Constants::Direction BombKickAnimation::getDirection() const
 {
    return mDirection;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -335,7 +309,6 @@ int BombKickAnimation::getDirectionX() const
    return dir;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return y direction
@@ -360,10 +333,9 @@ int BombKickAnimation::getDirectionY() const
    return dir;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::updatePosition()
 {
    updateCollisions();
@@ -381,16 +353,13 @@ void BombKickAnimation::updatePosition()
          float fieldX = floor(mX);
          float fieldY = floor(mY);
 
-         if (
-               isInRange(fabs(mX - fieldX), 0.5f, BOMB_EXPLODE_EPSILON)
-            && isInRange(fabs(mY - fieldY), 0.5f, BOMB_EXPLODE_EPSILON)
-         )
+         if (isInRange(fabs(mX - fieldX), 0.5f, BOMB_EXPLODE_EPSILON) && isInRange(fabs(mY - fieldY), 0.5f, BOMB_EXPLODE_EPSILON))
          {
             // reposition the bomb
             remapBomb();
 
             // let it explode
-            emit explode();
+            explodeSignal();
          }
       }
 
@@ -402,7 +371,7 @@ void BombKickAnimation::updatePosition()
       remapBomb();
 
       // if bomb can't move tell client to stop the animation
-      emit stopped();
+      stoppedSignal();
 
       // let it explode
       readyToExplode();
@@ -413,10 +382,9 @@ void BombKickAnimation::updatePosition()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::readyToExplode()
 {
    // qDebug("BombKickAnimation::readyToExplode(): %d", mReadyToExplode);
@@ -425,14 +393,13 @@ void BombKickAnimation::readyToExplode()
    // otherwise wait for it to be in its final position
    if (mReadyToExplode)
    {
-      emit explode();
+      explodeSignal();
    }
    else
    {
       mReadyToExplode = true;
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -445,7 +412,6 @@ void BombKickAnimation::updatePlayerPosition(int id, float x, float y)
    mPlayerPositions[id] = QPoint(static_cast<int32_t>(floor(x)), static_cast<int32_t>(floor(y)));
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param id player id
@@ -454,7 +420,6 @@ void BombKickAnimation::removePlayerPosition(int id)
 {
    mPlayerPositions.remove(id);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -495,11 +460,7 @@ bool BombKickAnimation::isMoveAllowed()
 
    // block if map bounds are exceeded
    // or if bomb hit something
-   if (  checkFieldX < 0
-      || checkFieldY < 0
-      || checkFieldX > getMap()->getWidth() - 1
-      || checkFieldY > getMap()->getHeight() - 1
-   )
+   if (checkFieldX < 0 || checkFieldY < 0 || checkFieldX > getMap()->getWidth() - 1 || checkFieldY > getMap()->getHeight() - 1)
    {
       allowed = false;
    }
@@ -508,10 +469,7 @@ bool BombKickAnimation::isMoveAllowed()
       // check for map item collisions
       MapItem* item = getMap()->getItem(checkFieldX, checkFieldY);
 
-      if (
-            item
-         && item->isBlocking()
-      )
+      if (item && item->isBlocking())
       {
          allowed = false;
       }
@@ -519,12 +477,9 @@ bool BombKickAnimation::isMoveAllowed()
       {
          // if there is no blocking item, we still need to check for
          // player collisions
-         foreach(const QPoint& p, mPlayerPositions)
+         foreach (const QPoint& p, mPlayerPositions)
          {
-            if (
-                  p.x() == checkFieldX
-               && p.y() == checkFieldY
-            )
+            if (p.x() == checkFieldX && p.y() == checkFieldY)
             {
                allowed = false;
                break;
@@ -543,20 +498,14 @@ bool BombKickAnimation::isMoveAllowed()
             int startX = mBombMapItem->getX();
             int startY = mBombMapItem->getY();
 
-            if (
-                  fieldXPos != startX
-               || fieldYPos != startY
-            )
+            if (fieldXPos != startX || fieldYPos != startY)
             {
                // check if there's a player on the field the bomb is
                // at *this very moment*. if that is the case, well...
                // stop the animation.
-               foreach(const QPoint& p, mPlayerPositions)
+               foreach (const QPoint& p, mPlayerPositions)
                {
-                  if (
-                        p.x() == fieldXPos
-                     && p.y() == fieldYPos
-                  )
+                  if (p.x() == fieldXPos && p.y() == fieldYPos)
                   {
                      allowed = false;
                      break;
@@ -570,7 +519,6 @@ bool BombKickAnimation::isMoveAllowed()
    return allowed;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return step size
@@ -580,32 +528,29 @@ float BombKickAnimation::getStepSize() const
    return mFactor * SERVER_SPEED;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param animation animation to add
 */
-void BombKickAnimation::addAnimation(BombKickAnimation *animation)
+void BombKickAnimation::addAnimation(BombKickAnimation* animation)
 {
    sAnimations.push_back(animation);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param animation animation to remove
 */
-void BombKickAnimation::removeAnimation(BombKickAnimation *animation)
+void BombKickAnimation::removeAnimation(BombKickAnimation* animation)
 {
    sAnimations.removeOne(animation);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \return \c true if bomb collides with another bomb
 */
-bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
+bool BombKickAnimation::checkCollision(BombKickAnimation* animation)
 {
    bool colliding = false;
 
@@ -644,7 +589,7 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
    {
       if (static_cast<int32_t>(floor(getX())) == static_cast<int32_t>(floor(animation->getX())))
       {
-         if ( fabs( getY() - animation->getY() ) < eps )
+         if (fabs(getY() - animation->getY()) < eps)
             colliding = true;
       }
    }
@@ -653,7 +598,7 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
    {
       if (static_cast<int32_t>(floor(getY())) == static_cast<int32_t>(floor(animation->getY())))
       {
-         if ( fabs( getX() - animation->getX() ) < eps )
+         if (fabs(getX() - animation->getX()) < eps)
             colliding = true;
       }
    }
@@ -723,40 +668,28 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
       // shift positions into possible collision range
 
       // lu
-      if (
-                       getDirection() == Constants::DirectionLeft
-         && animation->getDirection() == Constants::DirectionUp
-      )
+      if (getDirection() == Constants::DirectionLeft && animation->getDirection() == Constants::DirectionUp)
       {
          x1add = -diagonalEps;
          y2add = -diagonalEps;
       }
 
       // ld
-      else if (
-                       getDirection() == Constants::DirectionLeft
-         && animation->getDirection() == Constants::DirectionDown
-      )
+      else if (getDirection() == Constants::DirectionLeft && animation->getDirection() == Constants::DirectionDown)
       {
          x1add = -diagonalEps;
          y2add = diagonalEps;
       }
 
       // ru
-      else if (
-                       getDirection() == Constants::DirectionRight
-         && animation->getDirection() == Constants::DirectionUp
-      )
+      else if (getDirection() == Constants::DirectionRight && animation->getDirection() == Constants::DirectionUp)
       {
          x1add = diagonalEps;
          y2add = -diagonalEps;
       }
 
       // rd
-      else if (
-                       getDirection() == Constants::DirectionRight
-         && animation->getDirection() == Constants::DirectionDown
-      )
+      else if (getDirection() == Constants::DirectionRight && animation->getDirection() == Constants::DirectionDown)
       {
          x1add = diagonalEps;
          y2add = diagonalEps;
@@ -765,40 +698,28 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
       // ---
 
       // dl
-      else if (
-                       getDirection() == Constants::DirectionDown
-         && animation->getDirection() == Constants::DirectionLeft
-      )
+      else if (getDirection() == Constants::DirectionDown && animation->getDirection() == Constants::DirectionLeft)
       {
          y1add = diagonalEps;
          x2add = -diagonalEps;
       }
 
       // ul
-      else if (
-                       getDirection() == Constants::DirectionUp
-         && animation->getDirection() == Constants::DirectionLeft
-      )
+      else if (getDirection() == Constants::DirectionUp && animation->getDirection() == Constants::DirectionLeft)
       {
          y1add = -diagonalEps;
          x2add = -diagonalEps;
       }
 
       // ur
-      else if (
-                       getDirection() == Constants::DirectionUp
-         && animation->getDirection() == Constants::DirectionRight
-      )
+      else if (getDirection() == Constants::DirectionUp && animation->getDirection() == Constants::DirectionRight)
       {
          y1add = -diagonalEps;
          x2add = diagonalEps;
       }
 
       // dr
-      else if (
-                       getDirection() == Constants::DirectionDown
-         && animation->getDirection() == Constants::DirectionRight
-      )
+      else if (getDirection() == Constants::DirectionDown && animation->getDirection() == Constants::DirectionRight)
       {
          y1add = diagonalEps;
          x2add = diagonalEps;
@@ -817,21 +738,19 @@ bool BombKickAnimation::checkCollision(BombKickAnimation *animation)
       yFieldShifted2 = static_cast<int32_t>(floor(y2));
 
       // check if fields are in collision range
-      colliding =
-            (xFieldShifted1 == xFieldShifted2 && yFieldShifted1 == yFieldShifted2)  // all shifted
-                                                                                    //
-         || (xFieldShifted1 == xField2        && yFieldShifted1 == yField2)         // animation 1 shifted
-         || (xFieldShifted1 == xField2        && yField1        == yField2)         // animation 1 x shifted
-         || (xField1        == xField2        && yFieldShifted1 == yField2)         // animation 1 y shifted
-                                                                                    //
-         || (xField1        == xFieldShifted2 && yField1        == yFieldShifted2)  // animation 2 shifted
-         || (xField1        == xFieldShifted2 && yField1        == yField2)         // animation 2 x shifted
-         || (xField1        == xField2        && yField1        == yFieldShifted2); // animation 2 x shifted
+      colliding = (xFieldShifted1 == xFieldShifted2 && yFieldShifted1 == yFieldShifted2)  // all shifted
+                                                                                          //
+                  || (xFieldShifted1 == xField2 && yFieldShifted1 == yField2)             // animation 1 shifted
+                  || (xFieldShifted1 == xField2 && yField1 == yField2)                    // animation 1 x shifted
+                  || (xField1 == xField2 && yFieldShifted1 == yField2)                    // animation 1 y shifted
+                                                                                          //
+                  || (xField1 == xFieldShifted2 && yField1 == yFieldShifted2)             // animation 2 shifted
+                  || (xField1 == xFieldShifted2 && yField1 == yField2)                    // animation 2 x shifted
+                  || (xField1 == xField2 && yField1 == yFieldShifted2);                   // animation 2 x shifted
    }
 
    return colliding;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -842,7 +761,6 @@ bool BombKickAnimation::isColliding() const
    return mColliding;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param colliding colliding flag
@@ -852,10 +770,9 @@ void BombKickAnimation::setColliding(bool colliding)
    mColliding = colliding;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombKickAnimation::updateCollisions()
 {
    // check our current animation vs. all animations that are currently active
@@ -874,7 +791,3 @@ void BombKickAnimation::updateCollisions()
       }
    }
 }
-
-
-
-

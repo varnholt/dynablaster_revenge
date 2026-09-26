@@ -6,7 +6,7 @@
 
 // shared
 #include "constants.h"
-
+#include "signal.h"
 
 // forward declarations
 class Game;
@@ -19,108 +19,60 @@ class CollisionDetection : public QObject
    Q_OBJECT
 
 public:
-
    //! constructor
-   CollisionDetection(QObject *parent = 0);
+   CollisionDetection(QObject* parent = 0);
 
    //! process player
    void process(Player* player);
-   
+
    //! returns true if position is blocked
-   bool isFieldBlocked(
-      int* field,
-      MapItem** blockingItem = 0
-   );
+   bool isFieldBlocked(int* field, MapItem** blockingItem = 0);
 
    //! getter for game
    Game* getGame() const;
 
-
-signals:
+public:
+   // Signal<> replacements for CollisionDetection's former Qt signals (see
+   // project_full_qt_removal_scope memory).
 
    //! player kicks a bomb
-   void playerKicksBomb(
-      Player* player,
-      MapItem* item,
-      bool verticallyKicked,
-      int keysPressed
-   );
-   
+   Signal<Player*, MapItem*, bool, int> playerKicksBombSignal;
+
    //! send an idle packet
-   void playerIdle(int8_t directions, Player* player);
+   Signal<int8_t, Player*> playerIdleSignal;
 
    //! move player
-   void playerMove(
-      Player* player,
-      float assignedXPos,
-      float assignedYPos,
-      int8_t directions
-   );
+   Signal<Player*, float, float, int8_t> playerMoveSignal;
 
    //! player position was updated
-   void playerPositionChanged(int id, float x, float y);
-
+   Signal<int, float, float> playerPositionChangedSignal;
 
 public slots:
 
    //! setter for game
    void setGame(Game* game);
 
-
 protected:
-
    //! getter for game
    Map* getMap() const;
 
    //! prepare referenced values for current player
-   void updatePlayerDirections(
-      Player* player,
-      int keysPressed,
-      int8_t& directions,
-      float& desiredXPos,
-      float& desiredYPos
-   );
+   void updatePlayerDirections(Player* player, int keysPressed, int8_t& directions, float& desiredXPos, float& desiredYPos);
 
    //! adjust player x position
-   float adjustXPosition(
-      Player* player,
-      float xInField,
-      float desiredXPos,
-      bool playerMovesHorizontally,
-      bool horizontalMovementForbidden
-   );
+   float adjustXPosition(Player* player, float xInField, float desiredXPos, bool playerMovesHorizontally, bool horizontalMovementForbidden);
 
    //! adjust player y position
-   float adjustYPosition(
-      Player* player,
-      float yInField,
-      float desiredYPos,
-      bool playerMovesVertically,
-      bool verticalMovementForbidden
-   );
+   float adjustYPosition(Player* player, float yInField, float desiredYPos, bool playerMovesVertically, bool verticalMovementForbidden);
 
    //! update the player's rotation
-   bool updateRotation(
-      Player* player,
-      int keysPressed,
-      bool moved,
-      float assignedXPos,
-      float assignedYPos
-   );
+   bool updateRotation(Player* player, int keysPressed, bool moved, float assignedXPos, float assignedYPos);
 
    //! returns true if position is blocked
-   bool isPositionBlocked(
-      float x,
-      float y,
-      int keysPressed,
-      bool verticalCheck,
-      int fieldX,
-      int fieldY,
-      MapItem** blockingItem = 0
-   );
+   bool isPositionBlocked(float x, float y, int keysPressed, bool verticalCheck, int fieldX, int fieldY, MapItem** blockingItem = 0);
 
    //! game
    Game* mGame;
 };
 
-#endif // COLLISIONDETECTION_H
+#endif  // COLLISIONDETECTION_H

@@ -421,7 +421,7 @@ void Server::processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packe
    game->setCreator(player);
    game->getGameRound()->setCount(request->getData().mRounds);
 
-   connect(game, SIGNAL(forceLeaveGame(NET_StreamSocket*)), this, SLOT(processPlayerLeavesGame(NET_StreamSocket*)));
+   game->forceLeaveGameSignal.connect([this](NET_StreamSocket* socket) { processPlayerLeavesGame(socket); });
 
    // autocorrect duplicate game names
    correctDuplicateGameName(game);
