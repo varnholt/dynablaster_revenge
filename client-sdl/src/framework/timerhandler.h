@@ -4,7 +4,8 @@
 #include "tools/singleton.h"
 
 #include <QMutex>
-#include <QSet>
+
+#include <unordered_set>
 
 class TimerHandler : public Singleton<TimerHandler>
 {
@@ -21,5 +22,5 @@ public:
 
 private:
    mutable QMutex mMutex;
-   QSet<FrameTimer*> mTimers;
+   std::unordered_set<FrameTimer*> mTimers;
 };

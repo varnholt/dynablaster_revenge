@@ -3,10 +3,11 @@
 
 // Qt
 #include <QObject>
-#include <QSet>
 #include <QString>
 #include <QMap>
 #include <QQueue>
+
+#include <unordered_set>
 
 // tools
 #include "tools/map2d.h"
@@ -201,7 +202,7 @@ private:
    float mTime;
    float mTimePrev;
 
-   QSet<MapItem*> mMapItems;
+   std::unordered_set<MapItem*> mMapItems;
    QList<MapItem*> mStoneList;
    QMap<int,PlayerItem*> mPlayerList;
    QMap<MapItem*,Mesh*> mMeshes;

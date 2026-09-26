@@ -4,7 +4,8 @@
 
 #include <QObject>
 #include <QMap>
-#include <QSet>
+
+#include <unordered_set>
 
 class MenuPage;
 class PlayerInfo;
@@ -114,7 +115,7 @@ private:
 
    QList<QString> mSortedLevelNames;
    QList<QString> mSortedLevelDirNames;
-   QSet<MenuPage*> mCreateGamePagesInitialized;
+   std::unordered_set<MenuPage*> mCreateGamePagesInitialized;
    QMap<int, int> mPlayerIdToIndexMap;
    HostHistory mHostHistory;
 };

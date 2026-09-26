@@ -8,7 +8,7 @@ TimerHandler::TimerHandler()
 TimerHandler::~TimerHandler()
 {
    QMutexLocker lock(&mMutex);
-   QSet<FrameTimer*>::Iterator it;
+   std::unordered_set<FrameTimer*>::iterator it;
    it = mTimers.begin();
    while (it != mTimers.end())
    {
@@ -30,12 +30,12 @@ void TimerHandler::addTimer(FrameTimer* timer)
 void TimerHandler::removeTimer(FrameTimer* timer)
 {
    QMutexLocker lock(&mMutex);
-   mTimers.remove(timer);
+   mTimers.erase(timer);
 }
 
 void TimerHandler::update()
 {
-   QSet<FrameTimer*>::Iterator it = mTimers.begin();
+   std::unordered_set<FrameTimer*>::iterator it = mTimers.begin();
    while (it != mTimers.end())
    {
       FrameTimer* timer = *it;

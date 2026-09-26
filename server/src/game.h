@@ -6,8 +6,9 @@
 #include <QMap>
 #include <QObject>
 #include <QPointer>
-#include <QSet>
 #include <QTimer>
+
+#include <unordered_set>
 
 // shared
 #include "constants.h"
@@ -374,7 +375,7 @@ private:
    Map* mMap;
 
    //! map items to delete after destruction
-   QSet<MapItem*> mDestroyedMapItems;
+   std::unordered_set<MapItem*> mDestroyedMapItems;
 
    //! one direction to check
    QList<Constants::Direction> mDirectionCheckCenter;
@@ -422,7 +423,7 @@ private:
    int mPreparationCounter;
 
    //! idle packet map
-   QSet<Player*> mIdlePacketSentSet;
+   std::unordered_set<Player*> mIdlePacketSentSet;
 
    //! game over condition needs to be checked in (recursive) detonation
    bool mCheckGameOver;

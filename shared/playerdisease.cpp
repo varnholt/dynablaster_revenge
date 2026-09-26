@@ -10,7 +10,7 @@
 #include <QTimer>
 
 // static
-QSet<Constants::SkullType> PlayerDisease::sSupportedSkulls;
+std::unordered_set<Constants::SkullType> PlayerDisease::sSupportedSkulls;
 QList<Constants::SkullType> PlayerDisease::sCubeFaces;
 
 //-----------------------------------------------------------------------------
@@ -161,7 +161,7 @@ void PlayerDisease::setPlayerId(int playerId)
 /*!
    \param skulls supported skulls
 */
-void PlayerDisease::setSupportedSkulls(const QSet<Constants::SkullType>& skulls)
+void PlayerDisease::setSupportedSkulls(const std::unordered_set<Constants::SkullType>& skulls)
 {
    sSupportedSkulls = skulls;
 }
@@ -170,7 +170,7 @@ void PlayerDisease::setSupportedSkulls(const QSet<Constants::SkullType>& skulls)
 /*!
    \return supported skulls
 */
-QSet<Constants::SkullType> PlayerDisease::getSupportedSkulls()
+std::unordered_set<Constants::SkullType> PlayerDisease::getSupportedSkulls()
 {
    return sSupportedSkulls;
 }

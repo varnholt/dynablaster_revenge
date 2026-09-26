@@ -4,7 +4,8 @@
 // Qt
 #include <QElapsedTimer>
 #include <QObject>
-#include <QSet>
+
+#include <unordered_set>
 
 // constants
 #include "constants.h"
@@ -59,10 +60,10 @@ public:
    void setPlayerId(int playerId);
 
    //! setter for supported skulls
-   static void setSupportedSkulls(const QSet<Constants::SkullType>& skulls);
+   static void setSupportedSkulls(const std::unordered_set<Constants::SkullType>& skulls);
 
    //! getter for supported skulls;
-   static QSet<Constants::SkullType> getSupportedSkulls();
+   static std::unordered_set<Constants::SkullType> getSupportedSkulls();
 
    //! setter for skull faces
    static void setSkullFaces(QList<Constants::SkullType>& faces);
@@ -110,7 +111,7 @@ protected:
    int mPlayerId;
 
    //! all skulls that are supported/enabled
-   static QSet<Constants::SkullType> sSupportedSkulls;
+   static std::unordered_set<Constants::SkullType> sSupportedSkulls;
 
    //! skull cube setup
    static QList<Constants::SkullType> sCubeFaces;

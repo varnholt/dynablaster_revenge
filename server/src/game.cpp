@@ -46,6 +46,8 @@
 
 // stdlib
 #include <algorithm>
+#include <unordered_set>
+#include <vector>
 
 // SDL
 #include <SDL3_net/SDL_net.h>
@@ -251,7 +253,7 @@ void Game::initSkullSetup()
    PlayerDisease::setSkullFaces(faces);
 
    // init set of supported skulls
-   QSet<Constants::SkullType> supportedSkulls;
+   std::unordered_set<Constants::SkullType> supportedSkulls;
 
    if (skullAutofire)
       supportedSkulls.insert(Constants::SkullAutofire);
@@ -1021,7 +1023,7 @@ void Game::playerMove(Player* player, float assignedXPos, float assignedYPos, in
    player->setKeysPressed(player->getKeysPressed());
 
    // reset idle packet flag
-   mIdlePacketSentSet.remove(player);
+   mIdlePacketSentSet.erase(player);
 }
 
 //-----------------------------------------------------------------------------
@@ -1190,7 +1192,7 @@ void Game::updateExtras()
 
          // if the extra is removed here, remove it from the destroyed maps
          // also, so we don't have a dangling pointer in that list
-         mDestroyedMapItems.remove(extra);
+         mDestroyedMapItems.erase(extra);
       }
    }
 }
@@ -1930,7 +1932,11 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
          }
       }
 
-      qDeleteAll(mDestroyedMapItems);
+      for (MapItem* destroyedItem : mDestroyedMapItems)
+      {
+         delete destroyedItem;
+      }
+
       mDestroyedMapItems.clear();
 
       if (checkGameOver)
@@ -2978,18 +2984,18 @@ Constants::Color Game::getColorForNextPlayer() const
 {
    Constants::Color color = Constants::ColorWhite;
 
-   QSet<Constants::Color> colors;
+   std::unordered_set<Constants::Color> colors;
    for (int i = 1; i <= 10; i++)
       colors.insert(static_cast<Constants::Color>(i));
 
    foreach (Player* p, mPlayers.values())
-      colors.remove(p->getColor());
+      colors.erase(p->getColor());
 
-   QList<Constants::Color> colorList(colors.begin(), colors.end());
+   std::vector<Constants::Color> colorList(colors.begin(), colors.end());
    std::sort(colorList.begin(), colorList.end());
 
-   if (!colorList.isEmpty())
-      color = colorList.first();
+   if (!colorList.empty())
+      color = colorList.front();
 
    return color;
 }

@@ -217,7 +217,7 @@ void GameDrawable::setPlayerId(int id)
 */
 void GameDrawable::clear()
 {
-   foreach (MapItem *item, mMapItems.values())
+   foreach (MapItem *item, mMapItems)
       removeMapItem(item);
 
    mDetonations->clear();
@@ -680,7 +680,7 @@ void GameDrawable::createMapItem(MapItem *item)
 */
 void GameDrawable::removeMapItem(MapItem *item)
 {
-   QSet<MapItem*>::Iterator it= mMapItems.find(item);
+   std::unordered_set<MapItem*>::iterator it= mMapItems.find(item);
 
    if (it != mMapItems.end())
    {
@@ -797,7 +797,7 @@ Node* GameDrawable::createDestruction(SceneGraph *scene, float x, float y, Const
 */
 void GameDrawable::destroyMapItem(MapItem *item, float flameCount)
 {
-   QSet<MapItem*>::Iterator it= mMapItems.find(item);
+   std::unordered_set<MapItem*>::iterator it= mMapItems.find(item);
    if (it!=mMapItems.end())
    {
       if (item->getType() == MapItem::Stone)
