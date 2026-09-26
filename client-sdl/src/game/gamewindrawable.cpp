@@ -25,8 +25,7 @@
 #include "nodes/mesh.h"
 #include "nodes/scenegraph.h"
 #include "render/texturepool.h"
-
-#include <QTimer>
+#include "timer.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -521,9 +520,9 @@ bool GameWinDrawable::isDrawGame() const
 void GameWinDrawable::playSound()
 {
    if (isDrawGame())
-      QTimer::singleShot(500, SoundManager::getInstance(), SLOT(playSoundGameDraw()));
+      Timer::singleShot(500, []() { SoundManager::getInstance()->playSoundGameDraw(); });
    else
-      QTimer::singleShot(500, SoundManager::getInstance(), SLOT(playSoundGameWin()));
+      Timer::singleShot(500, []() { SoundManager::getInstance()->playSoundGameWin(); });
 }
 
 void GameWinDrawable::stateChanged()
@@ -557,7 +556,7 @@ void GameWinDrawable::stateChanged()
 
          initGameData();
 
-         QTimer::singleShot(500, this, SLOT(startWinAnimation()));
+         Timer::singleShot(500, [this]() { startWinAnimation(); });
 
          playSound();
 

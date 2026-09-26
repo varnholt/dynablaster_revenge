@@ -6,10 +6,10 @@
 // Qt
 #include <QObject>
 #include <QString>
-#include <QTimer>
 
 // shared
 #include "constants.h"
+#include "timer.h"
 
 // SDL
 #include <SDL3/SDL_audio.h>
@@ -130,7 +130,7 @@ protected:
    SDL_AudioStream* mMusicStream = nullptr;
    std::vector<std::filesystem::path> mPlaylist;
    std::size_t mTrackIndex = 0;
-   QTimer mMusicTimer;
+   Timer mMusicTimer;
 
    bool mFading = false;
    float mFadeStartVolume = 1.0f;

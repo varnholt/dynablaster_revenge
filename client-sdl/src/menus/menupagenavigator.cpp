@@ -20,9 +20,9 @@
 #include "menupagetextedit.h"
 
 #include "playerinfo.h"
+#include "timer.h"
 
 #include <QDebug>
-#include <QTimer>
 
 #include <SDL3_net/SDL_net.h>
 
@@ -373,7 +373,7 @@ void MenuPageNavigator::onJoinGameResponse(bool success)
       // matches GameMenuWorkflow::pageChanged()'s LOUNGE branch (real GameMenuWorkflow isn't
       // ported - this is the only trigger for BombermanClient::initializeBots(), which was
       // otherwise fully wired to BotFactory but never called from anywhere in this port).
-      QTimer::singleShot(1000, BombermanClient::getInstance(), SLOT(initializeBots()));
+      Timer::singleShot(1000, []() { BombermanClient::getInstance()->initializeBots(); });
    }
 }
 

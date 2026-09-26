@@ -64,16 +64,13 @@ int Game::sGameId = 0;
    constructor
 */
 Game::Game()
-    : mUpdateTimer(nullptr),
-      mMap(nullptr),
+    : mMap(nullptr),
       mGameId(++sGameId),
       mRunning(false),
       mIdlePacketSent(false),
-      mGameTimeUpdateTimer(nullptr),
       mDuration(0),
       mCreator(nullptr),
       mState(Constants::GameStopped),
-      mPreparationTimer(nullptr),
       mPreparationCounter(0),
       mCheckGameOver(false),
       mSkipCountdown(false),
@@ -103,14 +100,6 @@ Game::Game()
    mMaxSpeed = SERVER_DEFAULT_SPEED + (SERVER_SPEEDUP_INCREMENT * SERVER_MAX_SPEEDUPS);
 
    mSyncMaxTime = settings.value("player_sync_max_time", SERVER_PLAYER_SYNC_MAX_TIME).toInt();
-
-   // create timers
-   mUpdateTimer = new QTimer(this);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-   mUpdateTimer->setTimerType(Qt::PreciseTimer);
-#endif
-   mGameTimeUpdateTimer = new QTimer(this);
-   mPreparationTimer = new QTimer(this);
 
    // init direction maps
    mDirectionCheckCenter.append(Constants::DirectionUp);
@@ -452,19 +441,16 @@ void Game::initializeTimers()
    qDebug("Game::initializeTimers");
 
    // update timer
-   connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(update()));
-
-   mUpdateTimer->start(1000 / SERVER_HEARTBEAT_IN_HZ);
+   mUpdateTimer.timeoutSignal.connect([this]() { update(); });
+   mUpdateTimer.start(1000 / SERVER_HEARTBEAT_IN_HZ);
 
    // game time timer
-   connect(mGameTimeUpdateTimer, SIGNAL(timeout()), this, SLOT(processGameTime()));
-
-   mGameTimeUpdateTimer->start(1000);
+   mGameTimeUpdateTimer.timeoutSignal.connect([this]() { processGameTime(); });
+   mGameTimeUpdateTimer.start(1000);
 
    // game preparation timer
-   mPreparationTimer->setInterval(1000);
-
-   connect(mPreparationTimer, SIGNAL(timeout()), this, SLOT(updatePrepareGame()));
+   mPreparationTimer.setInterval(1000);
+   mPreparationTimer.timeoutSignal.connect([this]() { updatePrepareGame(); });
 }
 
 //-----------------------------------------------------------------------------
@@ -2065,7 +2051,7 @@ void Game::prepareGame()
 
       // start preparation timer
       mPreparationTime.restart();
-      mPreparationTimer->start();
+      mPreparationTimer.start();
 
       mPreparationCounter = SERVER_PREPARATION_TIME + SERVER_PREPARATION_SYNC_TIME;
 
@@ -2088,7 +2074,7 @@ void Game::updatePrepareGame()
       qDebug("Game::updatePrepareGame: starting game now");
 
       // stop preparation timer
-      mPreparationTimer->stop();
+      mPreparationTimer.stop();
 
       // start the game
       startGame();
@@ -2112,7 +2098,7 @@ void Game::finishGame()
 
       // this is the time to display some sort of finish animation
 
-      QTimer::singleShot(SERVER_FINISHING_TIME, this, SLOT(stopGame()));
+      Timer::singleShot(SERVER_FINISHING_TIME, [this]() { stopGame(); });
    }
 }
 
@@ -2178,7 +2164,7 @@ void Game::nextRound()
    {
       int delay = SHOW_WINNER_DISPLAY_TIME + SHOW_WINNER_FADE_IN_TIME + SHOW_WINNER_FADE_OUT_TIME + SHOW_WINNER_ADDITIONAL_TIME;
 
-      QTimer::singleShot(delay, this, SLOT(prepareGame()));
+      Timer::singleShot(delay, [this]() { prepareGame(); });
    }
 }
 
@@ -2253,7 +2239,7 @@ void Game::synchronize()
       if (mSynchronizationTime.elapsed() < mSyncMaxTime)
       {
          // otherwise wait and retry
-         QTimer::singleShot(100, this, SLOT(synchronize()));
+         Timer::singleShot(100, [this]() { synchronize(); });
       }
       else
       {
@@ -2743,7 +2729,7 @@ void Game::processSpectator(NET_StreamSocket* tcpSocket)
       {
          mSpectators.push_back(tcpSocket);
 
-         QTimer::singleShot(SERVER_SPECTATOR_DELAY, this, SLOT(processSpectatorMessage()));
+         Timer::singleShot(SERVER_SPECTATOR_DELAY, [this]() { processSpectatorMessage(); });
       }
    }
 }

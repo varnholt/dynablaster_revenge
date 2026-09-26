@@ -44,7 +44,7 @@ SoundManager::SoundManager() : QObject(nullptr)
    mVolumeSfx = GameSettings::getInstance()->getAudioSettings()->getVolumeSfx();
    SDL_SetAudioStreamGain(mMusicStream, mVolumeMusic);
 
-   connect(&mMusicTimer, &QTimer::timeout, this, &SoundManager::updateMusic);
+   mMusicTimer.timeoutSignal.connect([this]() { updateMusic(); });
    mMusicTimer.start(50);
 }
 
@@ -160,9 +160,8 @@ void SoundManager::restartPlayListAfterFadeOut(int delay)
    if (mMusicStream)
       SDL_ClearAudioStream(mMusicStream);
 
-   QTimer::singleShot(
+   Timer::singleShot(
       delay,
-      this,
       [this]()
       {
          SDL_SetAudioStreamGain(mMusicStream, mVolumeMusic);

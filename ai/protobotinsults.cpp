@@ -2,6 +2,8 @@
 
 #include <QRandomGenerator>
 
+#include "timer.h"
+
 ProtoBotInsults::ProtoBotInsults(QObject *parent) :
    QObject(parent)
 {
@@ -32,11 +34,7 @@ ProtoBotInsults::ProtoBotInsults(QObject *parent) :
 
 void ProtoBotInsults::shootAgain()
 {
-   QTimer::singleShot(
-      20000 + QRandomGenerator::global()->bounded(60000),
-      this,
-      SLOT(insult())
-   );
+   Timer::singleShot(20000 + QRandomGenerator::global()->bounded(60000), [this]() { insult(); });
 }
 
 

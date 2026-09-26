@@ -7,7 +7,8 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QTimer>
+
+#include "timer.h"
 
 // static
 std::unordered_set<Constants::SkullType> PlayerDisease::sSupportedSkulls;
@@ -94,7 +95,7 @@ void PlayerDisease::activate()
 {
    mActiveTime.start();
 
-   QTimer::singleShot(getDuration(), this, SLOT(abort()));
+   Timer::singleShot(getDuration(), [this]() { abort(); });
 }
 
 //-----------------------------------------------------------------------------

@@ -4,7 +4,6 @@
 // Qt
 #include <QObject>
 #include <QString>
-#include <QTimer>
 
 #include <vector>
 

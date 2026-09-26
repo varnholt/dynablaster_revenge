@@ -6,7 +6,6 @@
 #include <QMap>
 #include <QObject>
 #include <QPointer>
-#include <QTimer>
 
 #include <unordered_set>
 
@@ -17,6 +16,7 @@
 #include "gameround.h"
 #include "packet.h"
 #include "signal.h"
+#include "timer.h"
 
 // forward declarations
 class BombMapItem;
@@ -183,10 +183,6 @@ public slots:
    void addOutgoingPacket(Packet* packet);
 
 public:
-   // Signal<> replacements for Game's former Qt signals (see
-   // project_full_qt_removal_scope memory) - Q_OBJECT/QTimer stay for now, only the
-   // signals: block itself is converted this pass.
-
    //! player was killed
    Signal<int> playerKilledSignal;
 
@@ -357,7 +353,7 @@ private:
    // members
 
    //! calls the update loop
-   QTimer* mUpdateTimer;
+   Timer mUpdateTimer;
 
    //! map socket <-> player
    QMap<NET_StreamSocket*, Player*> mPlayerSockets;
@@ -399,7 +395,7 @@ private:
    bool mIdlePacketSent;
 
    //! server time update timer
-   QTimer* mGameTimeUpdateTimer;
+   Timer mGameTimeUpdateTimer;
 
    //! game time
    QElapsedTimer mGameTime;
@@ -414,7 +410,7 @@ private:
    Constants::GameState mState;
 
    //! preparation timer
-   QTimer* mPreparationTimer;
+   Timer mPreparationTimer;
 
    //! prepration time
    QElapsedTimer mPreparationTime;
