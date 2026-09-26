@@ -4,10 +4,11 @@
 // Qt
 #include <QObject>
 #include <QString>
-#include <QMap>
-#include <QQueue>
 
+#include <map>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 // tools
 #include "tools/map2d.h"
@@ -203,12 +204,12 @@ private:
    float mTimePrev;
 
    std::unordered_set<MapItem*> mMapItems;
-   QList<MapItem*> mStoneList;
-   QMap<int,PlayerItem*> mPlayerList;
-   QMap<MapItem*,Mesh*> mMeshes;
-   QMap<MapItem*,Skull*> mSkullMap;
-   QMap<int,Material*> mExtraMaterials;
-   QMap<MapItem*,float> mShakingBoxes;
+   std::vector<MapItem*> mStoneList;
+   std::map<int,PlayerItem*> mPlayerList;
+   std::unordered_map<MapItem*,Mesh*> mMeshes;
+   std::unordered_map<MapItem*,Skull*> mSkullMap;
+   std::unordered_map<int,Material*> mExtraMaterials;
+   std::unordered_map<MapItem*,float> mShakingBoxes;
 
    Material *mStones;
    Material *mBlocks;
@@ -223,7 +224,7 @@ private:
    Material *mShadowBillboards;
    Material *mShadowBlocks;
 
-   QList<Node*>   mDestructions;
+   std::vector<Node*> mDestructions;
    int     mPlayerId;
    float   mBounce;
    QString mLevelPath;

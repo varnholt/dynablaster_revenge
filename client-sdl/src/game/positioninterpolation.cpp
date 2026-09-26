@@ -65,13 +65,12 @@ void PositionInterpolation::moveMapItem(
    // animation stopped
    if (dir == Constants::DirectionUnknown)
    {
-      QMap<MapItem*, MapItemAnimation*>::const_iterator iter =
-         mMapItemAnimations.constFind(item);
+      auto iter = mMapItemAnimations.find(item);
 
       // relocate bomb map item at its nominal position
-      if (iter != mMapItemAnimations.constEnd())
+      if (iter != mMapItemAnimations.end())
       {
-         MapItemAnimation* anim = iter.value();
+         MapItemAnimation* anim = iter->second;
          anim->mNominalX = nominalX;
          anim->mNominalY = nominalY;
          anim->mDirection = dir;
@@ -102,7 +101,7 @@ void PositionInterpolation::moveMapItem(
 
          // store item data
          mMapItems.push_back(item);
-         mMapItemAnimations.insert(item, animation);
+         mMapItemAnimations[item] = animation;
       }
    }
 }
@@ -113,13 +112,19 @@ void PositionInterpolation::removeMapItem(MapItem* item)
    auto it = std::find(mMapItems.begin(), mMapItems.end(), item);
    if (it != mMapItems.end())
       mMapItems.erase(it);
-   delete mMapItemAnimations.take(item);
+
+   auto animIt = mMapItemAnimations.find(item);
+   if (animIt != mMapItemAnimations.end())
+   {
+      delete animIt->second;
+      mMapItemAnimations.erase(animIt);
+   }
 }
 
 
 void PositionInterpolation::interpolatePlayerPositions(float delta)
 {
-   const QMap<int, PlayerInfo*>* players =
+   const auto* players =
       BombermanClient::getInstance()->getPlayerInfoMap();
 
    float x = 0.0f;
@@ -130,7 +135,7 @@ void PositionInterpolation::interpolatePlayerPositions(float delta)
    float dy = 0.0f;
    float dr = 0.0f;
 
-   foreach (PlayerInfo* player, *players)
+   for (const auto& [id, player] : *players)
    {
       x = player->getX();
       y = player->getY();
@@ -261,7 +266,8 @@ void PositionInterpolation::gameStateChanged()
 
          // clear all animated mapitems
          mMapItems.clear();
-         qDeleteAll(mMapItemAnimations);
+         for (const auto& [item, anim] : mMapItemAnimations)
+            delete anim;
          mMapItemAnimations.clear();
 
          break;

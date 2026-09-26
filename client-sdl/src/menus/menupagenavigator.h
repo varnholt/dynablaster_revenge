@@ -3,9 +3,11 @@
 #include "hosthistory.h"
 
 #include <QObject>
-#include <QMap>
 
+#include <map>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 class MenuPage;
 class PlayerInfo;
@@ -58,7 +60,7 @@ private slots:
 
    //! mirrors GameMenuInterfaceLounge::playerInfoMapUpdated() - repopulates the lounge's player
    //! rows (nick/wins/rank/owner-icon) whenever the player set changes (join/leave/bot added).
-   void onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo);
+   void onPlayerInfoMapUpdated(std::map<int, PlayerInfo*>* playerInfo);
 
    //! mirrors GameMenuInterfaceOptions::applyVolumeMusic()/applyVolumeSfx() - forwards a dragged
    //! slider's value straight to SoundManager (live volume change, not yet persisted).
@@ -107,15 +109,15 @@ private:
 
    //! mirrors GameMenuInterfaceLounge::playerInfoMapUpdated() - the actual row-population logic,
    //! factored out so it can be called both on the live signal and once on first reaching LOUNGE.
-   void updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInfo);
+   void updateLoungePlayerList(std::map<int, PlayerInfo*>* playerInfo);
 
    //! mirrors GameMenuInterfaceLounge::addLoungeMessage() - word-wraps and appends one chat line
    //! (already formatted as "nick: text" by the server) to the lounge's message table.
    void addLoungeMessage(int senderId, const QString& message);
 
-   QList<QString> mSortedLevelNames;
-   QList<QString> mSortedLevelDirNames;
+   std::vector<QString> mSortedLevelNames;
+   std::vector<QString> mSortedLevelDirNames;
    std::unordered_set<MenuPage*> mCreateGamePagesInitialized;
-   QMap<int, int> mPlayerIdToIndexMap;
+   std::unordered_map<int, int> mPlayerIdToIndexMap;
    HostHistory mHostHistory;
 };

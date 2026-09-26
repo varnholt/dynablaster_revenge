@@ -2,13 +2,13 @@
 #define POSITIONINTERPOLATION_H
 
 // Qt
-#include <QMap>
 #include <QObject>
 
 // shared
 #include "constants.h"
 #include "framework/frametimer.h"
 
+#include <unordered_map>
 #include <vector>
 
 // forward declarations
@@ -84,7 +84,7 @@ class PositionInterpolation : public QObject
       std::vector<MapItem*> mMapItems;
 
       //! map mapitem <-> mapitemanimation
-      QMap<MapItem*, MapItemAnimation*> mMapItemAnimations;
+      std::unordered_map<MapItem*, MapItemAnimation*> mMapItemAnimations;
 };
 
 #endif // POSITIONINTERPOLATION_H

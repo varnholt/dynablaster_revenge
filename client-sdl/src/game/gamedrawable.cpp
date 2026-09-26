@@ -336,11 +336,11 @@ void GameDrawable::loadLevel(const QString& levelPath)
    mExtraKick    = mLevel->getKickExtra();
    mExtraSkull   = mLevel->getSkullExtra();
 
-   mExtraMaterials.insert(Constants::ExtraFlame,   mExtraFlame);
-   mExtraMaterials.insert(Constants::ExtraBomb,    mExtraBomb);
-   mExtraMaterials.insert(Constants::ExtraSpeedup, mExtraSpeedup);
-   mExtraMaterials.insert(Constants::ExtraKick,    mExtraKick);
-   mExtraMaterials.insert(Constants::ExtraSkull,   mExtraSkull);
+   mExtraMaterials[Constants::ExtraFlame]   = mExtraFlame;
+   mExtraMaterials[Constants::ExtraBomb]    = mExtraBomb;
+   mExtraMaterials[Constants::ExtraSpeedup] = mExtraSpeedup;
+   mExtraMaterials[Constants::ExtraKick]    = mExtraKick;
+   mExtraMaterials[Constants::ExtraSkull]   = mExtraSkull;
 
    mDestructAnim= mLevel->getDestructions();
 
@@ -379,9 +379,9 @@ void GameDrawable::initializeGL()
 */
 Mesh* GameDrawable::getMesh(MapItem* item) const
 {
-   QMap<MapItem*,Mesh*>::ConstIterator it= mMeshes.constFind(item);
-   if (it != mMeshes.constEnd())
-      return it.value();
+   auto it= mMeshes.find(item);
+   if (it != mMeshes.end())
+      return it->second;
    else
       return nullptr;
 }
@@ -392,9 +392,9 @@ Mesh* GameDrawable::getMesh(MapItem* item) const
 */
 Mesh* GameDrawable::getSkullMesh(MapItem* item) const
 {
-   QMap<MapItem*,Skull*>::ConstIterator it= mSkullMap.constFind(item);
-   if (it != mSkullMap.constEnd())
-      return it.value();
+   auto it= mSkullMap.find(item);
+   if (it != mSkullMap.end())
+      return it->second;
    else
       return nullptr;
 }
@@ -536,7 +536,7 @@ Mesh *GameDrawable::createSkull(MapItem *item)
 
    mPlayfield->addNode(mesh);
    mSkulls->addMesh(mesh);
-   mSkullMap.insert(item, mesh);
+   mSkullMap[item] = mesh;
 
    return mesh;
 }
@@ -550,7 +550,7 @@ void GameDrawable::animateSkulls(float time)
    // annoying 62.5 multiplier
    time *= 0.016f;
 
-   foreach(Skull* skull, mSkullMap)
+   for (const auto& [item, skull] : mSkullMap)
    {
       // frame time in seconds, relative to start frame, tick-scaled - see original comment in
       // client/src/game/gamedrawable.cpp for the derivation of the 3200.0f/19200.0 constants.
@@ -576,10 +576,10 @@ void GameDrawable::animateSkulls(float time)
 */
 void GameDrawable::shakeBlock(MapItem* item)
 {
-   QMap<MapItem*,Mesh*>::ConstIterator it= mMeshes.constFind( item );
-   if (it != mMeshes.constEnd())
+   auto it= mMeshes.find( item );
+   if (it != mMeshes.end())
    {
-      mShakingBoxes.insert( item, 1.0f );
+      mShakingBoxes[item] = 1.0f;
    }
 }
 
@@ -618,7 +618,7 @@ void GameDrawable::createMapItem(MapItem *item)
          case MapItem::Stone:
          {
             mesh= createBlock(mPlayfield, mStones, item->getX(), item->getY(), 0.8f);
-            mStoneList.append(item);
+            mStoneList.push_back(item);
             break;
          }
 
@@ -660,7 +660,7 @@ void GameDrawable::createMapItem(MapItem *item)
 
          if (mesh)
          {
-            mMeshes.insert(item, mesh);
+            mMeshes[item] = mesh;
 
             if (
                   item->getType() == MapItem::Stone
@@ -684,12 +684,12 @@ void GameDrawable::removeMapItem(MapItem *item)
 
    if (it != mMapItems.end())
    {
-      mStoneList.removeAll(item);
+      std::erase(mStoneList, item);
 
-      mShakingBoxes.remove(item);
+      mShakingBoxes.erase(item);
 
       // get associated mesh
-      QMap<MapItem*,Mesh*>::Iterator m= mMeshes.find(item);
+      auto m= mMeshes.find(item);
 
       if (m != mMeshes.end())
       {
@@ -701,7 +701,7 @@ void GameDrawable::removeMapItem(MapItem *item)
             removeBlock(item);
          }
 
-         Mesh *mesh= m.value();
+         Mesh *mesh= m->second;
 
          mStones->removeMesh(mesh);
          mShadowBlocks->removeMesh(mesh);
@@ -717,11 +717,11 @@ void GameDrawable::removeMapItem(MapItem *item)
       }
       else
       {
-         QMap<MapItem*,Skull*>::Iterator si= mSkullMap.find(item);
+         auto si= mSkullMap.find(item);
 
          if (si != mSkullMap.end())
          {
-            Mesh *skullMesh= si.value();
+            Mesh *skullMesh= si->second;
 
             mSkulls->removeMesh(skullMesh);
             deleteMesh(skullMesh);
@@ -812,7 +812,7 @@ void GameDrawable::destroyMapItem(MapItem *item, float flameCount)
             );
 
          if (dummy)
-            mDestructions.append(dummy);
+            mDestructions.push_back(dummy);
       }
    }
 
@@ -851,9 +851,9 @@ void GameDrawable::setMapItemPosition(
    float z
 )
 {
-   QMap<MapItem*,Mesh*>::const_iterator iter = mMeshes.constFind(item);
+   auto iter = mMeshes.find(item);
 
-   if (iter != mMeshes.constEnd())
+   if (iter != mMeshes.end())
    {
       float width = 0.0f;
       float height = 0.0f;
@@ -870,7 +870,7 @@ void GameDrawable::setMapItemPosition(
       if (y > height + ITEM_INTERPOLATION_EPS)
          y = height + ITEM_INTERPOLATION_EPS;
 
-      Mesh* mesh = iter.value();
+      Mesh* mesh = iter->second;
 
       Matrix pos;
       pos.identity();
@@ -1013,9 +1013,9 @@ void GameDrawable::setPlayerSpeed(int id, float dx, float dy, float /*da*/)
 */
 PlayerItem* GameDrawable::getPlayer(int id) const
 {
-   QMap<int,PlayerItem*>::ConstIterator it= mPlayerList.constFind(id);
-   if (it != mPlayerList.constEnd())
-      return it.value();
+   auto it= mPlayerList.find(id);
+   if (it != mPlayerList.end())
+      return it->second;
    else
       return nullptr;
 }
@@ -1035,7 +1035,7 @@ void GameDrawable::addPlayer(int id, const QString& nick, Constants::Color color
    }
 
    player= new PlayerItem(id, nick, color);
-   mPlayerList.insert(id, player);
+   mPlayerList[id] = player;
 
    Mesh *mesh= MotionMixer::getMesh("bomberman");
    if (!mesh)
@@ -1074,7 +1074,7 @@ void GameDrawable::removePlayer(int id)
    if (mPlayerList.size() > 1)
    {
       int alive= 0;
-      foreach (PlayerItem* p, mPlayerList)
+      for (const auto& [playerId, p] : mPlayerList)
       {
          if (!p->isKilled())
             alive++;
@@ -1082,7 +1082,7 @@ void GameDrawable::removePlayer(int id)
 
       if (alive == 1)
       {
-         foreach (PlayerItem* p, mPlayerList)
+         for (const auto& [playerId, p] : mPlayerList)
          {
             if (!p->isKilled())
             {
@@ -1103,7 +1103,7 @@ void GameDrawable::removePlayer(int id)
 */
 void GameDrawable::playWinAnimation()
 {
-   foreach (PlayerItem* player, mPlayerList)
+   for (const auto& [playerId, player] : mPlayerList)
    {
       if (!player->isKilled())
       {
@@ -1158,21 +1158,21 @@ void GameDrawable::animate(float time)
       mBounce= 0.0f;
 
    // rotational rotation is rotating:
-   for (QMap<MapItem*,Mesh*>::ConstIterator it= mMeshes.constBegin(); it != mMeshes.constEnd(); it++)
+   for (auto it= mMeshes.begin(); it != mMeshes.end(); it++)
    {
-      MapItem *item= it.key();
+      MapItem *item= it->first;
       switch (item->getType())
       {
          case MapItem::Extra:
          {
-            Extra *extra= dynamic_cast<Extra*>(it.value());
+            Extra *extra= dynamic_cast<Extra*>(it->second);
             extra->animate(time);
          }
          break;
 
          case MapItem::Bomb:
          {
-            Mesh *mesh= it.value();
+            Mesh *mesh= it->second;
             float t= time * 0.1f + mesh->getAnimationFrame();
 
             Vector pos= mesh->getTransform().translation();
@@ -1191,13 +1191,13 @@ void GameDrawable::animate(float time)
       }
    }
 
-   foreach (PlayerItem *player, mPlayerList)
+   for (const auto& [playerId, player] : mPlayerList)
    {
       player->animate(time, delta);
    }
 
    // update destructions and remove if end of animation was reached
-   for (QList<Node*>::Iterator it= mDestructions.begin(); it!=mDestructions.end(); )
+   for (std::vector<Node*>::iterator it= mDestructions.begin(); it!=mDestructions.end(); )
    {
       Node* destr= *it;
       bool remove= false;
@@ -1237,14 +1237,14 @@ void GameDrawable::animate(float time)
 */
 void GameDrawable::shakeBoxes(float delta)
 {
-   QMap<MapItem*,float>::Iterator it;
+   std::unordered_map<MapItem*,float>::iterator it;
    for (it= mShakingBoxes.begin(); it!=mShakingBoxes.end();)
    {
-      float time= it.value();
+      float time= it->second;
       time-=delta;
       if (time<0.0f) time= 0.0f;
       float intense= time*time;
-      MapItem* item= it.key();
+      MapItem* item= it->first;
       Mesh* mesh= getMesh(item);
       if (mesh)
       {
@@ -1264,7 +1264,7 @@ void GameDrawable::shakeBoxes(float delta)
          it= mShakingBoxes.erase(it);
       else
       {
-         *it= time;
+         it->second= time;
          it++;
       }
    }
@@ -1319,10 +1319,10 @@ void GameDrawable::paintGL()
          // if no players have been added to the camera interpolation; then add all players
          if (mLevel->isPlayerMapEmpty())
          {
-            const QMap<int, PlayerInfo*>* players =
+            const auto* players =
                BombermanClient::getInstance()->getPlayerInfoMap();
 
-            foreach (PlayerInfo* p, *players)
+            for (const auto& [playerId, p] : *players)
                mLevel->addPlayerPosition( p );
          }
       }
@@ -1356,7 +1356,7 @@ void GameDrawable::paintGL()
    // original's own "playerMesh->getFrame() > 10000.0f" convention: PlayerItem::animate() only
    // wraps the frame counter back to 0 while alive, so it climbs unbounded once mKilled is set,
    // naturally crossing 10000 once the one-shot death animation has long finished playing.
-   foreach (PlayerItem* player, mPlayerList)
+   for (const auto& [playerId, player] : mPlayerList)
    {
       if (player->isKilled())
       {
@@ -1401,10 +1401,10 @@ void GameDrawable::resetPlayers()
    if (mLevel)
       mLevel->resetPlayerPositions();
 
-   QMap<int,PlayerItem*>::Iterator it= mPlayerList.begin();
+   auto it= mPlayerList.begin();
    while (it != mPlayerList.end())
    {
-      PlayerItem* player= *it;
+      PlayerItem* player= it->second;
       it= mPlayerList.erase(it);
 
       int color= static_cast<int32_t>(player->getColor());

@@ -216,9 +216,9 @@ void GameWinDrawable::initGameData()
    mGameInformation = BombermanClient::getInstance()->getCurrentGameInformation();
 
    mPlayerScores.clear();
-   QList<PlayerInfo*> infoList = BombermanClient::getInstance()->getPlayerInfoList();
+   std::vector<PlayerInfo*> infoList = BombermanClient::getInstance()->getPlayerInfoList();
 
-   foreach (PlayerInfo* info, infoList)
+   for (PlayerInfo* info : infoList)
    {
       Weighted<PlayerInfo*, int> w(info, computeScore(info));
       mPlayerScores.push_back(w);
@@ -535,13 +535,13 @@ void GameWinDrawable::stateChanged()
       {
          SoundManager::getInstance()->fadeOut(1000);
 
-         QList<PlayerInfo*> playerAlive;
-         QList<PlayerInfo*> playerList = BombermanClient::getInstance()->getPlayerInfoList();
+         std::vector<PlayerInfo*> playerAlive;
+         std::vector<PlayerInfo*> playerList = BombermanClient::getInstance()->getPlayerInfoList();
 
-         foreach (PlayerInfo* player, playerList)
+         for (PlayerInfo* player : playerList)
          {
             if (!player->isKilled())
-               playerAlive << player;
+               playerAlive.push_back(player);
          }
 
          if (playerAlive.size() == 1)

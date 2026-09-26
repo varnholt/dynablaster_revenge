@@ -2,13 +2,14 @@
 
 // GLES3 port of client/src/game/gameplayernamedisplay.cpp.
 
-#include <QList>
-#include <QMap>
 #include <QString>
 
 #include "framework/frametimer.h"
 #include "math/vector.h"
 #include "render/texture.h"
+
+#include <map>
+#include <vector>
 
 class BitmapFont;
 class PlayerItem;
@@ -23,7 +24,7 @@ public:
    bool isActive() const;
 
 public slots:
-   void setPlayerData(QMap<int, PlayerItem*>& players);
+   void setPlayerData(std::map<int, PlayerItem*>& players);
    void draw() const;
    void drawPlayTexts() const;
    void drawArrow() const;
@@ -37,8 +38,8 @@ private:
    float computeArrowAlpha() const;
 
    FrameTimer mActiveTime;
-   QList<Vector> mPositions;
-   QList<QString> mNames;
+   std::vector<Vector> mPositions;
+   std::vector<QString> mNames;
    BitmapFont* mFont;
    bool mShowArrow;
    Texture mArrowTexture;

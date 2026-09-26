@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QTextStream>
 
+#include <algorithm>
+
 // defines
 #define HISTORY_FILE "history.dr"
 #define HISTORY_MAX_ENTRIES 3
@@ -28,17 +30,17 @@ void HostHistory::add(const QString &host)
    {
       deserialize();
 
-      QStringList hosts;
-      hosts.append(host);
+      std::vector<QString> hosts;
+      hosts.push_back(host);
 
       // add all entries from the original host list (skip duplicates,
       // do not exceed max size)
-      foreach (const QString& tmpHost, mHosts)
+      for (const QString& tmpHost : mHosts)
       {
          if (tmpHost != host)
          {
             if (hosts.size() < HISTORY_MAX_ENTRIES)
-               hosts.append(tmpHost);
+               hosts.push_back(tmpHost);
          }
       }
 
@@ -54,15 +56,15 @@ void HostHistory::add(const QString &host)
 /*!
    \return list of hosts
 */
-QStringList HostHistory::load(const QString& selected)
+std::vector<QString> HostHistory::load(const QString& selected)
 {
-   QStringList hosts;
+   std::vector<QString> hosts;
 
    deserialize();
    hosts = mHosts;
 
-   hosts.removeAll(selected);
-   hosts.prepend(selected);
+   std::erase(hosts, selected);
+   hosts.insert(hosts.begin(), selected);
 
    return hosts;
 }
@@ -77,7 +79,7 @@ void HostHistory::serialize()
    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
    {
       QTextStream out(&file);
-      foreach (const QString& host, mHosts)
+      for (const QString& host : mHosts)
       {
          out << host << "\n";
       }
@@ -101,12 +103,12 @@ void HostHistory::deserialize()
           QString line = in.readLine();
 
           if (
-               !mHosts.contains(line)
+               std::find(mHosts.begin(), mHosts.end(), line) == mHosts.end()
             && !line.trimmed().isEmpty()
             && mHosts.size() < HISTORY_MAX_ENTRIES
           )
           {
-             mHosts.append(line);
+             mHosts.push_back(line);
           }
       }
    }

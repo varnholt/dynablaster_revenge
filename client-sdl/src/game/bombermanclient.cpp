@@ -346,10 +346,10 @@ void BombermanClient::clientDisconnect()
 
    qDebug() << QString("disconnected");
 
-   QMap<int, MapItem*>::Iterator it = mMapItems.begin();
+   auto it = mMapItems.begin();
    while (it != mMapItems.end())
    {
-      MapItem* item = *it;
+      MapItem* item = it->second;
       it = mMapItems.erase(it);
       delete item;
    }
@@ -451,9 +451,9 @@ MapItem* BombermanClient::getMapItem(int id) const
 {
    MapItem* item = nullptr;
 
-   QMap<int, MapItem*>::ConstIterator it = mMapItems.constFind(id);
-   if (it != mMapItems.constEnd())
-      item = it.value();
+   auto it = mMapItems.find(id);
+   if (it != mMapItems.end())
+      item = it->second;
 
    return item;
 }
@@ -504,7 +504,7 @@ void BombermanClient::processCreateGameResponse(Packet* packet)
 */
 void BombermanClient::addPlayerInfo(int id, PlayerInfo* info)
 {
-   mPlayerInfo.insert(id, info);
+   mPlayerInfo[id] = info;
 }
 
 //-----------------------------------------------------------------------------
@@ -760,10 +760,10 @@ PlayerInfo* BombermanClient::getPlayerInfo(int id) const
 {
    PlayerInfo* pInfo = nullptr;
 
-   QMap<int, PlayerInfo*>::const_iterator iter = mPlayerInfo.constFind(id);
+   auto iter = mPlayerInfo.find(id);
 
-   if (iter != mPlayerInfo.constEnd())
-      pInfo = iter.value();
+   if (iter != mPlayerInfo.end())
+      pInfo = iter->second;
 
    return pInfo;
 }
@@ -790,16 +790,20 @@ PlayerInfo* BombermanClient::getCurrentPlayerInfo() const
 /*!
    \return list of players
 */
-QList<PlayerInfo*> BombermanClient::getPlayerInfoList() const
+std::vector<PlayerInfo*> BombermanClient::getPlayerInfoList() const
 {
-   return mPlayerInfo.values();
+   std::vector<PlayerInfo*> list;
+   list.reserve(mPlayerInfo.size());
+   for (const auto& [id, info] : mPlayerInfo)
+      list.push_back(info);
+   return list;
 }
 
 //-----------------------------------------------------------------------------
 /*!
    \return map of players
 */
-QMap<int, PlayerInfo*>* BombermanClient::getPlayerInfoMap() const
+std::map<int, PlayerInfo*>* BombermanClient::getPlayerInfoMap() const
 {
    return &mPlayerInfo;
 }
@@ -889,7 +893,7 @@ void BombermanClient::processPosition(Packet* packet)
 void BombermanClient::processMapItemCreated(Packet* packet)
 {
    MapItem* item = new MapItem(dynamic_cast<MapItemCreatedPacket*>(packet));
-   mMapItems.insert(item->getUniqueId(), item);
+   mMapItems[item->getUniqueId()] = item;
    createMapItemSignal(item);
 }
 
@@ -919,7 +923,7 @@ void BombermanClient::processMapItemMove(Packet* packet)
 void BombermanClient::processExtraMapItemCreated(Packet* packet)
 {
    ExtraMapItem* extra = new ExtraMapItem(dynamic_cast<ExtraMapItemCreatedPacket*>(packet));
-   mMapItems.insert(extra->getUniqueId(), extra);
+   mMapItems[extra->getUniqueId()] = extra;
    createMapItemSignal(extra);
 
    SoundManager::getInstance()->playSoundExtraRevealed();
@@ -943,11 +947,11 @@ void BombermanClient::processGameStats(Packet* packet)
    int i = 0;
    foreach (int id, ids)
    {
-      QMap<int, PlayerInfo*>::const_iterator iter = mPlayerInfo.find(id);
+      auto iter = mPlayerInfo.find(id);
 
       if (iter != mPlayerInfo.end())
       {
-         info = iter.value();
+         info = iter->second;
 
          /*
          qDebug(
@@ -984,7 +988,7 @@ void BombermanClient::processExtraMapItemDestroyed(Packet* packet)
       item->setDestroyDirection(remove->getDirection());
 
       destroyMapItemSignal(item, remove->getIntensity());
-      mMapItems.remove(item->getUniqueId());
+      mMapItems.erase(item->getUniqueId());
       delete item;
    }
 }
@@ -1001,7 +1005,7 @@ void BombermanClient::processMapItemRemoved(Packet* packet)
    if (item)
    {
       removeMapItemSignal(item);
-      mMapItems.remove(item->getUniqueId());
+      mMapItems.erase(item->getUniqueId());
       delete item;
    }
 }
@@ -1012,7 +1016,7 @@ void BombermanClient::processMapItemRemoved(Packet* packet)
 */
 void BombermanClient::broadcastAddPlayerData()
 {
-   foreach (PlayerInfo* playerInfo, mPlayerInfo)
+   for (const auto& [id, playerInfo] : mPlayerInfo)
    {
       // reset killed flag
       playerInfo->setKilled(false);
@@ -1027,7 +1031,7 @@ void BombermanClient::broadcastAddPlayerData()
  */
 void BombermanClient::broadcastPlayerStartPositions()
 {
-   foreach (PlayerInfo* playerInfo, mPlayerInfo)
+   for (const auto& [id, playerInfo] : mPlayerInfo)
    {
       setPlayerPositionSignal(playerInfo->getId(), playerInfo->getX(), playerInfo->getY(), playerInfo->getAngle());
    }
@@ -1537,7 +1541,8 @@ void BombermanClient::releaseAllKeys()
  */
 void BombermanClient::clearPlayerInfoMap()
 {
-   qDeleteAll(mPlayerInfo);
+   for (const auto& [id, info] : mPlayerInfo)
+      delete info;
    mPlayerInfo.clear();
 }
 
@@ -1547,7 +1552,12 @@ void BombermanClient::clearPlayerInfoMap()
 */
 void BombermanClient::removePlayerInfo(int id)
 {
-   delete mPlayerInfo.take(id);
+   auto it = mPlayerInfo.find(id);
+   if (it != mPlayerInfo.end())
+   {
+      delete it->second;
+      mPlayerInfo.erase(it);
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -1846,7 +1856,7 @@ void BombermanClient::resetClientState()
  */
 void BombermanClient::resetGameData()
 {
-   foreach (PlayerInfo* p, mPlayerInfo)
+   for (const auto& [id, p] : mPlayerInfo)
    {
       removePlayerSignal(p->getId());
    }
@@ -2166,9 +2176,9 @@ void BombermanClient::initializePlayback()
 /*!
    \return local ips
 */
-QList<QString> BombermanClient::getLocalIps() const
+std::vector<QString> BombermanClient::getLocalIps() const
 {
-   QList<QString> ips;
+   std::vector<QString> ips;
 
    int count = 0;
    NET_Address** addresses = NET_GetLocalAddresses(&count);
@@ -2186,7 +2196,7 @@ QList<QString> BombermanClient::getLocalIps() const
 
          // IPv4 only, no loopback
          if (!ip.contains(':') && ip != "127.0.0.1")
-            ips.append(ip);
+            ips.push_back(ip);
       }
 
       NET_FreeLocalAddresses(addresses);
@@ -2293,18 +2303,17 @@ void BombermanClient::showIps()
    // only do this when we're somewhere in the menus
    if (GameStateMachine::getInstance()->getState() == Constants::GameStopped)
    {
-      QStringList ipList = getLocalIps();
+      std::vector<QString> ipList = getLocalIps();
 
-      while (!ipList.isEmpty())
+      std::size_t index = 0;
+      while (index < ipList.size())
       {
-         // add two elements to each list
-         QStringList tmpList;
-         tmpList.append(ipList.takeFirst());
-         if (!ipList.isEmpty())
-            tmpList.append(ipList.takeFirst());
+         // combine two ips per message
+         QString combined = ipList[index++];
+         if (index < ipList.size())
+            combined += ";" + ipList[index++];
 
-         // and show them
-         QString ipText = tr("your ips are;%1").arg(tmpList.join(";"));
+         QString ipText = tr("your ips are;%1").arg(combined);
          HelpManager::getInstance()->addMessage("", ipText, Constants::HelpSeverityNotification);
       }
    }

@@ -50,7 +50,7 @@ bool GamePlayerNameDisplay::isActive() const
    return (mActiveTime.elapsed() < (FONT_DISPLAY_DURATION + FONT_DISPLAY_FADE_DURATION));
 }
 
-void GamePlayerNameDisplay::setPlayerData(QMap<int, PlayerItem*>& players)
+void GamePlayerNameDisplay::setPlayerData(std::map<int, PlayerItem*>& players)
 {
    Matrix projMat = static_cast<GLDevice*>(activeDevice)->getProjectionMatrix();
 
@@ -60,7 +60,7 @@ void GamePlayerNameDisplay::setPlayerData(QMap<int, PlayerItem*>& players)
    mPositions.clear();
    mNames.clear();
 
-   foreach (PlayerItem* player, players)
+   for (const auto& [playerId, player] : players)
    {
       if (!player->isKilled())
       {
@@ -76,8 +76,8 @@ void GamePlayerNameDisplay::setPlayerData(QMap<int, PlayerItem*>& players)
          v.y = (-v.y * t + 1.0f) * 0.5f * height;
          v.z = 0.0f;
 
-         mPositions << v;
-         mNames << player->getNick();
+         mPositions.push_back(v);
+         mNames.push_back(player->getNick());
 
          if (player->getID() == BombermanClient::getInstance()->getPlayerId())
          {

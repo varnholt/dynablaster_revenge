@@ -3,7 +3,6 @@
 
 // qt
 #include <QColor>
-#include <QMap>
 #include <QObject>
 #include <QTimer>
 
@@ -11,6 +10,8 @@
 #include "packetstreambuffer.h"
 #include "signal.h"
 
+#include <map>
+#include <unordered_map>
 #include <vector>
 
 // game
@@ -95,10 +96,10 @@ public:
    Constants::Color getColor(int playerId) const;
 
    //! get list of players
-   QList<PlayerInfo*> getPlayerInfoList() const;
+   std::vector<PlayerInfo*> getPlayerInfoList() const;
 
    //! get map of player
-   QMap<int, PlayerInfo*>* getPlayerInfoMap() const;
+   std::map<int, PlayerInfo*>* getPlayerInfoMap() const;
 
    //! add player info to map
    void addPlayerInfo(int id, PlayerInfo* info);
@@ -174,7 +175,7 @@ public:
    Signal<> gameStoppedSignal;
    Signal<int, const QString&, bool> messageReceivedSignal;
    Signal<int> countdownSignal;
-   Signal<QMap<int, PlayerInfo*>*> playerInfoMapUpdatedSignal;
+   Signal<std::map<int, PlayerInfo*>*> playerInfoMapUpdatedSignal;
    Signal<> showGameSignal;
    Signal<> showMenuSignal;
    Signal<> showMainMenuSignal;
@@ -379,7 +380,7 @@ private:
    void initializePlayback();
 
    //! list network devices
-   QList<QString> getLocalIps() const;
+   std::vector<QString> getLocalIps() const;
 
    // members
 
@@ -414,7 +415,7 @@ private:
    bool mDead;
 
    //! map items
-   QMap<int, MapItem*> mMapItems;
+   std::unordered_map<int, MapItem*> mMapItems;
 
    //! host name
    QString mHost;
@@ -438,7 +439,7 @@ private:
    QString mMessage;
 
    //! map id <-> player info object
-   mutable QMap<int, PlayerInfo*> mPlayerInfo;
+   mutable std::map<int, PlayerInfo*> mPlayerInfo;
 
    //! current player info
    QPointer<PlayerInfo> mCurrentPlayerInfo;

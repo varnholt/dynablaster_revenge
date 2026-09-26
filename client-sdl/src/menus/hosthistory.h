@@ -2,7 +2,9 @@
 #define HOSTHISTORY_H
 
 // Qt
-#include <QStringList>
+#include <QString>
+
+#include <vector>
 
 
 class HostHistory
@@ -17,7 +19,7 @@ public:
    void add(const QString& host);
 
    //! get all entries
-   QStringList load(const QString& selected = QString());
+   std::vector<QString> load(const QString& selected = QString());
 
 
 protected:
@@ -29,7 +31,7 @@ protected:
    void deserialize();
 
    //! list of hosts
-   QStringList mHosts;
+   std::vector<QString> mHosts;
 
 };
 

@@ -151,7 +151,7 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
    // matches GameMenuInterfaceLounge's constructor connection - keeps the lounge's player rows
    // (nick/wins/rank/owner-icon) live-updated whenever the player set changes (join/leave/bot
    // added). Without this, bots that join after the lounge page is already showing never appear.
-   BombermanClient::getInstance()->playerInfoMapUpdatedSignal.connect([this](QMap<int, PlayerInfo*>* infoMap)
+   BombermanClient::getInstance()->playerInfoMapUpdatedSignal.connect([this](std::map<int, PlayerInfo*>* infoMap)
                                                                       { onPlayerInfoMapUpdated(infoMap); });
 
    // matches GameMenuWorkflow's own connection to BombermanClient::messageReceived - lounge chat.
@@ -421,12 +421,12 @@ void MenuPageNavigator::onPageChanged(const QString& page)
    }
 }
 
-void MenuPageNavigator::onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>* playerInfo)
+void MenuPageNavigator::onPlayerInfoMapUpdated(std::map<int, PlayerInfo*>* playerInfo)
 {
    updateLoungePlayerList(playerInfo);
 }
 
-void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInfo)
+void MenuPageNavigator::updateLoungePlayerList(std::map<int, PlayerInfo*>* playerInfo)
 {
    // matches GameMenuInterfaceLounge::playerInfoMapUpdated() - only touches the UI while the
    // lounge page is actually the one showing (mirrors the original's own currentPage == page
@@ -445,9 +445,9 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
       int score;
    };
 
-   QList<ScoreEntry> scoreList;
-   for (PlayerInfo* info : *playerInfo)
-      scoreList.append({info, static_cast<int>(info->getOverallStats().getWins())});
+   std::vector<ScoreEntry> scoreList;
+   for (const auto& [id, info] : *playerInfo)
+      scoreList.push_back({info, static_cast<int>(info->getOverallStats().getWins())});
 
    std::sort(scoreList.begin(), scoreList.end(), [](const ScoreEntry& a, const ScoreEntry& b) { return a.score > b.score; });
 
@@ -504,7 +504,7 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
       // port (only getters + setOpacity exist), so that pixel-alignment tweak is skipped; the row
       // still shows correctly, just not pixel-perfect vertically.
 
-      mPlayerIdToIndexMap.insert(player->getId(), counter);
+      mPlayerIdToIndexMap[player->getId()] = counter;
 
       if (winsItem)
       {
@@ -604,7 +604,7 @@ void MenuPageNavigator::deserializeLoginData()
 
    const QString savedHost = GameSettings::getInstance()->getLoginSettings()->getHost();
 
-   const QStringList hosts = mHostHistory.load(savedHost);
+   const std::vector<QString> hosts = mHostHistory.load(savedHost);
    for (const QString& host : hosts)
       hostCombo->appendItem(host);
 
