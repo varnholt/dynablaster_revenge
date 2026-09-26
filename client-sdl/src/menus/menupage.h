@@ -1,8 +1,5 @@
 #pragma once
 
-// Qt
-#include <QImage>
-
 // shared
 #include "settings.h"
 #include "signal.h"
