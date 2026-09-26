@@ -1511,7 +1511,7 @@ bool ProtoBot::updateExtraScore()
       {
          QList<QPoint> points;
 
-         QList<AStarNode*> path = mPathFinding.getPath();
+         std::vector<AStarNode*> path = mPathFinding.getPath();
 
          // there is a safe way that leads to an extra
          if (!isPathHazardous(path))
@@ -1580,7 +1580,7 @@ bool ProtoBot::updateExtraScore()
    \param path path to examine
    \return \c true if path looks dangerous
 */
-bool ProtoBot::isPathHazardous(const QList<AStarNode*>& path) const
+bool ProtoBot::isPathHazardous(const std::vector<AStarNode*>& path) const
 {
    bool dangerous = false;
 
@@ -1602,7 +1602,7 @@ bool ProtoBot::isPathHazardous(const QList<AStarNode*>& path) const
    \param path path to examine
    \return \c true if path looks dangerous
 */
-int ProtoBot::getHazardousFieldCount(const QList<AStarNode*>& path) const
+int ProtoBot::getHazardousFieldCount(const std::vector<AStarNode*>& path) const
 {
    int count = 0;
 
@@ -1981,9 +1981,9 @@ bool ProtoBot::updateBombStoneScore()
 
                      pathFindingLoops2++;
 
-                     QList<AStarNode*> foundPath = mPathFinding.getPath();
+                     std::vector<AStarNode*> foundPath = mPathFinding.getPath();
 
-                     if (!foundPath.isEmpty())
+                     if (!foundPath.empty())
                      {
                         foreach (AStarNode* node, foundPath)
                         {
@@ -3420,9 +3420,9 @@ bool ProtoBot::updateLeastHazardousField()
             {
                findPath(best.x(), best.y());
 
-               QList<AStarNode*> path = mPathFinding.getPath();
+               std::vector<AStarNode*> path = mPathFinding.getPath();
 
-               if (path.length() > 0)
+               if (path.size() > 0)
                {
                   foundSomething = true;
 

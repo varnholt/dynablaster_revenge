@@ -10,34 +10,27 @@
 // Qt
 #include <QStringList>
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-AStarMap::AStarMap()
-   : BotMap(),
-     mNodeMap(0)
+ */
+AStarMap::AStarMap() : BotMap(), mNodeMap(0)
 {
    initMap();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-AStarMap::AStarMap(int width, int height)
-   : BotMap(width, height)
+ */
+AStarMap::AStarMap(int width, int height) : BotMap(width, height)
 {
    initMap();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param map map to copy
 */
-AStarMap::AStarMap(BotMap* map)
-   : BotMap()
+AStarMap::AStarMap(BotMap* map) : BotMap()
 {
    // init map
    initMap();
@@ -50,7 +43,6 @@ AStarMap::AStarMap(BotMap* map)
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -70,24 +62,21 @@ AStarMap::AStarMap(AStarMap* map)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 AStarMap::~AStarMap()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void AStarMap::initMap()
 {
-   mNodeMap = new AStarNode*[mWidth*mHeight];
+   mNodeMap = new AStarNode*[mWidth * mHeight];
    memset(mNodeMap, 0, mWidth * mHeight * sizeof(AStarNode*));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -100,10 +89,9 @@ void AStarMap::setBotMap(BotMap* map)
          setItem(x, y, map->getItem(x, y));
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void AStarMap::buildNodes()
 {
    for (int x = 0; x < mWidth; x++)
@@ -124,10 +112,9 @@ void AStarMap::buildNodes()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void AStarMap::clearNodes()
 {
    for (int x = 0; x < mWidth; x++)
@@ -142,7 +129,6 @@ void AStarMap::clearNodes()
    mNodes.clear();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
   \param x x position
@@ -150,14 +136,14 @@ void AStarMap::clearNodes()
   \param regardStones \c true if stones are to be regarded
   \return list of neighbors
 */
-QList<AStarNode*> AStarMap::getNeighbors(int x, int y, bool regardStones)
+std::vector<AStarNode*> AStarMap::getNeighbors(int x, int y, bool regardStones)
 {
-   QList<AStarNode*> list;
+   std::vector<AStarNode*> list;
 
-   QPoint up(x, y-1);
-   QPoint down(x, y+1);
-   QPoint left(x-1, y);
-   QPoint right(x+1, y);
+   QPoint up(x, y - 1);
+   QPoint down(x, y + 1);
+   QPoint left(x - 1, y);
+   QPoint right(x + 1, y);
 
    if (up.y() >= 0)
    {
@@ -186,17 +172,13 @@ QList<AStarNode*> AStarMap::getNeighbors(int x, int y, bool regardStones)
    return list;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
   \param point point to check
   \param regardStones \c if stones are to be regarded
   \return true if point is traversable
 */
-bool AStarMap::isTraversable(
-   const QPoint& point,
-   bool regardStones
-)
+bool AStarMap::isTraversable(const QPoint& point, bool regardStones)
 {
    MapItem* item = 0;
    bool add = true;
@@ -215,7 +197,6 @@ bool AStarMap::isTraversable(
    return add;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return pointer to mapitem
@@ -227,7 +208,6 @@ AStarNode* AStarMap::getNode(int x, int y) const
    return mNodeMap[y * mWidth + x];
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param x x position
@@ -236,21 +216,20 @@ AStarNode* AStarMap::getNode(int x, int y) const
 */
 void AStarMap::setNode(int x, int y, AStarNode* item)
 {
-   mNodeMap[y * mWidth + x]=item;
+   mNodeMap[y * mWidth + x] = item;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
   \param path path to debug
 */
-void AStarMap::debugPath(const QList<AStarNode *> &path)
+void AStarMap::debugPath(const std::vector<AStarNode*>& path)
 {
-   AStarNode** map = new AStarNode*[mWidth*mHeight];
+   AStarNode** map = new AStarNode*[mWidth * mHeight];
 
    memset(map, 0, mWidth * mHeight * sizeof(AStarNode*));
 
-   foreach (AStarNode* node, path)
+   for (AStarNode* node : path)
       map[node->getY() * mWidth + node->getX()] = node;
 
    QStringList lines;
@@ -313,6 +292,3 @@ void AStarMap::debugPath(const QList<AStarNode *> &path)
 
    delete[] map;
 }
-
-
-

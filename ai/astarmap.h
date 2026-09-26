@@ -4,78 +4,65 @@
 // base
 #include "botmap.h"
 
-// Qt
-#include <QList>
+#include <vector>
 
 // forward declarations
 class AStarNode;
 
 class AStarMap : public BotMap
 {
-   public:
+public:
+   //! constructor
+   AStarMap();
 
-      //! constructor
-      AStarMap();
+   //! constructor
+   AStarMap(int width, int height);
 
-      //! constructor
-      AStarMap(int width, int height);
+   //! copy constructor for botmap (map items are not copied)
+   explicit AStarMap(BotMap*);
 
-      //! copy constructor for botmap (map items are not copied)
-      explicit AStarMap(BotMap*);
+   //! copy constructor for astar map (map items are not copied)
+   explicit AStarMap(AStarMap*);
 
-      //! copy constructor for astar map (map items are not copied)
-      explicit AStarMap(AStarMap*);
+   //! destructor
+   virtual ~AStarMap();
 
-      //! destructor
-      virtual ~AStarMap();
+   //! clear map
+   void clear();
 
-      //! clear map
-      void clear();
+   //! setter for botmap
+   void setBotMap(BotMap*);
 
-      //! setter for botmap
-      void setBotMap(BotMap *);
+   //! create nodes
+   void buildNodes();
 
-      //! create nodes
-      void buildNodes();
+   //! delete all nodes
+   void clearNodes();
 
-      //! delete all nodes
-      void clearNodes();
+   //! get all neighbor nodes of a position
+   std::vector<AStarNode*> getNeighbors(int x, int y, bool regardStones = false);
 
-      //! get all neighbor nodes of a position
-      QList<AStarNode*> getNeighbors(int x, int y, bool regardStones = false);
+   //! get node at x, y
+   AStarNode* getNode(int x, int y) const;
 
-      //! get node at x, y
-      AStarNode* getNode(
-         int x,
-         int y
-      ) const;
+   //! set node at x, y
+   void setNode(int x, int y, AStarNode*);
 
-      //! set node at x, y
-      void setNode(
-         int x,
-         int y,
-         AStarNode*
-      );
+   //! debug path
+   void debugPath(const std::vector<AStarNode*>& path);
 
-      //! debug path
-      void debugPath(const QList<AStarNode*>& path);
+protected:
+   //! init map
+   void initMap();
 
+   //! check if a point is traversable
+   bool isTraversable(const QPoint& p, bool regardStones);
 
-   protected:
+   //! node map
+   AStarNode** mNodeMap;
 
-      //! init map
-      void initMap();
-
-      //! check if a point is traversable
-      bool isTraversable(const QPoint& p, bool regardStones);
-
-      //! node map
-      AStarNode** mNodeMap;
-
-      //! list of nodes
-      QList<AStarNode*> mNodes;
+   //! list of nodes
+   std::vector<AStarNode*> mNodes;
 };
 
-#endif // ASTARMAP_H
-
-
+#endif  // ASTARMAP_H

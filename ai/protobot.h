@@ -236,10 +236,10 @@ class ProtoBot : public Bot
       void resetHazardousTemporary();
 
       //! check if a path is dangerous
-      bool isPathHazardous(const QList<AStarNode*>& path) const;
+      bool isPathHazardous(const std::vector<AStarNode*>& path) const;
 
       //! get the number of hazardous fields per path
-      int getHazardousFieldCount(const QList<AStarNode*>& path) const;
+      int getHazardousFieldCount(const std::vector<AStarNode*>& path) const;
 
       //! player is currently unable to drop bombs
       bool isNoBombInfectionActive() const;

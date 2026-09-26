@@ -3,12 +3,8 @@
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-AStarPathFinding::AStarPathFinding()
- : mStartNode(0),
-   mTargetNode(0),
-   mCurrentNode(0),
-   mNodeMap(0)
+ */
+AStarPathFinding::AStarPathFinding() : mStartNode(0), mTargetNode(0), mCurrentNode(0), mNodeMap(0)
 {
 }
 
@@ -21,7 +17,6 @@ void AStarPathFinding::setMap(AStarMap* map)
    mNodeMap = map;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param start x position
@@ -31,7 +26,6 @@ void AStarPathFinding::setStart(int x, int y)
 {
    mStartNode = mNodeMap->getNode(x, y);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -43,10 +37,9 @@ void AStarPathFinding::setTarget(int x, int y)
    mTargetNode = mNodeMap->getNode(x, y);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void AStarPathFinding::findPath()
 {
    // init
@@ -62,17 +55,14 @@ void AStarPathFinding::findPath()
    if (mStartNode)
       mOpenSet.insert(mStartNode);
 
-   while (!mOpenSet.isEmpty())
+   while (!mOpenSet.empty())
    {
       // consider the best node in the open list (the node with the lowest f value)
       // the node in openset having the lowest f_score[] value;
       mCurrentNode = getBestFValueNode(&mOpenSet);
 
       // this node is the goal
-      if (
-            mCurrentNode->getX() == mTargetNode->getX()
-         && mCurrentNode->getY() == mTargetNode->getY()
-      )
+      if (mCurrentNode->getX() == mTargetNode->getX() && mCurrentNode->getY() == mTargetNode->getY())
       {
          // then we're done
          mOpenSet.clear();
@@ -81,16 +71,13 @@ void AStarPathFinding::findPath()
       else
       {
          // remove current from openset
-         mOpenSet.remove(mCurrentNode);
+         mOpenSet.erase(mCurrentNode);
 
          // add current to closedset
          mClosedSet.insert(mCurrentNode);
 
          // for (each neighbor) // i.e. up, down, left, right
-         foreach (
-            AStarNode* neighbor,
-            mNodeMap->getNeighbors(mCurrentNode->getX(), mCurrentNode->getY(), true)
-         )
+         for (AStarNode* neighbor : mNodeMap->getNeighbors(mCurrentNode->getX(), mCurrentNode->getY(), true))
          {
             if (!mClosedSet.contains(neighbor))
             {
@@ -122,15 +109,14 @@ void AStarPathFinding::findPath()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param currentNode
    \return all parent nodes
 */
-QList<AStarNode*> AStarPathFinding::reconstructPath(AStarNode* currentNode)
+std::vector<AStarNode*> AStarPathFinding::reconstructPath(AStarNode* currentNode)
 {
-   QList<AStarNode*> path;
+   std::vector<AStarNode*> path;
 
    while (currentNode && currentNode->getParent())
    {
@@ -141,19 +127,18 @@ QList<AStarNode*> AStarPathFinding::reconstructPath(AStarNode* currentNode)
    return path;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param set set to scan
    \return node with best f value
 */
-AStarNode* AStarPathFinding::getBestFValueNode(QSet<AStarNode*>* set)
+AStarNode* AStarPathFinding::getBestFValueNode(std::unordered_set<AStarNode*>* set)
 {
    AStarNode* node = 0;
 
    int fMin = INT_MAX;
 
-   foreach (AStarNode* n, *set)
+   for (AStarNode* n : *set)
    {
       if (n->getF() < fMin)
       {
@@ -165,20 +150,18 @@ AStarNode* AStarPathFinding::getBestFValueNode(QSet<AStarNode*>* set)
    return node;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void AStarPathFinding::debugPath()
 {
    int i = 0;
-   foreach (AStarNode* node, mPath)
+   for (AStarNode* node : mPath)
    {
       qDebug("%d: (%d, %d)", i, node->getX(), node->getY());
       i++;
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -188,12 +171,9 @@ void AStarPathFinding::debugPathShort()
 {
    QString pathString;
 
-   foreach(AStarNode* node, mPath)
+   for (AStarNode* node : mPath)
    {
-      QString point =
-         QString("=> (%1; %2) ")
-            .arg(node->getX())
-            .arg(node->getY());
+      QString point = QString("=> (%1; %2) ").arg(node->getX()).arg(node->getY());
 
       pathString.append(point);
    }
@@ -208,12 +188,11 @@ void AStarPathFinding::debugPathShort()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return computed path
 */
-QList<AStarNode*> AStarPathFinding::getPath() const
+std::vector<AStarNode*> AStarPathFinding::getPath() const
 {
    return mPath;
 }
@@ -226,8 +205,6 @@ int AStarPathFinding::getPathLength() const
 {
    return mPath.size();
 }
-
-
 
 /*
  wiki pseudocode
@@ -280,5 +257,3 @@ function A*(start,goal)
      else
          return current_node
 */
-
-

@@ -1,9 +1,6 @@
 #ifndef ASTARPATHFINDING_H
 #define ASTARPATHFINDING_H
 
-#include <QList>
-#include <QSet>
-
 #include "pathfinding.h"
 
 #include "map.h"
@@ -11,71 +8,69 @@
 #include "astarmap.h"
 #include "astarnode.h"
 
+#include <unordered_set>
+#include <vector>
+
 class AStarPathFinding : public PathFinding
 {
-   public:
+public:
+   //! constructor
+   AStarPathFinding();
 
-      //! constructor
-      AStarPathFinding();
+   //! setter for map
+   void setMap(AStarMap* map);
 
-      //! setter for map
-      void setMap(AStarMap* map);
+   //! setter for start pojt
+   void setStart(int x, int y);
 
-      //! setter for start pojt
-      void setStart(int x, int y);
+   //! setter for target point
+   void setTarget(int x, int y);
 
-      //! setter for target point
-      void setTarget(int x, int y);
+   //! find path from start to target
+   void findPath();
 
-      //! find path from start to target
-      void findPath();
+   //! debug path
+   void debugPath();
 
-      //! debug path
-      void debugPath();
+   //! debug path in a short version
+   void debugPathShort();
 
-      //! debug path in a short version
-      void debugPathShort();
+   //! getter for path nodes
+   std::vector<AStarNode*> getPath() const;
 
-      //! getter for path nodes
-      QList<AStarNode*> getPath() const;
+   //! getter for the path length
+   int getPathLength() const;
 
-      //! getter for the path length
-      int getPathLength() const;
+protected:
+   //! get best f score node in given set
+   AStarNode* getBestFValueNode(std::unordered_set<AStarNode*>* set);
 
+   //! build path by linking parents
+   std::vector<AStarNode*> reconstructPath(AStarNode* currentNode);
 
-   protected:
+   //! open set
+   std::unordered_set<AStarNode*> mOpenSet;
 
-      //! get best f score node in given set
-      AStarNode* getBestFValueNode(QSet<AStarNode *> *set);
+   //! closed set
+   std::unordered_set<AStarNode*> mClosedSet;
 
-      //! build path by linking parents
-      QList<AStarNode *> reconstructPath(AStarNode* currentNode);
+   //! start node
+   AStarNode* mStartNode;
 
-      //! open set
-      QSet<AStarNode*> mOpenSet;
+   //! target node
+   AStarNode* mTargetNode;
 
-      //! closed set
-      QSet<AStarNode*> mClosedSet;
+   //! current node
+   AStarNode* mCurrentNode;
 
-      //! start node
-      AStarNode* mStartNode;
+   //! map to work on
+   AStarMap* mNodeMap;
 
-      //! target node
-      AStarNode* mTargetNode;
-
-      //! current node
-      AStarNode* mCurrentNode;
-
-      //! map to work on
-      AStarMap* mNodeMap;
-
-      //! resulting path
-      QList<AStarNode*> mPath;
+   //! resulting path
+   std::vector<AStarNode*> mPath;
 };
 
-#endif // ASTARPATHFINDING_H
-
-
+#endif  // ASTARPATHFINDING_H
 
 /*
 
