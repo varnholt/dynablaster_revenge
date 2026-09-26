@@ -49,6 +49,19 @@ public:
       return *this;
    }
 
+   template <typename T>
+   BinaryWriter& operator<<(const std::vector<T>& list)
+   {
+      *this << static_cast<uint32_t>(list.size());
+
+      for (const auto& item : list)
+      {
+         *this << item;
+      }
+
+      return *this;
+   }
+
    size_t pos() const;
 
    // patches a uint16_t already written at 'offset', used for the leading packet-size

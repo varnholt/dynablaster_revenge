@@ -15,6 +15,8 @@
 #include "packetstreambuffer.h"
 #include "serverconfiguration.h"
 
+#include <vector>
+
 // forward declarations
 class Bot;
 class BotMap;
@@ -341,7 +343,7 @@ private:
    int mKeysPressed;
 
    //! list of games available
-   mutable QList<GameInformation> mGames;
+   mutable std::vector<GameInformation> mGames;
 
    //! true if game was succesfully joined
    bool mGameJoined;

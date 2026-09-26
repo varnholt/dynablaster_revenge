@@ -12,7 +12,7 @@
 
    \param name game's name
 */
-ListGamesResponsePacket::ListGamesResponsePacket(const QList<GameInformation>& games, bool update)
+ListGamesResponsePacket::ListGamesResponsePacket(const std::vector<GameInformation>& games, bool update)
     : Packet(Packet::LISTGAMESRESPONSE), mGames(games), mUpdate(update)
 {
    mPacketName = PACKETNAME;
@@ -39,7 +39,7 @@ ListGamesResponsePacket::~ListGamesResponsePacket()
 /*!
    \return game's list
 */
-const QList<GameInformation> ListGamesResponsePacket::getGames()
+const std::vector<GameInformation> ListGamesResponsePacket::getGames()
 {
    return mGames;
 }

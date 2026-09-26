@@ -11,6 +11,8 @@
 #include "packetstreambuffer.h"
 #include "signal.h"
 
+#include <vector>
+
 // game
 #include "gameinformation.h"
 #include "playerinfo.h"
@@ -63,7 +65,7 @@ public:
    void setLoginAfterConnect(bool loginAfterConnect);
 
    //! getter for list of games
-   QList<GameInformation>* getGames() const;
+   std::vector<GameInformation>* getGames() const;
 
    //! setter for game id
    void setGameId(int id);
@@ -181,7 +183,7 @@ public:
    Signal<bool> zoomInSignal;
    Signal<bool> zoomOutSignal;
    Signal<MapItem*, Constants::Direction, float, int, int> moveMapItemSignal;
-   Signal<const QList<GameInformation>&> gamesListUpdatedSignal;
+   Signal<const std::vector<GameInformation>&> gamesListUpdatedSignal;
    Signal<float, int> rumbleSignal;
    Signal<int, int> timeChangedSignal;
    Signal<bool> hostingSignal;
@@ -421,7 +423,7 @@ private:
    QString mNick;
 
    //! list of games available
-   mutable QList<GameInformation> mGames;
+   mutable std::vector<GameInformation> mGames;
 
    //! connected flag
    bool mConnected;

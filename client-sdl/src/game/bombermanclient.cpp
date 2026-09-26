@@ -147,7 +147,7 @@ BombermanClient* BombermanClient::getInstance()
 /*!
    \return ptr to list of games
 */
-QList<GameInformation>* BombermanClient::getGames() const
+std::vector<GameInformation>* BombermanClient::getGames() const
 {
    return &mGames;
 }
@@ -484,7 +484,7 @@ void BombermanClient::processCreateGameResponse(Packet* packet)
       }
       else
       {
-         mGames << gameInformation;
+         mGames.push_back(gameInformation);
       }
 
       success = true;

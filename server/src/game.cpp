@@ -548,8 +548,8 @@ void Game::initMapRelatedItems()
  */
 void Game::broadcastGameInformation()
 {
-   QList<GameInformation> games;
-   games << getGameInformation();
+   std::vector<GameInformation> games;
+   games.push_back(getGameInformation());
    mOutgoingPackets.append(new ListGamesResponsePacket(games, true));
 }
 

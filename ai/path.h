@@ -1,9 +1,9 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include <QList>
-
 #include "point.h"
+
+#include <vector>
 
 
 class Path
@@ -17,13 +17,13 @@ class Path
       void positionReached();
 
       //! setter for points
-      void setPoints(const QList<Point>&);
+      void setPoints(const std::vector<Point>&);
 
 
    protected:
 
       //! list of points
-      QList<Point> mPoints;
+      std::vector<Point> mPoints;
 
 };
 

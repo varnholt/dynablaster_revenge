@@ -4,10 +4,9 @@
 // base
 #include "packet.h"
 
-// Qt
-#include <QList>
-
 #include "point.h"
+
+#include <vector>
 
 class MapCreateRequestPacket : public Packet
 {
@@ -19,7 +18,7 @@ public:
       int stoneCount,
       int extraBombCount,
       int extraFlameCount,
-      const QList<Point>& startPositions
+      const std::vector<Point>& startPositions
    );
 
    //! read constructor
@@ -54,7 +53,7 @@ private:
    int32_t mExtraFlameCount;
 
    //! player start positions
-   QList<Point> mStartPositions;
+   std::vector<Point> mStartPositions;
 };
 
 #endif  // MAPCREATEREQUESTPACKET_H

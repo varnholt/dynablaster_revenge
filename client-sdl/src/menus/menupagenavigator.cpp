@@ -215,9 +215,9 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          // table (GameMenuInterfaceSelect::getSelectedGame()) - that table selection isn't wired
          // in this port yet, so this joins the first known game instead. Real enough to prove the
          // join->lounge chain; picking a specific game is a later refinement.
-         const QList<GameInformation>* games = BombermanClient::getInstance()->getGames();
-         if (games && !games->isEmpty())
-            BombermanClient::getInstance()->joinGame(games->first().getId());
+         const std::vector<GameInformation>* games = BombermanClient::getInstance()->getGames();
+         if (games && !games->empty())
+            BombermanClient::getInstance()->joinGame(games->front().getId());
          else
             qDebug("MenuPageNavigator: JOIN clicked with no games known yet");
       }

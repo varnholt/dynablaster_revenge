@@ -588,7 +588,7 @@ void BotClient::joinGame()
    {
       if (!isGameJoined())
       {
-         if (!mGames.isEmpty())
+         if (!mGames.empty())
          {
             // qDebug("BotClient::joinGame");
             JoinGameRequestPacket joinPacket(getGameId());

@@ -26,6 +26,8 @@
 // Qt
 #include <QSettings>
 
+#include <vector>
+
 // SDL
 #include <SDL3_net/SDL_net.h>
 
@@ -381,7 +383,7 @@ void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 void Server::processListGamesRequest(NET_StreamSocket* tcpSocket)
 {
    // ListGamesRequestPacket* request = (ListGamesRequestPacket*)packet;
-   QList<GameInformation> games;
+   std::vector<GameInformation> games;
 
    foreach (Game* game, mGames)
    {
@@ -398,7 +400,7 @@ void Server::processListGamesRequest(NET_StreamSocket* tcpSocket)
       //         game->getRoundsPlayed()
       //      )
 
-      games.append(game->getGameInformation());
+      games.push_back(game->getGameInformation());
    }
 
    ListGamesResponsePacket* response = new ListGamesResponsePacket(games);

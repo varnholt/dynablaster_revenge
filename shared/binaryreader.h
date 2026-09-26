@@ -57,6 +57,24 @@ public:
       return *this;
    }
 
+   template <typename T>
+   BinaryReader& operator>>(std::vector<T>& list)
+   {
+      uint32_t count = 0;
+      *this >> count;
+
+      list.clear();
+
+      for (uint32_t i = 0; i < count && _ok; ++i)
+      {
+         T item{};
+         *this >> item;
+         list.push_back(item);
+      }
+
+      return *this;
+   }
+
    bool ok() const;
    size_t pos() const;
    size_t bytesAvailable() const;

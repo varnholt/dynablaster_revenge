@@ -22,7 +22,7 @@ MapCreateRequestPacket::MapCreateRequestPacket(
    int stoneCount,
    int extraBombCount,
    int extraFlameCount,
-   const QList<Point>& startPositions
+   const std::vector<Point>& startPositions
 )
     : Packet(Packet::MAPCREATEREQUEST),
       mWidth(width),

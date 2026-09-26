@@ -7,14 +7,15 @@
 #include "gameinformation.h"
 
 // Qt
-#include <QList>
 #include <QString>
+
+#include <vector>
 
 class ListGamesResponsePacket : public Packet
 {
 public:
    //! write constructor
-   ListGamesResponsePacket(const QList<GameInformation>& games, bool update = false);
+   ListGamesResponsePacket(const std::vector<GameInformation>& games, bool update = false);
 
    //! read constructor
    ListGamesResponsePacket();
@@ -32,7 +33,7 @@ public:
    void dequeue(BinaryReader&);
 
    //! getter for game name
-   const QList<GameInformation> getGames();
+   const std::vector<GameInformation> getGames();
 
    //! setter for update flag
    void setUpdate(bool update);
@@ -42,7 +43,7 @@ public:
 
 private:
    //! game's name
-   QList<GameInformation> mGames;
+   std::vector<GameInformation> mGames;
 
    //! update game information
    bool mUpdate;
