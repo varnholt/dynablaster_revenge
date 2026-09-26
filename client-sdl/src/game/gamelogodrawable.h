@@ -20,15 +20,14 @@
 #include "math/vector.h"
 #include "tools/array.h"
 
-#include <QObject>
 #include <QString>
+
+#include <string>
 
 class PSDLayer;
 
 class GameLogoDrawable : public SphereFragmentsDrawable
 {
-   Q_OBJECT
-
 public:
    class Spark
    {
@@ -66,10 +65,8 @@ public:
    //! overwrite base
    void setVisible(bool visible);
 
-public slots:
-
    //!
-   void pageChanged(const QString& page);
+   void pageChanged(const std::string& page);
 
 protected:
    //! initialize layers

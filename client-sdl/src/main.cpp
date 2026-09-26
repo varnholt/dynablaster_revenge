@@ -238,32 +238,27 @@ int main(int argc, char** argv)
    GameLogoDrawable logoDrawable(&device);
    logoDrawable.initializeGL();
    logoDrawable.setVisible(true);
-   QObject::connect(&menuDrawable, SIGNAL(pageChanged(QString)), &logoDrawable, SLOT(pageChanged(QString)));
+   menuDrawable.pageChangedSignal.connect([&](const std::string& page) { logoDrawable.pageChanged(page); });
 
    // turns button clicks (Menu::actionRequest) into actual page navigation - see
    // menupagenavigator.h for exactly what this does and doesn't handle yet (no networking).
-   // pageChangeRequest connects to MenuDrawable's *protected* slot of the same name - legal via
-   // Qt's string-based SIGNAL/SLOT connect, which bypasses C++ access control; this is the same
-   // connection the real client/src/game/bombermanclientgui.cpp makes for GameMenuWorkflow.
+   // pageChangeRequest is now a plain public method - no more Qt-reflection access-control bypass
+   // needed to reach it from here.
    MenuPageNavigator navigator;
-   QObject::connect(menuDrawable.getMenu(), SIGNAL(actionRequest(QString, QString)), &navigator, SLOT(onActionRequest(QString, QString)));
-   QObject::connect(&navigator, SIGNAL(pageChangeRequest(QString)), &menuDrawable, SLOT(pageChangeRequest(QString)));
+   menuDrawable.getMenu()->actionRequestSignal.connect([&](const std::string& page, const std::string& action)
+                                                       { navigator.onActionRequest(page, action); });
+   navigator.pageChangeRequestSignal.connect([&](const std::string& page) { menuDrawable.pageChangeRequest(page); });
 
    // matches GameMenuWorkflow::pageChanged() - populates GAME_CREATE's dropdowns/checkboxes once
    // the page actually becomes current (see MenuPageNavigator::onPageChanged()).
-   QObject::connect(&menuDrawable, SIGNAL(pageChanged(QString)), &navigator, SLOT(onPageChanged(QString)));
+   menuDrawable.pageChangedSignal.connect([&](const std::string& page) { navigator.onPageChanged(page); });
 
-   // menu hover/click sound feedback - matches bombermanclientgui.cpp's own wiring.
-   QObject::connect(
-      menuDrawable.getMenu(),
-      SIGNAL(layerFocussed(QString, QString)),
-      SoundManager::getInstance(),
-      SLOT(playSoundMouseOver(QString, QString)),
-      Qt::QueuedConnection
-   );
-   QObject::connect(
-      &menuDrawable, SIGNAL(pageChanged(QString)), SoundManager::getInstance(), SLOT(playSoundMouseClick(QString)), Qt::QueuedConnection
-   );
+   // menu hover/click sound feedback - matches bombermanclientgui.cpp's own wiring. Qt's
+   // Qt::QueuedConnection deferral wasn't load-bearing (this app is single-threaded/poll-based) -
+   // dispatch synchronously instead.
+   menuDrawable.getMenu()->layerFocussedSignal.connect([](const std::string& page, const std::string& item)
+                                                       { SoundManager::getInstance()->playSoundMouseOver(page, item); });
+   menuDrawable.pageChangedSignal.connect([](const std::string& page) { SoundManager::getInstance()->playSoundMouseClick(page); });
 
    // GameDrawable (Phase 5, see project memory) - the real in-game rendering (map/players/bombs/
    // extras). Starts hidden; BombermanClient::showGame()/showMenu() (see below) toggle it on/off
@@ -343,8 +338,10 @@ int main(int argc, char** argv)
                                                 { gameDrawable.playerInfected(id, skull, infectorId, extraX, extraY); });
    bombermanClient.playerIdSignal.connect([&](int id) { gameDrawable.setPlayerId(id); });
    bombermanClient.countdownSignal.connect([&](int left) { countdownDrawable.countdown(left); });
-   bombermanClient.messageReceivedSignal.connect([&](int senderId, const std::string& message, bool finished)
-                                                 { gameMessagingDrawable.messageReceived(senderId, QString::fromStdString(message), finished); });
+   bombermanClient.messageReceivedSignal.connect(
+      [&](int senderId, const std::string& message, bool finished)
+      { gameMessagingDrawable.messageReceived(senderId, QString::fromStdString(message), finished); }
+   );
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
    // still-deferred GameStatsDrawable/MusicPlayerDrawable/GameHelpDrawable).
@@ -374,19 +371,14 @@ int main(int argc, char** argv)
    // leave/ESC, no valid game id) stays an immediate switch - matches GameWinDrawable's own
    // isGameIdValid() gate, which skips showing itself in exactly that case.
    bombermanClient.gameStoppedSignal.connect([&]() { Timer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain); });
-   // pageChangeRequest is a protected slot (see the navigator wiring above) - invokeMethod goes
-   // through Qt's meta-object system, bypassing C++ access control the same way the string-based
-   // SIGNAL/SLOT connects elsewhere in this file already do.
-   bombermanClient.showMainMenuSignal.connect(
-      [&]() { QMetaObject::invokeMethod(&menuDrawable, "pageChangeRequest", Q_ARG(QString, QString("data/menus/mainmenu.psd"))); }
-   );
+   bombermanClient.showMainMenuSignal.connect([&]() { menuDrawable.pageChangeRequest("data/menus/mainmenu.psd"); });
 
    // matches BombermanClientGui's own startup sequence (SoundManager::getInstance()->
    // startPlaylist(), called once real init is done) - background music.
    SoundManager::getInstance()->startPlaylist();
 
    bool running = true;
-   QObject::connect(&navigator, &MenuPageNavigator::quitRequest, [&running]() { running = false; });
+   navigator.quitRequestSignal.connect([&running]() { running = false; });
 
    while (running)
    {

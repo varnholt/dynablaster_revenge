@@ -2,10 +2,10 @@
 
 // Qt
 #include <QImage>
-#include <QObject>
 
 // shared
 #include "settings.h"
+#include "signal.h"
 
 // menus
 #include "image/psd.h"
@@ -34,12 +34,10 @@ class PSDLayer;
 /// The QRegExp-driven "*_input_regexp" ini key is no longer read - MenuPageTextEditItem and
 /// MenuPageListItem dropped setRegExp()/mRegexp entirely (QRegExp doesn't exist in Qt6, and the
 /// field was dead upstream anyway - see those classes).
-class MenuPage : public QObject, public PSD
+class MenuPage : public PSD
 {
-   Q_OBJECT
-
 public:
-   MenuPage(QObject* parent = 0);
+   MenuPage();
 
    virtual ~MenuPage();
 
@@ -105,18 +103,14 @@ public:
    //! getter for the focussed item
    MenuPageItem* getFocussedItem() const;
 
-signals:
-
    //! send out an action request
-   void actionRequest(const QString& page, const QString& actionRequest);
+   Signal<const std::string&, const std::string&> actionRequestSignal;
 
    //! a key was pressed while an item was focussed
-   void actionKeyPressed(const QString& page, const QString& itemName, int key);
+   Signal<const std::string&, const std::string&, int> actionKeyPressedSignal;
 
    //! a layer has been focussed
-   void layerFocussed(const QString& page, const QString& itemName);
-
-public slots:
+   Signal<const std::string&, const std::string&> layerFocussedSignal;
 
    void mouseMoved(int x, int y);
 
@@ -137,12 +131,10 @@ public slots:
    //! render to framebuffer
    void render();
 
-protected slots:
-
-   //! send out an action request
-   void actionRequestFromItem(const QString& actionRequest);
-
 protected:
+   //! send out an action request
+   void actionRequestFromItem(const std::string& actionRequest);
+
    //! initialize layers
    void initializeLayers();
 

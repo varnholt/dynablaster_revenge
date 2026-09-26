@@ -3,10 +3,6 @@
 // SDL3-backed sound manager - replaces the original's hand-rolled per-platform mixer.
 // Music decoding uses minimp3 (see CMakeLists.txt).
 
-// Qt
-#include <QObject>
-#include <QString>
-
 // shared
 #include "constants.h"
 #include "timer.h"
@@ -16,12 +12,11 @@
 
 #include <array>
 #include <filesystem>
+#include <string>
 #include <vector>
 
-class SoundManager : public QObject
+class SoundManager
 {
-   Q_OBJECT
-
 public:
    static SoundManager* getInstance();
 
@@ -34,8 +29,6 @@ public:
    float getVolumeSfx() const;
    void setVolumeMusic(float volume);
    void setVolumeSfx(float volume);
-
-public slots:
 
    void playSoundKilled();
    void playSoundBomb();
@@ -55,17 +48,16 @@ public slots:
    void playSoundGameWin();
    void playSoundGameDraw();
 
-   void playSoundMouseOver(const QString& page, const QString& item);
-   void playSoundMouseClick(const QString& page);
+   void playSoundMouseOver(const std::string& page, const std::string& item);
+   void playSoundMouseClick(const std::string& page);
    void playSoundTick();
 
-private slots:
    // ticks on mMusicTimer; auto-advances finished tracks and drives the fade-out ramp.
    void updateMusic();
 
 protected:
    SoundManager();
-   ~SoundManager() override;
+   ~SoundManager();
 
    enum SampleId
    {

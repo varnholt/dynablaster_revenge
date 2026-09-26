@@ -5,13 +5,17 @@
 #include <QKeyEvent>
 #include <QList>
 #include <QMouseEvent>
-#include <QObject>
 
 // engine
 #include "framework/drawable.h"
 
+// shared
+#include "signal.h"
+
 // menus
 #include "image/psd.h"
+
+#include <memory>
 
 class Menu;
 class MenuPageFadeAnimation;
@@ -31,10 +35,8 @@ class FrameBuffer;
 /// glPushMatrix()/glPopMatrix() stack this used to sit on top of.
 /// drawFrameBuffer(unsigned int) is dropped - declared and defined in the original, never called
 /// anywhere (dead code even upstream).
-class MenuDrawable : public QObject, public Drawable
+class MenuDrawable : public Drawable
 {
-   Q_OBJECT
-
 public:
    MenuDrawable(RenderDevice*);
 
@@ -70,28 +72,25 @@ public:
    //! initialization finished
    void initializationFinished();
 
-signals:
-
    //! page was changed
-   void pageChanged(const QString&);
+   Signal<const std::string&> pageChangedSignal;
 
    //! page change active
-   void pageChangeActive(bool);
+   Signal<bool> pageChangeActiveSignal;
 
    //! visible or not
-   void visible(bool);
+   Signal<bool> visibleSignal;
 
    //! page change finished
-   void pageChangeAnimationStoppedSignal();
+   Signal<> pageChangeAnimationStoppedSignal;
 
    //! signal key pressed event
-   void keyPressed(QKeyEvent*);
-
-protected slots:
+   Signal<QKeyEvent*> keyPressedSignal;
 
    //! setter for active page by name
-   void pageChangeRequest(const QString&);
+   void pageChangeRequest(const std::string&);
 
+protected:
    //! page change has been finished
    void pageChangeAnimationStopped();
 
@@ -101,7 +100,6 @@ protected slots:
    //! fade out has finished
    void fadeOutFinished();
 
-protected:
    void initGlParameters();
 
    void cleanupGlParameters();
@@ -123,13 +121,13 @@ protected:
 
    // menu
 
-   Menu* mMenu;
+   std::unique_ptr<Menu> mMenu;
 
    //
-   MenuPageFadeAnimation* mFadeInAnimation;
+   std::unique_ptr<MenuPageFadeAnimation> mFadeInAnimation;
 
    //
-   MenuPageFadeAnimation* mFadeOutAnimation;
+   std::unique_ptr<MenuPageFadeAnimation> mFadeOutAnimation;
 
    //!
    bool mInputBlocked;
@@ -161,5 +159,5 @@ protected:
 
    //! page cross-fade render target - see class comment for why this port owns it directly
    //! instead of pulling it from MainDrawable.
-   FrameBuffer* mFrameBuffer;
+   std::unique_ptr<FrameBuffer> mFrameBuffer;
 };

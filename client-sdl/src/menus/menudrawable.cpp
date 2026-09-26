@@ -25,11 +25,7 @@
    \param device render device
 */
 MenuDrawable::MenuDrawable(RenderDevice* device)
-    : QObject(),
-      Drawable(device),
-      mMenu(0),
-      mFadeInAnimation(0),
-      mFadeOutAnimation(0),
+    : Drawable(device),
       mInputBlocked(false),
       mMouseX(0),
       mMouseY(0),
@@ -39,10 +35,9 @@ MenuDrawable::MenuDrawable(RenderDevice* device)
       mAlpha(0.0f),
       mResetTime(false),
       mShader(0),
-      mAlphaParameter(-1),
-      mFrameBuffer(0)
+      mAlphaParameter(-1)
 {
-   mMenu = new Menu();
+   mMenu = std::make_unique<Menu>();
 }
 
 //-----------------------------------------------------------------------------
@@ -52,12 +47,12 @@ void MenuDrawable::initializeGL()
 {
    mMenu->initialize();
 
-   mFadeInAnimation = new MenuPageFadeAnimation();
+   mFadeInAnimation = std::make_unique<MenuPageFadeAnimation>();
    mFadeInAnimation->setFadeIn(true);
    mFadeInAnimation->initialize();
 
    // fade out
-   mFadeOutAnimation = new MenuPageFadeAnimation();
+   mFadeOutAnimation = std::make_unique<MenuPageFadeAnimation>();
    mFadeOutAnimation->setFadeIn(false);
    mFadeOutAnimation->initialize();
 
@@ -68,20 +63,7 @@ void MenuDrawable::initializeGL()
 //-----------------------------------------------------------------------------
 /*!
  */
-MenuDrawable::~MenuDrawable()
-{
-   delete mMenu;
-   mMenu = 0;
-
-   delete mFadeInAnimation;
-   mFadeInAnimation = 0;
-
-   delete mFadeOutAnimation;
-   mFadeOutAnimation = 0;
-
-   delete mFrameBuffer;
-   mFrameBuffer = 0;
-}
+MenuDrawable::~MenuDrawable() = default;
 
 //-----------------------------------------------------------------------------
 /*!
@@ -153,7 +135,7 @@ void MenuDrawable::drawMenuContents()
          // directly (sized to the current page) instead of pulling one from MainDrawable.
          if (!mFrameBuffer)
          {
-            mFrameBuffer = new FrameBuffer(page->getWidth(), page->getHeight());
+            mFrameBuffer = std::make_unique<FrameBuffer>(page->getWidth(), page->getHeight());
          }
          else
          {
@@ -256,7 +238,7 @@ void MenuDrawable::animateFadeFrameBuffer(float dt)
          Drawable::setVisible(false);
 
          setInputBlocked(false);
-         emit visible(false);
+         visibleSignal(false);
       }
    }
 
@@ -270,7 +252,7 @@ void MenuDrawable::animateFadeFrameBuffer(float dt)
          mFadeIn = false;
 
          setInputBlocked(false);
-         emit visible(true);
+         visibleSignal(true);
       }
    }
 }
@@ -323,7 +305,7 @@ void MenuDrawable::initializationFinished()
 {
    // called externally after everything is set up
    if (mMenu->getCurrentPage())
-      emit pageChanged(mMenu->getCurrentPage()->getFilename());
+      pageChangedSignal(mMenu->getCurrentPage()->getFilename().toStdString());
 }
 
 //-----------------------------------------------------------------------------
@@ -350,7 +332,7 @@ void MenuDrawable::startFadeInFrameBuffer()
 void MenuDrawable::fadeInFinished()
 {
    Drawable::setVisible(true);
-   emit visible(true);
+   visibleSignal(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -359,7 +341,7 @@ void MenuDrawable::fadeInFinished()
 void MenuDrawable::fadeOutFinished()
 {
    Drawable::setVisible(false);
-   emit visible(false);
+   visibleSignal(false);
 }
 
 //-----------------------------------------------------------------------------
@@ -437,25 +419,25 @@ void MenuDrawable::keyPressEvent(QKeyEvent* event)
 {
    mMenu->keyPressed(event->key(), event->text().toStdString());
 
-   emit keyPressed(event);
+   keyPressedSignal(event);
 }
 
 //-----------------------------------------------------------------------------
 /*!
    \param name requested page name
 */
-void MenuDrawable::pageChangeRequest(const QString& name)
+void MenuDrawable::pageChangeRequest(const std::string& name)
 {
    setInputBlocked(true);
 
    // get page pointers
    MenuPage* previous = mMenu->getCurrentPage();
-   MenuPage* current = mMenu->getPageByName(name);
+   MenuPage* current = mMenu->getPageByName(QString::fromStdString(name));
    mMenu->setCurrentPage(current);
 
    // set and connect animations
-   previous->setAnimation(mFadeOutAnimation);
-   current->setAnimation(mFadeInAnimation);
+   previous->setAnimation(mFadeOutAnimation.get());
+   current->setAnimation(mFadeInAnimation.get());
 
    // cleanup previous connections
    mFadeInAnimation->stoppedSignal.disconnectAll();
@@ -480,8 +462,8 @@ void MenuDrawable::pageChangeRequest(const QString& name)
    previous->unFocusAllItems();
 
    // signal page change
-   emit pageChanged(name);
-   emit pageChangeActive(true);
+   pageChangedSignal(name);
+   pageChangeActiveSignal(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -490,7 +472,7 @@ void MenuDrawable::pageChangeRequest(const QString& name)
 */
 Menu* MenuDrawable::getMenu()
 {
-   return mMenu;
+   return mMenu.get();
 }
 
 //-----------------------------------------------------------------------------
@@ -500,10 +482,10 @@ void MenuDrawable::pageChangeAnimationStopped()
 {
    // allow access to the page
    setInputBlocked(false);
-   emit pageChangeActive(false);
+   pageChangeActiveSignal(false);
 
    // re-trigger mouse move event
    mouseMoveEvent(mMouseX, mMouseY);
 
-   emit pageChangeAnimationStoppedSignal();
+   pageChangeAnimationStoppedSignal();
 }

@@ -1,18 +1,11 @@
 #pragma once
 
-// GLES3 port of client/src/effects/spherefragments/spherefragmentsdrawable.h. Kept as a
-// QObject+Drawable multiple-inheritance base (like the original) purely so GameLogoDrawable, which
-// derives from this and needs its own Q_OBJECT slot (pageChanged()), has a QObject in its
-// inheritance chain - this class itself declares no signals/slots of its own.
-
 // base
 #include "framework/drawable.h"
 
 //
 #include "framework/globaltime.h"
 #include "spherefragment.h"
-
-#include <QObject>
 
 class BombFuzeGeometryVbo;
 class BombSocketGeometryVbo;
@@ -27,10 +20,8 @@ class DuplicateAlpha;
 class BlendQuad;
 class FrameBuffer;
 
-class SphereFragmentsDrawable : public QObject, public Drawable
+class SphereFragmentsDrawable : public Drawable
 {
-   Q_OBJECT
-
 public:
    SphereFragmentsDrawable(RenderDevice* dev, bool visible = false);
 

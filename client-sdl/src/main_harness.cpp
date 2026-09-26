@@ -44,19 +44,15 @@ namespace
 {
 
 /// \brief logs Menu::actionRequest so scripted button-click selftests (see --click/--dumplayer)
-/// have real, observable proof that MenuPageItem::activated() -> action(QString) ->
+/// have real, observable proof that MenuPageItem::activated() -> action(std::string) ->
 /// MenuPage::actionRequestFromItem -> Menu::actionRequest fired, not just "no crash". Real
 /// GameMenuWorkflow (the actual button->network-request handler) is a later phase - this only
 /// verifies the menu-item click pipeline itself.
-class ActionLogger : public QObject
+struct ActionLogger
 {
-   Q_OBJECT
-
-public slots:
-
-   void onActionRequest(const QString& page, const QString& action)
+   void onActionRequest(const std::string& page, const std::string& action)
    {
-      SDL_Log("Menu::actionRequest: page=%s action=%s", qPrintable(page), qPrintable(action));
+      SDL_Log("Menu::actionRequest: page=%s action=%s", page.c_str(), action.c_str());
    }
 };
 
@@ -210,7 +206,7 @@ int main(int argc, char** argv)
       logoDrawable = new GameLogoDrawable(&device);
       logoDrawable->initializeGL();
       logoDrawable->setVisible(true);
-      QObject::connect(menuDrawable, SIGNAL(pageChanged(QString)), logoDrawable, SLOT(pageChanged(QString)));
+      menuDrawable->pageChangedSignal.connect([logoDrawable](const std::string& page) { logoDrawable->pageChanged(page); });
 
       // --page=<psd path>: jump straight to a real page for a static verification screenshot,
       // bypassing full click-driven navigation (which needs GameMenuWorkflow - a later phase).
@@ -349,9 +345,8 @@ int main(int argc, char** argv)
       }
 
       static ActionLogger actionLogger;
-      QObject::connect(
-         menuDrawable->getMenu(), SIGNAL(actionRequest(QString, QString)), &actionLogger, SLOT(onActionRequest(QString, QString))
-      );
+      menuDrawable->getMenu()->actionRequestSignal.connect([](const std::string& page, const std::string& action)
+                                                           { actionLogger.onActionRequest(page, action); });
 
       // the host-address dropdown normally lists previously-used server IPs, loaded from saved
       // settings (a networking concern out of scope for the menu-rendering phase) - a couple of
@@ -611,5 +606,3 @@ int main(int argc, char** argv)
 
    return 0;
 }
-
-#include "main_harness.moc"

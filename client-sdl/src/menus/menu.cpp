@@ -3,18 +3,20 @@
 // Qt
 #include <QStringList>
 
+#include <cstdlib>
+
 Menu* Menu::lInstance = 0;
 
-Menu::Menu() : QObject(), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
+Menu::Menu() : mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
    mSettings = std::make_unique<Settings>("data/menus/menu.ini", Settings::IniFormat);
 
    lInstance = this;
 }
 
-Menu::Menu(const Menu& /*menu*/) : QObject(), QList<MenuPage*>(), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
+Menu::Menu(const Menu& /*menu*/) : QList<MenuPage*>(), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
-   qFatal("fuck");
+   std::abort();
 }
 
 Menu::~Menu()
@@ -43,11 +45,12 @@ void Menu::initialize()
       page->initialize();
 
       // connect page actions to outside world
-      connect(page, SIGNAL(actionRequest(QString, QString)), this, SIGNAL(actionRequest(QString, QString)));
+      page->actionRequestSignal.connect([this](const std::string& p, const std::string& action) { actionRequestSignal(p, action); });
 
-      connect(page, SIGNAL(actionKeyPressed(QString, QString, int)), this, SIGNAL(actionKeyPressed(QString, QString, int)));
+      page->actionKeyPressedSignal.connect([this](const std::string& p, const std::string& item, int key)
+                                           { actionKeyPressedSignal(p, item, key); });
 
-      connect(page, SIGNAL(layerFocussed(QString, QString)), this, SIGNAL(layerFocussed(QString, QString)));
+      page->layerFocussedSignal.connect([this](const std::string& p, const std::string& item) { layerFocussedSignal(p, item); });
 
       // store page
       push_back(page);

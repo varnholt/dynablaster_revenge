@@ -3,7 +3,7 @@
 #include "hosthistory.h"
 #include "signal.h"
 
-#include <QObject>
+#include <QString>
 
 #include <map>
 #include <unordered_map>
@@ -31,25 +31,21 @@ class PlayerInfo;
 ///
 /// Deliberately named differently from GameMenuWorkflow so a future full port of that class isn't
 /// confused with this one.
-class MenuPageNavigator : public QObject
+class MenuPageNavigator
 {
-   Q_OBJECT
-
 public:
-   explicit MenuPageNavigator(QObject* parent = nullptr);
+   MenuPageNavigator();
 
-signals:
-   void pageChangeRequest(const QString& page);
-   void quitRequest();
+   Signal<const std::string&> pageChangeRequestSignal;
+   Signal<> quitRequestSignal;
 
-public slots:
-   void onActionRequest(const QString& page, const QString& action);
+   void onActionRequest(const std::string& page, const std::string& action);
 
    //! mirrors GameMenuWorkflow::pageChanged() - populates GAME_CREATE's controls once the page
-   //! actually becomes current. Connect to MenuDrawable::pageChanged(QString).
-   void onPageChanged(const QString& page);
+   //! actually becomes current. Connect to MenuDrawable::pageChangedSignal.
+   void onPageChanged(const std::string& page);
 
-private slots:
+private:
    void onLoginResponse(bool granted);
    void onCreateGameResponse(bool granted, int gameId, bool owner);
    void onJoinGameResponse(bool success);

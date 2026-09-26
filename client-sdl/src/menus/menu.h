@@ -2,10 +2,10 @@
 
 // Qt
 #include <QList>
-#include <QObject>
 
 // shared
 #include "settings.h"
+#include "signal.h"
 
 // menu
 #include "menupage.h"
@@ -15,10 +15,8 @@
 // forward declarations
 class MenuWorkflow;
 
-class Menu : public QObject, public QList<MenuPage*>
+class Menu : public QList<MenuPage*>
 {
-   Q_OBJECT
-
 public:
    Menu();
 
@@ -29,8 +27,6 @@ public:
    void initialize();
 
    static Menu* getInstance();
-
-public slots:
 
    void mouseMoved(int x, int y);
 
@@ -60,20 +56,18 @@ public slots:
    //! action response
    void actionResponse(const QString& page, const QString& action, bool ok);
 
-signals:
-
    // workflow
 
    //! action request
-   void actionRequest(const QString& page, const QString& action);
+   Signal<const std::string&, const std::string&> actionRequestSignal;
 
-   void pageChangeRequest(MenuPage* previous, MenuPage* current);
+   Signal<MenuPage*, MenuPage*> pageChangeRequestSignal;
 
    //! a key was pressed while an item was focussed
-   void actionKeyPressed(const QString& page, const QString& itemName, int key);
+   Signal<const std::string&, const std::string&, int> actionKeyPressedSignal;
 
    //! an item was focussed
-   void layerFocussed(const QString& page, const QString& itemName);
+   Signal<const std::string&, const std::string&> layerFocussedSignal;
 
 private:
    std::unique_ptr<Settings> mSettings;

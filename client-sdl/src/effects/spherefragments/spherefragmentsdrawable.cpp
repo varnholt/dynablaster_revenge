@@ -25,8 +25,7 @@
 #include "postproduction/blurfilter.h"
 
 SphereFragmentsDrawable::SphereFragmentsDrawable(RenderDevice* dev, bool visible)
-    : QObject(),
-      Drawable(dev, visible),
+    : Drawable(dev, visible),
       mSceneGraphEarth(0),
       mSceneGraphBomb(0),
       mBomb(0),

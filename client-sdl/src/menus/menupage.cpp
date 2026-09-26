@@ -3,9 +3,6 @@
 #include "menupage.h"
 #include "psdlayer.h"
 
-// Qt
-#include <QDebug>
-
 // menu
 #include "menupageanimation.h"
 #include "menupagebackgrounditem.h"
@@ -21,7 +18,7 @@
 #include "menupageslideritem.h"
 #include "menupagetextedit.h"
 
-MenuPage::MenuPage(QObject* parent) : QObject(parent), PSD(), mActiveItem(0), mAnimation(0), mActive(false)
+MenuPage::MenuPage() : PSD(), mActiveItem(0), mAnimation(0), mActive(false)
 {
 }
 
@@ -503,7 +500,7 @@ MenuPageItem* MenuPage::processButton(PSDLayer* layer, QString layerName, QStrin
       // store button action
       pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString().toStdString());
 
-      pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
+      pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(action); });
 
       mPageItems.push_back(pageItem);
 
@@ -642,7 +639,7 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
          // store button action
          pageItem->setAction(mSettings->value(baseName).toString().toStdString());
 
-         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
+         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(action); });
 
          mPageItems.push_back(pageItem);
 
@@ -820,7 +817,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
          // store button action
          pageItem->setAction(mSettings->value(baseName).toString().toStdString());
 
-         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
+         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(action); });
 
          mPageItems.push_back(pageItem);
 
@@ -1161,7 +1158,7 @@ void MenuPage::mouseMoved(int x, int y)
             if (!item->isFocussed())
             {
                if (item->isEnabled())
-                  emit layerFocussed(mFilename, layer->getName());
+                  layerFocussedSignal(mFilename.toStdString(), layer->getName());
 
                item->setFocus(true);
             }
@@ -1228,7 +1225,7 @@ void MenuPage::mousePressed(int x, int y)
 
       if (item->isActionRequestOnClickEnabled())
       {
-         emit actionRequest(mFilename, layer->getName());
+         actionRequestSignal(mFilename.toStdString(), layer->getName());
       }
 
       item->activated();
@@ -1315,11 +1312,11 @@ void MenuPage::keyPressed(int key, const std::string& text)
 
          if (key == Qt::Key_Return || key == Qt::Key_Enter)
          {
-            emit actionRequest(mFilename, mActiveItem->getCurrentLayer()->getName());
+            actionRequestSignal(mFilename.toStdString(), mActiveItem->getCurrentLayer()->getName());
          }
 
          // in any case notify workflow a key was pressed
-         emit actionKeyPressed(mFilename, mActiveItem->getCurrentLayer()->getName(), key);
+         actionKeyPressedSignal(mFilename.toStdString(), mActiveItem->getCurrentLayer()->getName(), key);
       }
    }
 }
@@ -1375,7 +1372,7 @@ void MenuPage::render()
    }
 }
 
-void MenuPage::actionRequestFromItem(const QString& request)
+void MenuPage::actionRequestFromItem(const std::string& request)
 {
-   emit actionRequest(mFilename, request);
+   actionRequestSignal(mFilename.toStdString(), request);
 }

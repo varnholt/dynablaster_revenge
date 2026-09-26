@@ -96,7 +96,7 @@ BombermanClient::BombermanClient(/*const std::string& host, const std::string& n
 
    mPositionInterpolation = new PositionInterpolation(this);
 
-   connect(mPositionInterpolation, SIGNAL(bounce()), SoundManager::getInstance(), SLOT(playSoundBombBounce()));
+   connect(mPositionInterpolation, &PositionInterpolation::bounce, []() { SoundManager::getInstance()->playSoundBombBounce(); });
 
    connect(GameStateMachine::getInstance(), SIGNAL(stateChanged()), this, SLOT(gameStateChanged()));
 
@@ -1966,17 +1966,7 @@ void BombermanClient::listGames()
 void BombermanClient::createGameAutomatic()
 {
    createGame(
-      "coding",
-      Level::getLevelDirectoryName(Level::LevelCastle),
-      1,
-      1800,
-      10,
-      true,
-      true,
-      true,
-      true,
-      true,
-      Constants::Dimension13x11
+      "coding", Level::getLevelDirectoryName(Level::LevelCastle), 1, 1800, 10, true, true, true, true, true, Constants::Dimension13x11
    );
 }
 

@@ -77,7 +77,7 @@ const char* const kMainMenuActionHome = "button_home_active";
 const char* const kGameSelectActionJoin = "button_join_active";
 const char* const kGameCreateActionOk = "button_ok_active";
 
-bool isOptionsPage(const QString& page)
+bool isOptionsPage(const std::string& page)
 {
    return page == kOptionsVideo || page == kOptionsAudio || page == kOptionsControls || page == kOptionsGame;
 }
@@ -108,27 +108,25 @@ bool isHostLocal(const QString& hostName)
    return local;
 }
 
-bool needsBrowser(const QString& action)
+bool needsBrowser(const std::string& action)
 {
    return action == kMainMenuActionPouet || action == kMainMenuActionFacebook || action == kMainMenuActionHome;
 }
 
-void logUnhandled(const QString& page, const QString& action)
+void logUnhandled(const std::string& page, const std::string& action)
 {
-   if (action.isEmpty())
+   if (action.empty())
       return;
 
    if (needsBrowser(action))
-      qDebug(
-         "MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", qPrintable(page), qPrintable(action)
-      );
+      qDebug("MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", page.c_str(), action.c_str());
    // else: not a real menu action (e.g. an editablecombobox's own internal layer-name emission) -
    // the real GameMenuWorkflow doesn't log these either, so neither do we.
 }
 
 }  // namespace
 
-MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
+MenuPageNavigator::MenuPageNavigator()
 {
    // matches GameMenuInterfaceCreate's constructor.
    mSortedLevelNames.push_back(QString::fromStdString(Level::getLevelName(Level::LevelCastle)));
@@ -155,9 +153,8 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
                                                                       { onPlayerInfoMapUpdated(infoMap); });
 
    // matches GameMenuWorkflow's own connection to BombermanClient::messageReceived - lounge chat.
-   BombermanClient::getInstance()->messageReceivedSignal.connect(
-      [this](int senderId, const std::string& message, bool finished)
-      { onMessageReceived(senderId, QString::fromStdString(message), finished); }
+   BombermanClient::getInstance()->messageReceivedSignal.connect([this](int senderId, const std::string& message, bool finished)
+                                                                 { onMessageReceived(senderId, QString::fromStdString(message), finished); }
    );
 
    // matches MenuWorkflow::initialize() calling deserializeLoginData() once at startup - the
@@ -166,7 +163,7 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
    deserializeLoginData();
 }
 
-void MenuPageNavigator::onActionRequest(const QString& page, const QString& action)
+void MenuPageNavigator::onActionRequest(const std::string& page, const std::string& action)
 {
    if (page == kMainMenu)
    {
@@ -176,18 +173,20 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
       updateLoginData();
 
       if (action == kMainMenuActionOptions)
-         emit pageChangeRequest(kOptionsVideo);
+         pageChangeRequestSignal(kOptionsVideo);
       else if (action == kMainMenuActionAbout)
-         emit pageChangeRequest(kAbout);
+         pageChangeRequestSignal(kAbout);
       else if (action == kMainMenuActionQuit)
-         emit quitRequest();
+         quitRequestSignal();
       else if (action == kMainMenuActionSingle)
       {
          // matches GameMenuWorkflow's MAINMENU_ACTION_SINGLE handler exactly: single player
          // always hosts an in-process server and logs into it over loopback.
          BombermanClient::getInstance()->setGameMode(Constants::GameModeSinglePlayer);
          BombermanClient::getInstance()->host();
-         BombermanClient::getInstance()->loginRequest("127.0.0.1", GameSettings::getInstance()->getLoginSettings()->getNick().toStdString());
+         BombermanClient::getInstance()->loginRequest(
+            "127.0.0.1", GameSettings::getInstance()->getLoginSettings()->getNick().toStdString()
+         );
       }
       else if (action == kMainMenuActionMulti)
       {
@@ -200,7 +199,9 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          if (isHostLocal(host))
             BombermanClient::getInstance()->host();
 
-         BombermanClient::getInstance()->loginRequest(host.toStdString(), GameSettings::getInstance()->getLoginSettings()->getNick().toStdString());
+         BombermanClient::getInstance()->loginRequest(
+            host.toStdString(), GameSettings::getInstance()->getLoginSettings()->getNick().toStdString()
+         );
       }
       else
          logUnhandled(page, action);
@@ -208,9 +209,9 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
    else if (page == kGameSelect)
    {
       if (action == kGameSelectActionCreate)
-         emit pageChangeRequest(kGameCreate);
+         pageChangeRequestSignal(kGameCreate);
       else if (action == kGameSelectActionBack)
-         emit pageChangeRequest(kMainMenu);
+         pageChangeRequestSignal(kMainMenu);
       else if (action == kGameSelectActionJoin)
       {
          // the real GAME_SELECT_ACTION_JOIN reads the operator-selected row out of the game
@@ -234,7 +235,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          // BombermanClient::getGameMode() (single- vs multiplayer) - that state doesn't exist in
          // this port yet, so this always goes back to GAME_SELECT, the multiplayer flow's own
          // back target and the only way to have reached GAME_CREATE at all right now.
-         emit pageChangeRequest(kGameSelect);
+         pageChangeRequestSignal(kGameSelect);
       }
       else if (action == kGameCreateActionOk)
       {
@@ -271,16 +272,16 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
             }
          }
 
-         emit pageChangeRequest(kMainMenu);
+         pageChangeRequestSignal(kMainMenu);
       }
       else if (action == kOptionsActionVideo)
-         emit pageChangeRequest(kOptionsVideo);
+         pageChangeRequestSignal(kOptionsVideo);
       else if (action == kOptionsActionAudio)
-         emit pageChangeRequest(kOptionsAudio);
+         pageChangeRequestSignal(kOptionsAudio);
       else if (action == kOptionsActionControls)
-         emit pageChangeRequest(kOptionsControls);
+         pageChangeRequestSignal(kOptionsControls);
       else if (action == kOptionsActionGame)
-         emit pageChangeRequest(kOptionsGame);
+         pageChangeRequestSignal(kOptionsGame);
       else if (page == kOptionsAudio && action == kOptionsAudioActionRestoreDefaults)
          restoreAudioDefaults();
       else
@@ -289,7 +290,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
    else if (page == kAbout)
    {
       if (action == kAboutActionBack)
-         emit pageChangeRequest(kMainMenu);
+         pageChangeRequestSignal(kMainMenu);
       else
          logUnhandled(page, action);
    }
@@ -302,7 +303,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
       else if (action == kLoungeActionBack)
       {
          BombermanClient::getInstance()->leaveGameRequest();
-         emit pageChangeRequest(kGameSelect);
+         pageChangeRequestSignal(kGameSelect);
       }
       else if (action == kLoungeLineeditSay)
       {
@@ -348,7 +349,7 @@ void MenuPageNavigator::onLoginResponse(bool granted)
    if (granted)
    {
       const Constants::GameMode mode = BombermanClient::getInstance()->getGameMode();
-      emit pageChangeRequest(mode == Constants::GameModeMultiPlayer ? kGameSelect : kGameCreate);
+      pageChangeRequestSignal(mode == Constants::GameModeMultiPlayer ? kGameSelect : kGameCreate);
    }
    else
    {
@@ -363,14 +364,14 @@ void MenuPageNavigator::onCreateGameResponse(bool granted, int gameId, bool owne
    if (granted && owner)
       BombermanClient::getInstance()->joinGame(gameId);
    else if (granted)
-      emit pageChangeRequest(kGameSelect);
+      pageChangeRequestSignal(kGameSelect);
 }
 
 void MenuPageNavigator::onJoinGameResponse(bool success)
 {
    if (success)
    {
-      emit pageChangeRequest(kLounge);
+      pageChangeRequestSignal(kLounge);
 
       // matches GameMenuWorkflow::pageChanged()'s LOUNGE branch (real GameMenuWorkflow isn't
       // ported - this is the only trigger for BombermanClient::initializeBots(), which was
@@ -387,7 +388,7 @@ void MenuPageNavigator::onGameStarted()
    qDebug("MenuPageNavigator: gameStarted() - real gameplay handoff not implemented yet (Phase 5)");
 }
 
-void MenuPageNavigator::onPageChanged(const QString& page)
+void MenuPageNavigator::onPageChanged(const std::string& page)
 {
    // matches GameMenuWorkflow::pageChanged(): monitoring is disabled unconditionally first, then
    // re-enabled only for the page actually being shown.

@@ -11,7 +11,7 @@
 
 SoundManager* SoundManager::sInstance = nullptr;
 
-SoundManager::SoundManager() : QObject(nullptr)
+SoundManager::SoundManager()
 {
    sInstance = this;
 
@@ -376,13 +376,13 @@ void SoundManager::playSkullSound(Constants::SkullType skullType)
    }
 }
 
-void SoundManager::playSoundMouseOver(const QString& /*page*/, const QString& item)
+void SoundManager::playSoundMouseOver(const std::string& /*page*/, const std::string& item)
 {
-   if (item.startsWith("button"))
+   if (item.starts_with("button"))
       play(SampleMouseOver);
 }
 
-void SoundManager::playSoundMouseClick(const QString& /*page*/)
+void SoundManager::playSoundMouseClick(const std::string& /*page*/)
 {
    if (mMouseClickInitialized)
       play(SampleMouseClick);

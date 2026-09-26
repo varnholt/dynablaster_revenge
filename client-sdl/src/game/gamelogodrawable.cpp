@@ -76,7 +76,7 @@ void GameLogoDrawable::paintGL()
    }
 }
 
-void GameLogoDrawable::pageChanged(const QString& page)
+void GameLogoDrawable::pageChanged(const std::string& page)
 {
    bool wasVisible = mMainMenuVisible;
    mMainMenuVisible = (page == MAINMENU);
@@ -246,7 +246,7 @@ void GameLogoDrawable::cleanupGlParameters()
 
 void GameLogoDrawable::initializeLayers()
 {
-   mPsd.load(qPrintable(mFilename));
+   mPsd.load(mFilename.toStdString().c_str());
 
    // assign layers to the two named pointers this class actually renders (see the header
    // comment - "earth"/"highlight" layers are still constructed here, matching the original 1:1,
