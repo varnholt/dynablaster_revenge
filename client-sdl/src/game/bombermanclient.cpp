@@ -1967,7 +1967,7 @@ void BombermanClient::createGameAutomatic()
 {
    createGame(
       "coding",
-      Level::getLevelDirectoryName(Level::LevelCastle).toStdString(),
+      Level::getLevelDirectoryName(Level::LevelCastle),
       1,
       1800,
       10,

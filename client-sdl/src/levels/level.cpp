@@ -10,9 +10,6 @@
 #define LEVEL_SPACE   "level-space"
 #define LEVEL_DUMMY   "level-dummy"
 
-// Qt
-#include <QCoreApplication>
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -56,7 +53,6 @@ Level::~Level()
 */
 void Level::abort()
 {
-   QWriteLocker locker(&mLock);
    mAborted = true;
 }
 
@@ -67,7 +63,6 @@ void Level::abort()
 */
 bool Level::isAborted() const
 {
-   QReadLocker locker(&mLock);
    return mAborted;
 }
 
@@ -77,13 +72,13 @@ bool Level::isAborted() const
 */
 void Level::load()
 {
-   QString levelPath= "data/"+path();
+   std::string levelPath = "data/" + path();
 
-   FileStream::addPath( qPrintable(levelPath) );
+   FileStream::addPath( levelPath.c_str() );
 
    loadData();
 
-   FileStream::removePath( qPrintable(levelPath) );
+   FileStream::removePath( levelPath.c_str() );
 }
 
 
@@ -139,7 +134,7 @@ void Level::reset()
 //-----------------------------------------------------------------------------
 /*!
 */
-QString Level::path() const
+std::string Level::path() const
 {
    return getLevelDirectoryName( mLevelType );
 }
@@ -221,9 +216,9 @@ void Level::setPlayerPosition()
 //-----------------------------------------------------------------------------
 /*!
 */
-QString Level::getLevelDirectoryName(Level::LevelType levelType)
+std::string Level::getLevelDirectoryName(Level::LevelType levelType)
 {
-   QString dir;
+   std::string dir;
 
    switch (levelType)
    {
@@ -249,24 +244,24 @@ QString Level::getLevelDirectoryName(Level::LevelType levelType)
 //-----------------------------------------------------------------------------
 /*!
 */
-QString Level::getLevelName(Level::LevelType levelType)
+std::string Level::getLevelName(Level::LevelType levelType)
 {
-   QString name;
+   std::string name;
 
    switch (levelType)
    {
       case LevelMansion:
-         name = qApp->tr("the mansion");
+         name = "the mansion";
          break;
       case LevelSpace:
-         name = qApp->tr("space");
+         name = "space";
          break;
       case LevelDummy:
-         name = qApp->tr("dummy");
+         name = "dummy";
          break;
 
       default:
-         name =  qApp->tr("the castle");
+         name = "the castle";
          break;
    }
 

@@ -47,7 +47,7 @@ Level *LevelFactory::getLevelInstance(const QString &levelName)
 {
    Level::LevelType levelType = Level::LevelCastle;
 
-   if (levelName.endsWith(Level::getLevelDirectoryName(Level::LevelCastle)))
+   if (levelName.toStdString().ends_with(Level::getLevelDirectoryName(Level::LevelCastle)))
       levelType = Level::LevelCastle;
 
    return getLevelInstance(levelType);

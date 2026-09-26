@@ -4,9 +4,7 @@
 #include "math/matrix.h"
 #include "camerainterpolation.h"
 
-// Qt
-#include <QString>
-#include <QReadWriteLock>
+#include <string>
 
 // forward declarations
 class SceneGraph;
@@ -31,8 +29,8 @@ public:
    Level(LevelType levelType);
    virtual ~Level();
 
-   static QString getLevelDirectoryName(LevelType levelType);
-   static QString getLevelName(LevelType levelType);
+   static std::string getLevelDirectoryName(LevelType levelType);
+   static std::string getLevelName(LevelType levelType);
 
    void abort();
    bool isAborted() const;
@@ -45,7 +43,7 @@ public:
    virtual void reset();
    virtual void loadData();
 
-   QString path() const;
+   std::string path() const;
    SceneGraph* getScene() const;
    SceneGraph* getLevel() const;
    SceneGraph* getPlayers() const;
@@ -72,7 +70,6 @@ public:
    Matrix getCameraMatrix(float time, float scale= 1.0f);
 
 protected:
-   mutable QReadWriteLock mLock;
    LevelType    mLevelType;
    bool         mAborted;
 

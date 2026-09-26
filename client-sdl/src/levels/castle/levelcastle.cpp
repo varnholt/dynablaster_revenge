@@ -1,6 +1,8 @@
 // header
 #include "levelcastle.h"
 
+#include <format>
+
 // engine/nodes
 #include "nodes/scenegraph.h"
 #include "nodes/camera.h"
@@ -248,10 +250,10 @@ void LevelCastle::loadData()
       Material* material = 0;
       for (int i = 0; i < MAX_PLAYERS; i++)
       {
-         QString filename= QString("player_%1").arg(i+1);
+         std::string filename = std::format("player_{}", i + 1);
          material= new PlayerMaterial(
                mPlayers,
-               qPrintable(filename),
+               filename.c_str(),
                "diffuse_level",
                "specular_level2",
                "player-ao"

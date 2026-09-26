@@ -131,13 +131,13 @@ void logUnhandled(const QString& page, const QString& action)
 MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
 {
    // matches GameMenuInterfaceCreate's constructor.
-   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelCastle));
-   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelMansion));
-   mSortedLevelNames.push_back(Level::getLevelName(Level::LevelSpace));
+   mSortedLevelNames.push_back(QString::fromStdString(Level::getLevelName(Level::LevelCastle)));
+   mSortedLevelNames.push_back(QString::fromStdString(Level::getLevelName(Level::LevelMansion)));
+   mSortedLevelNames.push_back(QString::fromStdString(Level::getLevelName(Level::LevelSpace)));
 
-   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelCastle));
-   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelMansion));
-   mSortedLevelDirNames.push_back(Level::getLevelDirectoryName(Level::LevelSpace));
+   mSortedLevelDirNames.push_back(QString::fromStdString(Level::getLevelDirectoryName(Level::LevelCastle)));
+   mSortedLevelDirNames.push_back(QString::fromStdString(Level::getLevelDirectoryName(Level::LevelMansion)));
+   mSortedLevelDirNames.push_back(QString::fromStdString(Level::getLevelDirectoryName(Level::LevelSpace)));
 
    // BombermanClient must already be constructed+initialize()'d by main.cpp before this runs -
    // getInstance() doesn't self-construct (matches the real client/src/game/bombermanclientgui.cpp
