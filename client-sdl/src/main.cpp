@@ -12,6 +12,7 @@
 #include "sdlglobaltime.h"
 
 #include "framework/timerhandler.h"
+#include "timer.h"
 
 #include "game/countdowndrawable.h"
 #include "game/gamedrawable.h"
@@ -503,9 +504,10 @@ int main(int argc, char** argv)
          }
       }
 
-      // pumps Server's and BombermanClient's QTimer-driven poll() - see the QCoreApplication
-      // comment above main().
+      // processEvents() still pumps deleteLater() and other Qt-Core internals that remain;
+      // Timer::update() drives Server's/BombermanClient's own poll() plus every other Timer.
       QCoreApplication::processEvents();
+      Timer::update();
 
       device.clear();
 

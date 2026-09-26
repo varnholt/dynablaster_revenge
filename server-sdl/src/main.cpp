@@ -9,6 +9,10 @@
 
 // shared
 #include "systemtools.h"
+#include "timer.h"
+
+#include <chrono>
+#include <thread>
 
 
 namespace
@@ -45,9 +49,12 @@ int main(int argc, char** argv)
    Server server;
    server.startPolling();
 
-   int result = app.exec();
-
-   NET_Quit();
-
-   return result;
+   // no real Qt event loop is driving anything anymore - keep processEvents() around for
+   // deleteLater() and any other lingering Qt-Core internals, tick Timer for everything else.
+   while (true)
+   {
+      QCoreApplication::processEvents();
+      Timer::update();
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+   }
 }

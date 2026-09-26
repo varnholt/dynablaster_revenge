@@ -155,6 +155,8 @@ set(DYNABLASTER_SHARED_SOURCES
     ../shared/systemtools.h
     ../shared/timepacket.cpp
     ../shared/timepacket.h
+    ../shared/timer.cpp
+    ../shared/timer.h
     ../shared/vec2.cpp
     ../shared/vec2.h
 )
