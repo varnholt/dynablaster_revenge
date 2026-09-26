@@ -8,10 +8,7 @@
 #include "tools/objectname.h"
 #include "tools/string.h"
 
-#include <QFileSystemWatcher>
-#include <QMap>
 #include <QObject>
-#include <QPair>
 
 class Stream;
 class Node;
@@ -111,12 +108,6 @@ public:
    static unsigned int uploadMap(const Image& image, int flags = 1);
    static void updateMap(unsigned int texture, const Image& image, int flags = 1);
 
-private slots:
-   void fileChanged(const QString& path);
-
-private:
-   void addWatcher(Texture* texture, Image* image);
-
 protected:
    int mId;
    bool mInitialized;
@@ -137,7 +128,4 @@ protected:
    Array<int> mImageFlagsQueue;
    Array<Texture*> mTextureIdQueue;
    int mDebug;
-
-   static QMultiMap<QString, QPair<Texture*, QString>> mWatchers;
-   static QFileSystemWatcher* mWatcher;
 };

@@ -15,9 +15,6 @@
 #include "textureslot.h"
 #include "tools/stream.h"
 
-QFileSystemWatcher* Material::mWatcher = nullptr;
-QMultiMap<QString, QPair<Texture*, QString>> Material::mWatchers;
-
 Material::Buffer::Buffer() : geo(nullptr), vb(nullptr)
 {
 }
@@ -95,49 +92,8 @@ void Material::addTexture(Texture& texture, const char* filename, int flags)
    addTexture(texture, image, flags);
 }
 
-void Material::addWatcher(Texture* texture, Image* image)
-{
-   if (!mWatcher)
-   {
-      mWatcher = new QFileSystemWatcher();
-      connect(mWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(fileChanged(const QString&)));
-
-      QString prev;
-      QMultiMap<QString, QPair<Texture*, QString>>::ConstIterator it;
-      for (it = mWatchers.constBegin(); it != mWatchers.constEnd(); it++)
-      {
-         if (it.key() != prev)
-            mWatcher->addPath(it.key());
-         prev = it.key();
-      }
-   }
-
-   QString path(static_cast<const char*>(image->path()));
-   QString filename(static_cast<const char*>(image->filename()));
-   mWatcher->addPath(path);
-   mWatchers.insert(path, QPair<Texture*, QString>(texture, filename));
-}
-
-void Material::fileChanged(const QString& path)
-{
-   delete mWatcher;
-   mWatcher = nullptr;
-
-   QMultiMap<QString, QPair<Texture*, QString>>::Iterator it;
-   it = mWatchers.find(path);
-   while (it != mWatchers.end() && it.key() == path)
-   {
-      Texture* texture = it.value().first;
-      QString filename = it.value().second;
-      it = mWatchers.erase(it);
-      addTexture(*texture, qPrintable(filename));
-   }
-}
-
 void Material::addTexture(Texture& texture, Image* image, int flags)
 {
-   //   addWatcher(&texture, image);
-
    mImageQueue.add(image);
    mImageFlagsQueue.add(flags);
    mTextureIdQueue.add(&texture);
