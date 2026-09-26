@@ -1034,7 +1034,7 @@ void GameDrawable::addPlayer(int id, const QString& nick, Constants::Color color
       return;
    }
 
-   player= new PlayerItem(id, nick, color);
+   player= new PlayerItem(id, nick.toStdString(), color);
    mPlayerList[id] = player;
 
    Mesh *mesh= MotionMixer::getMesh("bomberman");

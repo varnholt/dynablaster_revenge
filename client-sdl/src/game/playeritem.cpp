@@ -3,7 +3,7 @@
 #include "nodes/mesh.h"
 #include "animation/motionmixer.h"
 
-PlayerItem::PlayerItem(int id, const QString& nick, Constants::Color color)
+PlayerItem::PlayerItem(int id, const std::string& nick, Constants::Color color)
 : mID(id)
 , mColor(color)
 , mNick(nick)
@@ -64,7 +64,7 @@ Constants::Color PlayerItem::getColor() const
    return mColor;
 }
 
-const QString& PlayerItem::getNick() const
+const std::string& PlayerItem::getNick() const
 {
 	return mNick;
 }

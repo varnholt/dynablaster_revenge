@@ -1,9 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <QString>
 #include "math/vector.h"
 #include "constants.h"
+
+#include <string>
 
 class Material;
 class Mesh;
@@ -13,12 +14,12 @@ class PlayerItem
 
 public:
 
-   PlayerItem(int id, const QString& nick, Constants::Color color);
+   PlayerItem(int id, const std::string& nick, Constants::Color color);
    ~PlayerItem();
 
    int getID() const;
    Constants::Color getColor() const;
-   const QString& getNick() const;
+   const std::string& getNick() const;
 
    void setMaterial(Material *mat);
    Material* getMaterial() const;
@@ -49,7 +50,7 @@ private:
 
    int mID;
    Constants::Color mColor;
-   QString mNick;
+   std::string mNick;
    Mesh *mMesh;
    Material *mMaterial;
    Vector mPos;

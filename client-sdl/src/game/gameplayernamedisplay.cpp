@@ -203,10 +203,10 @@ void GamePlayerNameDisplay::drawPlayTexts() const
    for (int i = 0; i < mPositions.size(); i++)
    {
       const Vector& pos = mPositions[i];
-      const QString& name = mNames[i];
+      const std::string& name = mNames[i];
 
       mFont->setColor(1.0f, 1.0f, 1.0f, computeFontAlpha());
-      mFont->buildVertices(0.1f, qPrintable(name), pos.x, pos.y + FONT_Y_OFFSET, 0.0f);
+      mFont->buildVertices(0.1f, name.c_str(), pos.x, pos.y + FONT_Y_OFFSET, 0.0f);
       mFont->draw();
    }
 

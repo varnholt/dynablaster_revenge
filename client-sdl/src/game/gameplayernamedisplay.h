@@ -2,13 +2,12 @@
 
 // GLES3 port of client/src/game/gameplayernamedisplay.cpp.
 
-#include <QString>
-
 #include "framework/frametimer.h"
 #include "math/vector.h"
 #include "render/texture.h"
 
 #include <map>
+#include <string>
 #include <vector>
 
 class BitmapFont;
@@ -39,7 +38,7 @@ private:
 
    FrameTimer mActiveTime;
    std::vector<Vector> mPositions;
-   std::vector<QString> mNames;
+   std::vector<std::string> mNames;
    BitmapFont* mFont;
    bool mShowArrow;
    Texture mArrowTexture;
