@@ -124,7 +124,7 @@ void ProtoBot::cleanUpBot()
 */
 ProtoBot::~ProtoBot()
 {
-   terminate();
+   cleanUpBot();
 }
 
 

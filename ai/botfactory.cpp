@@ -4,8 +4,8 @@
 #include <QDateTime>
 #include <QFile>
 #include <QRandomGenerator>
-#include <QtCore/QCoreApplication>
 #include <QStringList>
+#include <QtCore/QCoreApplication>
 
 // bot
 #include "botclient.h"
@@ -13,21 +13,17 @@
 #include "protobot.h"
 #include "protobotinsults.h"
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-BotFactory::BotFactory(QObject *parent)
- : QObject(parent),
-   mGameId(-1)
+ */
+BotFactory::BotFactory(QObject* parent) : QObject(parent), mGameId(-1)
 {
    setHostname("127.0.0.1");
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 BotFactory::~BotFactory()
 {
    // bots are deleted in client destructor
@@ -35,10 +31,9 @@ BotFactory::~BotFactory()
    mClients.clear();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BotFactory::createBotClientPair()
 {
    // todo read data from command line
@@ -110,92 +105,43 @@ void BotFactory::createBotClientPair()
    client->initialize();
    client->connectToServer();
 
-   bot->start();
+   bot->startTicking();
 
-//   // link client to bot and vice versa
-//   connect(
-//      bot->getInsults(),
-//      SIGNAL(sendMessage(QString)),
-//      client,
-//      SLOT(sendMessage(QString))
-//   );
+   //   // link client to bot and vice versa
+   //   connect(
+   //      bot->getInsults(),
+   //      SIGNAL(sendMessage(QString)),
+   //      client,
+   //      SLOT(sendMessage(QString))
+   //   );
 
-   connect(
-      client,
-      SIGNAL(updatePlayerId(int)),
-      bot,
-      SLOT(updatePlayerId(int))
-   );
+   connect(client, SIGNAL(updatePlayerId(int)), bot, SLOT(updatePlayerId(int)));
 
-   connect(
-      client,
-      SIGNAL(updatePlayerPosition(int,float,float,float)),
-      bot,
-      SLOT(updatePlayerPosition(int,float,float,float))
-   );
+   connect(client, SIGNAL(updatePlayerPosition(int, float, float, float)), bot, SLOT(updatePlayerPosition(int, float, float, float)));
 
-   connect(
-      client,
-      SIGNAL(extraShake(int)),
-      bot,
-      SLOT(extraShake(int))
-   );
+   connect(client, SIGNAL(extraShake(int)), bot, SLOT(extraShake(int)));
 
-   connect(
-      client,
-      SIGNAL(gameStarted()),
-      bot,
-      SLOT(wakeUp())
-   );
+   connect(client, SIGNAL(gameStarted()), bot, SLOT(wakeUp()));
 
-   connect(
-      bot,
-      SIGNAL(walk(int8_t)),
-      client,
-      SLOT(walk(int8_t))
-   );
+   // Bot's own signals - migrated to Signal<> (see project_full_qt_removal_scope memory).
+   // Confirmed these only ever connect to a BotClient, never BombermanClient.
+   bot->walkSignal.connect([client](int8_t keysPressed) { client->walk(keysPressed); });
+   bot->bombSignal.connect([client]() { client->bomb(); });
 
-   connect(
-      bot,
-      SIGNAL(bomb()),
-      client,
-      SLOT(bomb())
-   );
+   connect(client, SIGNAL(markHazardousTemporary(int, int, int, int)), bot, SLOT(markHazardousTemporary(int, int, int, int)));
 
-   connect(
-      client,
-      SIGNAL(markHazardousTemporary(int,int,int,int)),
-      bot,
-      SLOT(markHazardousTemporary(int,int,int,int))
-   );
+   connect(client, SIGNAL(bombKicked(int, int, Constants::Direction, int)), bot, SLOT(bombKicked(int, int, Constants::Direction, int)));
 
-   connect(
-      client,
-      SIGNAL(bombKicked(int,int,Constants::Direction,int)),
-      bot,
-      SLOT(bombKicked(int,int,Constants::Direction,int))
-   );
-
-   connect(
-      bot,
-      SIGNAL(sync()),
-      client,
-      SLOT(deleteObsoleteMapItems()),
-      Qt::DirectConnection
-   );
+   // was Qt::DirectConnection (bot's own worker thread calling straight into client) - now a
+   // plain synchronous call, since both run on the main thread post-QThread-removal.
+   bot->syncSignal.connect([client]() { client->deleteObsoleteMapItems(); });
 
    // be notified if bot is to be removed
-   connect(
-      client,
-      SIGNAL(remove()),
-      this,
-      SLOT(removeBot())
-   );
+   connect(client, SIGNAL(remove()), this, SLOT(removeBot()));
 
    mClients << client;
    mBots << bot;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -211,46 +157,41 @@ void BotFactory::add(int count)
    mGivenNames.clear();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-void BotFactory::setHostname(const QString &hostname)
+ */
+void BotFactory::setHostname(const QString& hostname)
 {
    mHostname = hostname;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-const QString &BotFactory::getHostname() const
+ */
+const QString& BotFactory::getHostname() const
 {
    return mHostname;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BotFactory::setGameId(int gameId)
 {
    mGameId = gameId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 int BotFactory::getGameId() const
 {
    return mGameId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BotFactory::removeAll()
 {
    foreach (BotClient* client, mClients)
@@ -262,10 +203,9 @@ void BotFactory::removeAll()
    mBots.clear();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BotFactory::removeBot()
 {
    BotClient* client = dynamic_cast<BotClient*>(sender());

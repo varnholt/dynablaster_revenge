@@ -2,11 +2,10 @@
 #define BOT_H
 
 // Qt
-#include <QMutex>
+#include <QObject>
 #include <QPoint>
 #include <QQueue>
-#include <QThread>
-#include <QWaitCondition>
+#include <QTimer>
 
 // ai
 #include "botoption.h"
@@ -14,257 +13,232 @@
 // shared
 #include "constants.h"
 #include "serverconfiguration.h"
+#include "signal.h"
 
 // forward declarations
 class BotMap;
 class BotPlayerInfo;
 
-class Bot : public QThread
-{   
-    Q_OBJECT
+class Bot : public QObject
+{
+   Q_OBJECT
 
-   public:
+public:
+   //! bot state
+   enum BotState
+   {
+      BotStateIdle,
+      BotStateActive,
+      BotStateDead
+   };
 
-      //! bot state
-      enum BotState
-      {
-         BotStateIdle,
-         BotStateActive,
-         BotStateDead
-      };
+   //! constructor
+   Bot(QObject* parent = 0);
 
-      //! constructor
-      Bot(QObject *parent = 0);
+   //! destructor
+   virtual ~Bot();
 
-      //! destructor
-      virtual ~Bot();
+   //! setter for bot map
+   virtual void setBotMap(BotMap* botmap);
 
-      //! setter for bot map
-      virtual void setBotMap(BotMap* botmap);
+   //! setter for player info ptr
+   void setPlayerInfo(BotPlayerInfo* info);
 
-      //! setter for player info ptr
-      void setPlayerInfo(BotPlayerInfo* info);
+   //! getter for player info ptr
+   BotPlayerInfo* getPlayerInfo() const;
 
-      //! getter for player info ptr
-      BotPlayerInfo* getPlayerInfo() const;
+   //! getter for current position x
+   float getX() const;
 
-      //! getter for current position x
-      float getX() const;
+   //! getter for current position y
+   float getY() const;
 
-      //! getter for current position y
-      float getY() const;
+   //! getter for field x
+   int getXField();
 
-      //! getter for field x
-      int getXField();
+   //! getter for field y
+   int getYField();
 
-      //! getter for field y
-      int getYField();
+   //! create a map
+   virtual BotMap* createMap(int width, int height);
 
-      //! create a map
-      virtual BotMap* createMap(int width, int height);
+   //! setter for server configuration
+   void setServerConfiguration(const ServerConfiguration&);
 
-      //! setter for server configuration
-      void setServerConfiguration(const ServerConfiguration&);
+   //! getter for server configuration
+   const ServerConfiguration& getServerConfiguration() const;
 
-      //! getter for server configuration
-      const ServerConfiguration& getServerConfiguration() const;
+   //! start ticking the bot's think/decide/act loop, once per game round
+   void startTicking();
 
-      //! getter for stopped flag
-      bool isStopped() const;
+   //! setter for bot keys pressed
+   void setBotKeysPressed(int8_t keysPressed);
 
-      //! setter for stopped flag
-      void setStopped(bool value);
+   //! getter for bot keys pressed
+   int8_t getBotKeysPressed() const;
 
-      //! setter for bot keys pressed
-      void setBotKeysPressed(int8_t keysPressed);
+   //! compute walk keys
+   int8_t computeWalkKeys() const;
 
-      //! getter for bot keys pressed
-      int8_t getBotKeysPressed() const;
+   // Signal<> replacements for Bot's former Qt signals - the only two connect() sites for
+   // these (ai/botfactory.cpp) always target a BotClient instance, never BombermanClient (see
+   // project_full_qt_removal_scope memory - a previous session's claim that this reached into
+   // BombermanClient's own signal surface was wrong, it doesn't).
 
-      //! compute walk keys
-      int8_t computeWalkKeys() const;
+   //! drop bomb
+   Signal<> bombSignal;
 
+   //! send walk keys
+   Signal<int8_t> walkSignal;
 
-   signals:
+   //! time to sync
+   Signal<> syncSignal;
 
-      //! drop bomb
-      void bomb();
+public slots:
 
-      //! send walk keys
-      void walk(int8_t keysPressed);
+   //! setter for current position
+   virtual void updatePlayerPosition(int id, float x, float y, float ang);
 
-      //! time to sync
-      void sync();
+   //! setter for player id
+   void updatePlayerId(int id);
 
+   //! wake up bot
+   virtual void wakeUp();
 
-   public slots:
+   //! go to idle
+   virtual void idle();
 
-      //! setter for current position
-      virtual void updatePlayerPosition(int id, float x, float y, float ang);
+   //! die
+   virtual void die();
 
-      //! setter for player id
-      void updatePlayerId(int id);
+   //! extra shake packet spotted
+   virtual void extraShake(int);
 
-      //! wake up bot
-      virtual void wakeUp();
+   //! mark hazardous temporary
+   virtual void markHazardousTemporary(int x, int y, int ms, int fieldCount = 0);
 
-      //! go to idle
-      virtual void idle();
+   //! make hazardous temp for bomb kicks
+   virtual void bombKicked(int startX, int startY, Constants::Direction, int flames);
 
-      //! die
-      virtual void die();
+protected:
+   // bot base functionality
 
-      //! extra shake packet spotted
-      virtual void extraShake(int);
+   //! compute new options
+   virtual void think();
 
-      //! mark hazardous temporary
-      virtual void markHazardousTemporary(int x, int y, int ms, int fieldCount = 0);
+   //! decide what's to do next
+   virtual void decide();
 
-      //! make hazardous temp for bomb kicks
-      virtual void bombKicked(
-         int startX,
-         int startY,
-         Constants::Direction,
-         int flames
-      );
+   //! do some action
+   virtual void act();
 
+   //! check if an action is required
+   virtual bool isActionRequired();
 
-   protected:
+   //! reset bot states
+   virtual void reset();
 
-      //! overwrite thread's run()
-      virtual void run();
+   //! delete stuff in destructor
+   virtual void cleanUpBot();
 
-      // bot base functionality
+   //! think/decide/act once, called every mTickTimer interval while active
+   virtual void tick();
 
-      //! compute new options
-      virtual void think();
+   // game state transitions
 
-      //! decide what's to do next
-      virtual void decide();
+   //! check if bot is active
+   bool isActive();
 
-      //! do some action
-      virtual void act();
+   //! setter for bot's state
+   void setState(BotState state);
 
-      //! check if an action is required
-      virtual bool isActionRequired();
+   // navigation
 
-      //! reset bot states
-      virtual void reset();
+   //! check if field is already reached
+   bool isFieldReached();
 
-      //! delete stuff in destructor
-      virtual void cleanUpBot();
+   // bot information
 
-      //! terminate thread
-      virtual void terminate();
+   //! invalidate
+   void invalidate();
 
-      // game state transitions
+   //! check if player position is valid
+   bool isValid() const;
 
-      //! check if bot is active
-      bool isActive();
+   //! setter for valid flag
+   void setPlayerPositionValid(bool valid);
 
-      //! setter for bot's state
-      void setState(BotState state);
+   //! getter for valid flag
+   bool isPlayerPositionValid() const;
 
+   //! update position queue
+   void updatePositionQueue();
 
-      // navigation
+   //! check if player's brain seems to be fused
+   bool isPositionQueueRecurrent() const;
 
-      //! check if field is already reached
-       bool isFieldReached();
+   // members
 
+   //! bot state
+   BotState mBotState;
 
-      // bot information
+   //! bot map
+   BotMap* mBotMap;
 
-      //! invalidate
-      void invalidate();
+   //! player info ptr
+   BotPlayerInfo* mPlayerInfo;
 
-      //! check if player position is valid
-      bool isValid() const;
+   //! bot's options
+   QList<BotOption*> mOptions;
 
-      //! setter for valid flag
-      void setPlayerPositionValid(bool valid);
+   //! bot's next action
+   QList<BotAction*> mActions;
 
-      //! getter for valid flag
-      bool isPlayerPositionValid() const;
+   //! x position
+   float mX;
 
-      //! update position queue
-      void updatePositionQueue();
+   //! y position
+   float mY;
 
-      //! check if player's brain seems to be fused
-      bool isPositionQueueRecurrent() const;
+   //! x field
+   int mXField;
 
-      // members
+   //! y field
+   int mYField;
 
-      //! bot state
-      BotState mBotState;
+   //! bot id
+   int mId;
 
-      //! bot map
-      BotMap* mBotMap;
+   //! ticks tick() at the same ~100ms cadence the old QThread loop's msleep(100) had
+   QTimer* mTickTimer;
 
-      //! player info ptr
-      BotPlayerInfo* mPlayerInfo;
+   //! current walk direction
+   int mBotKeysPressed;
 
-      //! bot's options
-      QList<BotOption*> mOptions;
+   //! decision required flag
+   bool mDecisionRequired;
 
-      //! bot's next action
-      QList<BotAction*> mActions;
+   //! action required flag
+   bool mActionRequired;
 
-      //! x position
-      float mX;
+   // navigation
 
-      //! y position
-      float mY;
+   //! transiteration target x
+   int mTransiterateTargetX;
 
-      //! x field
-      int mXField;
+   //! transiteration target y
+   int mTransiterateTargetY;
 
-      //! y field
-      int mYField;
+   //! player position is valid
+   bool mPlayerPositionValid;
 
-      //! bot id
-      int mId;
+   //! store last few player positions
+   QQueue<QPoint> mPositionQueue;
 
-      //! idle wait condition
-      QWaitCondition mIdleCondition;
+   // server related
 
-      //! workflow mutex
-      QMutex mWorkflowMutex;
-
-      //! member access mutex
-      mutable QMutex mMemberMutex;
-
-      //! current walk direction
-      int mBotKeysPressed;
-
-      //! decision required flag
-      bool mDecisionRequired;
-
-      //! action required flag
-      bool mActionRequired;
-
-      //! thread stopped flag
-      bool mStopped;
-
-
-      // navigation
-
-      //! transiteration target x
-      int mTransiterateTargetX;
-
-      //! transiteration target y
-      int mTransiterateTargetY;
-
-      //! player position is valid
-      bool mPlayerPositionValid;      
-
-      //! store last few player positions
-      QQueue<QPoint> mPositionQueue;
-
-
-      // server related
-
-      //! server configuration
-      ServerConfiguration mServerConfiguration;
+   //! server configuration
+   ServerConfiguration mServerConfiguration;
 };
 
-#endif // BOT_H
+#endif  // BOT_H
