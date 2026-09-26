@@ -27,7 +27,7 @@ class MapItem;
 class MapItemCreatedPacket;
 class Player;
 class PlayerDisease;
-class QTcpSocket;
+struct NET_StreamSocket;
 
 class Game : public QObject
 {
@@ -68,12 +68,12 @@ class Game : public QObject
 
       //! process a packet
       void processPacket(
-         QTcpSocket* tcpSocket,
+         NET_StreamSocket* tcpSocket,
          Packet* packet
       );
 
       //! getter for map socket <-> player
-      QMap<QTcpSocket*, Player*>* getPlayerSockets();
+      QMap<NET_StreamSocket*, Player*>* getPlayerSockets();
 
       //! setter for the game's creator
       void setCreator(Player*);
@@ -130,7 +130,7 @@ class Game : public QObject
       bool isSynchronizationActive() const;
 
       //! player joins a game
-      bool joinGame(Player* player, QTcpSocket* socket);
+      bool joinGame(Player* player, NET_StreamSocket* socket);
 
       //! getter for position skip count
       int getPositionSkipCount() const;
@@ -157,7 +157,7 @@ class Game : public QObject
       void setGameOnlyPopulatedByBotsMessageShown(bool value);
 
       //! process spectator client
-      void processSpectator(QTcpSocket* tcpSocket);
+      void processSpectator(NET_StreamSocket* tcpSocket);
 
 
    public slots:
@@ -181,7 +181,7 @@ class Game : public QObject
       void finishGame();
 
       //! player left the game
-      void removePlayer(Player* player, QTcpSocket* playerSocket);
+      void removePlayer(Player* player, NET_StreamSocket* playerSocket);
 
       //! add packet to list of outgoing packets
       void addOutgoingPacket(Packet* packet);
@@ -196,7 +196,7 @@ class Game : public QObject
       void playerLeaves(int id);
 
       //! player is forced to leave game
-      void forceLeaveGame(QTcpSocket* socket);
+      void forceLeaveGame(NET_StreamSocket* socket);
 
       //! state changed
       void stateChanged(Constants::GameState);
@@ -293,7 +293,7 @@ class Game : public QObject
       void sendBroadcastPackets();
 
       //! send single packet
-      void sendPacket(QTcpSocket* socket, Packet* packet);
+      void sendPacket(NET_StreamSocket* socket, Packet* packet);
 
       //! get directions for given player
       int getPlayerDirections(Player* p);
@@ -388,13 +388,13 @@ class Game : public QObject
       QTimer* mUpdateTimer;
 
       //! map socket <-> player
-      QMap<QTcpSocket*, Player*> mPlayerSockets;
+      QMap<NET_StreamSocket*, Player*> mPlayerSockets;
 
       //! map id <-> player
       QMap<int8_t, Player*> mPlayers;
 
       //! map of expected packet sizes
-      QMap<QTcpSocket*, uint16_t> mPacketSizes;
+      QMap<NET_StreamSocket*, uint16_t> mPacketSizes;
 
       //! outgoing packages
       QList<Packet*> mOutgoingPackets;
@@ -498,8 +498,8 @@ class Game : public QObject
       //! only populated message shown flag
       bool mGameOnlyPopulatedByBotsMessageShown;
 
-      //! list of spectators
-      QList< QPointer<QTcpSocket> > mSpectators;
+      //! list of spectators - cleared explicitly in removePlayer() when a socket goes away
+      QList<NET_StreamSocket*> mSpectators;
 
       //! extra spawning
       ExtraSpawn* mExtraSpawn;

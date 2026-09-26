@@ -59,11 +59,11 @@
 
 // qt
 #include <QDir>
-#include <QHostAddress>
 #include <QKeyEvent>
-#include <QNetworkInterface>
-#include <QTcpSocket>
 #include <QThread>
+
+// SDL
+#include <SDL3_net/SDL_net.h>
 
 #include <cstdint>
 
@@ -78,6 +78,8 @@ BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
    : mKeysPressed(0),
      mBombReleased(true),
      mSocket(nullptr),
+     mAddress(nullptr),
+     mPollTimer(nullptr),
      mBlockSize(0),
      mId(-1),
      mGameId(-1),
@@ -120,43 +122,16 @@ BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
 */
 void BombermanClient::initialize()
 {
-   mSocket = new QTcpSocket(this);
-
-   // data connections
-   connect(
-      mSocket,
-      SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
-      this,
-      SLOT(socketError(QAbstractSocket::SocketError))
-   );
+   mPollTimer = new QTimer(this);
 
    connect(
-      mSocket,
-      SIGNAL(readyRead()),
+      mPollTimer,
+      SIGNAL(timeout()),
       this,
-      SLOT(readData())
+      SLOT(poll())
    );
 
-   connect(
-      mSocket,
-      SIGNAL(connected()),
-      this,
-      SLOT(clientConnect())
-   );
-
-   connect(
-      mSocket,
-      SIGNAL(connected()),
-      this,
-      SIGNAL(connected())
-   );
-
-   connect(
-      mSocket,
-      SIGNAL(disconnected()),
-      this,
-      SLOT(clientDisconnect())
-   );
+   mPollTimer->start(16);
 
    // interpolation
    connect(
@@ -326,8 +301,11 @@ Constants::Color BombermanClient::getColor(int playerId) const
 void BombermanClient::send(Packet *packet)
 {
    packet->serialize();
-   mSocket->write(*packet);
-   mSocket->flush();
+
+   if (mSocket)
+   {
+      NET_WriteToStreamSocket(mSocket, packet->constData(), static_cast<int>(packet->size()));
+   }
 }
 
 
@@ -356,10 +334,12 @@ const QString &BombermanClient::getHost() const
 */
 void BombermanClient::connectToServer()
 {
-   mSocket->connectToHost(
-      getHost(),
-      6300
-   );
+   mAddress = NET_ResolveHostname(qPrintable(getHost()));
+
+   if (!mAddress)
+   {
+      reportConnectionError(SDL_GetError());
+   }
 }
 
 
@@ -417,48 +397,44 @@ void BombermanClient::clientDisconnect()
 
 //-----------------------------------------------------------------------------
 /*!
-  \param error socket error
+   tear down whatever connection attempt or connection is in progress
 */
-void BombermanClient::socketError(QAbstractSocket::SocketError error)
+void BombermanClient::disconnectFromServer()
 {
-   QString message;
-
-   switch (error)
+   if (mAddress)
    {
-      case QAbstractSocket::ConnectionRefusedError:
-         message = TEXT_ERROR_CONNECTIONREFUSED;
-         break;
-      case QAbstractSocket::RemoteHostClosedError:
-         message = TEXT_ERROR_REMOTEHOSTCLOSED;
-         break;
-      case QAbstractSocket::HostNotFoundError:
-         message = TEXT_ERROR_HOSTNOTFOUND;
-         break;
-      case QAbstractSocket::SocketAccessError:
-         message = TEXT_ERROR_SOCKETACCESS;
-         break;
-      case QAbstractSocket::SocketResourceError:
-         message = TEXT_ERROR_SOCKETRESOURCE;
-         break;
-      case QAbstractSocket::SocketTimeoutError:
-         message = TEXT_ERROR_SOCKETTIMEOUT;
-         break;
-      case QAbstractSocket::AddressInUseError:
-         message = TEXT_ERROR_ADDRESSINUSE;
-         break;
-      default:
-         message = TEXT_ERROR_NETWORK_GENERAL;
-         break;
+      NET_UnrefAddress(mAddress);
+      mAddress = nullptr;
    }
 
-   if (!message.isEmpty())
+   if (mSocket)
    {
-      HelpManager::getInstance()->addMessage(
-         "",
-         message,
-         Constants::HelpSeverityError
-      );
+      NET_DestroyStreamSocket(mSocket);
+      mSocket = nullptr;
    }
+
+   clientDisconnect();
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+  \param reason low-level failure reason, from SDL_GetError()
+*/
+void BombermanClient::reportConnectionError(const char* reason)
+{
+   QString message = TEXT_ERROR_NETWORK_GENERAL;
+
+   if (reason && *reason)
+   {
+      message += QString(" (%1)").arg(reason);
+   }
+
+   HelpManager::getInstance()->addMessage(
+      "",
+      message,
+      Constants::HelpSeverityError
+   );
 }
 
 
@@ -473,7 +449,7 @@ bool BombermanClient::packetAvailable(QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mSocket->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
+      if (mBuffer.bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
         return false;
 
      // read blocksize
@@ -481,7 +457,7 @@ bool BombermanClient::packetAvailable(QDataStream& in)
    }
 
    // enough data?
-   return (mSocket->bytesAvailable() >= mBlockSize);
+   return (mBuffer.bytesAvailable() >= mBlockSize);
 }
 
 
@@ -1598,8 +1574,23 @@ void BombermanClient::processPacket(Packet* packet)
 */
 void BombermanClient::readData()
 {
-   QDataStream in(mSocket);
-   in.setVersion(QDataStream::Qt_4_6);
+   char chunk[4096];
+   int bytesRead;
+
+   while ((bytesRead = NET_ReadFromStreamSocket(mSocket, chunk, sizeof(chunk))) > 0)
+   {
+      mBuffer.append(chunk, bytesRead);
+   }
+
+   if (bytesRead < 0)
+   {
+      NET_DestroyStreamSocket(mSocket);
+      mSocket = nullptr;
+      clientDisconnect();
+      return;
+   }
+
+   QDataStream& in = mBuffer.stream();
 
    while (packetAvailable(in))
    {
@@ -1609,6 +1600,67 @@ void BombermanClient::readData()
       processPacket(packet);
 
       mBlockSize = 0;
+   }
+
+   mBuffer.compact();
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+   poll for connection progress and incoming data, once per tick
+*/
+void BombermanClient::poll()
+{
+   if (mAddress)
+   {
+      NET_Status status = NET_GetAddressStatus(mAddress);
+
+      if (status == NET_SUCCESS)
+      {
+         NET_Address* address = mAddress;
+         mAddress = nullptr;
+
+         mSocket = NET_CreateClient(address, 6300, 0);
+         NET_UnrefAddress(address);
+
+         if (!mSocket)
+         {
+            reportConnectionError(SDL_GetError());
+         }
+      }
+      else if (status == NET_FAILURE)
+      {
+         reportConnectionError(SDL_GetError());
+         NET_UnrefAddress(mAddress);
+         mAddress = nullptr;
+      }
+
+      return;
+   }
+
+   if (mSocket && !isConnected())
+   {
+      NET_Status status = NET_GetConnectionStatus(mSocket);
+
+      if (status == NET_SUCCESS)
+      {
+         clientConnect();
+         emit connected();
+      }
+      else if (status == NET_FAILURE)
+      {
+         reportConnectionError(SDL_GetError());
+         NET_DestroyStreamSocket(mSocket);
+         mSocket = nullptr;
+      }
+
+      return;
+   }
+
+   if (mSocket && isConnected())
+   {
+      readData();
    }
 }
 
@@ -2235,28 +2287,31 @@ void BombermanClient::loginRequest(
    const QString& nick
 )
 {
+   const QString previousHost = getHost();
+   const bool connectedOrConnecting = (mSocket != nullptr) || (mAddress != nullptr);
+
    setHost(host);
    setNick(nick);
 
    // we first have to disconnect from the current server
    // because its hostname obviously differs from ours
    if (
-         mSocket->state() >= QAbstractSocket::ConnectedState
-      && mSocket->peerName().toLower() != host.toLower()
+         connectedOrConnecting
+      && previousHost.toLower() != host.toLower()
    )
    {
       qDebug(
          "BombermanClient::loginRequest: connect to another host: %s -> %s",
-         qPrintable(mSocket->peerName().toLower()),
+         qPrintable(previousHost.toLower()),
          qPrintable(host.toLower())
       );
 
       setConnected(false);
-      mSocket->disconnectFromHost();
+      disconnectFromServer();
    }
    else
    {
-      if (mSocket->state() < QAbstractSocket::ConnectedState)
+      if (!isConnected())
       {
          setConnected(false);
          connectToServer();
@@ -2303,6 +2358,16 @@ void BombermanClient::host()
 
       if (mServer->isListening())
       {
+         // Server's poll QTimer must be started on the thread it will actually run on -
+         // starting it before moveToThread() leaves it ticking against this (the wrong)
+         // thread's event dispatcher, so it never fires once moved.
+         connect(
+            thread,
+            SIGNAL(started()),
+            mServer,
+            SLOT(startPolling())
+         );
+
          mServer->moveToThread(thread);
          thread->start();
 
@@ -2390,20 +2455,26 @@ QList<QString> BombermanClient::getLocalIps() const
 {
    QList<QString> ips;
 
-   foreach (const QNetworkInterface& interface, QNetworkInterface::allInterfaces())
+   int count = 0;
+   NET_Address** addresses = NET_GetLocalAddresses(&count);
+
+   if (addresses)
    {
-      if (
-            (interface.flags() & QNetworkInterface::IsUp)
-         && (interface.flags() & QNetworkInterface::IsRunning)
-         && !(interface.flags() & QNetworkInterface::IsLoopBack)
-      )
+      for (int i = 0; i < count; i++)
       {
-         foreach (const QNetworkAddressEntry& entry, interface.addressEntries())
-         {
-            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol)
-               ips.append(entry.ip().toString());
-         }
-     }
+         const char* address = NET_GetAddressString(addresses[i]);
+
+         if (!address)
+            continue;
+
+         QString ip(address);
+
+         // IPv4 only, no loopback
+         if (!ip.contains(':') && ip != "127.0.0.1")
+            ips.append(ip);
+      }
+
+      NET_FreeLocalAddresses(addresses);
    }
 
    return ips;

@@ -1,8 +1,8 @@
 #ifndef PLAYERROTATION_H
 #define PLAYERROTATION_H
 
-// Qt
-#include <QVector2D>
+// shared
+#include "vec2.h"
 
 
 class PlayerRotation
@@ -17,10 +17,10 @@ class PlayerRotation
       static void setAngleIncrement(float angle);
 
       //! setter for target direction (position on the unit circle)
-      void setTargetVector(const QVector2D&);
+      void setTargetVector(const Vec2&);
 
       //! getter for the target vector
-      const QVector2D& getTargetVector();
+      const Vec2& getTargetVector();
 
       //! update angle
       void updateAngle();
@@ -56,10 +56,10 @@ class PlayerRotation
       float mDelta;
 
       //! target vector
-      QVector2D mTargetVector;
+      Vec2 mTargetVector;
 
       //! down vector
-      static QVector2D mDown;
+      static Vec2 mDown;
 };
 
 #endif

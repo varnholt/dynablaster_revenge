@@ -665,7 +665,7 @@ bool CollisionDetection::updateRotation(
    // init the new target vector depending either
    // on the player's keyboard inputs or - if no movement was allowed -
    // the previous target vector directions
-   QVector2D direction;
+   Vec2 direction;
 
    bool cursorKeysPressed =
          (keysPressed & Constants::KeyUp)

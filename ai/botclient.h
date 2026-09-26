@@ -8,9 +8,11 @@
 #include <QObject>
 #include <QQueue>
 #include <QTime>
+#include <QTimer>
 
 // shared
 #include "gameinformation.h"
+#include "packetstreambuffer.h"
 #include "serverconfiguration.h"
 
 // forward declarations
@@ -19,7 +21,8 @@ class BotMap;
 class MapItem;
 class Packet;
 class BotPlayerInfo;
-class QTcpSocket;
+struct NET_Address;
+struct NET_StreamSocket;
 
 
 class BotClient : public QObject
@@ -159,11 +162,8 @@ signals:
 
    private slots:
 
-      //! data received on socket
-      void readData();
-
-      //! reconnect
-      void reconnect();
+      //! poll for connection progress and incoming data, once per tick
+      void poll();
 
       //! connect client
       void clientConnect();
@@ -276,6 +276,9 @@ signals:
       //! check for packets
       bool packetAvailable(QDataStream& source);
 
+      //! read and dispatch all available data from the socket
+      void readData();
+
       //! create a new map
       void createMap(Constants::Dimension dimensions);
 
@@ -304,8 +307,17 @@ signals:
       //! mapitem mutex
       mutable QMutex mMutex;
 
-      //! tcp socket to server
-      QTcpSocket* mSocket;
+      //! stream socket to server, null unless connected or connecting
+      NET_StreamSocket* mSocket;
+
+      //! host address pending resolution, null once resolved (or if not resolving)
+      NET_Address* mAddress;
+
+      //! drives poll() once per tick
+      QTimer* mPollTimer;
+
+      //! incoming byte buffer
+      PacketStreamBuffer mBuffer;
 
       //! host name
       QString mHost;

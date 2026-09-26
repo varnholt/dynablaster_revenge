@@ -8,7 +8,9 @@
 
 // Qt
 #include <QCoreApplication>
-#include <QTcpSocket>
+
+// SDL
+#include <SDL3_net/SDL_net.h>
 
 // math
 #include <math.h>
@@ -83,6 +85,8 @@ void botDebugHandler(QtMsgType type, const char *msg)
 BotClient::BotClient(QObject *parent) :
    QObject(parent),
    mSocket(0),
+   mAddress(nullptr),
+   mPollTimer(nullptr),
    mConnected(false),
    mBlockSize(0),
    mBot(0),
@@ -98,7 +102,6 @@ BotClient::BotClient(QObject *parent) :
    mDeltaY(0.0f)
 {
    // qInstallMsgHandler(botDebugHandler);
-   mSocket = new QTcpSocket(this);
 }
 
 
@@ -122,34 +125,16 @@ BotClient::~BotClient()
 */
 void BotClient::initialize()
 {
-   // data connections
-   connect(
-      mSocket,
-      SIGNAL(readyRead()),
-      this,
-      SLOT(readData())
-   );
+   mPollTimer = new QTimer(this);
 
    connect(
-      mSocket,
-      SIGNAL(connected()),
+      mPollTimer,
+      SIGNAL(timeout()),
       this,
-      SLOT(clientConnect())
+      SLOT(poll())
    );
 
-   connect(
-      mSocket,
-      SIGNAL(disconnected()),
-      this,
-      SLOT(clientDisconnect())
-   );
-
-   connect(
-      mSocket,
-      SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
-      this,
-      SLOT(clientDisconnect())
-   );
+   mPollTimer->start(16);
 
    // init auto join/start
    initializeAutoJoinStart();
@@ -161,19 +146,75 @@ void BotClient::initialize()
 */
 void BotClient::connectToServer()
 {
-   mSocket->connectToHost(
-      mHost,
-      6300
-   );
+   mAddress = NET_ResolveHostname(qPrintable(mHost));
+
+   if (!mAddress)
+   {
+      clientDisconnect();
+   }
 }
 
 
 //-----------------------------------------------------------------------------
 /*!
+   poll for connection progress and incoming data, once per tick
 */
-void BotClient::reconnect()
+void BotClient::poll()
 {
+   if (mAddress)
+   {
+      NET_Status status = NET_GetAddressStatus(mAddress);
 
+      if (status == NET_SUCCESS)
+      {
+         NET_Address* address = mAddress;
+         mAddress = nullptr;
+
+         mSocket = NET_CreateClient(address, 6300, 0);
+         NET_UnrefAddress(address);
+
+         if (!mSocket)
+         {
+            clientDisconnect();
+         }
+      }
+      else if (status == NET_FAILURE)
+      {
+         NET_UnrefAddress(mAddress);
+         mAddress = nullptr;
+         clientDisconnect();
+      }
+
+      return;
+   }
+
+   if (mSocket && !mConnected)
+   {
+      NET_Status status = NET_GetConnectionStatus(mSocket);
+
+      if (status == NET_SUCCESS)
+      {
+         clientConnect();
+
+         if (mAutoJoin)
+         {
+            login();
+         }
+      }
+      else if (status == NET_FAILURE)
+      {
+         NET_DestroyStreamSocket(mSocket);
+         mSocket = nullptr;
+         clientDisconnect();
+      }
+
+      return;
+   }
+
+   if (mSocket && mConnected)
+   {
+      readData();
+   }
 }
 
 
@@ -233,13 +274,7 @@ void BotClient::initializeAutoJoinStart()
 {
    if (mAutoJoin)
    {
-      connect(
-         mSocket,
-         SIGNAL(connected()),
-         this,
-         SLOT(login())
-      );
-
+      // login() itself fires from poll() once the connection succeeds - see connectToServer()
       connect(
          this,
          SIGNAL(updatePlayerId(int)),
@@ -298,8 +333,11 @@ void BotClient::selectGame()
 void BotClient::send(Packet* packet)
 {
    packet->serialize();
-   mSocket->write(*packet);
-   mSocket->flush();
+
+   if (mSocket)
+   {
+      NET_WriteToStreamSocket(mSocket, packet->constData(), static_cast<int>(packet->size()));
+   }
 }
 
 
@@ -315,7 +353,7 @@ bool BotClient::packetAvailable(QDataStream& in)
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mSocket->bytesAvailable() < (int)sizeof(uint16_t))
+      if (mBuffer.bytesAvailable() < (int)sizeof(uint16_t))
         return false;
 
      // read blocksize
@@ -325,7 +363,7 @@ bool BotClient::packetAvailable(QDataStream& in)
    }
 
    // enough data?
-   return (mSocket->bytesAvailable() >= mBlockSize);
+   return (mBuffer.bytesAvailable() >= mBlockSize);
 }
 
 
@@ -404,13 +442,27 @@ void BotClient::createMap(Constants::Dimension dimensions)
 */
 void BotClient::readData()
 {
-   QDataStream in(mSocket);
+   char chunk[4096];
+   int bytesRead;
+
+   while ((bytesRead = NET_ReadFromStreamSocket(mSocket, chunk, sizeof(chunk))) > 0)
+   {
+      mBuffer.append(chunk, bytesRead);
+   }
+
+   if (bytesRead < 0)
+   {
+      NET_DestroyStreamSocket(mSocket);
+      mSocket = nullptr;
+      clientDisconnect();
+      return;
+   }
+
    // must match shared/packet.cpp's serialize() and every other reader (server.cpp,
-   // bombermanclient.cpp) - Qt_4_8 here was a genuine pre-existing mismatch, dormant until now
-   // because bots never actually exchanged packets over the wire before this port made
-   // BotFactory real (see project memory) - the version gap silently reencodes some field types
-   // differently, desyncing the stream permanently after the first affected packet.
-   in.setVersion(QDataStream::Qt_4_6);
+   // bombermanclient.cpp) - PacketStreamBuffer fixes this to Qt_4_6 internally; a version gap
+   // here silently reencodes some field types differently, desyncing the stream permanently
+   // after the first affected packet (a real, previously dormant bug, see project memory).
+   QDataStream& in = mBuffer.stream();
 
    while (packetAvailable(in))
    {
@@ -567,6 +619,8 @@ void BotClient::readData()
 
       mBlockSize = 0;
    }
+
+   mBuffer.compact();
 }
 
 

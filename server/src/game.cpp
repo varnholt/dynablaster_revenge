@@ -46,8 +46,9 @@
 
 // stdlib
 #include <algorithm>
-#include <QTcpServer>
-#include <QTcpSocket>
+
+// SDL
+#include <SDL3_net/SDL_net.h>
 
 // c
 #include <math.h>
@@ -801,7 +802,7 @@ void Game::updatePlayerPositions()
 
    if (isStartPositionInitialized())
    {
-      QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
+      QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
       while (p.hasNext())
       {
          p.next();
@@ -1285,7 +1286,7 @@ void Game::createInfection(
 */
 void Game::updateExtras()
 {
-   QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
+   QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
    while (p.hasNext())
    {
       p.next();
@@ -1393,9 +1394,9 @@ void Game::updateInfections()
    if (mCreateGameData.mExtraSkullsEnabled)
    {
       QList<Player*> players = getPlayers();
-      QVector2D pos1;
-      QVector2D pos2;
-      QVector2D vec;
+      Vec2 pos1;
+      Vec2 pos2;
+      Vec2 vec;
 
       foreach (Player* player1, players)
       {
@@ -1409,8 +1410,8 @@ void Game::updateInfections()
                   // player "to be infected" must be not infected yet
                   if (!player2->isInfected() && !player2->isKilled())
                   {
-                     pos1 = QVector2D(player1->getX(), player1->getY());
-                     pos2 = QVector2D(player2->getX(), player2->getY());
+                     pos1 = Vec2(player1->getX(), player1->getY());
+                     pos2 = Vec2(player2->getX(), player2->getY());
 
                      vec = pos1 - pos2;
 
@@ -1435,7 +1436,7 @@ void Game::updateInfections()
 */
 void Game::updateBombs()
 {
-   QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
+   QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
    while (p.hasNext())
    {
       p.next();
@@ -1548,7 +1549,7 @@ void Game::sendMessageToOwner(const QString& message)
          true
       );
 
-   QTcpSocket* socket = mPlayerSockets.key(mCreator);
+   NET_StreamSocket* socket = mPlayerSockets.key(mCreator);
 
    sendPacket(socket, messagePacket);
 }
@@ -2634,7 +2635,7 @@ void Game::synchronize()
                qPrintable(player->getNick())
             );
 
-            QTcpSocket* socket = mPlayerSockets.key(player);
+            NET_StreamSocket* socket = mPlayerSockets.key(player);
             emit forceLeaveGame(socket);
 
             ErrorPacket* errorPacket = new ErrorPacket(
@@ -2673,7 +2674,7 @@ void Game::synchronize()
 /*!
    send single packet
 */
-void Game::sendPacket(QTcpSocket* socket, Packet* packet)
+void Game::sendPacket(NET_StreamSocket* socket, Packet* packet)
 {
    // init bytearray
    packet->serialize();
@@ -2688,7 +2689,7 @@ void Game::sendPacket(QTcpSocket* socket, Packet* packet)
 
    // send packet
    if (socket)
-      socket->write(*packet);
+      NET_WriteToStreamSocket(socket, packet->constData(), static_cast<int>(packet->size()));
 
    // clean up
    delete packet;
@@ -2703,7 +2704,7 @@ void Game::sendBroadcastPackets()
 {
    if (!mOutgoingPackets.isEmpty())
    {
-      QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
+      QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
 
       bool synced = false;
       Packet* packet = nullptr;
@@ -2714,7 +2715,7 @@ void Game::sendBroadcastPackets()
          p.next();
          synced = p.value()->isLoadingSynchronized();
 
-         QTcpSocket* socket = p.key();
+         NET_StreamSocket* socket = p.key();
 
          // write outgoing packets to socket
          for (int i = 0; i < mOutgoingPackets.size(); ++i)
@@ -2732,7 +2733,7 @@ void Game::sendBroadcastPackets()
                   || pType == Packet::MESSAGE
                )
                {
-                  socket->write(*packet);
+                  NET_WriteToStreamSocket(socket, packet->constData(), static_cast<int>(packet->size()));
                }
             }
          }
@@ -2753,7 +2754,7 @@ void Game::sendBroadcastPackets()
    \param packet packet to process
 */
 void Game::processPacket(
-   QTcpSocket* tcpSocket,
+   NET_StreamSocket* tcpSocket,
    Packet* packet
 )
 {
@@ -2773,12 +2774,12 @@ void Game::processPacket(
          {
             int senderId = mPlayerSockets[tcpSocket]->getId();
 
-            QMapIterator<QTcpSocket*, Player*> p(mPlayerSockets);
+            QMapIterator<NET_StreamSocket*, Player*> p(mPlayerSockets);
             while (p.hasNext())
             {
                p.next();
 
-               QTcpSocket* currentSocket = p.key();
+               NET_StreamSocket* currentSocket = p.key();
 
                // send message to all players unless it's private
                if (
@@ -3031,7 +3032,7 @@ void Game::setName(const QString &name)
 /*!
    \param player player who joined the game
 */
-bool Game::joinGame(Player* player, QTcpSocket* playerSocket)
+bool Game::joinGame(Player* player, NET_StreamSocket* playerSocket)
 {
    bool joiningAllowed = false;
 
@@ -3134,7 +3135,7 @@ bool Game::joinGame(Player* player, QTcpSocket* playerSocket)
    \param game ptr to game
    \param tcpSocket player's tcp socket
 */
-void Game::processSpectator(QTcpSocket* tcpSocket)
+void Game::processSpectator(NET_StreamSocket* tcpSocket)
 {
    if (
          getState() == Constants::GameActive
@@ -3213,7 +3214,7 @@ void Game::processSpectatorMessage()
 {
    if (!mSpectators.isEmpty())
    {
-      QPointer<QTcpSocket> tcpSocket = mSpectators.takeFirst();
+      NET_StreamSocket* tcpSocket = mSpectators.takeFirst();
 
       if (tcpSocket)
       {
@@ -3331,12 +3332,16 @@ void Game::setStartPositionsInitialized(bool value)
 /*!
    \param player player who left the game
 */
-void Game::removePlayer(Player* player, QTcpSocket* playerSocket)
+void Game::removePlayer(Player* player, NET_StreamSocket* playerSocket)
 {
    increasePlayersLeftTheGameCount();
 
    mPlayerSockets.remove(playerSocket);
    mPlayers.remove(player->getId());
+
+   // drop the socket from the spectator queue too, so processSpectatorMessage()'s
+   // delayed timer never fires against a socket that's since been destroyed
+   mSpectators.removeAll(playerSocket);
 
    // reset player stats on leave game event
    player->resetStats();
@@ -3488,7 +3493,7 @@ Constants::Color Game::getColorForNextPlayer() const
 /*!
    \return ptr to player socket map
 */
-QMap<QTcpSocket*, Player*>* Game::getPlayerSockets()
+QMap<NET_StreamSocket*, Player*>* Game::getPlayerSockets()
 {
    return &mPlayerSockets;
 }

@@ -1,7 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QAbstractSocket>
 #include <QObject>
 #include <QTimer>
 #include <QMap>
@@ -10,13 +9,14 @@
 // shared
 #include "constants.h"
 #include "packet.h"
+#include "packetstreambuffer.h"
 #include "serverconfiguration.h"
 
 // forward declarations
 class Game;
 class Player;
-class QTcpServer;
-class QTcpSocket;
+struct NET_Server;
+struct NET_StreamSocket;
 
 class Server : public QObject
 {
@@ -38,10 +38,18 @@ public:
    bool isListening() const;
 
    //! get socket for player id
-   QTcpSocket* getPlayerSocket( int playerId );
+   NET_StreamSocket* getPlayerSocket( int playerId );
 
    //! getter for server configuration
    const ServerConfiguration& getServerConfiguration() const;
+
+
+public slots:
+
+   //! start the poll timer - call once this object is running on its final thread
+   //! (BombermanClient::host() moves it to a worker thread after construction; a QTimer
+   //! started before that move keeps ticking against the wrong thread's event dispatcher)
+   void startPolling();
 
 
 signals:
@@ -67,26 +75,17 @@ protected:
 
 private slots:
 
-   //! new connection opened
-   void newConnection();
+   //! poll for new connections and incoming data, once per tick
+   void poll();
 
-   //! data received
-   void data();
-
-   //! player disconnected
-   void disconnect();
-
-   //! display error
-   void displayError(QAbstractSocket::SocketError);
-
-   void processStartGameRequest(QTcpSocket* tcpSocket, Packet* packet);
-   void processJoinGameRequest(QTcpSocket* tcpSocket, Packet* packet);
-   void processLoginRequest(QTcpSocket* tcpSocket, Packet* packet);
-   void processListGamesRequest(QTcpSocket* tcpSocket);
-   void processCreateGameRequest(QTcpSocket* tcpSocket, Packet* packet);
-   void processGamePacket(QTcpSocket* tcpSocket, Packet* packet);
-   void processPlayerLeavesGame(QTcpSocket* socket);
-   void processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet);
+   void processStartGameRequest(NET_StreamSocket* tcpSocket, Packet* packet);
+   void processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet);
+   void processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet);
+   void processListGamesRequest(NET_StreamSocket* tcpSocket);
+   void processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packet);
+   void processGamePacket(NET_StreamSocket* tcpSocket, Packet* packet);
+   void processPlayerLeavesGame(NET_StreamSocket* socket);
+   void processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packet);
    void processRemoveGame(int gameId);
    void processRemoveAllBots(int gameId);
    void processBroadcastLeaveGameResponse(Player* player, Game* game);
@@ -95,25 +94,40 @@ private slots:
    void correctDuplicateGameName(Game* game);
 
    //! send single packet
-   void sendPacket(QTcpSocket* socket, Packet* packet);
+   void sendPacket(NET_StreamSocket* socket, Packet* packet);
 
 
 private:
 
+   //! accept all pending incoming connections
+   void acceptConnections();
+
+   //! read and dispatch all available data for one connected socket
+   void readSocket(NET_StreamSocket* socket);
+
+   //! socket failed or the remote end dropped - clean up and destroy it
+   void disconnectSocket(NET_StreamSocket* socket);
+
    //! fix duplicate player names
    QString correctDuplicatePlayerName(const QString& nick);
 
-   //! tcp server
-   QTcpServer* mTcpServer;
+   //! listen socket
+   NET_Server* mNetServer;
+
+   //! drives poll() once per tick
+   QTimer* mPollTimer;
+
+   //! per-connection incoming byte buffer
+   QMap<NET_StreamSocket*, PacketStreamBuffer*> mSocketBuffers;
 
    //! map of expected packet sizes
-   QMap<QTcpSocket*, uint16_t> mPacketSizes;
+   QMap<NET_StreamSocket*, uint16_t> mPacketSizes;
 
    //! map socket <-> player
-   QMap<QTcpSocket*, Player*> mPlayerSockets;
+   QMap<NET_StreamSocket*, Player*> mPlayerSockets;
 
    //! map socket <-> game
-   QMap<QTcpSocket*, Game*> mSocketGameMapping;
+   QMap<NET_StreamSocket*, Game*> mSocketGameMapping;
 
    //! map of active games
    QMap<int, Game*> mGames;

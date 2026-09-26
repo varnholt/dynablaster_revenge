@@ -37,6 +37,7 @@
 #include <QTimer>
 
 #include <SDL3/SDL.h>
+#include <SDL3_net/SDL_net.h>
 
 namespace
 {
@@ -157,11 +158,19 @@ void registerMenuFont()
 
 int main(int argc, char** argv)
 {
+   // must run before any NET_* call (BombermanClient's own connection or an embedded Server via
+   // host()); nearly everything in SDL3_net is undefined behavior before this succeeds.
+   if (!NET_Init())
+   {
+      SDL_Log("Failed to initialize SDL_net: %s", SDL_GetError());
+      return 1;
+   }
+
    // Server (server/src/server.h, copied in as-is from the old client's embedded server - see
-   // client.pro's own ../server/src SOURCES) needs a running Qt event loop to ever fire
-   // QTcpServer::newConnection/readyRead - there was no QCoreApplication anywhere in this port
-   // before now. Constructed once, pumped once per frame below (processEvents()) rather than
-   // handing control to qApp->exec(), since SDL already owns the main loop here.
+   // client.pro's own ../server/src SOURCES) needs a running Qt event loop for its QTimer-driven
+   // poll() to ever fire - there was no QCoreApplication anywhere in this port before now.
+   // Constructed once, pumped once per frame below (processEvents()) rather than handing control
+   // to qApp->exec(), since SDL already owns the main loop here.
    QCoreApplication qtApp(argc, argv);
 
    // BombermanClient (client/src/game/bombermanclient.cpp, copied in as-is - see project memory,
@@ -177,6 +186,7 @@ int main(int argc, char** argv)
    // - 16:9, same aspect as the menu system's own 1920x1080 page space (mainmenu.psd etc.).
    if (!context.init("Dynablaster Revenge", 1024, 576))
    {
+      NET_Quit();
       return 1;
    }
 
@@ -476,8 +486,8 @@ int main(int argc, char** argv)
          }
       }
 
-      // pumps Server's QTcpServer/QTimer signals (newConnection, readyRead, ...) - see the
-      // QCoreApplication comment above main().
+      // pumps Server's and BombermanClient's QTimer-driven poll() - see the QCoreApplication
+      // comment above main().
       QCoreApplication::processEvents();
 
       device.clear();
@@ -542,6 +552,8 @@ int main(int argc, char** argv)
 
       context.swap();
    }
+
+   NET_Quit();
 
    return 0;
 }

@@ -27,7 +27,7 @@ endif()
 # none of that is windowing-toolkit-specific, it's just Qt's basic value types for images/events,
 # so it carries the same "kept for now, stripped later" status as Core above.
 set(CMAKE_AUTOMOC ON)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui)
 
 include(FetchContent)
 
@@ -51,6 +51,19 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(minimp3)
+
+# networking for the client<->server protocol. Not yet linked into any target; the
+# socket-handling rewrite lands separately.
+set(SDLNET_SHARED ON CACHE BOOL "" FORCE)
+set(SDLNET_STATIC OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    SDL3_net
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_net.git
+    GIT_TAG release-3.2.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SDL3_net)
 
 file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     CONFIGURE_DEPENDS
@@ -370,7 +383,7 @@ target_include_directories(dynablaster_core PUBLIC
     ../ai
     ${minimp3_SOURCE_DIR}
 )
-target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 Qt6::Core Qt6::Gui Qt6::Network)
+target_link_libraries(dynablaster_core PUBLIC SDL3::SDL3 SDL3_net::SDL3_net Qt6::Core Qt6::Gui)
 
 # dynablaster_sdl - the real game, no CLI flags, launches straight into the main menu.
 add_executable(dynablaster_sdl src/main.cpp)
@@ -396,9 +409,9 @@ foreach(dynablaster_target dynablaster_sdl dynablaster_sdl_harness)
         add_custom_command(TARGET ${dynablaster_target} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 $<TARGET_FILE:SDL3::SDL3>
+                $<TARGET_FILE:SDL3_net::SDL3_net>
                 $<TARGET_FILE:Qt6::Core>
                 $<TARGET_FILE:Qt6::Gui>
-                $<TARGET_FILE:Qt6::Network>
                 $<TARGET_FILE_DIR:${dynablaster_target}>
         )
     endif()

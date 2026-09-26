@@ -1,12 +1,13 @@
 // header
 #include "playerrotation.h"
 
-// math
-#include <math.h>
+// std
+#include <cmath>
+#include <numbers>
 
 // init static variables
 float PlayerRotation::mAngleIncrement = 0.2f; // 0.075f;
-QVector2D PlayerRotation::mDown = QVector2D(0.0f, -1.0f);
+Vec2 PlayerRotation::mDown = Vec2(0.0f, -1.0f);
 
 
 //-----------------------------------------------------------------------------
@@ -36,7 +37,7 @@ void PlayerRotation::setAngleIncrement(float angle)
 /*!
    \param vector target direction
 */
-void PlayerRotation::setTargetVector(const QVector2D& target)
+void PlayerRotation::setTargetVector(const Vec2& target)
 {
    mTargetVector = target;
    /*
@@ -71,7 +72,7 @@ void PlayerRotation::setTargetVector(const QVector2D& target)
    // initialize target angle from direction vector
 
    // map the atan2 circle to 0..2*PI
-   mTargetAngle = atan2(-target.y(), -target.x()) + M_PI;
+   mTargetAngle = std::atan2(-target.y(), -target.x()) + std::numbers::pi_v<float>;
 
 //      qDebug(
 //         "PlayerRotation::SetTargetVector: target angle is %f [deg]",
@@ -84,7 +85,7 @@ void PlayerRotation::setTargetVector(const QVector2D& target)
 /*!
    \return target vector
 */
-const QVector2D& PlayerRotation::getTargetVector()
+const Vec2& PlayerRotation::getTargetVector()
 {
    return mTargetVector;
 }
@@ -135,11 +136,11 @@ void PlayerRotation::updateAngle()
    if (from >= to)
    {
       a = from - to;
-      b = to + (2.0f * M_PI) - from;
+      b = to + (2.0f * std::numbers::pi_v<float>) - from;
    }
    else
    {
-      a = from + (2.0f * M_PI) - to;
+      a = from + (2.0f * std::numbers::pi_v<float>) - to;
       b = to - from;
    }
 
@@ -157,8 +158,8 @@ void PlayerRotation::updateAngle()
       mDelta = delta;
       mAngle += delta;
 
-      if (mAngle >= (float)M_PI * 2.0f)
-         mAngle -= (float)M_PI * 2.0f;
+      if (mAngle >= std::numbers::pi_v<float> * 2.0f)
+         mAngle -= std::numbers::pi_v<float> * 2.0f;
    }
    else
    {
@@ -171,7 +172,7 @@ void PlayerRotation::updateAngle()
       mAngle -= delta;
 
       if (mAngle < 0.0f)
-         mAngle += (float)M_PI * 2.0f;
+         mAngle += std::numbers::pi_v<float> * 2.0f;
 
       if (mAngle < mTargetAngle && mPreviousAngle >= mTargetAngle)
          mAngle = mTargetAngle;

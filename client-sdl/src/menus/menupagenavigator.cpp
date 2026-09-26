@@ -22,9 +22,9 @@
 #include "playerinfo.h"
 
 #include <QDebug>
-#include <QHostAddress>
-#include <QNetworkInterface>
 #include <QTimer>
+
+#include <SDL3_net/SDL_net.h>
 
 #include <algorithm>
 
@@ -87,15 +87,25 @@ bool isOptionsPage(const QString& page)
 // SINGLE always does), rather than only connecting out to a remote one.
 bool isHostLocal(const QString& hostName)
 {
-   QHostAddress hostAddress(hostName);
+   bool local = false;
 
-   for (const QHostAddress& address : QNetworkInterface::allAddresses())
+   int count = 0;
+   NET_Address** addresses = NET_GetLocalAddresses(&count);
+
+   if (addresses)
    {
-      if (hostAddress == address)
-         return true;
+      for (int i = 0; i < count && !local; i++)
+      {
+         const char* address = NET_GetAddressString(addresses[i]);
+
+         if (address && hostName == QString(address))
+            local = true;
+      }
+
+      NET_FreeLocalAddresses(addresses);
    }
 
-   return false;
+   return local;
 }
 
 bool needsBrowser(const QString& action)

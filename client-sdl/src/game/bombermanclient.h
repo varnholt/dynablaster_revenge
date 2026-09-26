@@ -5,7 +5,10 @@
 #include <QColor>
 #include <QMap>
 #include <QObject>
-#include <QTcpSocket>
+#include <QTimer>
+
+// shared
+#include "packetstreambuffer.h"
 
 // game
 #include "gameinformation.h"
@@ -20,7 +23,8 @@ class PositionInterpolation;
 class Server;
 
 class QKeyEvent;
-class QTcpSocket;
+struct NET_Address;
+struct NET_StreamSocket;
 
 class BombermanClient : public QObject
 {
@@ -396,20 +400,14 @@ class BombermanClient : public QObject
 
    private slots:
 
-      //! data received on socket
-      void readData();
-
-      // //! reconnect
-      // void reconnect();
+      //! poll for connection progress and incoming data, once per tick
+      void poll();
 
       //! connect client
       void clientConnect();
 
       //! disconnect client
       void clientDisconnect();
-
-      //! socket error
-      void socketError(QAbstractSocket::SocketError);
 
       //! process a packet
       void processPacket(Packet* packet);
@@ -455,6 +453,15 @@ class BombermanClient : public QObject
 
       //! check for packets
       bool packetAvailable(QDataStream& source);
+
+      //! read and dispatch all available data from the socket
+      void readData();
+
+      //! tear down whatever connection attempt or connection is in progress
+      void disconnectFromServer();
+
+      //! show a generic connection-failure message to the user
+      void reportConnectionError(const char* reason);
 
       //! get mapitem by mapitem id
       MapItem* getMapItem(int id) const;
@@ -507,8 +514,17 @@ class BombermanClient : public QObject
       //! flag indicating bomb key was released
       bool mBombReleased;
 
-      //! tcp socket to server
-      QTcpSocket *mSocket;
+      //! stream socket to server, null unless connected or connecting
+      NET_StreamSocket* mSocket;
+
+      //! host address pending resolution, null once resolved (or if not resolving)
+      NET_Address* mAddress;
+
+      //! drives poll() once per tick
+      QTimer* mPollTimer;
+
+      //! incoming byte buffer
+      PacketStreamBuffer mBuffer;
 
       //! blocksize of packet which is received from server
       uint16_t mBlockSize;

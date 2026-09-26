@@ -25,8 +25,9 @@
 
 // Qt
 #include <QSettings>
-#include <QTcpServer>
-#include <QTcpSocket>
+
+// SDL
+#include <SDL3_net/SDL_net.h>
 
 // c
 #include <math.h>
@@ -41,7 +42,8 @@ Server* Server::sInstance = nullptr;
    constructor
 */
 Server::Server()
-   : mTcpServer(nullptr),
+   : mNetServer(nullptr),
+     mPollTimer(nullptr),
      mPlayerId(0)
 {
    sInstance = this;
@@ -56,15 +58,14 @@ Server::Server()
 
    qDebug("Server::Server: binding to port %d..", SERVER_PORT);
 
-   // create tcp server instance
-   mTcpServer = new QTcpServer(this);
+   // create server, listening on all local addresses
+   mNetServer = NET_CreateServer(nullptr, SERVER_PORT, 0);
 
-   // open server
-   if (!mTcpServer->listen(QHostAddress::Any, SERVER_PORT))
+   if (!mNetServer)
    {
       qDebug(
          "Server::Server: Dynablaster Revenge Server: Unable to start the server: %s.",
-         qPrintable(mTcpServer->errorString())
+         SDL_GetError()
       );
    }
    else
@@ -72,13 +73,26 @@ Server::Server()
       qDebug("Server::Server: Dynablaster Revenge Server: server initialized");
    }
 
-   // check for incoming connections
+   // check for incoming connections and incoming data once per tick - not started here,
+   // see startPolling()
+   mPollTimer = new QTimer(this);
+
    connect(
-      mTcpServer,
-      SIGNAL(newConnection()),
+      mPollTimer,
+      SIGNAL(timeout()),
       this,
-      SLOT(newConnection())
+      SLOT(poll())
    );
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+   start the poll timer - call once this object is running on its final thread
+*/
+void Server::startPolling()
+{
+   mPollTimer->start(16);
 }
 
 
@@ -90,7 +104,10 @@ Server::~Server()
 {
    qDebug("Server::~Server");
 
-   delete mTcpServer;
+   if (mNetServer)
+   {
+      NET_DestroyServer(mNetServer);
+   }
 }
 
 
@@ -113,7 +130,7 @@ Server *Server::getInstance()
 */
 bool Server::isListening() const
 {
-   return mTcpServer->isListening();
+   return mNetServer != nullptr;
 }
 
 
@@ -122,9 +139,9 @@ bool Server::isListening() const
    get socket for player id
    \param playerId player id
 */
-QTcpSocket* Server::getPlayerSocket( int playerId )
+NET_StreamSocket* Server::getPlayerSocket( int playerId )
 {
-   QMap<QTcpSocket*, Player*>::ConstIterator it;
+   QMap<NET_StreamSocket*, Player*>::ConstIterator it;
    for (it= mPlayerSockets.constBegin(); it!= mPlayerSockets.constEnd(); it++)
    {
       Player* player= it.value();
@@ -165,43 +182,37 @@ void Server::initServerConfiguration()
 
 //-----------------------------------------------------------------------------
 /*!
-   new connection to server opened
+   accept all pending incoming connections
 */
-void Server::newConnection()
+void Server::acceptConnections()
 {
-   while (mTcpServer->hasPendingConnections())
+   while (true)
    {
-      QTcpSocket* socket = mTcpServer->nextPendingConnection();
+      NET_StreamSocket* socket = nullptr;
 
-      // disable the nagle's algorithm to provide low latency
-      socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+      if (!NET_AcceptClient(mNetServer, &socket))
+      {
+         qDebug("Server::acceptConnections: accept failed: %s", SDL_GetError());
+         break;
+      }
+
+      if (!socket)
+      {
+         break;
+      }
+
+      NET_Address* address = NET_GetStreamSocketAddress(socket);
 
       qDebug(
-         "Server::newConnection: peer address: %s, socket ptr: %p",
-         qPrintable(socket->peerAddress().toString()),
-         socket
+         "Server::acceptConnections: peer address: %s, socket ptr: %p",
+         address ? NET_GetAddressString(address) : "?",
+         static_cast<void*>(socket)
       );
 
-      connect(
-         socket,
-         SIGNAL(readyRead()),
-         this,
-         SLOT(data())
-      );
-
-      connect(
-         socket,
-         SIGNAL(disconnected()),
-         this,
-         SLOT(disconnect())
-      );
-
-      connect(
-         socket,
-         SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
-         this,
-         SLOT(displayError(QAbstractSocket::SocketError))
-      );
+      if (address)
+      {
+         NET_UnrefAddress(address);
+      }
 
       // create new player
       Player* player = new Player(mPlayerId++);
@@ -212,9 +223,27 @@ void Server::newConnection()
 
 //-----------------------------------------------------------------------------
 /*!
+   poll for new connections and incoming data, once per tick
+*/
+void Server::poll()
+{
+   acceptConnections();
+
+   // snapshot the keys since disconnectSocket() mutates mPlayerSockets mid-iteration
+   const QList<NET_StreamSocket*> sockets = mPlayerSockets.keys();
+
+   for (NET_StreamSocket* socket : sockets)
+   {
+      readSocket(socket);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
    send single packet
 */
-void Server::sendPacket(QTcpSocket* socket, Packet* packet)
+void Server::sendPacket(NET_StreamSocket* socket, Packet* packet)
 {
    // init bytearray
    packet->serialize();
@@ -228,7 +257,10 @@ void Server::sendPacket(QTcpSocket* socket, Packet* packet)
    */
 
    // send packet
-   socket->write(*packet);
+   if (socket)
+   {
+      NET_WriteToStreamSocket(socket, packet->constData(), static_cast<int>(packet->size()));
+   }
 
    // clean up
    delete packet;
@@ -240,7 +272,7 @@ void Server::sendPacket(QTcpSocket* socket, Packet* packet)
    \param tcpSocket sender socket
    \param packet packet to process
 */
-void Server::processStartGameRequest(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processStartGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
    StartGameRequestPacket* request = dynamic_cast<StartGameRequestPacket*>(packet);
 
@@ -271,7 +303,7 @@ void Server::processStartGameRequest(QTcpSocket* tcpSocket, Packet* packet)
    \param tcpSocket sender socket
    \param packet packet to process
 */
-void Server::processJoinGameRequest(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
    JoinGameRequestPacket* request = dynamic_cast<JoinGameRequestPacket*>(packet);
 
@@ -281,7 +313,7 @@ void Server::processJoinGameRequest(QTcpSocket* tcpSocket, Packet* packet)
    {
       Game* game = iter.value();
 
-      QMap<QTcpSocket*, Player*>::const_iterator socketIter =
+      QMap<NET_StreamSocket*, Player*>::const_iterator socketIter =
          mPlayerSockets.constFind(tcpSocket);
 
       if (socketIter != mPlayerSockets.constEnd())
@@ -320,7 +352,7 @@ void Server::processJoinGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 }
 
 
-void Server::processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packet)
 {
    /*
       game level loading synchronizing workflow:
@@ -339,14 +371,14 @@ void Server::processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet)
 
    if (request->getSynchronizeProcess() == PlayerSynchronizePacket::LevelLoaded)
    {
-      QMap<QTcpSocket*, Game*>::const_iterator iter =
+      QMap<NET_StreamSocket*, Game*>::const_iterator iter =
          mSocketGameMapping.constFind(tcpSocket);
 
       if (iter != mSocketGameMapping.constEnd())
       {
          Game* game = iter.value();
 
-         QMap<QTcpSocket*, Player*>::const_iterator socketIter =
+         QMap<NET_StreamSocket*, Player*>::const_iterator socketIter =
             mPlayerSockets.constFind(tcpSocket);
 
          if (socketIter != mPlayerSockets.constEnd())
@@ -366,7 +398,7 @@ void Server::processPlayerSynchronize(QTcpSocket* tcpSocket, Packet* packet)
 
 
 
-void Server::processLoginRequest(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
    LoginRequestPacket* request = dynamic_cast<LoginRequestPacket*>(packet);
 
@@ -407,7 +439,7 @@ void Server::processLoginRequest(QTcpSocket* tcpSocket, Packet* packet)
 }
 
 
-void Server::processListGamesRequest(QTcpSocket* tcpSocket)
+void Server::processListGamesRequest(NET_StreamSocket* tcpSocket)
 {
    // ListGamesRequestPacket* request = (ListGamesRequestPacket*)packet;
    QList<GameInformation> games;
@@ -439,7 +471,7 @@ void Server::processListGamesRequest(QTcpSocket* tcpSocket)
 }
 
 
-void Server::processCreateGameRequest(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
    // the server current does not support a maximum game count.
    // if this ought to be implemented, we need to return a gameinformation
@@ -456,9 +488,9 @@ void Server::processCreateGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 
    connect(
       game,
-      SIGNAL(forceLeaveGame(QTcpSocket*)),
+      SIGNAL(forceLeaveGame(NET_StreamSocket*)),
       this,
-      SLOT(processPlayerLeavesGame(QTcpSocket*))
+      SLOT(processPlayerLeavesGame(NET_StreamSocket*))
    );
 
    // autocorrect duplicate game names
@@ -479,9 +511,9 @@ void Server::processCreateGameRequest(QTcpSocket* tcpSocket, Packet* packet)
 }
 
 
-void Server::processGamePacket(QTcpSocket* tcpSocket, Packet* packet)
+void Server::processGamePacket(NET_StreamSocket* tcpSocket, Packet* packet)
 {
-   QMap<QTcpSocket*, Game*>::const_iterator iter =
+   QMap<NET_StreamSocket*, Game*>::const_iterator iter =
       mSocketGameMapping.constFind(tcpSocket);
 
    // if the socket already joined a game, let the
@@ -504,31 +536,40 @@ void Server::processGamePacket(QTcpSocket* tcpSocket, Packet* packet)
 
       Server
       |
-      + QTcpServer*
-      + newConnection() => new Player()
-                               |
-                               + TcpSocket*
-      + data() => while(data is available)
-                  1) read from QTcpSocket*
+      + NET_Server*
+      + acceptConnections() => new Player()
+                                   |
+                                   + NET_StreamSocket*
+      + readSocket() => while(data is available)
+                  1) read from NET_StreamSocket*
                   2) deserialize Packet*
                   3) process all server-related packets
                   4) process all game-related packets
 */
-void Server::data()
+void Server::readSocket(NET_StreamSocket* tcpSocket)
 {
-   // qDebug("Server::data(): packet received");
+   PacketStreamBuffer*& buffer = mSocketBuffers[tcpSocket];
 
-   QTcpSocket* tcpSocket = dynamic_cast<QTcpSocket*>(sender());
-
-   // check if player is known
-   if (!mPlayerSockets.contains(tcpSocket))
+   if (!buffer)
    {
-      qDebug("Server::data(): unknown player. fuck off");
+      buffer = new PacketStreamBuffer();
+   }
+
+   char chunk[4096];
+   int bytesRead;
+
+   while ((bytesRead = NET_ReadFromStreamSocket(tcpSocket, chunk, sizeof(chunk))) > 0)
+   {
+      buffer->append(chunk, bytesRead);
+   }
+
+   if (bytesRead < 0)
+   {
+      disconnectSocket(tcpSocket);
       return;
    }
 
-   QDataStream in(tcpSocket);
-   in.setVersion(QDataStream::Qt_4_6);
+   QDataStream& in = buffer->stream();
 
    while (true)
    {
@@ -537,10 +578,10 @@ void Server::data()
       // blocksize not initialized yet
       if (blockSize == 0)
       {
-         if (tcpSocket->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
+         if (buffer->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
          {
-            // qDebug("Server::data(): cannot read packet size, packet too small");
-            return;
+            // qDebug("Server::readSocket(): cannot read packet size, packet too small");
+            break;
          }
 
          in >> blockSize;
@@ -548,16 +589,9 @@ void Server::data()
       }
 
       // wait for more data
-      if (tcpSocket->bytesAvailable() < blockSize)
+      if (buffer->bytesAvailable() < blockSize)
       {
-         qDebug(
-            "Server::data: waiting for packet to complete [2] "
-            "(actually: %d < expected: %d)",
-            static_cast<int32_t>(tcpSocket->bytesAvailable()),
-            blockSize
-         );
-
-         return;
+         break;
       }
 
       // reset expected blocksize
@@ -621,7 +655,7 @@ void Server::data()
 
             case Packet::INVALID:
             {
-               qWarning("Server::data: Packet::INVALID received");
+               qWarning("Server::readSocket: Packet::INVALID received");
                break;
             }
 
@@ -635,20 +669,18 @@ void Server::data()
          delete packet;
       }
    }
+
+   buffer->compact();
 }
 
 
 //----------------------------------------------------------------------------
 /*!
-   player disconnected from server
+   socket failed or the remote end dropped - clean up and destroy it
 */
-void Server::disconnect()
+void Server::disconnectSocket(NET_StreamSocket* tcpSocket)
 {
-   qDebug("Server::disconnect");
-
-   // remove player from list of sockets
-   QTcpSocket* tcpSocket = dynamic_cast<QTcpSocket*>(sender());
-   // Player* player = mPlayerSockets[tcpSocket];
+   qDebug("Server::disconnectSocket");
 
    // notify other players
    processPlayerLeavesGame(tcpSocket);
@@ -661,6 +693,11 @@ void Server::disconnect()
       emit removePlayer(player->getId(), player->getNick());
 
    delete player;
+
+   delete mSocketBuffers.take(tcpSocket);
+   mPacketSizes.remove(tcpSocket);
+
+   NET_DestroyStreamSocket(tcpSocket);
 }
 
 
@@ -671,8 +708,8 @@ void Server::disconnect()
 */
 void Server::processBroadcastLeaveGameResponse(Player* player, Game* game)
 {
-   QMap<QTcpSocket*, Player*>* players = game->getPlayerSockets();
-   QMapIterator<QTcpSocket*, Player*> i(*players);
+   QMap<NET_StreamSocket*, Player*>* players = game->getPlayerSockets();
+   QMapIterator<NET_StreamSocket*, Player*> i(*players);
    while (i.hasNext())
    {
       i.next();
@@ -700,10 +737,10 @@ void Server::processBroadcastLeaveGameResponse(Player* player, Game* game)
    \param socket player's socket
 */
 void Server::processPlayerLeavesGame(
-   QTcpSocket* tcpSocket
+   NET_StreamSocket* tcpSocket
 )
 {
-   QMap<QTcpSocket*, Game*>::const_iterator iter =
+   QMap<NET_StreamSocket*, Game*>::const_iterator iter =
       mSocketGameMapping.constFind(tcpSocket);
 
    // remove player from game
@@ -800,7 +837,7 @@ void Server::processRemoveGame(
 void Server::processRemoveAllBots(int gameId)
 {
    Game* game = nullptr;
-   QTcpSocket* tcpSocket = nullptr;
+   NET_StreamSocket* tcpSocket = nullptr;
 
    QMap<int, Game*>::const_iterator it = mGames.find(gameId);
 
@@ -898,7 +935,7 @@ QString Server::correctDuplicatePlayerName(const QString &nick)
    {
       duplicate = false;
 
-      QMapIterator<QTcpSocket*, Player*> i(mPlayerSockets);
+      QMapIterator<NET_StreamSocket*, Player*> i(mPlayerSockets);
       while (i.hasNext())
       {
          i.next();
@@ -922,13 +959,4 @@ QString Server::correctDuplicatePlayerName(const QString &nick)
    while (duplicate);
 
    return correctedNick;
-}
-
-
-//----------------------------------------------------------------------------
-/*!
-*/
-void Server::displayError(QAbstractSocket::SocketError)
-{
-   qDebug("Server::displayError: %s", qPrintable(mTcpServer->errorString()));
 }
