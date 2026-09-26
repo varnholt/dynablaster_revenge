@@ -1,6 +1,8 @@
 #ifndef LOGINREQUESTPACKET_H
 #define LOGINREQUESTPACKET_H
 
+#include <string>
+
 // base
 #include "packet.h"
 
@@ -8,7 +10,7 @@ class LoginRequestPacket : public Packet
 {
 public:
    //! write constructor
-   LoginRequestPacket(const QString& mNick, bool bot);
+   LoginRequestPacket(const std::string& mNick, bool bot);
 
    //! read constructor
    LoginRequestPacket();
@@ -26,14 +28,14 @@ public:
    void dequeue(BinaryReader&);
 
    //! getter for player nick
-   const QString& getNick() const;
+   const std::string& getNick() const;
 
    //! getter for bot flag
    bool isBot() const;
 
 private:
    //! player nick
-   QString mNick;
+   std::string mNick;
 
    //! player is a bot
    bool mBot;

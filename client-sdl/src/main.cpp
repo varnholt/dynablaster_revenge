@@ -301,7 +301,7 @@ int main(int argc, char** argv)
    // memory's dual-signal transition plan). The Qt signal is still dual-emitted from
    // bombermanclient.cpp until every consumer has moved.
    QObject::connect(&gameDrawable, SIGNAL(levelLoaded(QString)), &bombermanClient, SLOT(levelLoaded(QString)));
-   bombermanClient.loadLevelSignal.connect([&](const QString& level) { gameDrawable.loadLevel(level); });
+   bombermanClient.loadLevelSignal.connect([&](const std::string& level) { gameDrawable.loadLevel(QString::fromStdString(level)); });
    bombermanClient.shakeBlockSignal.connect([&](MapItem* item) { gameDrawable.shakeBlock(item); });
    bombermanClient.setPlayerPositionSignal.connect([&](int id, float x, float y, float ang)
                                                    { gameDrawable.setPlayerPosition(id, x, y, ang); });
@@ -332,8 +332,8 @@ int main(int argc, char** argv)
    bombermanClient.createMapItemSignal.connect([&](MapItem* item) { gameDrawable.createMapItem(item); });
    bombermanClient.removeMapItemSignal.connect([&](MapItem* item) { gameDrawable.removeMapItem(item); });
    bombermanClient.destroyMapItemSignal.connect([&](MapItem* item, float flameCount) { gameDrawable.destroyMapItem(item, flameCount); });
-   bombermanClient.addPlayerSignal.connect([&](int id, const QString& nick, Constants::Color color)
-                                           { gameDrawable.addPlayer(id, nick, color); });
+   bombermanClient.addPlayerSignal.connect([&](int id, const std::string& nick, Constants::Color color)
+                                           { gameDrawable.addPlayer(id, QString::fromStdString(nick), color); });
    bombermanClient.removePlayerSignal.connect([&](int id) { gameDrawable.removePlayer(id); });
    bombermanClient.extraRemovedSignal.connect([&](int x, int y, bool destroyed, Constants::ExtraType extra, int playerId)
                                               { gameDrawable.extraRemoved(x, y, destroyed, extra, playerId); });
@@ -343,8 +343,8 @@ int main(int argc, char** argv)
                                                 { gameDrawable.playerInfected(id, skull, infectorId, extraX, extraY); });
    bombermanClient.playerIdSignal.connect([&](int id) { gameDrawable.setPlayerId(id); });
    bombermanClient.countdownSignal.connect([&](int left) { countdownDrawable.countdown(left); });
-   bombermanClient.messageReceivedSignal.connect([&](int senderId, const QString& message, bool finished)
-                                                 { gameMessagingDrawable.messageReceived(senderId, message, finished); });
+   bombermanClient.messageReceivedSignal.connect([&](int senderId, const std::string& message, bool finished)
+                                                 { gameMessagingDrawable.messageReceived(senderId, QString::fromStdString(message), finished); });
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
    // still-deferred GameStatsDrawable/MusicPlayerDrawable/GameHelpDrawable).

@@ -7,7 +7,6 @@
 #include "gameinformation.h"
 
 // Qt
-#include <QString>
 
 #include <vector>
 

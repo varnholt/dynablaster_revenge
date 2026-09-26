@@ -13,8 +13,8 @@
    \param name game's name
 */
 CreateGameRequestPacket::CreateGameRequestPacket(
-   const QString& name,
-   const QString& level,
+   const std::string& name,
+   const std::string& level,
    int rounds,
    int duration,
    int maxPlayers,
@@ -72,7 +72,7 @@ CreateGameRequestPacket::~CreateGameRequestPacket()
 /*!
    \return game's name
 */
-const QString CreateGameRequestPacket::getName()
+const std::string CreateGameRequestPacket::getName()
 {
    return mData.mName;
 }
@@ -144,8 +144,8 @@ void CreateGameRequestPacket::debug()
       "- extra kick enabled: %d"
       "- extra skulls enabled: %d"
       "- dimension: %d",
-      qPrintable(mData.mName),
-      qPrintable(mData.mLevel),
+      mData.mName.c_str(),
+      mData.mLevel.c_str(),
       mData.mRounds,
       mData.mDuration,
       mData.mMaxPlayers,

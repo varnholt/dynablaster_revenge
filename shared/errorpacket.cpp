@@ -11,7 +11,7 @@
    \param errorType error type
    \param message error message
 */
-ErrorPacket::ErrorPacket(Constants::ErrorType errorType, const QString& message)
+ErrorPacket::ErrorPacket(Constants::ErrorType errorType, const std::string& message)
     : Packet(Packet::ERROR), mErrorType(errorType), mErrorMessage(message)
 {
    mPacketName = PACKETNAME;
@@ -72,7 +72,7 @@ void ErrorPacket::setErrorType(Constants::ErrorType errorType)
 /*!
    \return error message
 */
-const QString& ErrorPacket::getErrorMessage() const
+const std::string& ErrorPacket::getErrorMessage() const
 {
    return mErrorMessage;
 }
@@ -81,7 +81,7 @@ const QString& ErrorPacket::getErrorMessage() const
 /*!
    \param message error message
 */
-void ErrorPacket::setErrorMessage(const QString& message)
+void ErrorPacket::setErrorMessage(const std::string& message)
 {
    mErrorMessage = message;
 }
@@ -93,5 +93,5 @@ void ErrorPacket::setErrorMessage(const QString& message)
 void ErrorPacket::debug()
 {
    // debug output login response
-   qDebug("ErrorPacket:debug: type: %d, message: %s", mErrorType, qPrintable(mErrorMessage));
+   qDebug("ErrorPacket:debug: type: %d, message: %s", mErrorType, mErrorMessage.c_str());
 }

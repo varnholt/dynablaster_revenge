@@ -43,8 +43,8 @@ GameInformation::GameInformation(
    int id,
    int playerCount,
    int playerMaximumCount,
-   const QString& gameName,
-   const QString& levelName,
+   const std::string& gameName,
+   const std::string& levelName,
    int creatorId,
    Constants::Dimension dimensions,
    int extras,
@@ -101,7 +101,7 @@ int GameInformation::getPlayerMaximumCount() const
 /*!
    \return game name
 */
-const QString GameInformation::getGameName() const
+const std::string GameInformation::getGameName() const
 {
    return mGameName;
 }
@@ -110,7 +110,7 @@ const QString GameInformation::getGameName() const
 /*!
    \return level name
 */
-const QString GameInformation::getLevelName() const
+const std::string GameInformation::getLevelName() const
 {
    return mLevelName;
 }

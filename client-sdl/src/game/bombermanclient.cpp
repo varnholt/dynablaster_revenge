@@ -48,8 +48,12 @@
 #include "startgameresponsepacket.h"
 #include "stopgamerequestpacket.h"
 #include "stopgameresponsepacket.h"
+#include "stringutils.h"
 #include "timepacket.h"
 #include "tools/stream.h"
+
+#include <format>
+#include <string>
 
 // ai
 #include "botfactory.h"
@@ -71,7 +75,7 @@ BombermanClient* BombermanClient::mInstance = nullptr;
 //-----------------------------------------------------------------------------
 /*!
  */
-BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
+BombermanClient::BombermanClient(/*const std::string& host, const std::string& nick*/)
     : mKeysPressed(0),
       mBombReleased(true),
       mSocket(nullptr),
@@ -274,7 +278,7 @@ void BombermanClient::send(Packet* packet)
 /*!
    \param host host name
 */
-void BombermanClient::setHost(const QString& host)
+void BombermanClient::setHost(const std::string& host)
 {
    mHost = host;
 }
@@ -283,7 +287,7 @@ void BombermanClient::setHost(const QString& host)
 /*!
    \return host name
 */
-const QString& BombermanClient::getHost() const
+const std::string& BombermanClient::getHost() const
 {
    return mHost;
 }
@@ -293,7 +297,7 @@ const QString& BombermanClient::getHost() const
  */
 void BombermanClient::connectToServer()
 {
-   mAddress = NET_ResolveHostname(qPrintable(getHost()));
+   mAddress = NET_ResolveHostname(getHost().c_str());
 
    if (!mAddress)
    {
@@ -340,7 +344,7 @@ void BombermanClient::clientDisconnect()
    resetGameData();
    resetClientState();
 
-   qDebug() << QString("disconnected");
+   qDebug("disconnected");
 
    auto it = mMapItems.begin();
    while (it != mMapItems.end())
@@ -378,11 +382,11 @@ void BombermanClient::disconnectFromServer()
 */
 void BombermanClient::reportConnectionError(const char* reason)
 {
-   QString message = TEXT_ERROR_NETWORK_GENERAL;
+   std::string message = TEXT_ERROR_NETWORK_GENERAL;
 
    if (reason && *reason)
    {
-      message += QString(" (%1)").arg(reason);
+      message += std::format(" ({})", reason);
    }
 
    HelpManager::getInstance()->addMessage("", message, Constants::HelpSeverityError);
@@ -817,7 +821,7 @@ PositionInterpolation* BombermanClient::getPositionInterpolation() const
 /*!
    \return current message
 */
-const QString& BombermanClient::getMessage() const
+const std::string& BombermanClient::getMessage() const
 {
    return mMessage;
 }
@@ -826,7 +830,7 @@ const QString& BombermanClient::getMessage() const
 /*!
    \param message message to set
 */
-void BombermanClient::setMessage(const QString& message)
+void BombermanClient::setMessage(const std::string& message)
 {
    mMessage = message;
 }
@@ -1890,7 +1894,7 @@ void BombermanClient::resetGameData()
    \param nick nick to use
    \param color color to use
 */
-void BombermanClient::login(const QString& nick)
+void BombermanClient::login(const std::string& nick)
 {
    setNick(nick);
    LoginRequestPacket login(nick, false);
@@ -1909,7 +1913,7 @@ void BombermanClient::stopGame()
 /*!
    \param player's nick
 */
-void BombermanClient::setNick(const QString& nick)
+void BombermanClient::setNick(const std::string& nick)
 {
    mNick = nick;
 }
@@ -1918,7 +1922,7 @@ void BombermanClient::setNick(const QString& nick)
 /*!
    \return player's nick
 */
-const QString& BombermanClient::getNick() const
+const std::string& BombermanClient::getNick() const
 {
    return mNick;
 }
@@ -1928,7 +1932,7 @@ const QString& BombermanClient::getNick() const
    \param message message to send
    \param receiverId id of the message receiver
 */
-void BombermanClient::sendMessage(const QString& message, bool finishedTyping, int receiverId)
+void BombermanClient::sendMessage(const std::string& message, bool finishedTyping, int receiverId)
 {
    if (!finishedTyping)
       setMessage(message);
@@ -1962,7 +1966,17 @@ void BombermanClient::listGames()
 void BombermanClient::createGameAutomatic()
 {
    createGame(
-      "coding", Level::getLevelDirectoryName(Level::LevelCastle), 1, 1800, 10, true, true, true, true, true, Constants::Dimension13x11
+      "coding",
+      Level::getLevelDirectoryName(Level::LevelCastle).toStdString(),
+      1,
+      1800,
+      10,
+      true,
+      true,
+      true,
+      true,
+      true,
+      Constants::Dimension13x11
    );
 }
 
@@ -1971,8 +1985,8 @@ void BombermanClient::createGameAutomatic()
    \param name game's name
 */
 void BombermanClient::createGame(
-   const QString& name,
-   const QString& level,
+   const std::string& name,
+   const std::string& level,
    int rounds,
    int duration,
    int maxPlayers,
@@ -2050,9 +2064,9 @@ void BombermanClient::setLoginAfterConnect(bool loginAfterConnect)
    \param host host to use
    \param nick nick to use
 */
-void BombermanClient::loginRequest(const QString& host, const QString& nick)
+void BombermanClient::loginRequest(const std::string& host, const std::string& nick)
 {
-   const QString previousHost = getHost();
+   const std::string previousHost = getHost();
    const bool connectedOrConnecting = (mSocket != nullptr) || (mAddress != nullptr);
 
    setHost(host);
@@ -2060,10 +2074,12 @@ void BombermanClient::loginRequest(const QString& host, const QString& nick)
 
    // we first have to disconnect from the current server
    // because its hostname obviously differs from ours
-   if (connectedOrConnecting && previousHost.toLower() != host.toLower())
+   if (connectedOrConnecting && StringUtils::toLower(previousHost) != StringUtils::toLower(host))
    {
       qDebug(
-         "BombermanClient::loginRequest: connect to another host: %s -> %s", qPrintable(previousHost.toLower()), qPrintable(host.toLower())
+         "BombermanClient::loginRequest: connect to another host: %s -> %s",
+         StringUtils::toLower(previousHost).c_str(),
+         StringUtils::toLower(host).c_str()
       );
 
       setConnected(false);
@@ -2172,9 +2188,9 @@ void BombermanClient::initializePlayback()
 /*!
    \return local ips
 */
-std::vector<QString> BombermanClient::getLocalIps() const
+std::vector<std::string> BombermanClient::getLocalIps() const
 {
-   std::vector<QString> ips;
+   std::vector<std::string> ips;
 
    int count = 0;
    NET_Address** addresses = NET_GetLocalAddresses(&count);
@@ -2188,10 +2204,10 @@ std::vector<QString> BombermanClient::getLocalIps() const
          if (!address)
             continue;
 
-         QString ip(address);
+         std::string ip(address);
 
          // IPv4 only, no loopback
-         if (!ip.contains(':') && ip != "127.0.0.1")
+         if (ip.find(':') == std::string::npos && ip != "127.0.0.1")
             ips.push_back(ip);
       }
 
@@ -2299,17 +2315,17 @@ void BombermanClient::showIps()
    // only do this when we're somewhere in the menus
    if (GameStateMachine::getInstance()->getState() == Constants::GameStopped)
    {
-      std::vector<QString> ipList = getLocalIps();
+      std::vector<std::string> ipList = getLocalIps();
 
       std::size_t index = 0;
       while (index < ipList.size())
       {
          // combine two ips per message
-         QString combined = ipList[index++];
+         std::string combined = ipList[index++];
          if (index < ipList.size())
             combined += ";" + ipList[index++];
 
-         QString ipText = tr("your ips are;%1").arg(combined);
+         std::string ipText = std::format("your ips are;{}", combined);
          HelpManager::getInstance()->addMessage("", ipText, Constants::HelpSeverityNotification);
       }
    }

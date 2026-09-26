@@ -132,7 +132,7 @@ void BotClient::initialize()
  */
 void BotClient::connectToServer()
 {
-   mAddress = NET_ResolveHostname(qPrintable(mHost));
+   mAddress = NET_ResolveHostname(mHost.c_str());
 
    if (!mAddress)
    {
@@ -223,7 +223,7 @@ void BotClient::clientDisconnect()
 /*!
    \param host host to set
 */
-void BotClient::setHost(const QString& host)
+void BotClient::setHost(const std::string& host)
 {
    mHost = host;
 }
@@ -232,7 +232,7 @@ void BotClient::setHost(const QString& host)
 /*!
    \param player's nick
 */
-void BotClient::setNick(const QString& nick)
+void BotClient::setNick(const std::string& nick)
 {
    mNick = nick;
 }
@@ -1290,7 +1290,7 @@ int BotClient::getPlayerId() const
    \param message message to send
    \param receiverId id of the message receiver
 */
-void BotClient::sendMessage(const QString& message, bool finishedTyping, int receiverId)
+void BotClient::sendMessage(const std::string& message, bool finishedTyping, int receiverId)
 {
    if (isGameJoined())
    {

@@ -106,7 +106,7 @@ void Packet::setTimeStamp(const QTime& time)
 /*!
    \return packet name
 */
-const QString& Packet::getPacketName() const
+const std::string& Packet::getPacketName() const
 {
    return mPacketName;
 }

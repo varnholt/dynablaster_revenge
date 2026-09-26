@@ -12,7 +12,7 @@
    \param nickName player's nick
    \param col player's color
 */
-LoginRequestPacket::LoginRequestPacket(const QString& nickName, bool bot) : Packet(Packet::LOGINREQUEST), mNick(nickName), mBot(bot)
+LoginRequestPacket::LoginRequestPacket(const std::string& nickName, bool bot) : Packet(Packet::LOGINREQUEST), mNick(nickName), mBot(bot)
 {
    mPacketName = PACKETNAME;
 }
@@ -35,7 +35,7 @@ LoginRequestPacket::~LoginRequestPacket()
 /*!----------------------------------------------------------------------------
    \return player's nickname
 */
-const QString& LoginRequestPacket::getNick() const
+const std::string& LoginRequestPacket::getNick() const
 {
    return mNick;
 }
@@ -75,5 +75,5 @@ void LoginRequestPacket::dequeue(BinaryReader& in)
 void LoginRequestPacket::debug()
 {
    // debug output login request
-   qDebug("LoginRequestPacket:loginrequest: player: %s, bot: %d", qPrintable(mNick), mBot);
+   qDebug("LoginRequestPacket:loginrequest: player: %s, bot: %d", mNick.c_str(), mBot);
 }

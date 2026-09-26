@@ -1,6 +1,8 @@
 #ifndef PLAYERINFO_H
 #define PLAYERINFO_H
 
+#include <string>
+
 // game
 #include "constants.h"
 #include "playerstats.h"
@@ -8,7 +10,6 @@
 // Qt
 #include <QObject>
 #include <QPointer>
-#include <QString>
 
 // forward declarations
 class PlayerDisease;
@@ -26,13 +27,13 @@ Q_OBJECT
 
       void setColor(Constants::Color);
 
-      void setNick(const QString&);
+      void setNick(const std::string&);
 
       int getId() const;
 
       Constants::Color getColor() const;
 
-      QString getNick() const;
+      std::string getNick() const;
 
       void setPosition(float x, float y, float angle);
 
@@ -108,7 +109,7 @@ Q_OBJECT
       //! round stats
       PlayerStats mRoundStats;
 
-      QString mNick;
+      std::string mNick;
 
       float mX;
 

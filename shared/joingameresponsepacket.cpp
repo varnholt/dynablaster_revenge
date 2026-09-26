@@ -12,7 +12,7 @@
 
    \param nickName player's nick
 */
-JoinGameResponsePacket::JoinGameResponsePacket(bool success, int32_t gameId, int32_t playerId, const QString& nick, Constants::Color color)
+JoinGameResponsePacket::JoinGameResponsePacket(bool success, int32_t gameId, int32_t playerId, const std::string& nick, Constants::Color color)
     : Packet(Packet::JOINGAMERESPONSE), mSuccess(success), mGameId(gameId), mPlayerId(playerId), mNick(nick), mColor(color)
 {
    mPacketName = PACKETNAME;
@@ -110,7 +110,7 @@ void JoinGameResponsePacket::debug()
 /*!
    \return player's nickname
 */
-const QString& JoinGameResponsePacket::getNick() const
+const std::string& JoinGameResponsePacket::getNick() const
 {
    return mNick;
 }

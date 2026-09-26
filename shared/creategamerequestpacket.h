@@ -8,16 +8,15 @@
 #include "constants.h"
 #include "creategamedata.h"
 
-// Qt
-#include <QString>
+#include <string>
 
 class CreateGameRequestPacket : public Packet
 {
 public:
    //! write constructor
    CreateGameRequestPacket(
-      const QString& name,
-      const QString& level,
+      const std::string& name,
+      const std::string& level,
       int rounds,
       int duration,
       int maxPlayers,
@@ -45,7 +44,7 @@ public:
    void dequeue(BinaryReader&);
 
    //! getter for game name
-   const QString getName();
+   const std::string getName();
 
    //! getter for create game data
    CreateGameData getData() const;

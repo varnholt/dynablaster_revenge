@@ -8,36 +8,14 @@
 #include "server.h"
 
 // shared
-#include "systemtools.h"
 #include "timer.h"
 
 #include <chrono>
 #include <thread>
 
 
-namespace
-{
-static constexpr auto minimum_version_major = 5;
-static constexpr auto minimum_version_minor = 0;
-}
-
-
 int main(int argc, char** argv)
 {
-   QString version;
-
-   if (!checkQtVersion(minimum_version_major, minimum_version_minor, &version))
-   {
-      qWarning(
-         "The installed Qt version (%s) is invalid!\nRequired is a version >=%d.%d.",
-         qPrintable(version),
-         minimum_version_major,
-         minimum_version_minor
-      );
-
-      return 0;
-   }
-
    if (!NET_Init())
    {
       qWarning("Failed to initialize SDL_net: %s", SDL_GetError());

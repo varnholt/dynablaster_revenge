@@ -1,6 +1,8 @@
 #ifndef LOGINRESPONSEPACKET_H
 #define LOGINRESPONSEPACKET_H
 
+#include <string>
+
 // base
 #include "packet.h"
 
@@ -11,7 +13,7 @@ class LoginResponsePacket : public Packet
 {
 public:
    //! write constructor
-   LoginResponsePacket(bool broadcasted, int32_t id, const QString& nick, const ServerConfiguration& serverConfig);
+   LoginResponsePacket(bool broadcasted, int32_t id, const std::string& nick, const ServerConfiguration& serverConfig);
 
    //! read constructor
    LoginResponsePacket();
@@ -35,7 +37,7 @@ public:
    int32_t getId() const;
 
    //! getter for player nick
-   const QString& getNick() const;
+   const std::string& getNick() const;
 
    //! getter for broadcast flag
    bool isBroadcast() const;
@@ -51,7 +53,7 @@ private:
    int32_t mId;
 
    //! player nick
-   QString mNick;
+   std::string mNick;
 
    //! server configuration data
    ServerConfiguration mServerConfiguration;

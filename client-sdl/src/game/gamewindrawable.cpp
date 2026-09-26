@@ -30,7 +30,10 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <format>
+#include <map>
 #include <math.h>
+#include <string>
 
 #define OFFSET_X_POINTS -43
 #define OFFSET_Y_POINTS -2
@@ -199,13 +202,13 @@ void GameWinDrawable::drawWinnerText()
 
    if (isDrawGame())
    {
-      mLargeFont->buildVertices(fontSize, qPrintable(tr("draw game")), 0.0f, 0.15f * 1080.0f + yOffset, 1920.0f);
+      mLargeFont->buildVertices(fontSize, "draw game", 0.0f, 0.15f * 1080.0f + yOffset, 1920.0f);
       mLargeFont->draw();
    }
    else
    {
-      QString winText = tr("%1 wins!").arg(getWinnerName());
-      mLargeFont->buildVertices(fontSize, qPrintable(winText), 0.0f, 0.15f * 1080.0f + yOffset, 1920.0f);
+      std::string winText = std::format("{} wins!", getWinnerName());
+      mLargeFont->buildVertices(fontSize, winText.c_str(), 0.0f, 0.15f * 1080.0f + yOffset, 1920.0f);
       mLargeFont->draw();
    }
 }
@@ -234,7 +237,7 @@ void GameWinDrawable::initGameData()
       Constants::Color color = info->getColor();
       int colorIndex = color - 1;
 
-      qDebug("GameWinDrawable::initGameData(): #%d: %s", w.getWeight(), qPrintable(info->getNick()));
+      qDebug("GameWinDrawable::initGameData(): #%d: %s", w.getWeight(), info->getNick().c_str());
 
       PSDLayer* rankLayer = mRanks[row];
       PSDLayer* nameLayer = mNames[row];
@@ -275,15 +278,16 @@ void GameWinDrawable::drawGameData()
       PSDLayer* pointsLayer = mPoints[row];
 
       mDefaultFont->setColor(1.0f, 1.0f, 1.0f, 1.0f);
-      mDefaultFont->buildVertices(0.27f, qPrintable(info->getNick()), nameLayer->getLeft(), nameLayer->getBottom() + OFFSET_Y_NAME);
+      mDefaultFont->buildVertices(0.27f, info->getNick().c_str(), nameLayer->getLeft(), nameLayer->getBottom() + OFFSET_Y_NAME);
       mDefaultFont->draw();
 
       const int colorIndex = static_cast<int32_t>(info->getColor()) - 1;
       mPlayerScoresAnimated[colorIndex] += mDeltaTime;
       const int score = static_cast<int32_t>(qMin(mPlayerScoresAnimated[colorIndex], static_cast<float>(computeScore(info))));
 
+      const auto scoreText = std::to_string(score);
       mDefaultFont->buildVertices(
-         0.27f, qPrintable(QString("%1").arg(score)), pointsLayer->getLeft() + OFFSET_X_POINTS, pointsLayer->getBottom() + OFFSET_Y_POINTS,
+         0.27f, scoreText.c_str(), pointsLayer->getLeft() + OFFSET_X_POINTS, pointsLayer->getBottom() + OFFSET_Y_POINTS,
          CENTER_WIDTH_SCORE
       );
       mDefaultFont->draw();
@@ -497,12 +501,12 @@ Constants::Color GameWinDrawable::getColorEnum() const
    return mColorEnum;
 }
 
-void GameWinDrawable::setWinnerName(const QString& name)
+void GameWinDrawable::setWinnerName(const std::string& name)
 {
    mWinnerName = name;
 }
 
-const QString& GameWinDrawable::getWinnerName()
+const std::string& GameWinDrawable::getWinnerName()
 {
    return mWinnerName;
 }
@@ -588,94 +592,94 @@ void GameWinDrawable::cleanupGlParameters()
 
 void GameWinDrawable::initializeLayers()
 {
-   mPsd.load(qPrintable(mFilename));
+   mPsd.load(mFilename.c_str());
 
-   QMap<QString, int> ranks;
-   ranks.insert("p1-rank", 0);
-   ranks.insert("p2-rank", 1);
-   ranks.insert("p3-rank", 2);
-   ranks.insert("p4-rank", 3);
-   ranks.insert("p5-rank", 4);
-   ranks.insert("p6-rank", 5);
-   ranks.insert("p7-rank", 6);
-   ranks.insert("p8-rank", 7);
-   ranks.insert("p9-rank", 8);
-   ranks.insert("p10-rank", 9);
+   std::map<std::string, int> ranks;
+   ranks.insert({"p1-rank", 0});
+   ranks.insert({"p2-rank", 1});
+   ranks.insert({"p3-rank", 2});
+   ranks.insert({"p4-rank", 3});
+   ranks.insert({"p5-rank", 4});
+   ranks.insert({"p6-rank", 5});
+   ranks.insert({"p7-rank", 6});
+   ranks.insert({"p8-rank", 7});
+   ranks.insert({"p9-rank", 8});
+   ranks.insert({"p10-rank", 9});
 
-   QMap<QString, Constants::Color> icons;
-   icons.insert("white-icon", Constants::ColorWhite);
-   icons.insert("black-icon", Constants::ColorBlack);
-   icons.insert("red-icon", Constants::ColorRed);
-   icons.insert("green-icon", Constants::ColorGreen);
-   icons.insert("blue-icon", Constants::ColorBlue);
-   icons.insert("silver-icon", Constants::ColorGrey);
-   icons.insert("gold-icon", Constants::ColorYellow);
-   icons.insert("purple-icon", Constants::ColorPurple);
-   icons.insert("cyan-icon", Constants::ColorCyan);
-   icons.insert("orange-icon", Constants::ColorOrange);
+   std::map<std::string, Constants::Color> icons;
+   icons.insert({"white-icon", Constants::ColorWhite});
+   icons.insert({"black-icon", Constants::ColorBlack});
+   icons.insert({"red-icon", Constants::ColorRed});
+   icons.insert({"green-icon", Constants::ColorGreen});
+   icons.insert({"blue-icon", Constants::ColorBlue});
+   icons.insert({"silver-icon", Constants::ColorGrey});
+   icons.insert({"gold-icon", Constants::ColorYellow});
+   icons.insert({"purple-icon", Constants::ColorPurple});
+   icons.insert({"cyan-icon", Constants::ColorCyan});
+   icons.insert({"orange-icon", Constants::ColorOrange});
 
-   QMap<QString, int> names;
-   names.insert("p1-name", 0);
-   names.insert("p2-name", 1);
-   names.insert("p3-name", 2);
-   names.insert("p4-name", 3);
-   names.insert("p5-name", 4);
-   names.insert("p6-name", 5);
-   names.insert("p7-name", 6);
-   names.insert("p8-name", 7);
-   names.insert("p9-name", 8);
-   names.insert("p10-name", 9);
+   std::map<std::string, int> names;
+   names.insert({"p1-name", 0});
+   names.insert({"p2-name", 1});
+   names.insert({"p3-name", 2});
+   names.insert({"p4-name", 3});
+   names.insert({"p5-name", 4});
+   names.insert({"p6-name", 5});
+   names.insert({"p7-name", 6});
+   names.insert({"p8-name", 7});
+   names.insert({"p9-name", 8});
+   names.insert({"p10-name", 9});
 
-   QMap<QString, int> points;
-   points.insert("p1-points", 0);
-   points.insert("p2-points", 1);
-   points.insert("p3-points", 2);
-   points.insert("p4-points", 3);
-   points.insert("p5-points", 4);
-   points.insert("p6-points", 5);
-   points.insert("p7-points", 6);
-   points.insert("p8-points", 7);
-   points.insert("p9-points", 8);
-   points.insert("p10-points", 9);
+   std::map<std::string, int> points;
+   points.insert({"p1-points", 0});
+   points.insert({"p2-points", 1});
+   points.insert({"p3-points", 2});
+   points.insert({"p4-points", 3});
+   points.insert({"p5-points", 4});
+   points.insert({"p6-points", 5});
+   points.insert({"p7-points", 6});
+   points.insert({"p8-points", 7});
+   points.insert({"p9-points", 8});
+   points.insert({"p10-points", 9});
 
-   QMap<QString, int> bars;
-   bars.insert("bar-bg-1", 0);
-   bars.insert("bar-bg-2", 1);
-   bars.insert("bar-bg-3", 2);
-   bars.insert("bar-bg-4", 3);
-   bars.insert("bar-bg-5", 4);
-   bars.insert("bar-bg-6", 5);
-   bars.insert("bar-bg-7", 6);
-   bars.insert("bar-bg-8", 7);
-   bars.insert("bar-bg-9", 8);
-   bars.insert("bar-bg-10", 9);
+   std::map<std::string, int> bars;
+   bars.insert({"bar-bg-1", 0});
+   bars.insert({"bar-bg-2", 1});
+   bars.insert({"bar-bg-3", 2});
+   bars.insert({"bar-bg-4", 3});
+   bars.insert({"bar-bg-5", 4});
+   bars.insert({"bar-bg-6", 5});
+   bars.insert({"bar-bg-7", 6});
+   bars.insert({"bar-bg-8", 7});
+   bars.insert({"bar-bg-9", 8});
+   bars.insert({"bar-bg-10", 9});
 
    for (int l = 0; l < mPsd.getLayerCount(); l++)
    {
       PSDLayer* layer = new PSDLayer(mPsd.getLayer(l));
-      QString layerName = layer->getLayer()->getName();
+      std::string layerName = layer->getLayer()->getName();
 
       mPsdLayers << layer;
 
       auto rankIterator = ranks.find(layerName);
       if (rankIterator != ranks.end())
-         mRanks[rankIterator.value()] = layer;
+         mRanks[rankIterator->second] = layer;
 
       auto iconsIterator = icons.find(layerName);
       if (iconsIterator != icons.end())
-         mIcons[iconsIterator.value() - 1] = layer;
+         mIcons[iconsIterator->second - 1] = layer;
 
       auto namesIterator = names.find(layerName);
       if (namesIterator != names.end())
-         mNames[namesIterator.value()] = layer;
+         mNames[namesIterator->second] = layer;
 
       auto pointsIterator = points.find(layerName);
       if (pointsIterator != points.end())
-         mPoints[pointsIterator.value()] = layer;
+         mPoints[pointsIterator->second] = layer;
 
       auto barsIterator = bars.find(layerName);
       if (barsIterator != bars.end())
-         mBars[barsIterator.value()] = layer;
+         mBars[barsIterator->second] = layer;
    }
 }
 
@@ -707,12 +711,14 @@ void GameWinDrawable::initializePlayerMaterial()
 
    FileStream::addPath("data/winner");
 
-   mPlayerMaterial = new PlayerMaterial(mScene, qPrintable(QString("player_%1").arg(Constants::ColorCyan)), "diffuse_level", "specular_level", "player-ao");
+   const auto material_texture_name = std::format("player_{}", static_cast<int>(Constants::ColorCyan));
+   mPlayerMaterial = new PlayerMaterial(mScene, material_texture_name.c_str(), "diffuse_level", "specular_level", "player-ao");
 
    TexturePool* pool = TexturePool::Instance();
    for (int i = 0; i < 10; i++)
    {
-      mPlayerTextures[i] = pool->getTexture(qPrintable(QString("player_%1").arg(i + 1)));
+      const auto texture_name = std::format("player_{}", i + 1);
+      mPlayerTextures[i] = pool->getTexture(texture_name.c_str());
    }
 
    FileStream::removePath("data/winner");

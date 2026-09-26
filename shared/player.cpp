@@ -215,7 +215,7 @@ PlayerRotation* Player::getPlayerRotation()
 /*!
    \param nick player's nick
 */
-void Player::setNick(const QString& nick)
+void Player::setNick(const std::string& nick)
 {
    mNick = nick;
 }
@@ -225,7 +225,7 @@ void Player::setNick(const QString& nick)
 /*!
    \return the player's rotation
 */
-const QString& Player::getNick()
+const std::string& Player::getNick()
 {
    return mNick;
 }

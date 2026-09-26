@@ -9,9 +9,10 @@
 #include "menus/psdlayer.h"
 #include "render/texture.h"
 
+#include <string>
+
 #include <QColor>
 #include <QObject>
-#include <QString>
 
 class BitmapFont;
 class BlurFilter;
@@ -44,8 +45,8 @@ public:
    void setColorEnum(Constants::Color color);
    Constants::Color getColorEnum() const;
 
-   void setWinnerName(const QString& name);
-   const QString& getWinnerName();
+   void setWinnerName(const std::string& name);
+   const std::string& getWinnerName();
 
    void setDrawGame(bool draw);
    bool isDrawGame() const;
@@ -83,7 +84,7 @@ private:
 
    QColor mColor;
    Constants::Color mColorEnum;
-   QString mWinnerName;
+   std::string mWinnerName;
 
    BitmapFont* mLargeFont;
    BitmapFont* mDefaultFont;
@@ -118,7 +119,7 @@ private:
    PlayerMaterial* mPlayerMaterial;
    Texture mPlayerTextures[10];
 
-   QString mFilename;
+   std::string mFilename;
    PSD mPsd;
    QList<PSDLayer*> mPsdLayers;
 

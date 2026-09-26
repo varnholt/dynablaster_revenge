@@ -2,9 +2,9 @@
 #define PACKET_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
-#include <QString>
 #include <QTime>
 
 #include "binaryreader.h"
@@ -92,7 +92,7 @@ public:
    void setTimeStamp(const QTime& time);
 
    //! getter for packet name
-   const QString& getPacketName() const;
+   const std::string& getPacketName() const;
 
    //! raw byte pointer, kept for existing socket-write call sites
    const char* constData() const;
@@ -108,7 +108,7 @@ protected:
    QTime mTimestamp;
 
    //! packet name
-   QString mPacketName;
+   std::string mPacketName;
 };
 
 #endif

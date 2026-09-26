@@ -155,8 +155,8 @@ set(DYNABLASTER_SHARED_SOURCES
     ../shared/stopgamerequestpacket.h
     ../shared/stopgameresponsepacket.cpp
     ../shared/stopgameresponsepacket.h
-    ../shared/systemtools.cpp
-    ../shared/systemtools.h
+    ../shared/stringutils.cpp
+    ../shared/stringutils.h
     ../shared/timepacket.cpp
     ../shared/timepacket.h
     ../shared/timer.cpp

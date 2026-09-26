@@ -6,7 +6,6 @@
 #include "packet.h"
 
 // Qt
-#include <QString>
 
 class CreateGameResponsePacket : public Packet
 {

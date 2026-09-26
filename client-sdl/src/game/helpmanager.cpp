@@ -21,8 +21,8 @@ HelpManager* HelpManager::getInstance()
 
 
 void HelpManager::addMessage(
-   const QString& page,
-   const QString &message,
+   const std::string& page,
+   const std::string& message,
    Constants::HelpSeverity severity,
    Constants::HelpLocation location,
    int delay

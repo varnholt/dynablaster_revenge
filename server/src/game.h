@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <string>
+
 #include <QList>
 #include <QMap>
 #include <QObject>
@@ -58,13 +60,13 @@ public:
    void setCreateGameData(const CreateGameData& data);
 
    //! setter for game name
-   void setName(const QString& name);
+   void setName(const std::string& name);
 
    //! getter for the game's name
-   const QString& getName() const;
+   const std::string& getName() const;
 
    //! getter for the level's name
-   const QString& getLevelName() const;
+   const std::string& getLevelName() const;
 
    //! process a packet
    void processPacket(NET_StreamSocket* tcpSocket, Packet* packet);
@@ -97,7 +99,7 @@ public:
    int getDuration() const;
 
    //! broadcast a message to all players in the game
-   void broadcastMessage(const QString&);
+   void broadcastMessage(const std::string&);
 
    //! broadcast start game
    void broadcastStartGame();
@@ -342,7 +344,7 @@ private:
    int getPlayersLeftTheGameCount() const;
 
    //! send a message to game owner
-   void sendMessageToOwner(const QString& message);
+   void sendMessageToOwner(const std::string& message);
 
    //! do not rotate dead player into stones
    void rotateDeadPlayerTowardsBomb(Constants::Direction direction, Player* player, int x, int y);

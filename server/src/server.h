@@ -1,6 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <string>
+
 #include <QObject>
 #include <QMap>
 #include <QList>
@@ -53,16 +55,16 @@ public slots:
 signals:
 
    //! new player connected to server
-   void newPlayer(int playerId, const QString& nickName);
+   void newPlayer(int playerId, const std::string& nickName);
 
    //! player disconnected
-   void removePlayer(int playerId, const QString& nickName);
+   void removePlayer(int playerId, const std::string& nickName);
 
    //! new game created
-   void newGame(int gameId, const QString& gameName);
+   void newGame(int gameId, const std::string& gameName);
 
    //! game removed
-   void removeGame(int gameId, const QString& gameName);
+   void removeGame(int gameId, const std::string& gameName);
 
 
 protected:
@@ -107,7 +109,7 @@ private:
    void disconnectSocket(NET_StreamSocket* socket);
 
    //! fix duplicate player names
-   QString correctDuplicatePlayerName(const QString& nick);
+   std::string correctDuplicatePlayerName(const std::string& nick);
 
    //! listen socket
    NET_Server* mNetServer;

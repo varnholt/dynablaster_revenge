@@ -1,9 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <string>
+
 // Qt
 #include <QPointer>
-#include <QString>
 
 // shared
 #include "constants.h"
@@ -66,10 +67,10 @@ public:
    PlayerRotation* getPlayerRotation();
 
    //! setter for the player's nick
-   void setNick(const QString& nick);
+   void setNick(const std::string& nick);
 
    //! getter for the player's nick
-   const QString& getNick();
+   const std::string& getNick();
 
    //! setter for bombs
    void setBombCount(int8_t count);
@@ -195,7 +196,7 @@ private:
    float mY;
 
    //! nick
-   QString mNick;
+   std::string mNick;
 
    //! number of bombs
    int mBombCount;

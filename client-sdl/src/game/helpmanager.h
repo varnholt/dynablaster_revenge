@@ -1,6 +1,8 @@
 #ifndef HELPMANAGER_H
 #define HELPMANAGER_H
 
+#include <string>
+
 // Qt
 #include <QObject>
 
@@ -18,8 +20,8 @@ public:
 signals:
 
    void messageAdded(
-      const QString& page,
-      const QString& message,
+      const std::string& page,
+      const std::string& message,
       Constants::HelpSeverity severity,
       Constants::HelpLocation location,
       int delay
@@ -29,8 +31,8 @@ signals:
 public slots:
 
    void addMessage(
-      const QString& page,
-      const QString& message,
+      const std::string& page,
+      const std::string& message,
       Constants::HelpSeverity severity,
       Constants::HelpLocation location = Constants::HelpLocationTopRight,
       int delay = 0

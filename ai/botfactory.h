@@ -1,6 +1,9 @@
 #ifndef BOTFACTORY_H
 #define BOTFACTORY_H
 
+#include <string>
+#include <vector>
+
 // Qt
 #include <QObject>
 #include <QList>
@@ -21,9 +24,9 @@ public:
 
    void add(int count = 1);
 
-   void setHostname(const QString& hostname);
+   void setHostname(const std::string& hostname);
 
-   const QString& getHostname() const;
+   const std::string& getHostname() const;
 
    void setGameId(int gameId);
 
@@ -44,7 +47,7 @@ protected:
    void createBotClientPair();
 
    //! host to connect to
-   QString mHostname;
+   std::string mHostname;
 
    //! game to join
    int mGameId;
@@ -56,7 +59,7 @@ protected:
    QList<Bot*> mBots;
 
    //! list of given names
-   QList<QString> mGivenNames;
+   std::vector<std::string> mGivenNames;
 };
 
 #endif // BOTFACTORY_H

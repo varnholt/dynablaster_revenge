@@ -26,6 +26,8 @@
 // Qt
 #include "settings.h"
 
+#include <format>
+#include <string>
 #include <vector>
 
 // SDL
@@ -286,7 +288,7 @@ void Server::processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 
          if (game->joinGame(player, tcpSocket))
          {
-            game->broadcastMessage(tr("%1 joined the game").arg(player->getNick()));
+            game->broadcastMessage(std::format("{} joined the game", player->getNick()));
 
             mSocketGameMapping.insert(tcpSocket, game);
 
@@ -337,7 +339,7 @@ void Server::processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packe
 
             player->setLoadingSynchronized(true);
 
-            qDebug("Server::processPlayerSynchronize: game: %d player: '%s'", game->getId(), qPrintable(player->getNick()));
+            qDebug("Server::processPlayerSynchronize: game: %d player: '%s'", game->getId(), player->getNick().c_str());
          }
       }
    }
@@ -356,7 +358,7 @@ void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
    {
       bool wasLoggedIn = player->isLoggedIn();
 
-      QString nick = request->getNick();
+      std::string nick = request->getNick();
       if (!wasLoggedIn)
          nick = correctDuplicatePlayerName(nick);
 
@@ -638,8 +640,8 @@ void Server::processBroadcastLeaveGameResponse(Player* player, Game* game)
       qDebug(
          "Server::processBroadcastLeaveGameResponse: "
          "informing '%s' that '%s' left",
-         qPrintable(i.value()->getNick()),
-         qPrintable(player->getNick())
+         i.value()->getNick().c_str(),
+         player->getNick().c_str()
       );
 
       sendPacket(i.key(), new LeaveGameResponsePacket(game->getId(), player->getId()));
@@ -677,7 +679,7 @@ void Server::processPlayerLeavesGame(NET_StreamSocket* tcpSocket)
       }
       else
       {
-         game->broadcastMessage(tr("%1 left the game").arg(player->getNick()));
+         game->broadcastMessage(std::format("{} left the game", player->getNick()));
 
          if (player == game->getCreator())
          {
@@ -689,7 +691,7 @@ void Server::processPlayerLeavesGame(NET_StreamSocket* tcpSocket)
                if (!tmpPlayer->isBot())
                {
                   game->setCreator(tmpPlayer);
-                  game->broadcastMessage(tr("%1 is the new game owner").arg(tmpPlayer->getNick()));
+                  game->broadcastMessage(std::format("{} is the new game owner", tmpPlayer->getNick()));
                   break;
                }
             }
@@ -771,8 +773,8 @@ void Server::correctDuplicateGameName(Game* newGame)
 {
    bool changed = false;
 
-   QString gameName = newGame->getName();
-   QString correctedGameName = gameName;
+   std::string gameName = newGame->getName();
+   std::string correctedGameName = gameName;
 
    bool duplicate = false;
    int iteration = 0;
@@ -794,7 +796,7 @@ void Server::correctDuplicateGameName(Game* newGame)
       {
          changed = true;
 
-         correctedGameName = QString("%1 #%2").arg(gameName).arg(iteration + 1);
+         correctedGameName = std::format("{} #{}", gameName, iteration + 1);
 
          iteration++;
       }
@@ -812,9 +814,9 @@ void Server::correctDuplicateGameName(Game* newGame)
    \param nick player nick
    \return corrected player nick
 */
-QString Server::correctDuplicatePlayerName(const QString& nick)
+std::string Server::correctDuplicatePlayerName(const std::string& nick)
 {
-   QString correctedNick = nick;
+   std::string correctedNick = nick;
 
    bool duplicate = false;
    int iteration = 0;
@@ -837,7 +839,7 @@ QString Server::correctDuplicatePlayerName(const QString& nick)
 
       if (duplicate)
       {
-         correctedNick = QString("%1%2").arg(nick).arg(iteration + 1);
+         correctedNick = std::format("{}{}", nick, iteration + 1);
 
          iteration++;
       }

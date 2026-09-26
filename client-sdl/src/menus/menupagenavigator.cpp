@@ -155,8 +155,10 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
                                                                       { onPlayerInfoMapUpdated(infoMap); });
 
    // matches GameMenuWorkflow's own connection to BombermanClient::messageReceived - lounge chat.
-   BombermanClient::getInstance()->messageReceivedSignal.connect([this](int senderId, const QString& message, bool finished)
-                                                                 { onMessageReceived(senderId, message, finished); });
+   BombermanClient::getInstance()->messageReceivedSignal.connect(
+      [this](int senderId, const std::string& message, bool finished)
+      { onMessageReceived(senderId, QString::fromStdString(message), finished); }
+   );
 
    // matches MenuWorkflow::initialize() calling deserializeLoginData() once at startup - the
    // main menu is already the current page by construction time (no pageChanged() fires for it
@@ -185,7 +187,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          // always hosts an in-process server and logs into it over loopback.
          BombermanClient::getInstance()->setGameMode(Constants::GameModeSinglePlayer);
          BombermanClient::getInstance()->host();
-         BombermanClient::getInstance()->loginRequest("127.0.0.1", GameSettings::getInstance()->getLoginSettings()->getNick());
+         BombermanClient::getInstance()->loginRequest("127.0.0.1", GameSettings::getInstance()->getLoginSettings()->getNick().toStdString());
       }
       else if (action == kMainMenuActionMulti)
       {
@@ -198,7 +200,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
          if (isHostLocal(host))
             BombermanClient::getInstance()->host();
 
-         BombermanClient::getInstance()->loginRequest(host, GameSettings::getInstance()->getLoginSettings()->getNick());
+         BombermanClient::getInstance()->loginRequest(host.toStdString(), GameSettings::getInstance()->getLoginSettings()->getNick().toStdString());
       }
       else
          logUnhandled(page, action);
@@ -319,7 +321,7 @@ void MenuPageNavigator::onActionRequest(const QString& page, const QString& acti
             if (!message.trimmed().isEmpty())
             {
                // lounge chat always broadcasts to everyone (receiverId -1)
-               BombermanClient::getInstance()->sendMessage(message, true);
+               BombermanClient::getInstance()->sendMessage(message.toStdString(), true);
                sayItem->setText("");
             }
          }
@@ -514,7 +516,7 @@ void MenuPageNavigator::updateLoungePlayerList(std::map<int, PlayerInfo*>* playe
       }
 
       if (nickItem)
-         nickItem->setText(player->getNick());
+         nickItem->setText(QString::fromStdString(player->getNick()));
       if (activeBoxItem)
          activeBoxItem->setVisible(true);
       if (ownerItem)
@@ -892,8 +894,8 @@ void MenuPageNavigator::createGame()
    cgs->serialize();
 
    BombermanClient::getInstance()->createGame(
-      gameName,
-      levelDirName,
+      gameName.toStdString(),
+      levelDirName.toStdString(),
       rounds,
       durationSeconds,
       maxPlayers,

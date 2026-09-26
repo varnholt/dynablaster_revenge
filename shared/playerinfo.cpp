@@ -33,7 +33,7 @@ void PlayerInfo::setColor(Constants::Color color)
 }
 
 
-void PlayerInfo::setNick(const QString& nick)
+void PlayerInfo::setNick(const std::string& nick)
 {
    mNick = nick;
 }
@@ -102,7 +102,7 @@ Constants::Color PlayerInfo::getColor() const
 }
 
 
-QString PlayerInfo::getNick() const
+std::string PlayerInfo::getNick() const
 {
    return mNick;
 }

@@ -1,13 +1,15 @@
 #ifndef MESSAGEPACKET_H
 #define MESSAGEPACKET_H
 
+#include <string>
+
 #include "packet.h"
 
 class MessagePacket : public Packet
 {
 public:
    //! write constructor
-   MessagePacket(int8_t senderId, const QString& message, bool finishedTyping, int8_t receiverId = -1);
+   MessagePacket(int8_t senderId, const std::string& message, bool finishedTyping, int8_t receiverId = -1);
 
    //! read constructor
    MessagePacket();
@@ -28,7 +30,7 @@ public:
    int8_t getSenderId() const;
 
    //! getter for the message
-   QString getMessage() const;
+   std::string getMessage() const;
 
    //! getter for the receiver's id
    int8_t getReceiverId() const;
@@ -41,7 +43,7 @@ private:
    int8_t mSenderId;
 
    //! message to send
-   QString mMessage;
+   std::string mMessage;
 
    //! receiver id
    int8_t mReceiverId;

@@ -2,9 +2,7 @@
 
 // Qt
 #include <QDateTime>
-#include <QFile>
 #include <QRandomGenerator>
-#include <QStringList>
 #include <QtCore/QCoreApplication>
 
 // bot
@@ -12,6 +10,10 @@
 #include "botmap.h"
 #include "protobot.h"
 #include "protobotinsults.h"
+#include "stringutils.h"
+
+#include <algorithm>
+#include <fstream>
 
 //-----------------------------------------------------------------------------
 /*!
@@ -46,34 +48,27 @@ void BotFactory::createBotClientPair()
 
    bot->setPlayerInfoMap(client->getPlayerInfoMap());
 
-   QStringList nicks;
+   std::vector<std::string> nicks;
 
-   QFile nicksFile("data/server/botnicks.txt");
+   std::ifstream nicksFile("data/server/botnicks.txt");
 
-   if (nicksFile.open(QFile::ReadOnly))
+   if (nicksFile.is_open())
    {
-      QTextStream stream(&nicksFile);
-      QString line;
-      do
+      std::string line;
+      while (std::getline(nicksFile, line))
       {
-         line = stream.readLine();
-
-         if (!line.trimmed().isEmpty())
-            nicks << line;
-
-      } while (!line.isNull());
+         if (!StringUtils::trim(line).empty())
+            nicks.push_back(line);
+      }
    }
    else
    {
-      nicks << "r2d2" << "c3po" << "bender" << "no5" << "t-1000"
-            << "t-800" << "cyclon" << "ramrod" << "h8" << "gort"
-            << "astroboy" << "clank" << "rosie" << "hal9000" << "sentinel"
-            << "vision" << "cyberman" << "alpha" << "wall-e" << "asimo"
-            << "cylon" << "voltron" << "wheatley" << "megaman" << "brainiac"
-            << "eve" << "pneuman" << "optimus" << "robby" << "awesome-o";
+      nicks = {"r2d2",     "c3po",   "bender",   "no5",      "t-1000", "t-800",  "cyclon",  "ramrod",  "h8",     "gort",
+               "astroboy", "clank",  "rosie",    "hal9000",  "sentinel", "vision", "cyberman", "alpha",   "wall-e", "asimo",
+               "cylon",    "voltron", "wheatley", "megaman", "brainiac", "eve",    "pneuman",  "optimus", "robby",  "awesome-o"};
    }
 
-   QString nick;
+   std::string nick;
 
    if (nicks.size() >= 9)
    {
@@ -83,8 +78,8 @@ void BotFactory::createBotClientPair()
 
       while (duplicate)
       {
-         nick = nicks[QRandomGenerator::global()->bounded(nicks.size() - 1)];
-         duplicate = mGivenNames.contains(nick);
+         nick = nicks[QRandomGenerator::global()->bounded(static_cast<int>(nicks.size()) - 1)];
+         duplicate = std::find(mGivenNames.begin(), mGivenNames.end(), nick) != mGivenNames.end();
       }
 
       mGivenNames.push_back(nick);
@@ -93,7 +88,7 @@ void BotFactory::createBotClientPair()
    {
       // if the nick list size is smaller than the possible bot maximum,
       // just choose any of the names
-      nick = nicks[QRandomGenerator::global()->bounded(nicks.size() - 1)];
+      nick = nicks[QRandomGenerator::global()->bounded(static_cast<int>(nicks.size()) - 1)];
    }
 
    client->setBot(bot);
@@ -160,7 +155,7 @@ void BotFactory::add(int count)
 //-----------------------------------------------------------------------------
 /*!
  */
-void BotFactory::setHostname(const QString& hostname)
+void BotFactory::setHostname(const std::string& hostname)
 {
    mHostname = hostname;
 }
@@ -168,7 +163,7 @@ void BotFactory::setHostname(const QString& hostname)
 //-----------------------------------------------------------------------------
 /*!
  */
-const QString& BotFactory::getHostname() const
+const std::string& BotFactory::getHostname() const
 {
    return mHostname;
 }

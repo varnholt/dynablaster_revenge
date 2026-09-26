@@ -13,7 +13,7 @@
    \param nickName player's nick
    \param col player's color
 */
-LoginResponsePacket::LoginResponsePacket(bool broadcast, int32_t id, const QString& nick, const ServerConfiguration& serverConfig)
+LoginResponsePacket::LoginResponsePacket(bool broadcast, int32_t id, const std::string& nick, const ServerConfiguration& serverConfig)
     : Packet(Packet::LOGINRESPONSE), mBroadcast(broadcast), mId(id), mNick(nick), mServerConfiguration(serverConfig)
 {
    mPacketName = PACKETNAME;
@@ -88,7 +88,7 @@ void LoginResponsePacket::debug()
 /*!
    \return player's nickname
 */
-const QString& LoginResponsePacket::getNick() const
+const std::string& LoginResponsePacket::getNick() const
 {
    return mNick;
 }

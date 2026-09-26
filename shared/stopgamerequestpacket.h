@@ -4,7 +4,6 @@
 #include "packet.h"
 
 // Qt
-#include <QString>
 
 class StopGameRequestPacket : public Packet
 {

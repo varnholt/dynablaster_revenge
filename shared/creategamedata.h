@@ -1,8 +1,7 @@
 #ifndef CREATEGAMEDATA_H
 #define CREATEGAMEDATA_H
 
-// Qt
-#include <QString>
+#include <string>
 
 // shared
 #include "constants.h"
@@ -18,10 +17,10 @@ class CreateGameData
       virtual ~CreateGameData();
 
       //! game's name
-      QString mName;
+      std::string mName;
 
       //! game level name
-      QString mLevel;
+      std::string mLevel;
 
       //! number of rounds
       int mRounds;

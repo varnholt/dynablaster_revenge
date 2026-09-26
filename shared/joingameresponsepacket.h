@@ -1,6 +1,8 @@
 #ifndef JOINGAMERESPONSEPACKET_H
 #define JOINGAMERESPONSEPACKET_H
 
+#include <string>
+
 // base
 #include "packet.h"
 
@@ -11,7 +13,7 @@ class JoinGameResponsePacket : public Packet
 {
 public:
    //! write constructor
-   JoinGameResponsePacket(bool success, int32_t gameid, int32_t id, const QString& nick, Constants::Color color);
+   JoinGameResponsePacket(bool success, int32_t gameid, int32_t id, const std::string& nick, Constants::Color color);
 
    //! read constructor
    JoinGameResponsePacket();
@@ -41,7 +43,7 @@ public:
    int32_t getPlayerId() const;
 
    //! getter for player nick
-   const QString& getNick() const;
+   const std::string& getNick() const;
 
    //! getter for successful flag
    bool isSuccessful() const;
@@ -63,7 +65,7 @@ private:
    int32_t mPlayerId;
 
    //! player nick
-   QString mNick;
+   std::string mNick;
 
    //! player's color
    Constants::Color mColor;

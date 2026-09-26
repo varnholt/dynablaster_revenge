@@ -11,6 +11,7 @@
 #include "timer.h"
 
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -36,7 +37,7 @@ class BombermanClient : public QObject
 
 public:
    //! constructor
-   BombermanClient(/*const QString& host, const QString& nick*/);
+   BombermanClient(/*const std::string& host, const std::string& nick*/);
 
    //! destructor
    virtual ~BombermanClient();
@@ -48,16 +49,16 @@ public:
    void initialize();
 
    //! setter for hostname to connect to
-   void setHost(const QString& host);
+   void setHost(const std::string& host);
 
    //! getter for hostname to connect to
-   const QString& getHost() const;
+   const std::string& getHost() const;
 
    //! setter for nickname to use in login
-   void setNick(const QString& nick);
+   void setNick(const std::string& nick);
 
    //! getter for nickname to use in login
-   const QString& getNick() const;
+   const std::string& getNick() const;
 
    //! connect to server
    void connectToServer();
@@ -120,10 +121,10 @@ public:
    PlayerInfo* getCurrentPlayerInfo() const;
 
    //! getter for message
-   const QString& getMessage() const;
+   const std::string& getMessage() const;
 
    //! setter for message
-   void setMessage(const QString& message);
+   void setMessage(const std::string& message);
 
    //! setter for connected state
    void setConnected(bool connected);
@@ -158,12 +159,12 @@ public:
    Signal<MapItem*> removeMapItemSignal;
    Signal<MapItem*, float> destroyMapItemSignal;
    Signal<int, int, int, int, int, int, float> detonationSignal;
-   Signal<int, const QString&, Constants::Color> addPlayerSignal;
+   Signal<int, const std::string&, Constants::Color> addPlayerSignal;
    Signal<int> removePlayerSignal;
    Signal<int> playerIdSignal;
    Signal<float, float> playfieldScaleSignal;
    Signal<int, int> playfieldSizeSignal;
-   Signal<const QString&> loadLevelSignal;
+   Signal<const std::string&> loadLevelSignal;
    Signal<MapItem*> shakeBlockSignal;
    Signal<int, Constants::SkullType, int, int, int> playerInfectedSignal;
    Signal<> connectedSignal;
@@ -173,7 +174,7 @@ public:
    Signal<bool> joinGameResponseSignal;
    Signal<> gameStartedSignal;
    Signal<> gameStoppedSignal;
-   Signal<int, const QString&, bool> messageReceivedSignal;
+   Signal<int, const std::string&, bool> messageReceivedSignal;
    Signal<int> countdownSignal;
    Signal<std::map<int, PlayerInfo*>*> playerInfoMapUpdatedSignal;
    Signal<> showGameSignal;
@@ -211,7 +212,7 @@ public slots:
    // game workflow
 
    //! try to log in
-   void login(const QString& nick = tr("developer"));
+   void login(const std::string& nick = "developer");
 
    //! ask the server to stop the game
    void stopGame();
@@ -221,8 +222,8 @@ public slots:
 
    //! create a game
    void createGame(
-      const QString& name,
-      const QString& level,
+      const std::string& name,
+      const std::string& level,
       int rounds,
       int duration,
       int maxPlayers,
@@ -247,7 +248,7 @@ public slots:
    void stopGame(int game);
 
    //! send a message to others
-   void sendMessage(const QString& message, bool finishedTyping, int receiverId = -1);
+   void sendMessage(const std::string& message, bool finishedTyping, int receiverId = -1);
 
    //! host a game
    void host();
@@ -258,7 +259,7 @@ public slots:
    // functions for communication from or to the menu
 
    //! process login request
-   void loginRequest(const QString& host, const QString& nick);
+   void loginRequest(const std::string& host, const std::string& nick);
 
    //! game list request
    void gameListRequest();
@@ -380,7 +381,7 @@ private:
    void initializePlayback();
 
    //! list network devices
-   std::vector<QString> getLocalIps() const;
+   std::vector<std::string> getLocalIps() const;
 
    // members
 
@@ -418,10 +419,10 @@ private:
    std::unordered_map<int, MapItem*> mMapItems;
 
    //! host name
-   QString mHost;
+   std::string mHost;
 
    //! nick name
-   QString mNick;
+   std::string mNick;
 
    //! list of games available
    mutable std::vector<GameInformation> mGames;
@@ -436,7 +437,7 @@ private:
    Server* mServer;
 
    //! ingame message to send
-   QString mMessage;
+   std::string mMessage;
 
    //! map id <-> player info object
    mutable std::map<int, PlayerInfo*> mPlayerInfo;

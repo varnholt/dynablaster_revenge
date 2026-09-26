@@ -11,7 +11,7 @@
    \param message message to send
    \param receiverId id of the receiver
 */
-MessagePacket::MessagePacket(int8_t senderId, const QString& message, bool finishedTyping, int8_t receiverId)
+MessagePacket::MessagePacket(int8_t senderId, const std::string& message, bool finishedTyping, int8_t receiverId)
     : Packet(Packet::MESSAGE), mSenderId(senderId), mMessage(message), mReceiverId(receiverId), mFinishedTyping(finishedTyping)
 {
    mPacketName = PACKETNAME;
@@ -36,7 +36,7 @@ MessagePacket::~MessagePacket()
 /*!
    \return message to send
 */
-QString MessagePacket::getMessage() const
+std::string MessagePacket::getMessage() const
 {
    return mMessage;
 }
@@ -108,7 +108,7 @@ void MessagePacket::debug()
       "MessagePacket:debug: sender: %d, message: '%s', "
       "receiver: %d, finished: %d",
       mSenderId,
-      qPrintable(mMessage),
+      mMessage.c_str(),
       mReceiverId,
       mFinishedTyping
    );

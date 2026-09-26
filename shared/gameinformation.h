@@ -1,8 +1,9 @@
 #ifndef GAMEINFORMATION_H
 #define GAMEINFORMATION_H
 
+#include <string>
+
 // Qt
-#include <QString>
 
 // shared
 #include "constants.h"
@@ -21,8 +22,8 @@ public:
       int id,
       int playerCount,
       int playerMaximumCount,
-      const QString& gameName,
-      const QString& levelName,
+      const std::string& gameName,
+      const std::string& levelName,
       int creatorId,
       Constants::Dimension dimensions,
       int extras,
@@ -43,10 +44,10 @@ public:
    int getPlayerMaximumCount() const;
 
    //! getter for the game name
-   const QString getGameName() const;
+   const std::string getGameName() const;
 
    //! getter for the level name
-   const QString getLevelName() const;
+   const std::string getLevelName() const;
 
    //! getter for the game creator id
    int getCreatorId() const;
@@ -101,10 +102,10 @@ public:
    int mMaximumPlayerCount;
 
    //! game name
-   QString mGameName;
+   std::string mGameName;
 
    //! level name
-   QString mLevelName;
+   std::string mLevelName;
 
    //! creator id
    int mCreatorId;

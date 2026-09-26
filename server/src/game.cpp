@@ -38,6 +38,7 @@
 #include "stonemapitem.h"
 #include "stopgamerequestpacket.h"
 #include "stopgameresponsepacket.h"
+#include "stringutils.h"
 #include "timepacket.h"
 
 // Qt
@@ -46,6 +47,7 @@
 
 // stdlib
 #include <algorithm>
+#include <format>
 #include <unordered_set>
 #include <vector>
 
@@ -1314,7 +1316,7 @@ void Game::processPlayerWon(Player* player)
 /*!
    \param message message to send
 */
-void Game::sendMessageToOwner(const QString& message)
+void Game::sendMessageToOwner(const std::string& message)
 {
    MessagePacket* messagePacket = new MessagePacket(mCreator->getId(), message, true);
 
@@ -1348,7 +1350,7 @@ void Game::processOnlyBotsLeft()
 {
    qDebug("Game::processOnlyBotsLeft: the game is now only populated by bots");
 
-   QString message = tr("The game is now only populated by bots. Press F10 to abort.");
+   std::string message = "The game is now only populated by bots. Press F10 to abort.";
 
    if (!isGameOnlyPopulatedByBotsMessageShown())
    {
@@ -1731,7 +1733,7 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
                            );
 
                            // show player killed message
-                           broadcastMessage(tr("%1 was killed.").arg(currentPlayer->getNick()));
+                           broadcastMessage(std::format("{} was killed.", currentPlayer->getNick()));
 
                            // check if game is over
                            checkGameOver = true;
@@ -2248,12 +2250,12 @@ void Game::synchronize()
          // time has elapsed, kick those who died trying
          foreach (Player* player, criticalPlayers)
          {
-            qDebug("Game::synchronize: time to kick '%s' out of the game", qPrintable(player->getNick()));
+            qDebug("Game::synchronize: time to kick '%s' out of the game", player->getNick().c_str());
 
             NET_StreamSocket* socket = mPlayerSockets.key(player);
             forceLeaveGameSignal(socket);
 
-            ErrorPacket* errorPacket = new ErrorPacket(Constants::ErrorSyncTimeout, tr("sync aborted.;your pc is too slow."));
+            ErrorPacket* errorPacket = new ErrorPacket(Constants::ErrorSyncTimeout, "sync aborted.;your pc is too slow.");
 
             sendPacket(socket, errorPacket);
          }
@@ -2384,7 +2386,7 @@ void Game::processPacket(NET_StreamSocket* tcpSocket, Packet* packet)
                {
                   MessagePacket* messagePacket = new MessagePacket(
                      senderId,
-                     QString("%1: %2").arg(mPlayerSockets[tcpSocket]->getNick()).arg(senderPacket->getMessage().trimmed()),
+                     std::format("{}: {}", mPlayerSockets[tcpSocket]->getNick(), StringUtils::trim(senderPacket->getMessage())),
                      senderPacket->isTypingFinished(),
                      senderPacket->getReceiverId()
                   );
@@ -2511,7 +2513,7 @@ void Game::processPacket(NET_StreamSocket* tcpSocket, Packet* packet)
                   finishGame();
 
                   // show player killed message
-                  broadcastMessage(tr("%1 aborted the game.").arg(player->getNick()));
+                  broadcastMessage(std::format("{} aborted the game.", player->getNick()));
                }
             }
          }
@@ -2543,7 +2545,7 @@ int Game::getId() const
 /*!
    \return game name
 */
-const QString& Game::getName() const
+const std::string& Game::getName() const
 {
    return mCreateGameData.mName;
 }
@@ -2552,7 +2554,7 @@ const QString& Game::getName() const
 /*!
    \return level name
 */
-const QString& Game::getLevelName() const
+const std::string& Game::getLevelName() const
 {
    return mCreateGameData.mLevel;
 }
@@ -2588,7 +2590,7 @@ void Game::setCreateGameData(const CreateGameData& data)
 /*!
    \param name new game name
 */
-void Game::setName(const QString& name)
+void Game::setName(const std::string& name)
 {
    mCreateGameData.mName = name;
 }
@@ -2748,12 +2750,12 @@ void Game::processSpectatorMessage()
          int timeLeft = getTimeLeft();
 
          // tell player next round will start in n seconds
-         MessagePacket* message1 = new MessagePacket(-1, tr("Please wait, the game is currently active."), true);
+         MessagePacket* message1 = new MessagePacket(-1, "Please wait, the game is currently active.", true);
 
          MessagePacket* message2 = new MessagePacket(
             -1,
-            (timeLeft == 1) ? tr("The next game will start in about 1 second.")
-                            : tr("The next game will start in about %1 seconds.").arg(timeLeft),
+            (timeLeft == 1) ? std::string("The next game will start in about 1 second.")
+                            : std::format("The next game will start in about {} seconds.", timeLeft),
             true
          );
 
@@ -3017,7 +3019,7 @@ Constants::Dimension Game::getMapDimension() const
 /*!
    \param message message to broadcast
 */
-void Game::broadcastMessage(const QString& message)
+void Game::broadcastMessage(const std::string& message)
 {
    mOutgoingPackets.append(new MessagePacket(-1, message, true));
 }

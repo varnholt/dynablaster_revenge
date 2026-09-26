@@ -14,6 +14,7 @@
 #include "serverconfiguration.h"
 #include "timer.h"
 
+#include <string>
 #include <vector>
 
 // forward declarations
@@ -45,10 +46,10 @@ public:
    void initializeAutoJoinStart();
 
    //! setter for host name
-   void setHost(const QString& host);
+   void setHost(const std::string& host);
 
    //! setter for nickname to use in login
-   void setNick(const QString& nick);
+   void setNick(const std::string& nick);
 
    //! setter for bot
    void setBot(Bot* bot);
@@ -142,7 +143,7 @@ public slots:
    void bomb();
 
    //! send a message to others
-   void sendMessage(const QString& message, bool finishedTyping = true, int receiverId = -1);
+   void sendMessage(const std::string& message, bool finishedTyping = true, int receiverId = -1);
 
    //! delete obsolete items
    void deleteObsoleteMapItems();
@@ -300,10 +301,10 @@ private:
    PacketStreamBuffer mBuffer;
 
    //! host name
-   QString mHost;
+   std::string mHost;
 
    //! nick name
-   QString mNick;
+   std::string mNick;
 
    //! connected flag
    bool mConnected;

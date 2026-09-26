@@ -129,7 +129,7 @@ void GameMessagingDrawable::keyPressEvent(QKeyEvent* event)
          {
             if (!mMessage.isEmpty())
             {
-               BombermanClient::getInstance()->sendMessage(mMessage, true);
+               BombermanClient::getInstance()->sendMessage(mMessage.toStdString(), true);
                clearMessage();
             }
          }
@@ -236,7 +236,7 @@ void GameMessagingDrawable::buildNickVertices()
    if (playerInfo)
    {
       mFont->setColor(1.0f, 1.0f, 1.0f, 1.0f);
-      mFont->buildVertices(FONT_SCALE_NICK, qPrintable(playerInfo->getNick()), 0, 0);
+      mFont->buildVertices(FONT_SCALE_NICK, playerInfo->getNick().c_str(), 0, 0);
       mNickVertices.copy(mFont->getVertices());
    }
    else
@@ -265,7 +265,7 @@ void GameMessagingDrawable::gameStateChanged()
    else if (GameStateMachine::getInstance()->getState() == Constants::GameActive)
    {
       // copy buffer from client to textedit
-      mMessage = BombermanClient::getInstance()->getMessage();
+      mMessage = QString::fromStdString(BombermanClient::getInstance()->getMessage());
       updateMessageVertices();
    }
 }
