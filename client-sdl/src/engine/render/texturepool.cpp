@@ -51,14 +51,6 @@ Texture TexturePool::getTexture(const char* filename, int flags)
 
 void TexturePool::updateImage(Image* /*image*/)
 {
-   /*
-      QMap<Image*,unsigned int>::ConstIterator it= mPool.constFind(image);
-      if (it != mPool.constEnd())
-      {
-         unsigned int texture= it.value();
-         Material::updateMap(texture, *image);
-      }
-   */
 }
 
 void TexturePool::update()

@@ -5,7 +5,8 @@
 #include "framework/frametimer.h"
 
 #include <QObject>
-#include <QString>
+
+#include <string>
 
 class GameMessage : public QObject
 {
@@ -17,7 +18,7 @@ public:
    void operator=(const GameMessage&);
    GameMessage(const GameMessage& message);
 
-   void setMessage(const QString&);
+   void setMessage(const std::string&);
 
    static void setDisplayTime(int time);
 
@@ -27,12 +28,12 @@ signals:
    void expired();
 
 protected:
-   QString mMessage;
+   std::string mMessage;
    FrameTimer mTime;
    int mSenderId;
    int mReceiverId;
-   QString mSenderName;
-   QString mReceiverName;
+   std::string mSenderName;
+   std::string mReceiverName;
 
    static int sDisplayTime;
 };

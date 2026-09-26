@@ -56,7 +56,10 @@ GameMessagingDrawable::GameMessagingDrawable(RenderDevice* dev)
 
 GameMessagingDrawable::~GameMessagingDrawable()
 {
-   qDeleteAll(mPsdLayers);
+   for (auto* layer : mPsdLayers)
+   {
+      delete layer;
+   }
    mPsdLayers.clear();
 }
 
@@ -103,11 +106,11 @@ void GameMessagingDrawable::messageReceived(int /*senderId*/, const QString& tex
             mFont->buildVertices(FONT_SCALE_MESSAGE, qPrintable(line), MESSAGE_OFFSET_X, MESSAGE_OFFSET_Y - MESSAGE_STACK_OFFSET);
 
             AnimatedGameMessage* message = new AnimatedGameMessage();
-            message->setMessage(line);
+            message->setMessage(line.toStdString());
             message->setVertices(mFont->getVertices());
             message->initialize();
 
-            mMessages.prepend(message);
+            mMessages.insert(mMessages.begin(), message);
 
             connect(message, SIGNAL(expired()), this, SLOT(popMessage()));
          }
@@ -429,7 +432,7 @@ void GameMessagingDrawable::initializeLayers()
       PSD::Layer* layer = mPsd.getLayer(l);
       PSDLayer* renderLayer = new PSDLayer(layer);
 
-      mPsdLayers << renderLayer;
+      mPsdLayers.push_back(renderLayer);
 
       if (QString(layer->getName()).compare(LINEEDIT_SAY) == 0)
       {

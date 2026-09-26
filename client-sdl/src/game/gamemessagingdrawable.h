@@ -10,6 +10,8 @@
 
 #include <QObject>
 
+#include <vector>
+
 class BitmapFont;
 class PSDLayer;
 
@@ -70,11 +72,11 @@ protected:
 
    PSD mPsd;
    QString mFilename;
-   QList<PSDLayer*> mPsdLayers;
+   std::vector<PSDLayer*> mPsdLayers;
    PSDLayer* mLineEditSayLayer;
    PSDLayer* mPlayerNameLayer;
 
-   QList<AnimatedGameMessage*> mMessages;
+   std::vector<AnimatedGameMessage*> mMessages;
    BitmapFont* mFont;
 
    QString mMessage;

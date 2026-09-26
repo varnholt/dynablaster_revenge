@@ -34,7 +34,7 @@ GameMessage::GameMessage(const GameMessage& message) : QObject(message.parent())
    TimerHandler::singleShot(sDisplayTime, this, SIGNAL(expired()));
 }
 
-void GameMessage::setMessage(const QString& message)
+void GameMessage::setMessage(const std::string& message)
 {
    mMessage = message;
 }
