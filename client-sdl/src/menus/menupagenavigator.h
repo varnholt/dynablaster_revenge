@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hosthistory.h"
+#include "signal.h"
 
 #include <QObject>
 
@@ -120,4 +121,14 @@ private:
    std::unordered_set<MenuPage*> mCreateGamePagesInitialized;
    std::unordered_map<int, int> mPlayerIdToIndexMap;
    HostHistory mHostHistory;
+
+   //! connection tokens for setMonitorCreateGameOptionsEnabled()'s connect/disconnect pair
+   Signal<const std::string&>::Connection mMaxPlayersValueChangedConnection;
+   Signal<const std::string&>::Connection mLevelValueChangedConnection;
+   Signal<int>::Connection mLevelElementFocussedConnection;
+
+   //! connection tokens for setMonitorAudioSettingsEnabled()'s connect/disconnect pair
+   Signal<float>::Connection mMusicVolumeChangedConnection;
+   Signal<float>::Connection mSfxVolumeChangedConnection;
+   Signal<float>::Connection mSfxTickConnection;
 };

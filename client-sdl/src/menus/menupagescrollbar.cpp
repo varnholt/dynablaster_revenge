@@ -1,6 +1,7 @@
 #include "menupagescrollbar.h"
 
-MenuPageScrollbar::MenuPageScrollbar() : MenuPageItem(), mPosition(0), mHeight(0), mTop(0), mOffset(0.0f), mRelativeToY(0)
+MenuPageScrollbar::MenuPageScrollbar()
+    : mPosition(0), mHeight(0), mTop(0), mOffset(0.0f), mRelativeToY(0), mSignalsBlocked(false)
 {
    mPageItemType = PageItemTypeScrollbar;
    mInteractive = true;
@@ -40,7 +41,10 @@ void MenuPageScrollbar::mouseMoved(int x, int y)
 
    mOffset = (mPosition - mTop) / (float)(mHeight - mLayerActive->getHeight());
 
-   emit scrollToPercentage(mOffset);
+   if (!mSignalsBlocked)
+   {
+      scrollToPercentageSignal(mOffset);
+   }
 
    MenuPageItem::mouseMoved(x, y);
 }
@@ -65,7 +69,7 @@ void MenuPageScrollbar::updateFromAnimation(float percent)
    // reset mouse press relative y
    mRelativeToY = 0;
 
-   blockSignals(true);
+   mSignalsBlocked = true;
    mouseMoved(0, mTop + ((mHeight - mLayerActive->getHeight()) * percent));
-   blockSignals(false);
+   mSignalsBlocked = false;
 }

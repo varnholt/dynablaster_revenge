@@ -3,15 +3,14 @@
 #include "math/matrix.h"
 
 // math
-#include <math.h>
+#include <algorithm>
 #include <cstring>
 
 // defines
 #define COLOR_CHANGE_DURATION 2000
 
-MenuPageBackgroundItem::MenuPageBackgroundItem(QObject* parent)
-    : MenuPageItem(parent),
-      mX(0.0f),
+MenuPageBackgroundItem::MenuPageBackgroundItem()
+    : mX(0.0f),
       mY(0.0f),
       mBackgroundColor(BackgroundColorBlue),
       mBackgroundColorPrevious(BackgroundColorBlue),
@@ -46,7 +45,7 @@ void MenuPageBackgroundItem::draw()
 {
    if (mBackgroundLayers[mBackgroundColor])
    {
-      float alpha = qMin(mFlipBackgroundElapsed.elapsed() / (float)COLOR_CHANGE_DURATION, 1.0f);
+      float alpha = std::min(mFlipBackgroundElapsed.elapsed() / (float)COLOR_CHANGE_DURATION, 1.0f);
 
       float alphaInverted = 1.0f - alpha;
 

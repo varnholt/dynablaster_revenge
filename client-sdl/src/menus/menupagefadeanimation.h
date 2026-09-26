@@ -5,8 +5,6 @@
 
 class MenuPageFadeAnimation : public MenuPageAnimation
 {
-   Q_OBJECT
-
 public:
    MenuPageFadeAnimation();
 
@@ -23,8 +21,6 @@ public:
    bool isStopped() const;
 
    void setStopped(bool value);
-
-public slots:
 
    virtual void start();
 

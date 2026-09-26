@@ -7,8 +7,6 @@
 
 class MenuPageBackgroundItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    enum BackgroundColor
    {
@@ -18,7 +16,7 @@ public:
    };
 
    //! constructor
-   MenuPageBackgroundItem(QObject* parent = 0);
+   MenuPageBackgroundItem();
 
    // main
 
@@ -27,8 +25,6 @@ public:
    virtual void initialize();
 
    void addGradientLayer(PSDLayer* gradient, BackgroundColor color);
-
-public slots:
 
    void setBackgroundColor(BackgroundColor);
 

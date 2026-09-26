@@ -119,8 +119,8 @@ void MenuPageEditableComboBoxItem::linkComboBoxToTextEdit(const QString& textEdi
 
       editableCombobBox->setTextEditItem(textEdit);
 
-      // see MenuPageComboBoxItem::linkComboBoxToButton for why qApp->connect() becomes
-      // QObject::connect() in this port (no QApplication instance exists).
-      QObject::connect(editableCombobBox, SIGNAL(valueChanged(QString)), textEdit, SLOT(setText(QString)));
+      editableCombobBox->valueChangedSignal.connect(
+         [textEdit](const std::string& value) { textEdit->setText(QString::fromStdString(value)); }
+      );
    }
 }

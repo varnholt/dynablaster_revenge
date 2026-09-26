@@ -1,13 +1,12 @@
 #pragma once
 
 #include "menupageitem.h"
+#include "signal.h"
 
 class MenuPageCheckBoxItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
-   MenuPageCheckBoxItem(QObject* parent = 0);
+   MenuPageCheckBoxItem();
 
    virtual void draw();
 
@@ -25,15 +24,11 @@ public:
 
    void setChecked(bool checked);
 
-public slots:
-
    virtual void activated();
 
    virtual void deactivated();
 
-signals:
-
-   void stateChanged();
+   Signal<> stateChangedSignal;
 
 protected:
    virtual void toggleChecked();

@@ -210,11 +210,7 @@ void MenuPageComboBoxItem::linkComboBoxToButton(const QString& buttonKey, const 
       {
          comboBox->setButtonItem(button);
 
-         // qApp->connect(...) in the original relied on a QApplication instance existing purely
-         // as a convenient QObject to call the (non-static) connect() member function on - this
-         // port has no QApplication (SDL owns the window/event loop), so use the static
-         // QObject::connect() instead, which needs no instance at all.
-         QObject::connect(button, SIGNAL(action(QString)), comboBox, SLOT(setVisible()));
+         button->actionSignal.connect([comboBox](const std::string&) { comboBox->setVisible(true); });
       }
    }
 }
@@ -227,7 +223,7 @@ void MenuPageComboBoxItem::linkComboBoxToLabel(const QString& labelKey, const QS
       MenuPageComboBoxItem* comboBox = sMapComboBoxes[comboBoxKey];
       comboBox->setLabelItem(label);
 
-      QObject::connect(comboBox, SIGNAL(valueChanged(QString)), label, SLOT(setText(QString)));
+      comboBox->valueChangedSignal.connect([label](const std::string& value) { label->setText(QString::fromStdString(value)); });
    }
 }
 
@@ -277,7 +273,7 @@ void MenuPageComboBoxItem::mousePressed(int x, int y)
             setFocus(false);
 
             QString value = mElements.at(mActiveElement)->getText();
-            emit valueChanged(value);
+            valueChangedSignal(value.toStdString());
          }
       }
    }

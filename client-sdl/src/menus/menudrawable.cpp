@@ -435,7 +435,7 @@ void MenuDrawable::mouseReleaseEvent(QMouseEvent* /*event*/)
 */
 void MenuDrawable::keyPressEvent(QKeyEvent* event)
 {
-   mMenu->keyPressed(event->key(), event->text());
+   mMenu->keyPressed(event->key(), event->text().toStdString());
 
    emit keyPressed(event);
 }
@@ -458,17 +458,17 @@ void MenuDrawable::pageChangeRequest(const QString& name)
    current->setAnimation(mFadeInAnimation);
 
    // cleanup previous connections
-   mFadeInAnimation->disconnect();
-   mFadeOutAnimation->disconnect();
+   mFadeInAnimation->stoppedSignal.disconnectAll();
+   mFadeOutAnimation->stoppedSignal.disconnectAll();
 
    // disable previous page when animation has finished
-   connect(mFadeOutAnimation, SIGNAL(stopped()), previous, SLOT(deactivate()));
+   mFadeOutAnimation->stoppedSignal.connect([previous]() { previous->deactivate(); });
 
-   connect(mFadeOutAnimation, SIGNAL(stopped()), previous, SLOT(resetAnimation()));
+   mFadeOutAnimation->stoppedSignal.connect([previous]() { previous->resetAnimation(); });
 
-   connect(mFadeInAnimation, SIGNAL(stopped()), current, SLOT(resetAnimation()));
+   mFadeInAnimation->stoppedSignal.connect([current]() { current->resetAnimation(); });
 
-   connect(mFadeInAnimation, SIGNAL(stopped()), this, SLOT(pageChangeAnimationStopped()));
+   mFadeInAnimation->stoppedSignal.connect([this]() { pageChangeAnimationStopped(); });
 
    // activate the current page
    current->setActive(true);

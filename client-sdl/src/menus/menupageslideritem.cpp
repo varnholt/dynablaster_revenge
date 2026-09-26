@@ -34,7 +34,7 @@ void MenuPageSliderItem::mouseMoved(int x, int y)
    mLayerActive->getLayer()->setX(x);
 
    mValue = (x - mMinimum) / width;
-   emit valueChanged(mValue);
+   valueChangedSignal(mValue);
 
    MenuPageItem::mouseMoved(x, y);
 }

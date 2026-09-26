@@ -12,6 +12,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 // forward declarations
@@ -121,11 +122,11 @@ public slots:
 
    void mousePressed(int x, int y);
 
-   void paste(const QString& text);
+   void paste(const std::string& text);
 
    void mouseReleased();
 
-   void keyPressed(int key, const QString& text);
+   void keyPressed(int key, const std::string& text);
 
    void deactivate();
 

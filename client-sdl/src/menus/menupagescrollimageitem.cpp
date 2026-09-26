@@ -6,7 +6,8 @@
 #include "framework/globaltime.h"
 
 // cmath
-#include <math.h>
+#include <cmath>
+#include <numbers>
 
 // defines
 #define SCROLLTIME 36.0f
@@ -106,7 +107,7 @@ void MenuPageScrollImageItem::animate(float /*time*/)
       float val = (relativeTime - LIM_1) / (LIM_2 - LIM_1);
 
       // normalize to pi/2
-      val *= (float)M_PI_2;
+      val *= (std::numbers::pi_v<float> / 2.0f);
       val = 1.0f - cos(val);
 
       val *= LIM_2_POS_LENGTH;
@@ -130,7 +131,7 @@ void MenuPageScrollImageItem::animate(float /*time*/)
       float val = (relativeTime - LIM_3) / (LIM_4 - LIM_3);
 
       // normalize to pi/2
-      val *= (float)M_PI_2;
+      val *= (std::numbers::pi_v<float> / 2.0f);
       val = sin(val);
 
       val *= LIM_4_POS_LENGTH;

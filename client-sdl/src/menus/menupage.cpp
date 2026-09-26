@@ -261,9 +261,18 @@ MenuPageItem* MenuPage::processTableScrollButtons(PSDLayer* layer, QString layer
 
    QString baseLayer = QString("table_%1_main").arg(layerName.split("_").at(1));
 
-   connect(pageItem, SIGNAL(action(QString)), (MenuPageListItem*)mPageItemNameMap[baseLayer], up ? SLOT(scrollUp()) : SLOT(scrollDown()));
+   MenuPageListItem* scrollTarget = (MenuPageListItem*)mPageItemNameMap[baseLayer];
 
-   connect(pageItem, SIGNAL(signalMouseReleased()), (MenuPageListItem*)mPageItemNameMap[baseLayer], SLOT(scrollStop()));
+   if (up)
+   {
+      pageItem->actionSignal.connect([scrollTarget](const std::string&) { scrollTarget->scrollUp(); });
+   }
+   else
+   {
+      pageItem->actionSignal.connect([scrollTarget](const std::string&) { scrollTarget->scrollDown(); });
+   }
+
+   pageItem->mouseReleasedSignal.connect([scrollTarget]() { scrollTarget->scrollStop(); });
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -306,19 +315,17 @@ MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString lay
    // connect slider to table
    QString baseLayer = QString("table_%1_main").arg(layerName.split("_").at(1));
 
-   if (!connect(
-          pageItem, SIGNAL(scrollToPercentage(float)), (MenuPageListItem*)mPageItemNameMap[baseLayer], SLOT(scrollToPercentage(float))
-       ))
-   {
-      qDebug("processTableScrollBarSlider: layer '%s' missing", qPrintable(baseLayer));
-   }
+   MenuPageListItem* tableItem = (MenuPageListItem*)mPageItemNameMap[baseLayer];
+   MenuPageScrollbar* scrollbarItem = (MenuPageScrollbar*)pageItem;
+
+   scrollbarItem->scrollToPercentageSignal.connect([tableItem](float percent) { tableItem->scrollToPercentage(percent); });
 
    MenuPageItem* scrollbar = mPageItemNameMap[scrollAreaLayer];
-   ((MenuPageScrollbar*)pageItem)->setTop(scrollbar->getCurrentLayer()->getTop());
-   ((MenuPageScrollbar*)pageItem)->setHeight(scrollbar->getCurrentLayer()->getHeight());
+   scrollbarItem->setTop(scrollbar->getCurrentLayer()->getTop());
+   scrollbarItem->setHeight(scrollbar->getCurrentLayer()->getHeight());
 
    // connect table back to slider
-   connect((MenuPageListItem*)mPageItemNameMap[baseLayer], SIGNAL(scrollAnimation(float)), pageItem, SLOT(updateFromAnimation(float)));
+   tableItem->scrollAnimationSignal.connect([scrollbarItem](float percent) { scrollbarItem->updateFromAnimation(percent); });
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -419,7 +426,7 @@ MenuPageItem* MenuPage::processCheckBox(PSDLayer* layer, QString layerNameWithou
       pageItem = new MenuPageCheckBoxItem();
 
       // store button action
-      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString());
+      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString().toStdString());
 
       mPageItems.push_back(pageItem);
 
@@ -494,9 +501,9 @@ MenuPageItem* MenuPage::processButton(PSDLayer* layer, QString layerName, QStrin
       pageItem = new MenuPageButtonItem();
 
       // store button action
-      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString());
+      pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString().toStdString());
 
-      connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
+      pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
 
       mPageItems.push_back(pageItem);
 
@@ -633,9 +640,9 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
          pageItem = new MenuPageButtonItem();
 
          // store button action
-         pageItem->setAction(mSettings->value(baseName).toString());
+         pageItem->setAction(mSettings->value(baseName).toString().toStdString());
 
-         connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
+         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
 
          mPageItems.push_back(pageItem);
 
@@ -811,9 +818,9 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
          pageItem = new MenuPageButtonItem();
 
          // store button action
-         pageItem->setAction(mSettings->value(baseName).toString());
+         pageItem->setAction(mSettings->value(baseName).toString().toStdString());
 
-         connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
+         pageItem->actionSignal.connect([this](const std::string& action) { actionRequestFromItem(QString::fromStdString(action)); });
 
          mPageItems.push_back(pageItem);
 
@@ -1247,7 +1254,7 @@ void MenuPage::mousePressed(int x, int y)
    }
 }
 
-void MenuPage::paste(const QString& text)
+void MenuPage::paste(const std::string& text)
 {
    if (mActiveItem)
    {
@@ -1293,7 +1300,7 @@ MenuPageItem* MenuPage::getPageItem(const QString& layerName) const
    return item;
 }
 
-void MenuPage::keyPressed(int key, const QString& text)
+void MenuPage::keyPressed(int key, const std::string& text)
 {
    // check if any item has focus
    if (mActiveItem)

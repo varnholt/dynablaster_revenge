@@ -768,15 +768,16 @@ void MenuPageNavigator::setMonitorCreateGameOptionsEnabled(bool enabled)
 
    if (enabled)
    {
-      connect(maxPlayersCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGamePlayerCounts()));
-      connect(levelCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGameLevelPreview()));
-      connect(levelCombo, SIGNAL(elementFocussed(int)), this, SLOT(updateCreateGameLevelPreview()));
+      mMaxPlayersValueChangedConnection =
+         maxPlayersCombo->valueChangedSignal.connect([this](const std::string&) { updateCreateGamePlayerCounts(); });
+      mLevelValueChangedConnection = levelCombo->valueChangedSignal.connect([this](const std::string&) { updateCreateGameLevelPreview(); });
+      mLevelElementFocussedConnection = levelCombo->elementFocussedSignal.connect([this](int) { updateCreateGameLevelPreview(); });
    }
    else
    {
-      disconnect(maxPlayersCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGamePlayerCounts()));
-      disconnect(levelCombo, SIGNAL(valueChanged(QString)), this, SLOT(updateCreateGameLevelPreview()));
-      disconnect(levelCombo, SIGNAL(elementFocussed(int)), this, SLOT(updateCreateGameLevelPreview()));
+      maxPlayersCombo->valueChangedSignal.disconnect(mMaxPlayersValueChangedConnection);
+      levelCombo->valueChangedSignal.disconnect(mLevelValueChangedConnection);
+      levelCombo->elementFocussedSignal.disconnect(mLevelElementFocussedConnection);
    }
 }
 
@@ -805,15 +806,15 @@ void MenuPageNavigator::setMonitorAudioSettingsEnabled(bool enabled)
 
    if (enabled)
    {
-      connect(musicSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeMusic(float)));
-      connect(sfxSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeSfx(float)));
-      connect(sfxSlider, SIGNAL(valueChanged(float)), SoundManager::getInstance(), SLOT(playSoundTick()));
+      mMusicVolumeChangedConnection = musicSlider->valueChangedSignal.connect([this](float value) { applyVolumeMusic(value); });
+      mSfxVolumeChangedConnection = sfxSlider->valueChangedSignal.connect([this](float value) { applyVolumeSfx(value); });
+      mSfxTickConnection = sfxSlider->valueChangedSignal.connect([](float) { SoundManager::getInstance()->playSoundTick(); });
    }
    else
    {
-      disconnect(musicSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeMusic(float)));
-      disconnect(sfxSlider, SIGNAL(valueChanged(float)), this, SLOT(applyVolumeSfx(float)));
-      disconnect(sfxSlider, SIGNAL(valueChanged(float)), SoundManager::getInstance(), SLOT(playSoundTick()));
+      musicSlider->valueChangedSignal.disconnect(mMusicVolumeChangedConnection);
+      sfxSlider->valueChangedSignal.disconnect(mSfxVolumeChangedConnection);
+      sfxSlider->valueChangedSignal.disconnect(mSfxTickConnection);
    }
 }
 

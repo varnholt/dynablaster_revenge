@@ -109,7 +109,7 @@ void Menu::mouseReleased()
    }
 }
 
-void Menu::keyPressed(int key, const QString& text)
+void Menu::keyPressed(int key, const std::string& text)
 {
    if (mCurrentPage)
    {
@@ -117,7 +117,7 @@ void Menu::keyPressed(int key, const QString& text)
    }
 }
 
-void Menu::paste(const QString& text)
+void Menu::paste(const std::string& text)
 {
    if (mCurrentPage)
    {

@@ -1,8 +1,7 @@
 #include "menupageitem.h"
 
-MenuPageItem::MenuPageItem(QObject* parent)
-    : QObject(parent),
-      mPageItemType(PageItemTypeUnknown),
+MenuPageItem::MenuPageItem()
+    : mPageItemType(PageItemTypeUnknown),
       mLayerActive(0),
       mLayerInactive(0),
       mFocussed(false),
@@ -54,7 +53,7 @@ bool MenuPageItem::isModal() const
 
 void MenuPageItem::activated()
 {
-   emit action(mAction);
+   actionSignal(mAction);
 }
 
 void MenuPageItem::deactivated()
@@ -71,7 +70,7 @@ bool MenuPageItem::isInteractive()
    return mInteractive;
 }
 
-void MenuPageItem::setAction(const QString& action)
+void MenuPageItem::setAction(const std::string& action)
 {
    mAction = action;
 }
@@ -123,7 +122,7 @@ PSDLayer* MenuPageItem::getInactiveLayer()
    return mLayerInactive;
 }
 
-void MenuPageItem::keyPressed(int /*key*/, const QString& /*text*/)
+void MenuPageItem::keyPressed(int /*key*/, const std::string& /*text*/)
 {
 }
 
@@ -162,13 +161,13 @@ void MenuPageItem::mousePressed(int /*x*/, int /*y*/)
 
 void MenuPageItem::mouseReleased()
 {
-   emit signalMouseReleased();
+   mouseReleasedSignal();
 }
 
 void MenuPageItem::setVisible(bool enabled)
 {
    mVisible = enabled;
-   emit visible(enabled);
+   visibleSignal(enabled);
 }
 
 bool MenuPageItem::isVisible() const

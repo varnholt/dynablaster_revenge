@@ -53,8 +53,6 @@ public:
 
    const FrameTimer& getFocusOutTime() const;
 
-public slots:
-
    virtual void setFocus(bool);
 
    virtual void setActive(bool);

@@ -3,9 +3,12 @@
 // base
 #include "framework/frametimer.h"
 #include "menupageitem.h"
+#include "signal.h"
 
 // math
 #include "math/color.h"
+
+#include <QString>
 
 #include <vector>
 
@@ -23,8 +26,6 @@ class MenuPageListItemElement;
 /// same treatment as MenuPageBackgroundItem's animated quad.
 class MenuPageListItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    MenuPageListItem();
 
@@ -138,8 +139,6 @@ public:
    //! setter for y offset dest
    void setYOffsetDest(float value);
 
-public slots:
-
    virtual void animate(float time);
 
    virtual void scrollUp();
@@ -157,11 +156,9 @@ public slots:
    //! smooth scroll to index
    virtual int scrollSmoothToIndex(int index);
 
-signals:
+   Signal<float> scrollAnimationSignal;
 
-   void scrollAnimation(float percent);
-
-   void elementFocussed(int element);
+   Signal<int> elementFocussedSignal;
 
 protected:
    //! draw the text

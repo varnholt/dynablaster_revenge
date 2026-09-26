@@ -1,14 +1,12 @@
 #pragma once
 
 #include "psdlayer.h"
+#include "signal.h"
 
-// Qt
-#include <QObject>
+#include <string>
 
-class MenuPageItem : public QObject
+class MenuPageItem
 {
-   Q_OBJECT
-
 public:
    //! page item types
    enum PageItemType
@@ -30,7 +28,7 @@ public:
    };
 
    //!
-   MenuPageItem(QObject* parent = 0);
+   MenuPageItem();
 
    virtual ~MenuPageItem();
 
@@ -73,7 +71,7 @@ public:
    virtual bool isModal() const;
 
    //! setter for action identifier
-   void setAction(const QString&);
+   void setAction(const std::string&);
 
    //! menu page item has integrated items
    virtual bool hasNestedElements();
@@ -116,18 +114,14 @@ public:
    //! getter for parent item
    void setParent(MenuPageItem* value);
 
-signals:
-
    //! action was triggered
-   void action(const QString&);
+   Signal<const std::string&> actionSignal;
 
    //! mouse was released
-   void signalMouseReleased();
+   Signal<> mouseReleasedSignal;
 
    //! visibility changed
-   void visible(bool enabled);
-
-public slots:
+   Signal<bool> visibleSignal;
 
    //! setter for visible flag
    void setVisible(bool);
@@ -141,9 +135,9 @@ public slots:
 
    virtual void deactivated();
 
-   virtual void keyPressed(int key, const QString& text);
+   virtual void keyPressed(int key, const std::string& text);
 
-   virtual void paste(const QString& /*text*/)
+   virtual void paste(const std::string& /*text*/)
    {
    }
 
@@ -159,7 +153,7 @@ protected:
 
    // behaviour
 
-   QString mAction;
+   std::string mAction;
 
    // layer info
 

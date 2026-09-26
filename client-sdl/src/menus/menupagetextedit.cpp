@@ -38,7 +38,7 @@ void MenuPageTextEditItem::initialize()
    // init update timer
    mTimer.setInterval(CURSOR_UPDATE_TIME);
 
-   connect(&mTimer, SIGNAL(timeout()), this, SLOT(updateCursorHighlight()));
+   mTimer.timeoutSignal.connect([this]() { updateCursorHighlight(); });
 }
 
 void MenuPageTextEditItem::draw()
@@ -78,8 +78,10 @@ void MenuPageTextEditItem::draw()
    }
 }
 
-void MenuPageTextEditItem::keyPressed(int key, const QString& text)
+void MenuPageTextEditItem::keyPressed(int key, const std::string& text)
 {
+   const QString text_q = QString::fromStdString(text);
+
    if (key == Qt::Key_Backspace)
    {
       if (isCursorAtEnd())
@@ -126,18 +128,18 @@ void MenuPageTextEditItem::keyPressed(int key, const QString& text)
    {
       // ignored
    }
-   else if (!text.isEmpty())
+   else if (!text.empty())
    {
       if (isCursorAtEnd())
       {
          // append chars
          if (mText.length() < getMaxLength())
-            mText.append(text);
+            mText.append(text_q);
       }
       else
       {
          // replace chars
-         mText = mText.replace(getCursorPosition(), 1, text);
+         mText = mText.replace(getCursorPosition(), 1, text_q);
       }
 
       moveCursorRight();
@@ -278,10 +280,12 @@ void MenuPageTextEditItem::deactivated()
    MenuPageItem::deactivated();
 }
 
-void MenuPageTextEditItem::paste(const QString& text)
+void MenuPageTextEditItem::paste(const std::string& text)
 {
-   for (int i = 0; i < text.length(); i++)
-      keyPressed(Qt::Key_unknown, text.at(i));
+   const QString text_q = QString::fromStdString(text);
+
+   for (int i = 0; i < text_q.length(); i++)
+      keyPressed(Qt::Key_unknown, QString(text_q.at(i)).toStdString());
 }
 
 void MenuPageTextEditItem::drawCursor()

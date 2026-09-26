@@ -6,14 +6,10 @@
 
 class MenuPageButtonItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
-   MenuPageButtonItem(QObject* parent = 0);
+   MenuPageButtonItem();
 
    virtual void draw();
-
-public slots:
 
    virtual void setFocus(bool focus);
 

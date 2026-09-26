@@ -1,6 +1,6 @@
 #include "menupageanimation.h"
 
-MenuPageAnimation::MenuPageAnimation() : QObject()
+MenuPageAnimation::MenuPageAnimation()
 {
 }
 

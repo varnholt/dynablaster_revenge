@@ -1,6 +1,6 @@
 #include "menupagecheckboxitem.h"
 
-MenuPageCheckBoxItem::MenuPageCheckBoxItem(QObject* parent) : MenuPageItem(parent), mLayerChecked(0), mLayerUnchecked(0), mChecked(false)
+MenuPageCheckBoxItem::MenuPageCheckBoxItem() : mLayerChecked(0), mLayerUnchecked(0), mChecked(false)
 {
    mPageItemType = PageItemTypeCheckbox;
    mInteractive = true;
@@ -44,7 +44,7 @@ void MenuPageCheckBoxItem::setChecked(bool checked)
    mChecked = checked;
 
    // notify others
-   emit stateChanged();
+   stateChangedSignal();
 }
 
 void MenuPageCheckBoxItem::toggleChecked()

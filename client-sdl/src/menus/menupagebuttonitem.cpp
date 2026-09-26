@@ -3,7 +3,7 @@
 // math
 #include "math.h"
 
-MenuPageButtonItem::MenuPageButtonItem(QObject* parent) : MenuPageItem(parent), mFadeValue(0.0f), mFadeOut(false)
+MenuPageButtonItem::MenuPageButtonItem() : mFadeValue(0.0f), mFadeOut(false)
 {
    mPageItemType = PageItemTypeButton;
    mInteractive = true;

@@ -7,6 +7,8 @@
 // math
 #include "math/color.h"
 
+#include <QString>
+
 // forward declarations
 class BitmapFont;
 
@@ -20,8 +22,6 @@ class BitmapFont;
 /// but never actually read anywhere in this file.
 class MenuPageTextEditItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    //! constructor
    MenuPageTextEditItem();
@@ -64,8 +64,6 @@ public:
    //! check if editing is active
    bool isEditingActive() const;
 
-public slots:
-
    void setText(const QString&);
 
    void setScale(float scale);
@@ -84,15 +82,15 @@ public slots:
 
    void setFieldWidth(int fieldWidth);
 
-   virtual void keyPressed(int key, const QString& text);
+   virtual void keyPressed(int key, const std::string& text);
 
    virtual void activated();
 
    virtual void deactivated();
 
-   virtual void paste(const QString& text);
+   virtual void paste(const std::string& text);
 
-protected slots:
+protected:
 
    //! update the cursor's highlight
    void updateCursorHighlight();

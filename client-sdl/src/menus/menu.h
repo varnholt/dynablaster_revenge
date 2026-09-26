@@ -38,9 +38,9 @@ public slots:
 
    void mouseReleased();
 
-   void keyPressed(int key, const QString&);
+   void keyPressed(int key, const std::string&);
 
-   void paste(const QString& text);
+   void paste(const std::string& text);
 
    MenuPage* getCurrentPage();
 

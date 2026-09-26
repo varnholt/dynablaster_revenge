@@ -2,8 +2,10 @@
 #include "menupagelistitem.h"
 
 // math
+#include <algorithm>
+#include <cmath>
 #include <cstring>
-#include "math.h"
+#include <numbers>
 
 // menus
 #include "clipper.h"
@@ -223,7 +225,7 @@ void MenuPageListItem::initialize()
 void MenuPageListItem::updateScrollbars()
 {
    float percent = (float)(mY) / (-mHeightAllElements + mLayerActive->getHeight());
-   emit scrollAnimation(percent);
+   scrollAnimationSignal(percent);
 }
 
 //-----------------------------------------------------------------------------
@@ -264,7 +266,7 @@ void MenuPageListItem::animate(float /*time*/)
    {
       float elapsed = mBlendTimer.elapsed();
 
-      float a = 0.5f * (1.0f + cos(M_PI * (elapsed / duration)));
+      float a = 0.5f * (1.0f + cos(std::numbers::pi_v<float> * (elapsed / duration)));
       float b = 1.0f - a;
 
       mY = a * getYOffsetSource() + b * getYOffsetDest();
@@ -652,7 +654,7 @@ void MenuPageListItem::setRowHeight(int height)
 */
 void MenuPageListItem::scrollToIndex(int index, bool /*clicked*/)
 {
-   int count = qMax(getElementCount(), 1);
+   int count = std::max(getElementCount(), 1);
    float percent = index / (float)count;
 
    if (percent < 0.0f)
@@ -732,7 +734,7 @@ void MenuPageListItem::scrollToPercentage(float percent, bool clicked)
 
    if (!clicked)
    {
-      emit scrollAnimation(percent);
+      scrollAnimationSignal(percent);
    }
 }
 
@@ -912,7 +914,7 @@ void MenuPageListItem::setFocussedElement(int element)
 {
    mFocussedElement = element;
 
-   emit elementFocussed(element);
+   elementFocussedSignal(element);
 }
 
 //-----------------------------------------------------------------------------

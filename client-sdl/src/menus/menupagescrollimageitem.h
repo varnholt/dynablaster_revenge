@@ -9,8 +9,6 @@ class PSDLayer;
 
 class MenuPageScrollImageItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    MenuPageScrollImageItem();
 
@@ -19,8 +17,6 @@ public:
    virtual void initialize();
 
    virtual void draw();
-
-public slots:
 
    virtual void reset();
 

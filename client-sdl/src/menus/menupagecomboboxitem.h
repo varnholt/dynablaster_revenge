@@ -2,6 +2,9 @@
 
 // base
 #include "menupagelistitem.h"
+#include "signal.h"
+
+#include <QString>
 
 #include <map>
 
@@ -15,8 +18,6 @@ class MenuPageLabelItem;
 /// the whole page-render pass) - same treatment as MenuPageBackgroundItem's animated quad.
 class MenuPageComboBoxItem : public MenuPageListItem
 {
-   Q_OBJECT
-
 public:
    MenuPageComboBoxItem();
 
@@ -105,21 +106,17 @@ height  +--------------------+     |                   |
    //! setter for value
    void setValue(const QString&);
 
-public slots:
-
    //! called when button pressed, item selected
    virtual void setVisible(bool visible = true);
 
    //! dropdown was enabled/disabled
    virtual void dropDownEnabled(bool enabled);
 
-signals:
-
    //! new value is passed to dropdown label on select
-   void updateDropDown(const QString&);
+   Signal<const std::string&> updateDropDownSignal;
 
    //! value changed
-   void valueChanged(const QString&);
+   Signal<const std::string&> valueChangedSignal;
 
 protected:
    //! draws single quad

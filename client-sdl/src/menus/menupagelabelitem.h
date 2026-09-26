@@ -6,13 +6,13 @@
 // math
 #include "math/color.h"
 
+#include <QString>
+
 // forward declarations
 class BitmapFont;
 
 class MenuPageLabelItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    MenuPageLabelItem();
 
@@ -23,8 +23,6 @@ public:
    virtual void initialize();
 
    QString getText() const;
-
-public slots:
 
    void setFontName(const QString& fontName);
 

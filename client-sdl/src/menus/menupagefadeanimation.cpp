@@ -75,7 +75,7 @@ void MenuPageFadeAnimation::animate()
       if (elapsed > kPi * 0.5f)
       {
          mStopped = true;
-         emit stopped();
+         stoppedSignal();
       }
    }
 }

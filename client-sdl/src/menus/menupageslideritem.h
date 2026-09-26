@@ -2,11 +2,10 @@
 
 // base
 #include "menupageitem.h"
+#include "signal.h"
 
 class MenuPageSliderItem : public MenuPageItem
 {
-   Q_OBJECT
-
 public:
    //! constructor
    MenuPageSliderItem();
@@ -29,9 +28,7 @@ public:
 
    void setValue(float);
 
-signals:
-
-   void valueChanged(float val);
+   Signal<float> valueChangedSignal;
 
 protected:
    int mMinimum;
