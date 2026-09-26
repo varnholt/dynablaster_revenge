@@ -7,16 +7,14 @@
 #include "math/quat.h"
 #include "psdlayer.h"
 
-// Qt
-#include <QMouseEvent>
-
 // texture names
 #define DEFAULT "default"
 #define BUSY "busy"
 #define CLICKED "clicked"
 
 // cmath
-#include <math.h>
+#include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -24,8 +22,7 @@ constexpr float kPi = 3.14159265358979323846f;
 }
 
 MenuMouseCursor::MenuMouseCursor(RenderDevice* dev, bool visible)
-    : QObject(),
-      Drawable(dev, visible),
+    : Drawable(dev, visible),
       mDefaultLayer(0),
       mClickedLayer(0),
       mBusyLayer(0),
@@ -58,13 +55,13 @@ void MenuMouseCursor::animate(float time)
    mTime = time;
 }
 
-void MenuMouseCursor::mousePressEvent(int /*x*/, int /*y*/, Qt::MouseButton)
+void MenuMouseCursor::mousePressEvent(int /*x*/, int /*y*/)
 {
    mMousePressed = true;
    mClickTime.restart();
 }
 
-void MenuMouseCursor::mouseReleaseEvent(QMouseEvent* /*event*/)
+void MenuMouseCursor::mouseReleaseEvent()
 {
    mMousePressed = false;
 }
@@ -87,7 +84,7 @@ void MenuMouseCursor::initializeGL()
 
 void MenuMouseCursor::initializeLayers()
 {
-   mPsd.load(qPrintable(mFilename));
+   mPsd.load(mFilename.c_str());
 
    // assign layers to menu page items
 
@@ -143,7 +140,7 @@ void MenuMouseCursor::paintClickedCursor()
    if (!mClickedLayer)
       return;
 
-   float opacity = qMax(300 - (int)mClickTime.elapsed(), 0) * 0.00003f * mClickedLayer->getOpacity();
+   float opacity = std::max(300 - (int)mClickTime.elapsed(), 0) * 0.00003f * mClickedLayer->getOpacity();
 
    if (opacity > 0.0f)
    {
@@ -169,7 +166,7 @@ void MenuMouseCursor::paintBusyIcon()
       Matrix pre;
       pre.translate(Vector(-0.5f * w, -0.5f * h, 0.0f));
 
-      Matrix rot(Quat(0.0f, 0.0f, sinf(angle * 0.5f), cosf(angle * 0.5f)));
+      Matrix rot(Quat(0.0f, 0.0f, std::sin(angle * 0.5f), std::cos(angle * 0.5f)));
 
       Matrix post;
       post.translate(Vector(mX + mBusyX + 0.5f * w, mY + mBusyY + 0.5f * h, 0.0f));

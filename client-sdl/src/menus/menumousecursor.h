@@ -7,19 +7,13 @@
 #include "image/psd.h"
 
 #include "framework/frametimer.h"
-// Qt
-#include <QImage>
-#include <QList>
-#include <QMap>
-#include <QObject>
-#include <QString>
+
+#include <string>
 
 class PSDLayer;
 
-class MenuMouseCursor : public QObject, public Drawable
+class MenuMouseCursor : public Drawable
 {
-   Q_OBJECT
-
 public:
    enum State
    {
@@ -37,11 +31,9 @@ public:
    virtual void animate(float globalTime);
 
    //! mouse events
-   virtual void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
+   virtual void mousePressEvent(int x, int y);
    virtual void mouseMoveEvent(int x, int y);
-   virtual void mouseReleaseEvent(QMouseEvent* event);
-
-public slots:
+   virtual void mouseReleaseEvent();
 
    void setBusy(bool);
 
@@ -58,7 +50,7 @@ protected:
 
    PSD mPsd;
 
-   QString mFilename;
+   std::string mFilename;
 
    PSDLayer* mDefaultLayer;
    PSDLayer* mClickedLayer;

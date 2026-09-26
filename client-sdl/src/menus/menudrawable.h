@@ -1,11 +1,5 @@
 #pragma once
 
-// Qt
-#include <QImage>
-#include <QKeyEvent>
-#include <QList>
-#include <QMouseEvent>
-
 // engine
 #include "framework/drawable.h"
 
@@ -55,16 +49,16 @@ public:
    // event handler
 
    //!
-   void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
+   void mousePressEvent(int x, int y);
 
    //!
    void mouseMoveEvent(int x, int y);
 
    //!
-   void mouseReleaseEvent(QMouseEvent* event);
+   void mouseReleaseEvent();
 
    //!
-   void keyPressEvent(QKeyEvent* event);
+   void keyPressEvent(const KeyEvent& event);
 
    //! overwrite animate
    virtual void animate(float globalTime);
@@ -85,7 +79,7 @@ public:
    Signal<> pageChangeAnimationStoppedSignal;
 
    //! signal key pressed event
-   Signal<QKeyEvent*> keyPressedSignal;
+   Signal<const KeyEvent&> keyPressedSignal;
 
    //! setter for active page by name
    void pageChangeRequest(const std::string&);

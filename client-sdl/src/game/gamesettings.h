@@ -1,11 +1,10 @@
 #ifndef GAMESETTINGS_H
 #define GAMESETTINGS_H
 
-// Qt
-#include <QMap>
-#include <QObject>
-
 #include <map>
+#include <unordered_map>
+
+#include <SDL3/SDL_keycode.h>
 
 // math
 #include "math/color.h"
@@ -559,19 +558,19 @@ class GameSettings
             void restoreDefaults();
 
             //! setter for keymap
-            void setKeyMap(const QMap<Constants::Key, int>& keyMap);
+            void setKeyMap(const std::unordered_map<Constants::Key, int>& keyMap);
 
             //! getter for keymap
-            QMap<Constants::Key, int> getKeyMap() const;
+            std::unordered_map<Constants::Key, int> getKeyMap() const;
 
-            Qt::Key getUpKey() const;
-            Qt::Key getDownKey() const;
-            Qt::Key getLeftKey() const;
-            Qt::Key getRightKey() const;
-            Qt::Key getBombKey() const;
-            Qt::Key getZoomOutKey() const;
-            Qt::Key getZoomInKey() const;
-            Qt::Key getStartKey() const;
+            SDL_Keycode getUpKey() const;
+            SDL_Keycode getDownKey() const;
+            SDL_Keycode getLeftKey() const;
+            SDL_Keycode getRightKey() const;
+            SDL_Keycode getBombKey() const;
+            SDL_Keycode getZoomOutKey() const;
+            SDL_Keycode getZoomInKey() const;
+            SDL_Keycode getStartKey() const;
 
             //! setter for analogue axis 1
             void setAnalogueAxis1(int axis1);
@@ -597,8 +596,11 @@ class GameSettings
             //! initialize default map
             void initializeDefaultMap();
 
+            //! looks up a key in mKeyMap, 0 if not present
+            SDL_Keycode getKey(Constants::Key key) const;
+
             //! keymap
-            QMap<Constants::Key, int> mKeyMap;
+            std::unordered_map<Constants::Key, int> mKeyMap;
 
             //! analogue axis 1
             int mAnalogueAxis1;

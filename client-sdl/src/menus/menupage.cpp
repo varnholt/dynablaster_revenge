@@ -18,6 +18,8 @@
 #include "menupageslideritem.h"
 #include "menupagetextedit.h"
 
+#include <SDL3/SDL_keycode.h>
+
 MenuPage::MenuPage() : PSD(), mActiveItem(0), mAnimation(0), mActive(false)
 {
 }
@@ -1302,7 +1304,7 @@ void MenuPage::keyPressed(int key, const std::string& text)
    // check if any item has focus
    if (mActiveItem)
    {
-      if (key == Qt::Key_Tab)
+      if (key == SDLK_TAB)
       {
          tabPressed();
       }
@@ -1310,7 +1312,7 @@ void MenuPage::keyPressed(int key, const std::string& text)
       {
          mActiveItem->keyPressed(key, text);
 
-         if (key == Qt::Key_Return || key == Qt::Key_Enter)
+         if (key == SDLK_RETURN || key == SDLK_KP_ENTER)
          {
             actionRequestSignal(mFilename.toStdString(), mActiveItem->getCurrentLayer()->getName());
          }

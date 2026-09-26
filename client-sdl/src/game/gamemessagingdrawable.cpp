@@ -2,7 +2,7 @@
 
 #include "gamemessagingdrawable.h"
 
-#include <QKeyEvent>
+#include <SDL3/SDL_keycode.h>
 
 #include "bombermanclient.h"
 #include "gamestatemachine.h"
@@ -123,11 +123,11 @@ void GameMessagingDrawable::clearMessage()
    mMessage.clear();
 }
 
-void GameMessagingDrawable::keyPressEvent(QKeyEvent* event)
+void GameMessagingDrawable::keyPressEvent(const KeyEvent& event)
 {
    if (GameStateMachine::getInstance()->getState() == Constants::GameActive)
    {
-      if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+      if (event.key() == SDLK_RETURN || event.key() == SDLK_KP_ENTER)
       {
          bool wasActive = isActive();
          toggleActive();
@@ -149,12 +149,12 @@ void GameMessagingDrawable::keyPressEvent(QKeyEvent* event)
       {
          if (isActive())
          {
-            if (event->key() == Qt::Key_Escape)
+            if (event.key() == SDLK_ESCAPE)
             {
                clearMessage();
                toggleActive();
             }
-            else if (event->key() == Qt::Key_Backspace)
+            else if (event.key() == SDLK_BACKSPACE)
             {
                if (isCursorAtEnd())
                {
@@ -170,39 +170,41 @@ void GameMessagingDrawable::keyPressEvent(QKeyEvent* event)
                   }
                }
             }
-            else if (event->key() == Qt::Key_Delete)
+            else if (event.key() == SDLK_DELETE)
             {
                if (!isCursorAtEnd())
                {
                   mMessage = mMessage.replace(getCursorPosition(), 1, "");
                }
             }
-            else if (event->key() == Qt::Key_Left)
+            else if (event.key() == SDLK_LEFT)
             {
                moveCursorLeft();
             }
-            else if (event->key() == Qt::Key_Right)
+            else if (event.key() == SDLK_RIGHT)
             {
                moveCursorRight();
             }
-            else if (event->key() == Qt::Key_Home)
+            else if (event.key() == SDLK_HOME)
             {
                moveCursorToStart();
             }
-            else if (event->key() == Qt::Key_End)
+            else if (event.key() == SDLK_END)
             {
                moveCursorToEnd();
             }
-            else if (!event->text().isEmpty())
+            else if (!event.text().empty())
             {
+               const QString text = QString::fromStdString(event.text());
+
                if (isCursorAtEnd())
                {
                   if (mMessage.length() < MESSAGE_LENGTH_MAX)
-                     mMessage.append(event->text());
+                     mMessage.append(text);
                }
                else
                {
-                  mMessage = mMessage.replace(getCursorPosition(), 1, event->text());
+                  mMessage = mMessage.replace(getCursorPosition(), 1, text);
                }
 
                moveCursorRight();

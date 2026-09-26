@@ -9,6 +9,8 @@
 // Qt
 #include <QChar>
 
+#include <SDL3/SDL_keycode.h>
+
 #include <cstring>
 
 #define CURSOR_UPDATE_TIME 500
@@ -82,7 +84,7 @@ void MenuPageTextEditItem::keyPressed(int key, const std::string& text)
 {
    const QString text_q = QString::fromStdString(text);
 
-   if (key == Qt::Key_Backspace)
+   if (key == SDLK_BACKSPACE)
    {
       if (isCursorAtEnd())
       {
@@ -100,7 +102,7 @@ void MenuPageTextEditItem::keyPressed(int key, const std::string& text)
          }
       }
    }
-   else if (key == Qt::Key_Delete)
+   else if (key == SDLK_DELETE)
    {
       if (!isCursorAtEnd())
       {
@@ -108,23 +110,23 @@ void MenuPageTextEditItem::keyPressed(int key, const std::string& text)
          mText = mText.replace(getCursorPosition(), 1, "");
       }
    }
-   else if (key == Qt::Key_Left)
+   else if (key == SDLK_LEFT)
    {
       moveCursorLeft();
    }
-   else if (key == Qt::Key_Right)
+   else if (key == SDLK_RIGHT)
    {
       moveCursorRight();
    }
-   else if (key == Qt::Key_Home)
+   else if (key == SDLK_HOME)
    {
       moveCursorToStart();
    }
-   else if (key == Qt::Key_End)
+   else if (key == SDLK_END)
    {
       moveCursorToEnd();
    }
-   else if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
+   else if (key == SDLK_RETURN || key == SDLK_KP_ENTER || key == SDLK_ESCAPE)
    {
       // ignored
    }
@@ -285,7 +287,7 @@ void MenuPageTextEditItem::paste(const std::string& text)
    const QString text_q = QString::fromStdString(text);
 
    for (int i = 0; i < text_q.length(); i++)
-      keyPressed(Qt::Key_unknown, QString(text_q.at(i)).toStdString());
+      keyPressed(SDLK_UNKNOWN, QString(text_q.at(i)).toStdString());
 }
 
 void MenuPageTextEditItem::drawCursor()

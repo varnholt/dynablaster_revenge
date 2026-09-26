@@ -2,11 +2,11 @@
 
 // GLES3 port of client/src/game/gamemessagingdrawable.cpp.
 
-#include "drawable.h"
 #include "animatedgamemessage.h"
+#include "drawable.h"
 
-#include "image/psd.h"
 #include "framework/frametimer.h"
+#include "image/psd.h"
 
 #include <QObject>
 
@@ -28,7 +28,7 @@ public:
    void initializeGL();
    void paintGL();
 
-   virtual void keyPressEvent(QKeyEvent* event);
+   virtual void keyPressEvent(const KeyEvent& event);
    virtual void setVisible(bool visible);
 
    const QString& getMessage() const;

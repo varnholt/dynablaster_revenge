@@ -455,9 +455,9 @@ int main(int argc, char** argv)
                   break;
                }
                case SDL_EVENT_MOUSE_BUTTON_UP:
-                  menuDrawable->mouseReleaseEvent(nullptr);
+                  menuDrawable->mouseReleaseEvent();
                   if (menuCursor)
-                     menuCursor->mouseReleaseEvent(nullptr);
+                     menuCursor->mouseReleaseEvent();
                   break;
                default:
                   break;
@@ -490,9 +490,9 @@ int main(int argc, char** argv)
          }
          else if (frame == 22)
          {
-            menuDrawable->mouseReleaseEvent(nullptr);
+            menuDrawable->mouseReleaseEvent();
             if (menuCursor)
-               menuCursor->mouseReleaseEvent(nullptr);
+               menuCursor->mouseReleaseEvent();
          }
       }
 

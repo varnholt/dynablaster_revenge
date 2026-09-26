@@ -33,7 +33,6 @@
 #include "game/positioninterpolation.h"
 
 #include <QCoreApplication>
-#include <QKeyEvent>
 #include <QObject>
 
 #include <SDL3/SDL.h>
@@ -42,85 +41,63 @@
 namespace
 {
 
-/// \brief maps the editing/navigation keys MenuPageTextEditItem::keyPressed() special-cases
-/// (menus/menupagetextedit.cpp) to Qt::Key. Printable characters don't go through this - they
-/// come from SDL_EVENT_TEXT_INPUT instead, which already gives correctly-shifted/composed text.
-int mapEditingKey(SDL_Keycode key)
+/// \brief allow-lists the editing/navigation keys MenuPageTextEditItem::keyPressed() special-cases
+/// (menus/menupagetextedit.cpp) - everything else is filtered out here. Printable characters don't
+/// go through this - they come from SDL_EVENT_TEXT_INPUT instead, which already gives
+/// correctly-shifted/composed text.
+SDL_Keycode mapEditingKey(SDL_Keycode key)
 {
    switch (key)
    {
       case SDLK_BACKSPACE:
-         return Qt::Key_Backspace;
       case SDLK_DELETE:
-         return Qt::Key_Delete;
       case SDLK_LEFT:
-         return Qt::Key_Left;
       case SDLK_RIGHT:
-         return Qt::Key_Right;
       case SDLK_HOME:
-         return Qt::Key_Home;
       case SDLK_END:
-         return Qt::Key_End;
       case SDLK_RETURN:
-         return Qt::Key_Return;
       case SDLK_KP_ENTER:
-         return Qt::Key_Enter;
+         return key;
       default:
-         return 0;
+         return SDLK_UNKNOWN;
    }
 }
 
-/// \brief maps the movement/bomb/zoom/start keys BombermanClient::keyPressed() checks against
+/// \brief allow-lists the movement/bomb/zoom/start keys BombermanClient::keyPressed() checks against
 /// GameSettings::ControllerSettings' default keymap (client/src/game/gamesettings.cpp -
 /// initializeDefaultMap(): Up/Down/Left/Right arrows, Space for bomb, [ ] for zoom, F10 for
 /// start), plus Return/Enter/Escape - not part of that remappable keymap, but hardcoded special
 /// cases BombermanClient::processKeyPressed() checks directly (client/src/game/bombermanclient.cpp:
 /// Return/Enter toggles in-game chat, Escape closes chat if open or otherwise leaves the game).
-/// Both were missing here entirely, so neither ever reached BombermanClient while in-game.
-/// Separate from mapEditingKey() below (menu text-field navigation) - only one of
-/// menuDrawable/gameDrawable is visible and receives key events at a time, so reusing the same
-/// Qt::Key values for both is fine. Backspace/Delete/Home/End are for GameMessagingDrawable's own
-/// in-game chat text editing - same key event reaches both BombermanClient and
-/// GameMessagingDrawable each frame (matches the original's GameView::keyPressEvent(), which
-/// forwards to every visible Drawable), each independently gated on its own "chat active" flag.
-int mapGameKey(SDL_Keycode key)
+/// Separate from mapEditingKey() above (menu text-field navigation) - only one of
+/// menuDrawable/gameDrawable is visible and receives key events at a time. Backspace/Delete/Home/End
+/// are for GameMessagingDrawable's own in-game chat text editing - same key event reaches both
+/// BombermanClient and GameMessagingDrawable each frame (matches the original's
+/// GameView::keyPressEvent(), which forwards to every visible Drawable), each independently gated
+/// on its own "chat active" flag.
+SDL_Keycode mapGameKey(SDL_Keycode key)
 {
    switch (key)
    {
       case SDLK_UP:
-         return Qt::Key_Up;
       case SDLK_DOWN:
-         return Qt::Key_Down;
       case SDLK_LEFT:
-         return Qt::Key_Left;
       case SDLK_RIGHT:
-         return Qt::Key_Right;
       case SDLK_SPACE:
-         return Qt::Key_Space;
       case SDLK_LEFTBRACKET:
-         return Qt::Key_BracketLeft;
       case SDLK_RIGHTBRACKET:
-         return Qt::Key_BracketRight;
       case SDLK_F10:
-         return Qt::Key_F10;
       case SDLK_RETURN:
-         return Qt::Key_Return;
       case SDLK_KP_ENTER:
-         return Qt::Key_Enter;
       case SDLK_ESCAPE:
-         return Qt::Key_Escape;
       case SDLK_TAB:
-         return Qt::Key_Tab;
       case SDLK_BACKSPACE:
-         return Qt::Key_Backspace;
       case SDLK_DELETE:
-         return Qt::Key_Delete;
       case SDLK_HOME:
-         return Qt::Key_Home;
       case SDLK_END:
-         return Qt::Key_End;
+         return key;
       default:
-         return 0;
+         return SDLK_UNKNOWN;
    }
 }
 
@@ -322,8 +299,8 @@ int main(int argc, char** argv)
    bombermanClient.removeMapItemSignal.connect([&](MapItem* item) { bombermanClient.getPositionInterpolation()->removeMapItem(item); });
    bombermanClient.playfieldScaleSignal.connect([&](float x, float y) { gameDrawable.setPlayfieldScale(x, y); });
    bombermanClient.playfieldSizeSignal.connect([&](int width, int height) { gameDrawable.setPlayfieldSize(width, height); });
-   QObject::connect(&gameDrawable, SIGNAL(keyPressed(QKeyEvent*)), &bombermanClient, SLOT(keyPressed(QKeyEvent*)));
-   QObject::connect(&gameDrawable, SIGNAL(keyReleased(QKeyEvent*)), &bombermanClient, SLOT(keyReleased(QKeyEvent*)));
+   gameDrawable.keyPressedSignal.connect([&](const KeyEvent& event) { bombermanClient.keyPressed(event); });
+   gameDrawable.keyReleasedSignal.connect([&](const KeyEvent& event) { bombermanClient.keyReleased(event); });
    bombermanClient.createMapItemSignal.connect([&](MapItem* item) { gameDrawable.createMapItem(item); });
    bombermanClient.removeMapItemSignal.connect([&](MapItem* item) { gameDrawable.removeMapItem(item); });
    bombermanClient.destroyMapItemSignal.connect([&](MapItem* item, float flameCount) { gameDrawable.destroyMapItem(item, flameCount); });
@@ -435,32 +412,32 @@ int main(int argc, char** argv)
                break;
             }
             case SDL_EVENT_MOUSE_BUTTON_UP:
-               menuDrawable.mouseReleaseEvent(nullptr);
-               menuCursor.mouseReleaseEvent(nullptr);
+               menuDrawable.mouseReleaseEvent();
+               menuCursor.mouseReleaseEvent();
                break;
             case SDL_EVENT_KEY_DOWN:
             {
                if (gameDrawable.isVisible())
                {
-                  const int qtKey = mapGameKey(event.key.key);
-                  if (qtKey != 0)
+                  const SDL_Keycode key = mapGameKey(event.key.key);
+                  if (key != SDLK_UNKNOWN)
                   {
                      // same key event reaches both - matches GameView::keyPressEvent() forwarding
                      // to every visible Drawable; each side's own "chat active" gate (see
                      // BombermanClient::processKeyPressed()/GameMessagingDrawable::isActive())
                      // keeps movement and chat text entry from double-handling it.
-                     QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier, QString(), event.key.repeat);
-                     gameDrawable.keyPressEvent(&keyEvent);
-                     gameMessagingDrawable.keyPressEvent(&keyEvent);
+                     KeyEvent keyEvent(key, std::string(), event.key.repeat);
+                     gameDrawable.keyPressEvent(keyEvent);
+                     gameMessagingDrawable.keyPressEvent(keyEvent);
                   }
                }
                else
                {
-                  const int qtKey = mapEditingKey(event.key.key);
-                  if (qtKey != 0)
+                  const SDL_Keycode key = mapEditingKey(event.key.key);
+                  if (key != SDLK_UNKNOWN)
                   {
-                     QKeyEvent keyEvent(QEvent::KeyPress, qtKey, Qt::NoModifier);
-                     menuDrawable.keyPressEvent(&keyEvent);
+                     KeyEvent keyEvent(key, std::string(), false);
+                     menuDrawable.keyPressEvent(keyEvent);
                   }
                }
                break;
@@ -469,23 +446,23 @@ int main(int argc, char** argv)
             {
                if (gameDrawable.isVisible())
                {
-                  const int qtKey = mapGameKey(event.key.key);
-                  if (qtKey != 0)
+                  const SDL_Keycode key = mapGameKey(event.key.key);
+                  if (key != SDLK_UNKNOWN)
                   {
-                     QKeyEvent keyEvent(QEvent::KeyRelease, qtKey, Qt::NoModifier, QString(), event.key.repeat);
-                     gameDrawable.keyReleaseEvent(&keyEvent);
+                     KeyEvent keyEvent(key, std::string(), event.key.repeat);
+                     gameDrawable.keyReleaseEvent(keyEvent);
                   }
                }
                break;
             }
             case SDL_EVENT_TEXT_INPUT:
             {
-               QKeyEvent keyEvent(QEvent::KeyPress, 0, Qt::NoModifier, QString::fromUtf8(event.text.text));
+               KeyEvent keyEvent(SDLK_UNKNOWN, std::string(event.text.text), false);
 
                if (gameDrawable.isVisible())
-                  gameMessagingDrawable.keyPressEvent(&keyEvent);
+                  gameMessagingDrawable.keyPressEvent(keyEvent);
                else
-                  menuDrawable.keyPressEvent(&keyEvent);
+                  menuDrawable.keyPressEvent(keyEvent);
 
                break;
             }

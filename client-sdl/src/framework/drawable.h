@@ -1,13 +1,8 @@
 #pragma once
 
-#include <qnamespace.h>
+#include "keyevent.h"
 
 class RenderDevice;
-
-// qt forwards
-class QMouseEvent;
-class QKeyEvent;
-class QWheelEvent;
 
 /// \brief GLES3 port of client/src/framework/drawable.cpp.
 ///
@@ -30,15 +25,14 @@ public:
    virtual void animate(float globalTime);
 
    //! mouse events
-   virtual void mousePressEvent(int x, int y, Qt::MouseButton = Qt::LeftButton);
+   virtual void mousePressEvent(int x, int y);
 
    virtual void mouseMoveEvent(int x, int y);
-   virtual void mouseReleaseEvent(QMouseEvent* event);
-   virtual void wheelEvent(QWheelEvent*);
+   virtual void mouseReleaseEvent();
 
    //! keyboard events
-   virtual void keyPressEvent(QKeyEvent* event);
-   virtual void keyReleaseEvent(QKeyEvent* event);
+   virtual void keyPressEvent(const KeyEvent& event);
+   virtual void keyReleaseEvent(const KeyEvent& event);
 
    virtual void setVisible(bool visible);
    virtual bool isVisible() const;

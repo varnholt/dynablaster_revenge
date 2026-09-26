@@ -944,11 +944,9 @@ void GameSettings::ControllerSettings::serialize()
    {
       SettingsMap serializeMap;
 
-      QMapIterator<Constants::Key, int> i(mKeyMap);
-      while (i.hasNext())
+      for (const auto& [key, value] : mKeyMap)
       {
-         i.next();
-         serializeMap[QString("%1").arg(i.key())] = QString("%1").arg(i.value());
+         serializeMap[QString("%1").arg(static_cast<int>(key))] = QString("%1").arg(value);
       }
 
       setValue("controller/keymap", serializeMap);
@@ -977,13 +975,7 @@ void GameSettings::ControllerSettings::deserialize()
 
       if (keyOk && keyValOk)
       {
-         if (mKeyMap.contains(key))
-            mKeyMap.remove(key);
-
-         mKeyMap.insert(
-            key,
-            keyVal
-         );
+         mKeyMap[key] = keyVal;
       }
    }
 
@@ -1023,13 +1015,13 @@ void GameSettings::ControllerSettings::restoreDefaults()
 }
 
 
-void GameSettings::ControllerSettings::setKeyMap(const QMap<Constants::Key, int> &keyMap)
+void GameSettings::ControllerSettings::setKeyMap(const std::unordered_map<Constants::Key, int>& keyMap)
 {
    mKeyMap = keyMap;
 }
 
 
-QMap<Constants::Key, int> GameSettings::ControllerSettings::getKeyMap() const
+std::unordered_map<Constants::Key, int> GameSettings::ControllerSettings::getKeyMap() const
 {
    return mKeyMap;
 }
@@ -1037,62 +1029,69 @@ QMap<Constants::Key, int> GameSettings::ControllerSettings::getKeyMap() const
 
 void GameSettings::ControllerSettings::initializeDefaultMap()
 {
-   mKeyMap.insert(Constants::KeyUp,     Qt::Key_Up);
-   mKeyMap.insert(Constants::KeyDown,   Qt::Key_Down);
-   mKeyMap.insert(Constants::KeyLeft,   Qt::Key_Left);
-   mKeyMap.insert(Constants::KeyRight,  Qt::Key_Right);
-   mKeyMap.insert(Constants::KeyBomb,   Qt::Key_Space);
-   mKeyMap.insert(Constants::KeyZoomIn, Qt::Key_BracketRight);
-   mKeyMap.insert(Constants::KeyZoomOut,Qt::Key_BracketLeft);
-   mKeyMap.insert(Constants::KeyStart,  Qt::Key_F10);
+   mKeyMap[Constants::KeyUp] = SDLK_UP;
+   mKeyMap[Constants::KeyDown] = SDLK_DOWN;
+   mKeyMap[Constants::KeyLeft] = SDLK_LEFT;
+   mKeyMap[Constants::KeyRight] = SDLK_RIGHT;
+   mKeyMap[Constants::KeyBomb] = SDLK_SPACE;
+   mKeyMap[Constants::KeyZoomIn] = SDLK_RIGHTBRACKET;
+   mKeyMap[Constants::KeyZoomOut] = SDLK_LEFTBRACKET;
+   mKeyMap[Constants::KeyStart] = SDLK_F10;
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getUpKey() const
+SDL_Keycode GameSettings::ControllerSettings::getKey(Constants::Key key) const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyUp]);
+   auto it = mKeyMap.find(key);
+   return it != mKeyMap.end() ? static_cast<SDL_Keycode>(it->second) : 0;
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getDownKey() const
+SDL_Keycode GameSettings::ControllerSettings::getUpKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyDown]);
+   return getKey(Constants::KeyUp);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getLeftKey() const
+SDL_Keycode GameSettings::ControllerSettings::getDownKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyLeft]);
+   return getKey(Constants::KeyDown);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getRightKey() const
+SDL_Keycode GameSettings::ControllerSettings::getLeftKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyRight]);
+   return getKey(Constants::KeyLeft);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getBombKey() const
+SDL_Keycode GameSettings::ControllerSettings::getRightKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyBomb]);
+   return getKey(Constants::KeyRight);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getZoomInKey() const
+SDL_Keycode GameSettings::ControllerSettings::getBombKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyZoomIn]);
+   return getKey(Constants::KeyBomb);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getZoomOutKey() const
+SDL_Keycode GameSettings::ControllerSettings::getZoomInKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyZoomOut]);
+   return getKey(Constants::KeyZoomIn);
 }
 
 
-Qt::Key GameSettings::ControllerSettings::getStartKey() const
+SDL_Keycode GameSettings::ControllerSettings::getZoomOutKey() const
 {
-   return static_cast<Qt::Key>(mKeyMap[Constants::KeyStart]);
+   return getKey(Constants::KeyZoomOut);
+}
+
+
+SDL_Keycode GameSettings::ControllerSettings::getStartKey() const
+{
+   return getKey(Constants::KeyStart);
 }
 
 

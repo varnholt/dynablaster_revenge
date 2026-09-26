@@ -31,8 +31,7 @@
 #include <math.h>
 #include <cstdint>
 
-// qt
-#include <QKeyEvent>
+#include <SDL3/SDL_keycode.h>
 
 
 //-----------------------------------------------------------------------------
@@ -164,14 +163,14 @@ void GameDrawable::setVisible(bool visible)
 /*!
    \param event key press event
 */
-void GameDrawable::keyPressEvent(QKeyEvent* event)
+void GameDrawable::keyPressEvent(const KeyEvent& event)
 {
-   if (event->key() == Qt::Key_Tab)
+   if (event.key() == SDLK_TAB)
    {
       displayPlayerNames();
    }
 
-   emit keyPressed(event);
+   keyPressedSignal(event);
 }
 
 
@@ -188,9 +187,9 @@ void GameDrawable::displayPlayerNames()
 /*!
    \param event key release event
 */
-void GameDrawable::keyReleaseEvent(QKeyEvent* event)
+void GameDrawable::keyReleaseEvent(const KeyEvent& event)
 {
-   emit keyReleased(event);
+   keyReleasedSignal(event);
 }
 
 

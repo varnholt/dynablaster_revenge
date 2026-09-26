@@ -9,6 +9,9 @@
 #include "signal.h"
 #include "timer.h"
 
+// framework
+#include "framework/keyevent.h"
+
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -26,7 +29,6 @@ class Playlist;
 class PositionInterpolation;
 class Server;
 
-class QKeyEvent;
 struct NET_Address;
 struct NET_StreamSocket;
 
@@ -194,10 +196,10 @@ public slots:
    // key event handlers
 
    //! process key pressed event handed from gui
-   void keyPressed(QKeyEvent*);
+   void keyPressed(const KeyEvent&);
 
    //! process key released event handed from gui
-   void keyReleased(QKeyEvent*);
+   void keyReleased(const KeyEvent&);
 
    //! release all keys
    void releaseAllKeys();

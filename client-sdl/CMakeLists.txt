@@ -80,6 +80,7 @@ file(GLOB_RECURSE DYNABLASTER_ENGINE_SOURCES
     src/framework/frametimer.cpp src/framework/frametimer.h
     src/framework/timerhandler.cpp src/framework/timerhandler.h
     src/framework/drawable.cpp src/framework/drawable.h
+    src/framework/keyevent.cpp src/framework/keyevent.h
     src/image/*.cpp src/image/*.h
 )
 

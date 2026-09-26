@@ -22,6 +22,9 @@
 #include "drawable.h"
 #include "math/matrix.h"
 
+// shared
+#include "signal.h"
+
 // forward declarations
 class DetonationManager;
 class ExtraMapItem;
@@ -33,7 +36,6 @@ class Mesh;
 class Node;
 class PlayerDeathEffect;
 class PlayerItem;
-class QKeyEvent;
 class RenderDevice;
 class SceneGraph;
 class Skull;
@@ -86,10 +88,14 @@ public:
    // event handles
 
    //! key release event
-   void keyPressEvent(QKeyEvent* event);
+   void keyPressEvent(const KeyEvent& event);
 
    //! key press event
-   void keyReleaseEvent(QKeyEvent* event);
+   void keyReleaseEvent(const KeyEvent& event);
+
+   //! key press/release notification
+   Signal<const KeyEvent&> keyPressedSignal;
+   Signal<const KeyEvent&> keyReleasedSignal;
 
    //! show player-name overlay + own-position arrow (Tab key)
    void displayPlayerNames();
@@ -147,8 +153,6 @@ public slots:
 
 signals:
 
-   void keyPressed(QKeyEvent*);
-   void keyReleased(QKeyEvent*);
    void levelLoadingStarted(const QString& path);
    void levelLoaded(const QString& path);
 

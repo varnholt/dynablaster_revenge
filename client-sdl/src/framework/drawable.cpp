@@ -1,6 +1,4 @@
 #include "drawable.h"
-#include <QKeyEvent>
-#include <QMouseEvent>
 
 Drawable::Drawable(RenderDevice* dev, bool visible) : mDevice(dev), mVisible(visible)
 {
@@ -18,11 +16,7 @@ void Drawable::resizeGL()
 {
 }
 
-void Drawable::mousePressEvent(
-   int /*x*/,
-   int /*y*/,
-   Qt::MouseButton /*button*/
-)
+void Drawable::mousePressEvent(int /*x*/, int /*y*/)
 {
 }
 
@@ -30,19 +24,15 @@ void Drawable::mouseMoveEvent(int /*x*/, int /*y*/)
 {
 }
 
-void Drawable::mouseReleaseEvent(QMouseEvent* /*event*/)
+void Drawable::mouseReleaseEvent()
 {
 }
 
-void Drawable::wheelEvent(QWheelEvent* /*e*/)
+void Drawable::keyPressEvent(const KeyEvent& /*event*/)
 {
 }
 
-void Drawable::keyPressEvent(QKeyEvent* /*event*/)
-{
-}
-
-void Drawable::keyReleaseEvent(QKeyEvent* /*event*/)
+void Drawable::keyReleaseEvent(const KeyEvent& /*event*/)
 {
 }
 

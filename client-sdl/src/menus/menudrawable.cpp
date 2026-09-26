@@ -1,9 +1,5 @@
 #include "menudrawable.h"
 
-// Qt
-#include <QKeyEvent>
-#include <QMouseEvent>
-
 // menu
 #include "defaultshader.h"
 #include "menu.h"
@@ -379,11 +375,7 @@ bool MenuDrawable::isInputBlocked() const
    \param y y pos
    \param button mouse button
 */
-void MenuDrawable::mousePressEvent(
-   int x,
-   int y,
-   Qt::MouseButton /*button*/
-)
+void MenuDrawable::mousePressEvent(int x, int y)
 {
    if (!isInputBlocked())
       mMenu->mousePressed(x, y);
@@ -405,7 +397,7 @@ void MenuDrawable::mouseMoveEvent(int x, int y)
 //-----------------------------------------------------------------------------
 /*!
  */
-void MenuDrawable::mouseReleaseEvent(QMouseEvent* /*event*/)
+void MenuDrawable::mouseReleaseEvent()
 {
    if (!isInputBlocked())
       mMenu->mouseReleased();
@@ -415,9 +407,9 @@ void MenuDrawable::mouseReleaseEvent(QMouseEvent* /*event*/)
 /*!
    \param event key event that was received
 */
-void MenuDrawable::keyPressEvent(QKeyEvent* event)
+void MenuDrawable::keyPressEvent(const KeyEvent& event)
 {
-   mMenu->keyPressed(event->key(), event->text().toStdString());
+   mMenu->keyPressed(event.key(), event.text());
 
    keyPressedSignal(event);
 }

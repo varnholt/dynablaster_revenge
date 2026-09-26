@@ -63,8 +63,8 @@
 
 // qt
 #include <QDir>
-#include <QKeyEvent>
 // SDL
+#include <SDL3/SDL_keycode.h>
 #include <SDL3_net/SDL_net.h>
 
 #include <cstdint>
@@ -1495,18 +1495,18 @@ void BombermanClient::poll()
 /*!
    \param event keypressed event
 */
-void BombermanClient::keyPressed(QKeyEvent* event)
+void BombermanClient::keyPressed(const KeyEvent& event)
 {
    GameSettings::ControllerSettings* controllerSettings = GameSettings::getInstance()->getControllerSettings();
 
-   bool controlKey = event->key() == controllerSettings->getUpKey() || event->key() == controllerSettings->getDownKey() ||
-                     event->key() == controllerSettings->getLeftKey() || event->key() == controllerSettings->getRightKey() ||
-                     event->key() == controllerSettings->getBombKey() || event->key() == controllerSettings->getZoomInKey() ||
-                     event->key() == controllerSettings->getZoomOutKey() || event->key() == controllerSettings->getStartKey();
+   bool controlKey = event.key() == controllerSettings->getUpKey() || event.key() == controllerSettings->getDownKey() ||
+                     event.key() == controllerSettings->getLeftKey() || event.key() == controllerSettings->getRightKey() ||
+                     event.key() == controllerSettings->getBombKey() || event.key() == controllerSettings->getZoomInKey() ||
+                     event.key() == controllerSettings->getZoomOutKey() || event.key() == controllerSettings->getStartKey();
 
-   if ((controlKey && !event->isAutoRepeat()) || !controlKey)
+   if ((controlKey && !event.isAutoRepeat()) || !controlKey)
    {
-      processKeyPressed(event->key());
+      processKeyPressed(event.key());
    }
 }
 
@@ -1514,10 +1514,10 @@ void BombermanClient::keyPressed(QKeyEvent* event)
 /*!
    \param event keyreleased event
 */
-void BombermanClient::keyReleased(QKeyEvent* event)
+void BombermanClient::keyReleased(const KeyEvent& event)
 {
-   if (!event->isAutoRepeat())
-      processKeyReleased(event->key());
+   if (!event.isAutoRepeat())
+      processKeyReleased(event.key());
 }
 
 //-----------------------------------------------------------------------------
@@ -1637,7 +1637,7 @@ void BombermanClient::removeBombKeyFlag()
 */
 void BombermanClient::processKeyPressed(int key)
 {
-   if (key == Qt::Key_Return || key == Qt::Key_Enter)
+   if (key == SDLK_RETURN || key == SDLK_KP_ENTER)
    {
       if (GameStateMachine::getInstance()->getState() == Constants::GameActive)
       {
@@ -1650,7 +1650,7 @@ void BombermanClient::processKeyPressed(int key)
    {
       if (GameStateMachine::getInstance()->getState() == Constants::GameActive)
       {
-         if (key == Qt::Key_Escape)
+         if (key == SDLK_ESCAPE)
          {
             toggleIngameMessaging();
          }
@@ -1658,7 +1658,7 @@ void BombermanClient::processKeyPressed(int key)
    }
 
    // leave game if requested
-   else if (key == Qt::Key_Escape)
+   else if (key == SDLK_ESCAPE)
    {
       // restart music if escape was hit during countdown
       if (GameStateMachine::getInstance()->getState() == Constants::GamePreparing)
@@ -1680,17 +1680,17 @@ void BombermanClient::processKeyPressed(int key)
    }
 
    // zoom camera
-   else if (key == Qt::Key_BracketLeft)
+   else if (key == SDLK_LEFTBRACKET)
    {
       zoomOutSignal(true);
    }
-   else if (key == Qt::Key_BracketRight)
+   else if (key == SDLK_RIGHTBRACKET)
    {
       zoomInSignal(true);
    }
 
    // abort game (F10/Start)
-   else if (key == Qt::Key_F10)
+   else if (key == SDLK_F10)
    {
       stopGame();
    }
@@ -1774,18 +1774,15 @@ void BombermanClient::processKeyReleased(int key)
       mKeysPressed &= ~Constants::KeyRight;
    }
    // zoom camera
-   else if (key == Qt::Key_BracketLeft)
+   else if (key == SDLK_LEFTBRACKET)
    {
       zoomOutSignal(false);
    }
-   else if (key == Qt::Key_BracketRight)
+   else if (key == SDLK_RIGHTBRACKET)
    {
       zoomInSignal(false);
    }
-   else if (key == controllerSettings->getBombKey()
-            // || key == Qt::Key_Space
-            // || key == Qt::Key_Control
-   )
+   else if (key == controllerSettings->getBombKey())
    {
       // next bomb may be dropped
       mBombReleased = true;
