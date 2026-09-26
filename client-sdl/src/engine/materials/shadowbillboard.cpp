@@ -26,7 +26,7 @@ void ShadowBillboard::removeMesh(Mesh* mesh)
 {
    for (int i = 0; i < mesh->getPartCount(); i++)
    {
-      mInstances.remove(mesh->getPart(i));
+      mInstances.erase(mesh->getPart(i));
    }
 }
 
@@ -92,7 +92,7 @@ void ShadowBillboard::addGeometry(Geometry* geo)
                 //   mat= mat.invert();
    bound.min = Vector(-1.5f - mOffset.x, -1.5f - mOffset.y);
    bound.max = Vector(1.5f - mOffset.x, 1.5f - mOffset.y);
-   mInstances.insert(geo, bound);
+   mInstances[geo] = bound;
 
    /*
       if (!vb)
@@ -219,12 +219,12 @@ void ShadowBillboard::renderDiffuse()
       return;
    }
 
-   QMap<Geometry*, Bounding>::ConstIterator it;
-   for (it = mInstances.constBegin(); it != mInstances.constEnd(); it++)
+   std::unordered_map<Geometry*, Bounding>::const_iterator it;
+   for (it = mInstances.begin(); it != mInstances.end(); it++)
    {
       // get vertex buffer
-      Geometry* geo = it.key();
-      const Bounding& bound = it.value();
+      Geometry* geo = it->first;
+      const Bounding& bound = it->second;
 
       if (geo->isVisible())
       {

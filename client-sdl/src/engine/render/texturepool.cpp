@@ -33,14 +33,14 @@ Texture TexturePool::getTexture(const char* filename, int flags)
 {
    if (filename)
    {
-      QMap<QString, Texture>::ConstIterator it = mPool.constFind(filename);
-      if (it != mPool.constEnd())
-         return it.value();
+      auto it = mPool.find(filename);
+      if (it != mPool.end())
+         return it->second;
       else
       {
          Image* image = new Image(filename);
          Texture texture = getTexture(image, flags);
-         mPool.insert(QString(filename), texture);
+         mPool[QString(filename)] = texture;
          delete image;
          return texture;
       }
@@ -78,11 +78,11 @@ void TexturePool::remove(const Texture& texture)
    mBlock = true;
    bool found = false;
    // remove from pool
-   QMap<QString, Texture>::Iterator it;
+   std::map<QString, Texture>::iterator it;
    for (it = mPool.begin(); it != mPool.end();)
    {
-      // const QString& fileName= it.key();
-      const Texture& pool = it.value();
+      // const QString& fileName= it->first;
+      const Texture& pool = it->second;
       if (pool.getTexture() == texture.getTexture())
       {
          if (texture.getRefCount() <= 2)

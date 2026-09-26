@@ -6,7 +6,7 @@
 #include "material.h"
 #include "math/vector2.h"
 
-#include <QMap>
+#include <unordered_map>
 
 class ShadowBillboard : public Material
 {
@@ -43,7 +43,7 @@ private:
    unsigned int mIndices;
 
    int mParamTexture;
-   QMap<Geometry*, Bounding> mInstances;
+   std::unordered_map<Geometry*, Bounding> mInstances;
    Vector2 mOffset;
 };
 

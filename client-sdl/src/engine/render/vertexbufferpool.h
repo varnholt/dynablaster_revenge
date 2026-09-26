@@ -1,7 +1,7 @@
 #ifndef VERTEXBUFFERPOOL_H
 #define VERTEXBUFFERPOOL_H
 
-#include <QMap>
+#include <unordered_map>
 
 class Geometry;
 class VertexBuffer;
@@ -17,7 +17,7 @@ public:
    VertexBuffer* get(Geometry* geo);
 
 private:
-   QMap<int, VertexBuffer*> mPool;
+   std::unordered_map<int, VertexBuffer*> mPool;
 };
 
 #endif

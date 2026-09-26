@@ -2,7 +2,7 @@
 
 #include "math/vector2.h"
 #include "math/matrix.h"
-#include <QMap>
+#include <unordered_map>
 
 class Camera;
 class PlayerInfo;
@@ -31,6 +31,6 @@ private:
    float   mTime;
    float   mDeltaTime;
    int     mActivePlayers;
-   QMap<PlayerInfo*, float> mPlayers;
+   std::unordered_map<PlayerInfo*, float> mPlayers;
 };
 

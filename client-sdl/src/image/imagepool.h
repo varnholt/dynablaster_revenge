@@ -3,10 +3,11 @@
 
 #include <QDateTime>
 #include <QFileInfoList>
-#include <QMap>
 #include <QString>
 #include "image.h"
 #include "tools/singleton.h"
+
+#include <map>
 
 class QTimer;
 
@@ -31,7 +32,7 @@ private slots:
 private:
    QDateTime getFileDate(const QFileInfoList& list, const QString& filename) const;
 
-   QMap<QString, Image*> mPool;
+   std::map<QString, Image*> mPool;
    QTimer* mRefresh;
 };
 

@@ -42,22 +42,21 @@ void CameraInterpolation::addPlayerPosition( PlayerInfo* player )
 {
    float fade= 1.0f;
 
-   QMap<PlayerInfo*, float>::Iterator it;
-   it= mPlayers.find( player );
+   auto it= mPlayers.find( player );
    if (it != mPlayers.end())
    {
       if (player->isKilled())
       {
-         fade= it.value();
+         fade= it->second;
          fade-=mDeltaTime;
          if (fade < 0.0f)
             fade= 0.0f;
-         *it= fade;
+         it->second= fade;
       }
    }
    else
    {
-      mPlayers.insert(player, 1.0f);
+      mPlayers[player] = 1.0f;
    }
 
    if (fade > 0.0f)

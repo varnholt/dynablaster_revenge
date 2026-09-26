@@ -18,9 +18,9 @@ bool VertexBufferPool::contains(Geometry* geo) const
 
 VertexBuffer* VertexBufferPool::get(Geometry* geo)
 {
-   QMap<int, VertexBuffer*>::ConstIterator it = mPool.constFind(geo->getID());
-   if (it != mPool.constEnd())
-      return it.value();
+   auto it = mPool.find(geo->getID());
+   if (it != mPool.end())
+      return it->second;
    else
       return 0;
 }
@@ -28,6 +28,6 @@ VertexBuffer* VertexBufferPool::get(Geometry* geo)
 VertexBuffer* VertexBufferPool::add(Geometry* geo)
 {
    VertexBuffer* buffer = new VertexBuffer(geo);
-   mPool.insert(geo->getID(), buffer);
+   mPool[geo->getID()] = buffer;
    return buffer;
 }

@@ -12,10 +12,10 @@ ImagePool::ImagePool() : mRefresh(0)
 
 ImagePool::~ImagePool()
 {
-   QMap<QString, Image*>::Iterator it = mPool.begin();
+   auto it = mPool.begin();
    while (it != mPool.end())
    {
-      Image* image = it.value();
+      Image* image = it->second;
       it = mPool.erase(it);
       delete image;
    }
@@ -23,10 +23,10 @@ ImagePool::~ImagePool()
 
 void ImagePool::remove(Image* image)
 {
-   QMap<QString, Image*>::Iterator it;
+   std::map<QString, Image*>::iterator it;
    for (it = mPool.begin(); it != mPool.end();)
    {
-      if (it.value() == image)
+      if (it->second == image)
          it = mPool.erase(it);
       else
          it++;
@@ -82,15 +82,15 @@ Image* ImagePool::getImage(const char* filename, int /*preprocessingFlags*/)
 {
    Image* image;
    QString name(filename);
-   QMap<QString, Image*>::ConstIterator it = mPool.constFind(name);
-   if (it != mPool.constEnd())
-      image = it.value();
+   auto it = mPool.find(name);
+   if (it != mPool.end())
+      image = it->second;
    else
    {
       image = new Image(filename);
       //      image->premultiplyAlpha();
       //      image->setDate( QDateTime::currentDateTime() );
-      mPool.insert(QString(name), image);
+      mPool[name] = image;
    }
    return image;
 }
