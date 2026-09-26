@@ -305,7 +305,7 @@ void MenuDrawable::animate(float time)
 
          if (page->isActive())
          {
-            foreach (MenuPageItem* item, *page->getPageItems())
+            for (MenuPageItem* item : *page->getPageItems())
             {
                item->animate(time);
             }

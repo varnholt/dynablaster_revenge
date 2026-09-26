@@ -27,10 +27,12 @@ MenuPage::MenuPage(QObject* parent) : QObject(parent), PSD(), mSettings(0), mAct
 
 MenuPage::~MenuPage()
 {
-   qDeleteAll(mPageItems);
+   for (MenuPageItem* item : mPageItems)
+      delete item;
    mPageItems.clear();
 
-   qDeleteAll(mRenderLayers);
+   for (PSDLayer* layer : mRenderLayers)
+      delete layer;
    mRenderLayers.clear();
 }
 
@@ -65,7 +67,7 @@ void MenuPage::initializeLayers()
       else
          renderLayer = new PSDLayer(layer, -1.0f);
 
-      mRenderLayers << renderLayer;
+      mRenderLayers.push_back(renderLayer);
    }
 }
 
@@ -73,7 +75,7 @@ MenuPageItem* MenuPage::processLabel(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageLabelItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -105,7 +107,7 @@ MenuPageItem* MenuPage::processLabel(PSDLayer* layer, QString layerName)
    ((MenuPageLabelItem*)pageItem)->setAlpha(alpha);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -114,7 +116,7 @@ MenuPageItem* MenuPage::processLineEdit(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageTextEditItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -149,7 +151,7 @@ MenuPageItem* MenuPage::processLineEdit(PSDLayer* layer, QString layerName)
    ((MenuPageTextEditItem*)pageItem)->setAlpha(alpha);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -165,8 +167,8 @@ MenuPageItem* MenuPage::processBackground(PSDLayer* layer, QString layerName)
    {
       added = true;
       pageItem = new MenuPageBackgroundItem();
-      mPageItems << pageItem;
-      mPageItemNameMap.insert(baseName, pageItem);
+      mPageItems.push_back(pageItem);
+      mPageItemNameMap[baseName] = pageItem;
    }
    else
    {
@@ -199,7 +201,7 @@ MenuPageItem* MenuPage::processTableMain(PSDLayer* layer, QString layerName)
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageListItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    QString baseName = layerName;
    baseName.remove("_main");
@@ -228,7 +230,7 @@ MenuPageItem* MenuPage::processTableMain(PSDLayer* layer, QString layerName)
    ((MenuPageListItem*)pageItem)->setRowHeight(rowHeight);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -241,7 +243,7 @@ MenuPageItem* MenuPage::processTableScrollButtons(PSDLayer* layer, QString layer
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    pageItem->setInteractive(true);
 
@@ -268,7 +270,7 @@ MenuPageItem* MenuPage::processTableScrollButtons(PSDLayer* layer, QString layer
    pageItem->setInactiveLayer(layer);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -277,7 +279,7 @@ MenuPageItem* MenuPage::processTableScrollBar(PSDLayer* layer, QString layerName
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    pageItem->setInteractive(true);
 
@@ -286,7 +288,7 @@ MenuPageItem* MenuPage::processTableScrollBar(PSDLayer* layer, QString layerName
    pageItem->setInactiveLayer(layer);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -295,7 +297,7 @@ MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString lay
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageScrollbar();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    pageItem->setInteractive(true);
 
@@ -323,7 +325,7 @@ MenuPageItem* MenuPage::processTableScrollBarSlider(PSDLayer* layer, QString lay
    pageItem->setInactiveLayer(layer);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -332,8 +334,8 @@ MenuPageItem* MenuPage::processSliderScrollBarIcons(PSDLayer* layer, QString lay
 {
    MenuPageItem* pageItem = 0;
    pageItem = new MenuPageSliderItem();
-   mPageItems << pageItem;
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItems.push_back(pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
@@ -386,8 +388,8 @@ MenuPageItem* MenuPage::processScrollImage(PSDLayer* layer, QString layerName)
    else
    {
       sci = new MenuPageScrollImageItem();
-      mPageItemNameMap.insert(baseName, sci);
-      mPageItems << sci;
+      mPageItemNameMap[baseName] = sci;
+      mPageItems.push_back(sci);
    }
 
    if (clipRect)
@@ -419,10 +421,10 @@ MenuPageItem* MenuPage::processCheckBox(PSDLayer* layer, QString layerNameWithou
       // store button action
       pageItem->setAction(mSettings->value(layerNameWithoutPostfix).toString());
 
-      mPageItems << pageItem;
+      mPageItems.push_back(pageItem);
 
       // store page item without postfix names
-      mPageItemNameMap.insert(layerNameWithoutPostfix, pageItem);
+      mPageItemNameMap[layerNameWithoutPostfix] = pageItem;
    }
    else
    {
@@ -446,14 +448,14 @@ MenuPageItem* MenuPage::processCheckBox(PSDLayer* layer, QString layerNameWithou
 MenuPageItem* MenuPage::processPixmap(PSDLayer* layer, QString layerName)
 {
    MenuPagePixmapItem* pageItem = new MenuPagePixmapItem();
-   mPageItems << pageItem;
+   mPageItems.push_back(pageItem);
 
    // both layers are the same
    pageItem->setActiveLayer(layer);
    pageItem->setInactiveLayer(layer);
 
    // store page item without postfix names
-   mPageItemNameMap.insert(layerName, pageItem);
+   mPageItemNameMap[layerName] = pageItem;
 
    return pageItem;
 }
@@ -465,14 +467,14 @@ MenuPageItem* MenuPage::processDefaultItem(PSDLayer* layer, QString layerName)
    if (!layerName.startsWith("unused_"))
    {
       pageItem = new MenuPageItem();
-      mPageItems << pageItem;
+      mPageItems.push_back(pageItem);
 
       // both layers are the same
       pageItem->setActiveLayer(layer);
       pageItem->setInactiveLayer(layer);
 
       // store page item without postfix names
-      mPageItemNameMap.insert(layerName, pageItem);
+      mPageItemNameMap[layerName] = pageItem;
    }
 
    return pageItem;
@@ -496,10 +498,10 @@ MenuPageItem* MenuPage::processButton(PSDLayer* layer, QString layerName, QStrin
 
       connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
-      mPageItems << pageItem;
+      mPageItems.push_back(pageItem);
 
       // store page item without postfix names
-      mPageItemNameMap.insert(layerNameWithoutPostfix, pageItem);
+      mPageItemNameMap[layerNameWithoutPostfix] = pageItem;
    }
    else
    {
@@ -550,7 +552,7 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
       {
          // combobox item
          pageItem = new MenuPageComboBoxItem();
-         mPageItems << pageItem;
+         mPageItems.push_back(pageItem);
 
          MenuPageComboBoxItem::addComboBox(baseName, (MenuPageComboBoxItem*)pageItem);
          MenuPageComboBoxItem::linkComboBoxToButton(baseNameButton, baseNameTable);
@@ -576,7 +578,7 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
          ((MenuPageListItem*)pageItem)->setRowHeight(rowHeight);
 
          // store page item without postfix names
-         mPageItemNameMap.insert(baseName, pageItem);
+         mPageItemNameMap[baseName] = pageItem;
 
          // if link between combobox table and button not yet made
          MenuPageComboBoxItem::addComboBox(baseName, (MenuPageComboBoxItem*)pageItem);
@@ -635,10 +637,10 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
 
          connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
-         mPageItems << pageItem;
+         mPageItems.push_back(pageItem);
 
          // store page item without postfix names
-         mPageItemNameMap.insert(baseName, pageItem);
+         mPageItemNameMap[baseName] = pageItem;
       }
       else
       {
@@ -666,7 +668,7 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
    else if (itemType.toLower() == "label")
    {
       pageItem = new MenuPageLabelItem();
-      mPageItems << pageItem;
+      mPageItems.push_back(pageItem);
 
       // both layers are the same
       pageItem->setActiveLayer(layer);
@@ -689,7 +691,7 @@ MenuPageItem* MenuPage::processComboBox(PSDLayer* layer, QString layerName)
       ((MenuPageLabelItem*)pageItem)->setScale(scale);
 
       // store page item without postfix names
-      mPageItemNameMap.insert(baseName, pageItem);
+      mPageItemNameMap[baseName] = pageItem;
 
       // if link between combobox table and button not yet made
       MenuPageComboBoxItem::addLabel(baseName, (MenuPageLabelItem*)pageItem);
@@ -728,7 +730,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
       {
          // combobox item
          pageItem = new MenuPageEditableComboBoxItem();
-         mPageItems << pageItem;
+         mPageItems.push_back(pageItem);
 
          MenuPageComboBoxItem::addComboBox(baseName, (MenuPageComboBoxItem*)pageItem);
          MenuPageComboBoxItem::linkComboBoxToButton(baseNameButton, baseNameTable);
@@ -754,7 +756,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
          ((MenuPageListItem*)pageItem)->setRowHeight(rowHeight);
 
          // store page item without postfix names
-         mPageItemNameMap.insert(baseName, pageItem);
+         mPageItemNameMap[baseName] = pageItem;
 
          // if link between combobox table and button not yet made
          MenuPageComboBoxItem::addComboBox(baseName, (MenuPageComboBoxItem*)pageItem);
@@ -813,10 +815,10 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
 
          connect(pageItem, SIGNAL(action(QString)), this, SLOT(actionRequestFromItem(QString)));
 
-         mPageItems << pageItem;
+         mPageItems.push_back(pageItem);
 
          // store page item without postfix names
-         mPageItemNameMap.insert(baseName, pageItem);
+         mPageItemNameMap[baseName] = pageItem;
       }
       else
       {
@@ -844,7 +846,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
    else if (itemType.toLower() == "lineedit")
    {
       pageItem = new MenuPageTextEditItem();
-      mPageItems << pageItem;
+      mPageItems.push_back(pageItem);
 
       // both layers are the same
       pageItem->setActiveLayer(layer);
@@ -879,7 +881,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
       ((MenuPageTextEditItem*)pageItem)->setAlpha(alpha);
 
       // store page item without postfix names
-      mPageItemNameMap.insert(baseName, pageItem);
+      mPageItemNameMap[baseName] = pageItem;
 
       // if link between combobox table and button not yet made
       MenuPageEditableComboBoxItem::addTextEdit(baseName, (MenuPageTextEditItem*)pageItem);
@@ -1050,7 +1052,7 @@ void MenuPage::tabPressed()
    MenuPageItem* nextFocusItem = 0;
 
    // find greater tab index
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item->getTabIndex() > tabIndex)
       {
@@ -1063,7 +1065,7 @@ void MenuPage::tabPressed()
    // if no greater tab index found, continue with 0
    if (!nextFocusItem)
    {
-      foreach (MenuPageItem* item, mPageItems)
+      for (MenuPageItem* item : mPageItems)
       {
          if (item->getTabIndex() == 0)
          {
@@ -1095,13 +1097,13 @@ void MenuPage::setActiveItem(MenuPageItem* value)
    mActiveItem = value;
 }
 
-QList<MenuPageItem*> MenuPage::getItemsAt(int x, int y) const
+std::vector<MenuPageItem*> MenuPage::getItemsAt(int x, int y) const
 {
-   QList<MenuPageItem*> items;
+   std::vector<MenuPageItem*> items;
    MenuPageItem* itemAtPos = 0;
    PSD::Layer* layer = 0;
 
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item && item->isInteractive())
       {
@@ -1123,7 +1125,7 @@ MenuPageItem* MenuPage::getFocussedItem() const
 {
    MenuPageItem* focussedItem = 0;
 
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item->isFocussed())
       {
@@ -1140,7 +1142,7 @@ void MenuPage::mouseMoved(int x, int y)
    // check for layer collisions
    PSD::Layer* layer = 0;
 
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item && item->isInteractive())
       {
@@ -1187,9 +1189,9 @@ void MenuPage::mousePressed(int x, int y)
    PSD::Layer* layer = 0;
    bool focusSet = false;
 
-   QList<MenuPageItem*> clickedItems;
+   std::vector<MenuPageItem*> clickedItems;
 
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item && item->isInteractive())
       {
@@ -1198,22 +1200,22 @@ void MenuPage::mousePressed(int x, int y)
          if (x > layer->getLeft() && x < layer->getLeft() + layer->getWidth() && y > layer->getTop() &&
              y < layer->getTop() + layer->getHeight())
          {
-            clickedItems << item;
+            clickedItems.push_back(item);
          }
       }
    }
 
-   foreach (MenuPageItem* item, clickedItems)
+   for (MenuPageItem* item : clickedItems)
    {
       if (item->isVisible() && item->isModal())
       {
          clickedItems.clear();
-         clickedItems << item;
+         clickedItems.push_back(item);
          break;
       }
    }
 
-   foreach (MenuPageItem* item, clickedItems)
+   for (MenuPageItem* item : clickedItems)
    {
       layer = item->getCurrentLayer();
 
@@ -1255,7 +1257,7 @@ void MenuPage::paste(const QString& text)
 
 void MenuPage::mouseReleased()
 {
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       if (item && item->isInteractive())
       {
@@ -1274,7 +1276,7 @@ void MenuPage::setFilename(const QString& filename)
    mFilename = filename;
 }
 
-QList<MenuPageItem*>* MenuPage::getPageItems()
+std::vector<MenuPageItem*>* MenuPage::getPageItems()
 {
    return &mPageItems;
 }
@@ -1283,10 +1285,10 @@ MenuPageItem* MenuPage::getPageItem(const QString& layerName) const
 {
    MenuPageItem* item = 0;
 
-   QMap<QString, MenuPageItem*>::const_iterator it = mPageItemNameMap.find(layerName);
+   auto it = mPageItemNameMap.find(layerName);
 
    if (it != mPageItemNameMap.end())
-      item = it.value();
+      item = it->second;
 
    return item;
 }
@@ -1352,7 +1354,7 @@ void MenuPage::resetAnimation()
 
 void MenuPage::unFocusAllItems()
 {
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       item->setFocus(false);
    }
@@ -1360,7 +1362,7 @@ void MenuPage::unFocusAllItems()
 
 void MenuPage::render()
 {
-   foreach (MenuPageItem* item, mPageItems)
+   for (MenuPageItem* item : mPageItems)
    {
       item->draw();
    }

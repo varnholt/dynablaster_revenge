@@ -2,13 +2,14 @@
 
 // Qt
 #include <QImage>
-#include <QList>
-#include <QMap>
 #include <QObject>
 #include <QSettings>
 
 // menus
 #include "image/psd.h"
+
+#include <map>
+#include <vector>
 
 // forward declarations
 class MenuPageItem;
@@ -46,7 +47,7 @@ public:
 
    void initialize();
 
-   QList<MenuPageItem*>* getPageItems();
+   std::vector<MenuPageItem*>* getPageItems();
 
    void setActive(bool);
 
@@ -95,7 +96,7 @@ public:
    void setActiveItem(MenuPageItem* value);
 
    //! getter for pageitem at given position
-   QList<MenuPageItem*> getItemsAt(int x, int y) const;
+   std::vector<MenuPageItem*> getItemsAt(int x, int y) const;
 
    //! getter for the focussed item
    MenuPageItem* getFocussedItem() const;
@@ -152,11 +153,11 @@ protected:
 
    // page item information
 
-   QList<MenuPageItem*> mPageItems;
+   std::vector<MenuPageItem*> mPageItems;
 
-   QMap<QString, MenuPageItem*> mPageItemNameMap;
+   std::map<QString, MenuPageItem*> mPageItemNameMap;
 
-   QList<PSDLayer*> mRenderLayers;
+   std::vector<PSDLayer*> mRenderLayers;
 
    // page information
 
