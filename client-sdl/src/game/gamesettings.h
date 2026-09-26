@@ -3,20 +3,23 @@
 
 // Qt
 #include <QColor>
-#include <QSettings>
+#include <QMap>
 #include <QObject>
 
 // shared
 #include "constants.h"
+#include "settings.h"
 
 class GameSettings
 {
    public:
 
       //! settings base
-      class SettingsPrivate : public QSettings
+      class SettingsPrivate : public Settings
       {
          public:
+
+            using SettingsMap = Settings::SettingsMap;
 
             //! constructor
             SettingsPrivate();

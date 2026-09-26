@@ -3,12 +3,15 @@
 // Qt
 #include <QImage>
 #include <QObject>
-#include <QSettings>
+
+// shared
+#include "settings.h"
 
 // menus
 #include "image/psd.h"
 
 #include <map>
+#include <memory>
 #include <vector>
 
 // forward declarations
@@ -165,7 +168,7 @@ protected:
 
    QString mFilename;
 
-   QSettings* mSettings;
+   std::unique_ptr<Settings> mSettings;
 
    //! focussed item
    MenuPageItem* mActiveItem;

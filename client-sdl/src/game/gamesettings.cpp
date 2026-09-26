@@ -118,9 +118,9 @@ GameSettings* GameSettings::getInstance()
 
 
 GameSettings::SettingsPrivate::SettingsPrivate()
- : QSettings(
+ : Settings(
       SETTINGS_FILE,
-      QSettings::IniFormat
+      Settings::IniFormat
    )
 {
 }
@@ -731,7 +731,7 @@ void GameSettings::CreateGameSettings::deserialize()
 {
    if (isSinglePlayer())
    {
-      setGameName(value("creategamesingle/gamename", tr("Default")).toString());
+      setGameName(value("creategamesingle/gamename", "Default").toString());
       setLevelIndex(value("creategamesingle/levelindex", 0).toInt());
       setRounds(value("creategamesingle/rounds", 1).toInt());
       setDuration(value("creategamesingle/duration", 3).toInt());
@@ -752,7 +752,7 @@ void GameSettings::CreateGameSettings::deserialize()
    }
    else
    {
-      setGameName(value("creategamemulti/gamename", tr("Default")).toString());
+      setGameName(value("creategamemulti/gamename", "Default").toString());
       setLevelIndex(value("creategamemulti/levelindex", 0).toInt());
       setRounds(value("creategamemulti/rounds", 1).toInt());
       setDuration(value("creategamemulti/duration", 3).toInt());
@@ -948,10 +948,7 @@ void GameSettings::ControllerSettings::serialize()
       while (i.hasNext())
       {
          i.next();
-         serializeMap.insert(
-            QString("%1").arg(i.key()),
-            QString("%1").arg(i.value())
-         );
+         serializeMap[QString("%1").arg(i.key())] = QString("%1").arg(i.value());
       }
 
       setValue("controller/keymap", serializeMap);
@@ -970,17 +967,13 @@ void GameSettings::ControllerSettings::deserialize()
 
    SettingsMap deserializeMap = value("controller/keymap").toMap();
 
-   QMapIterator<QString, QVariant> i(deserializeMap);
-
    bool keyOk = false;
    bool keyValOk = false;
 
-   while (i.hasNext())
+   for (const auto& entry : deserializeMap)
    {
-      i.next();
-
-      Constants::Key key = static_cast<Constants::Key>(i.key().toInt(&keyOk));
-      int keyVal = i.value().toInt(&keyValOk);
+      Constants::Key key = static_cast<Constants::Key>(entry.first.toInt(&keyOk));
+      int keyVal = entry.second.toInt(&keyValOk);
 
       if (keyOk && keyValOk)
       {
@@ -1152,23 +1145,19 @@ void GameSettings::StyleSettings::deserialize()
    SettingsMap deserializeMap = value("style/colormap").toMap();
 
    // if nothing was found, init with default data
-   if (deserializeMap.isEmpty())
+   if (deserializeMap.empty())
    {
       initDefaultMap();
       serialize();
    }
    else
    {
-      QMapIterator<QString, QVariant> i(deserializeMap);
-
       bool keyOk = false;
 
-      while (i.hasNext())
+      for (const auto& entry : deserializeMap)
       {
-         i.next();
-
-         Constants::Color key = static_cast<Constants::Color>(i.key().toInt(&keyOk));
-         QColor value = i.value().toString();
+         Constants::Color key = static_cast<Constants::Color>(entry.first.toInt(&keyOk));
+         QColor value(entry.second);
 
          if (keyOk)
          {
@@ -1242,10 +1231,7 @@ void GameSettings::StyleSettings::serialize()
    while (i.hasNext())
    {
       i.next();
-      serializeMap.insert(
-         QString("%1").arg(i.key()),
-         i.value()
-      );
+      serializeMap[QString("%1").arg(i.key())] = i.value().name();
    }
 
    setValue("style/colormap", serializeMap);

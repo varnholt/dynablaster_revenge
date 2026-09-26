@@ -24,7 +24,7 @@
 #include "stopgameresponsepacket.h"
 
 // Qt
-#include <QSettings>
+#include "settings.h"
 
 #include <vector>
 
@@ -145,7 +145,7 @@ const ServerConfiguration& Server::getServerConfiguration() const
 void Server::initServerConfiguration()
 {
    // init config
-   QSettings settings(SERVER_CONFIG_FILE_SERVER, QSettings::IniFormat);
+   Settings settings(SERVER_CONFIG_FILE_SERVER, Settings::IniFormat);
 
    int bombTickTime = settings.value("tick_count", SERVER_BOMB_TICKTIME_DEFAULT).toInt();
 

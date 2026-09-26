@@ -97,10 +97,9 @@ void SphereFragmentsDrawable::initializeGL()
    mPositionOffset = Vector(0.0f, 0.0f, 0.0f);
 
    // the legacy version read spherefragments_offset_{x,y,z}/spherefragments_scale from
-   // GameSettings::StyleSettings (a QSettings-backed style .ini) - that settings subsystem hasn't
-   // been ported (it's part of the not-yet-started options-persistence work, unrelated to
-   // rendering), so this uses the same values GameSettings itself falls back to when no override
-   // exists, i.e. the real default appearance of a freshly-installed game.
+   // GameSettings::StyleSettings - this effect isn't wired to that subsystem, so it uses the
+   // same fallback values GameSettings itself falls back to when no override exists, i.e. the
+   // real default appearance of a freshly-installed game.
    mPositionOffset.x = 0.0f;
    mPositionOffset.y = 0.35f;
    mPositionOffset.z = 0.0f;

@@ -21,7 +21,7 @@
 #include "menupageslideritem.h"
 #include "menupagetextedit.h"
 
-MenuPage::MenuPage(QObject* parent) : QObject(parent), PSD(), mSettings(0), mActiveItem(0), mAnimation(0), mActive(false)
+MenuPage::MenuPage(QObject* parent) : QObject(parent), PSD(), mActiveItem(0), mAnimation(0), mActive(false)
 {
 }
 
@@ -39,7 +39,7 @@ MenuPage::~MenuPage()
 void MenuPage::initialize()
 {
    // init settings
-   mSettings = new QSettings("data/menus/menu.ini", QSettings::IniFormat);
+   mSettings = std::make_unique<Settings>("data/menus/menu.ini", Settings::IniFormat);
 
    // initialize layer information
    initializeLayers();

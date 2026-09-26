@@ -42,7 +42,7 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QSettings>
+#include "settings.h"
 
 // stdlib
 #include <algorithm>
@@ -90,7 +90,7 @@ Game::Game()
    qDebug("Game::Game: initializing");
 
    // init config
-   QSettings settings(SERVER_CONFIG_FILE_SERVER, QSettings::IniFormat);
+   Settings settings(SERVER_CONFIG_FILE_SERVER, Settings::IniFormat);
 
    mPositionSkipCount = settings.value("skip_positions", 1).toInt();
    mSkipCountdown = settings.value("skip_countdown", false).toBool();

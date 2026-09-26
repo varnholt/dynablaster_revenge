@@ -3,10 +3,14 @@
 // Qt
 #include <QList>
 #include <QObject>
-#include <QSettings>
+
+// shared
+#include "settings.h"
 
 // menu
 #include "menupage.h"
+
+#include <memory>
 
 // forward declarations
 class MenuWorkflow;
@@ -72,7 +76,7 @@ signals:
    void layerFocussed(const QString& page, const QString& itemName);
 
 private:
-   QSettings* mSettings;
+   std::unique_ptr<Settings> mSettings;
 
    MenuPage* mCurrentPage;
 

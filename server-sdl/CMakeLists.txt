@@ -141,6 +141,8 @@ set(DYNABLASTER_SHARED_SOURCES
     ../shared/positionpacket.h
     ../shared/serverconfiguration.cpp
     ../shared/serverconfiguration.h
+    ../shared/settings.cpp
+    ../shared/settings.h
     ../shared/startgamerequestpacket.cpp
     ../shared/startgamerequestpacket.h
     ../shared/startgameresponsepacket.cpp

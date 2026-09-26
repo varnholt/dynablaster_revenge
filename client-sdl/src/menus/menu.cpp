@@ -5,14 +5,14 @@
 
 Menu* Menu::lInstance = 0;
 
-Menu::Menu() : QObject(), mSettings(0), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
+Menu::Menu() : QObject(), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
-   mSettings = new QSettings("data/menus/menu.ini", QSettings::IniFormat);
+   mSettings = std::make_unique<Settings>("data/menus/menu.ini", Settings::IniFormat);
 
    lInstance = this;
 }
 
-Menu::Menu(const Menu& /*menu*/) : QObject(), QList<MenuPage*>(), mSettings(0), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
+Menu::Menu(const Menu& /*menu*/) : QObject(), QList<MenuPage*>(), mCurrentPage(0), mBackground(0), mMenuWorkflow(0)
 {
    qFatal("fuck");
 }
