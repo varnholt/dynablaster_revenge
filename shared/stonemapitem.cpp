@@ -16,18 +16,25 @@ StoneMapItem::StoneMapItem(
    int y
 )
    : MapItem(Stone, id, true, true, x, y),
-     mExtraMapItem(0)
+     mExtraMapItem(nullptr)
 {
 }
 
 
 //-----------------------------------------------------------------------------
 /*!
-   \param item extra map item
+   destructor
 */
-void StoneMapItem::setExtraMapItem(ExtraMapItem* item)
+StoneMapItem::~StoneMapItem() = default;
+
+
+//-----------------------------------------------------------------------------
+/*!
+   \param item extra map item, ownership transfers to this stone
+*/
+void StoneMapItem::setExtraMapItem(std::unique_ptr<ExtraMapItem> item)
 {
-   mExtraMapItem = item;
+   mExtraMapItem = std::move(item);
 }
 
 
@@ -35,8 +42,18 @@ void StoneMapItem::setExtraMapItem(ExtraMapItem* item)
 /*!
    \return extra map item
 */
-ExtraMapItem* StoneMapItem::getExtraMapItem()
+ExtraMapItem* StoneMapItem::getExtraMapItem() const
 {
-   return mExtraMapItem;
+   return mExtraMapItem.get();
+}
+
+
+//-----------------------------------------------------------------------------
+/*!
+   \return extra map item, ownership transfers to the caller
+*/
+std::unique_ptr<ExtraMapItem> StoneMapItem::releaseExtraMapItem()
+{
+   return std::move(mExtraMapItem);
 }
 

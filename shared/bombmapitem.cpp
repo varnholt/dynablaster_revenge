@@ -18,9 +18,9 @@ BombMapItem::BombMapItem(int playerId, int flames, int id, int x, int y)
       mPlayerId(playerId),
       mFlames(flames),
       mKicked(false),
-      mAnimation(0),
+      mAnimation(nullptr),
       mDetonationOrigin(Active),
-      mShadowedItem(0),
+      mShadowedItem(nullptr),
       mIgniterId(-1)
 {
    mTimer.timeoutSignal.connect([this]() { explodeActive(); });
@@ -35,12 +35,9 @@ BombMapItem::~BombMapItem()
 {
    mTimer.stop();
 
-   // delete running animations in any case
-   if (mAnimation)
-   {
-      mAnimation->deleteLater();
-      mAnimation = 0;
-   }
+   // mAnimation (unique_ptr) cleans itself up automatically; safe to do synchronously here -
+   // this destructor never runs nested inside mAnimation's own signal dispatch (unlike
+   // explodeDelayed(), see below), only from deferred teardown or whole-map destruction.
 }
 
 //-----------------------------------------------------------------------------
@@ -129,8 +126,12 @@ void BombMapItem::explodeDelayed()
 
    if (isKicked())
    {
-      mAnimation->deleteLater();
-      mAnimation = 0;
+      // this runs synchronously from inside mAnimation's own explodeSignal dispatch -
+      // destroying mAnimation right here would destroy the object while one of its own
+      // methods is still on the call stack. Defer to the next tick instead (same cadence
+      // deleteLater() used to provide) - std::shared_ptr since Timer::singleShot's
+      // std::function needs a copyable target, a moved-in unique_ptr wouldn't compile.
+      Timer::singleShot(0, [anim = std::shared_ptr<BombKickAnimation>(std::move(mAnimation))]() {});
    }
 }
 
@@ -239,16 +240,16 @@ MapItem* BombMapItem::getShadowedItem()
 */
 BombKickAnimation* BombMapItem::getBombKickAnimation() const
 {
-   return mAnimation;
+   return mAnimation.get();
 }
 
 //-----------------------------------------------------------------------------
 /*!
-   \param shadowedItem item that has been shadowed by a bomb
+   \param animation kick animation, ownership transfers to this bomb
 */
-void BombMapItem::setBombKickAnimation(BombKickAnimation* animation)
+void BombMapItem::setBombKickAnimation(std::unique_ptr<BombKickAnimation> animation)
 {
-   mAnimation = animation;
+   mAnimation = std::move(animation);
 }
 
 //-----------------------------------------------------------------------------

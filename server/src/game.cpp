@@ -48,6 +48,7 @@
 // stdlib
 #include <algorithm>
 #include <format>
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
@@ -836,7 +837,8 @@ void Game::createKickAnimation(BombMapItem* kickedBomb, Constants::Direction kic
    // init kick animation
    // also a kick animation needs the playfield map
    // for collision detection
-   BombKickAnimation* bka = new BombKickAnimation(this);
+   auto bkaOwner = std::make_unique<BombKickAnimation>();
+   BombKickAnimation* bka = bkaOwner.get();
    bka->setDirection(kickDir);
    bka->setMap(getMap());
 
@@ -868,7 +870,7 @@ void Game::createKickAnimation(BombMapItem* kickedBomb, Constants::Direction kic
       }
    );
 
-   kickedBomb->setBombKickAnimation(bka);
+   kickedBomb->setBombKickAnimation(std::move(bkaOwner));
 }
 
 //-----------------------------------------------------------------------------
@@ -1896,6 +1898,29 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
       );
       */
 
+      // a destroyed item may currently be some other, still-kicked bomb's shadowed item
+      // (the item it's temporarily covering on the grid) - QPointer used to auto-null that
+      // reference when the pointee died; now that mShadowedItem is a plain raw pointer, we
+      // have to invalidate it explicitly before deleting, same pattern already used for
+      // Game::mSpectators.
+      for (int gx = 0; gx < mMap->getWidth(); gx++)
+      {
+         for (int gy = 0; gy < mMap->getHeight(); gy++)
+         {
+            MapItem* gridItem = mMap->getItem(gx, gy);
+
+            if (gridItem && gridItem->getType() == MapItem::Bomb)
+            {
+               BombMapItem* otherBomb = dynamic_cast<BombMapItem*>(gridItem);
+
+               if (otherBomb && mDestroyedMapItems.count(otherBomb->getShadowedItem()))
+               {
+                  otherBomb->setShadowedItem(nullptr);
+               }
+            }
+         }
+      }
+
       // cleanup map when all explosions are finished
       foreach (MapItem* destroyedItem, mDestroyedMapItems)
       {
@@ -1906,16 +1931,18 @@ void Game::bombExploded(BombMapItem* bomb, bool /*unused*/)
             makeFieldImmune(destroyedItem->getX(), destroyedItem->getY());
 
             StoneMapItem* stone = dynamic_cast<StoneMapItem*>(destroyedItem);
-            ExtraMapItem* extra = stone->getExtraMapItem();
+            std::unique_ptr<ExtraMapItem> extra = stone->releaseExtraMapItem();
 
             if (extra)
             {
-               mMap->setItem(destroyedItem->getX(), destroyedItem->getY(), extra);
+               ExtraMapItem* extraRaw = extra.release();
+
+               mMap->setItem(destroyedItem->getX(), destroyedItem->getY(), extraRaw);
 
                // send mapitem
-               mOutgoingPackets.append(new ExtraMapItemCreatedPacket(extra));
+               mOutgoingPackets.append(new ExtraMapItemCreatedPacket(extraRaw));
 
-               extra->initializeStartTime();
+               extraRaw->initializeStartTime();
             }
          }
       }

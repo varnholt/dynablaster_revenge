@@ -7,10 +7,11 @@
 
 // Qt
 #include <QObject>
-#include <QPointer>
 
 // shared
 #include "timer.h"
+
+#include <memory>
 
 // forward declarations
 class BombKickAnimation;
@@ -82,8 +83,8 @@ public:
    //! getter for kick animation
    BombKickAnimation* getBombKickAnimation() const;
 
-   //! setter for bomb kick animation
-   void setBombKickAnimation(BombKickAnimation* animation);
+   //! setter for bomb kick animation - takes ownership
+   void setBombKickAnimation(std::unique_ptr<BombKickAnimation> animation);
 
    //! setter for tick time
    static void setTickTime(int time);
@@ -128,13 +129,16 @@ protected:
    bool mKicked;
 
    //! bomb kick animation
-   QPointer<BombKickAnimation> mAnimation;
+   std::unique_ptr<BombKickAnimation> mAnimation;
 
    //! detonation origin
    DetonationOrigin mDetonationOrigin;
 
-   //! mapitem that may be shadowed by a kicked bomb
-   QPointer<MapItem> mShadowedItem;
+   //! mapitem that may be shadowed by a kicked bomb - raw, non-owning: the grid (Map) owns
+   //! whatever this points at, if anything; whoever destroys a grid item is responsible for
+   //! nulling out any bomb's mShadowedItem that observes it (see Game::bombExploded()'s
+   //! cleanup loop, same explicit-invalidation pattern as Game::mSpectators)
+   MapItem* mShadowedItem;
 
    //! tick time
    static int sTickTime;

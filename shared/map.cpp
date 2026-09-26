@@ -18,6 +18,7 @@
 // cmath
 #include <limits.h>
 
+#include <memory>
 #include <unordered_set>
 
 //-----------------------------------------------------------------------------
@@ -43,29 +44,11 @@ Map::Map(int w, int h)
 */
 Map::~Map()
 {
-   MapItem* mapItem = 0;
+   // a stone's extra (if any) is now owned by the stone itself (unique_ptr) and cleans
+   // itself up automatically - no separate delete needed here
    for (int i = 0; i < mWidth * mHeight; i++)
    {
-      mapItem = mMap[i];
-
-      // delete extras as well
-      if (
-            mapItem
-         && mapItem->getType() == MapItem::Stone
-      )
-      {
-         StoneMapItem* stone = dynamic_cast<StoneMapItem*>(mapItem);
-
-         if (stone)
-         {
-            ExtraMapItem* extra = stone->getExtraMapItem();
-
-            if (extra)
-               delete extra;
-         }
-      }
-
-      delete mapItem;
+      delete mMap[i];
    }
 }
 
@@ -500,7 +483,7 @@ Map* Map::generateMap(
             if (extraBombPlaced < extraBombCount)
             {
                ((StoneMapItem*)item)->setExtraMapItem(
-                  new ExtraMapItem(
+                  std::make_unique<ExtraMapItem>(
                      -1,
                      Constants::ExtraBomb,
                      randX,
@@ -515,7 +498,7 @@ Map* Map::generateMap(
             else if (extraFlamePlaced < extraFlameCount)
             {
                ((StoneMapItem*)item)->setExtraMapItem(
-                  new ExtraMapItem(
+                  std::make_unique<ExtraMapItem>(
                      -1,
                      Constants::ExtraFlame,
                      randX,
@@ -530,7 +513,7 @@ Map* Map::generateMap(
             else if (extraSpeedUpPlaced < extraSpeedUpCount)
             {
                ((StoneMapItem*)item)->setExtraMapItem(
-                  new ExtraMapItem(
+                  std::make_unique<ExtraMapItem>(
                      -1,
                      Constants::ExtraSpeedup,
                      randX,
@@ -545,7 +528,7 @@ Map* Map::generateMap(
             else if (extraKickPlaced < extraKickCount)
             {
                ((StoneMapItem*)item)->setExtraMapItem(
-                  new ExtraMapItem(
+                  std::make_unique<ExtraMapItem>(
                      -1,
                      Constants::ExtraKick,
                      randX,
@@ -559,7 +542,7 @@ Map* Map::generateMap(
             // create skull extras
             else if (extraSkullPlaced < extraSkullCount)
             {
-               ExtraMapItem* extra = new ExtraMapItem(
+               auto extra = std::make_unique<ExtraMapItem>(
                   -1,
                   Constants::ExtraSkull,
                   randX,
@@ -569,7 +552,7 @@ Map* Map::generateMap(
                // generate skull faces and init start time
                extra->setSkullFaces(PlayerDisease::generateSkullFaces());
 
-               ((StoneMapItem*)item)->setExtraMapItem(extra);
+               ((StoneMapItem*)item)->setExtraMapItem(std::move(extra));
 
                extraSkullPlaced++;
             }
