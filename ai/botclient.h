@@ -5,7 +5,6 @@
 #include <QMap>
 #include <QObject>
 #include <QQueue>
-#include <QTime>
 
 // shared
 #include "elapsedtimer.h"

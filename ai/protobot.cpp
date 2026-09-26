@@ -31,7 +31,8 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QTime>
+
+#include <chrono>
 
 // std
 #include <algorithm>
@@ -746,7 +747,7 @@ void ProtoBot::markHazardousFields()
 void ProtoBot::updateRemainingBombTimes()
 {
    // init
-   QTime currentTime = QTime::currentTime();
+   auto currentTime = std::chrono::steady_clock::now();
    int tickTime = getServerConfiguration().getBombTickTime();
    int timeDiff = 0;
    int timeLeft = 0;
@@ -771,7 +772,7 @@ void ProtoBot::updateRemainingBombTimes()
 
       foreach (BotBombMapItem* item, connectedBombs)
       {
-         timeDiff = item->getDropTime().msecsTo(currentTime);
+         timeDiff = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - item->getDropTime()).count());
          timeLeft = qMax(tickTime - timeDiff, 0);
 
          min = qMin(min, timeLeft);

@@ -25,7 +25,7 @@ BotBombMapItem::BotBombMapItem(
         y
      )
 {
-   mDropTime = QTime::currentTime();
+   mDropTime = std::chrono::steady_clock::now();
 }
 
 
@@ -34,7 +34,7 @@ BotBombMapItem::BotBombMapItem(
 /*!
    \return drop time
 */
-const QTime &BotBombMapItem::getDropTime() const
+std::chrono::steady_clock::time_point BotBombMapItem::getDropTime() const
 {
    return mDropTime;
 }

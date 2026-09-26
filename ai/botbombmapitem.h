@@ -4,8 +4,7 @@
 // base
 #include "bombmapitem.h"
 
-// Qt
-#include <QTime>
+#include <chrono>
 
 class BotBombMapItem : public BombMapItem
 {
@@ -23,7 +22,7 @@ class BotBombMapItem : public BombMapItem
       );
 
       //! getter for drop time
-      const QTime& getDropTime() const;
+      std::chrono::steady_clock::time_point getDropTime() const;
 
       //! setter for flame count
       void setFlameCount(int flames);
@@ -32,7 +31,7 @@ class BotBombMapItem : public BombMapItem
    protected:
 
        //! bomb drop time
-       QTime mDropTime;
+       std::chrono::steady_clock::time_point mDropTime;
 };
 
 #endif // BOTBOMBMAPITEM_H
