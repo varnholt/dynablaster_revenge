@@ -2,9 +2,13 @@
 #define GAMESETTINGS_H
 
 // Qt
-#include <QColor>
 #include <QMap>
 #include <QObject>
+
+#include <map>
+
+// math
+#include "math/color.h"
 
 // shared
 #include "constants.h"
@@ -53,10 +57,10 @@ class GameSettings
             void serialize();
 
             //! getter for color
-            QColor getColor(Constants::Color color) const;
+            Color getColor(Constants::Color color) const;
 
             //! getter for rgb
-            QRgb getRgb(Constants::Color color) const;
+            uint32_t getRgb(Constants::Color color) const;
 
 
          protected:
@@ -68,18 +72,18 @@ class GameSettings
             void initializeIndividualColor();
 
             //! color map
-            QMap<Constants::Color, QColor> mPlayerColors;
+            std::map<Constants::Color, Color> mPlayerColors;
 
-            QRgb mColorWhite;
-            QRgb mColorBlack;
-            QRgb mColorRed;
-            QRgb mColorGreen;
-            QRgb mColorBlue;
-            QRgb mColorGrey;
-            QRgb mColorYellow;
-            QRgb mColorPurple;
-            QRgb mColorCyan;
-            QRgb mColorOrange;
+            uint32_t mColorWhite = 0;
+            uint32_t mColorBlack = 0;
+            uint32_t mColorRed = 0;
+            uint32_t mColorGreen = 0;
+            uint32_t mColorBlue = 0;
+            uint32_t mColorGrey = 0;
+            uint32_t mColorYellow = 0;
+            uint32_t mColorPurple = 0;
+            uint32_t mColorCyan = 0;
+            uint32_t mColorOrange = 0;
       };
 
 

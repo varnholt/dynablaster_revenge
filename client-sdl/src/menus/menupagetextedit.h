@@ -4,8 +4,8 @@
 #include "framework/frametimer.h"
 #include "menupageitem.h"
 
-// Qt
-#include <QColor>
+// math
+#include "math/color.h"
 
 // forward declarations
 class BitmapFont;
@@ -50,7 +50,7 @@ public:
    const QString& getText() const;
 
    //! getter for color
-   const QColor& getColor() const;
+   const Color& getColor() const;
 
    //! check if action request on click is enabled
    virtual bool isActionRequestOnClickEnabled() const;
@@ -70,9 +70,9 @@ public slots:
 
    void setScale(float scale);
 
-   void setColor(const QColor& color);
+   void setColor(const Color& color);
 
-   void setOutlineColor(const QColor& outlineColor);
+   void setOutlineColor(const Color& outlineColor);
 
    void setAlpha(int alpha);
 
@@ -140,11 +140,11 @@ protected:
 
    bool mCursorVisible;
 
-   QColor mColor;
+   Color mColor;
 
    int mAlpha;
 
-   QColor mOutlineColor;
+   Color mOutlineColor;
 
    int mCursorPosition;
 

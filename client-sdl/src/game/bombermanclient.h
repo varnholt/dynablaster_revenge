@@ -2,7 +2,6 @@
 #define BOMBERMANCLIENT_H
 
 // qt
-#include <QColor>
 #include <QObject>
 
 // shared

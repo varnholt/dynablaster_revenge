@@ -481,12 +481,12 @@ void GameWinDrawable::animate(float time)
    mPlayerMesh->setTransform(playerMatrix);
 }
 
-void GameWinDrawable::setColor(const QColor& color)
+void GameWinDrawable::setColor(const Color& color)
 {
    mColor = color;
 }
 
-const QColor& GameWinDrawable::getColor()
+const Color& GameWinDrawable::getColor()
 {
    return mColor;
 }

@@ -195,17 +195,17 @@ void MenuPageTextEditItem::setText(const QString& text)
    setCursorPosition(mText.length());
 }
 
-void MenuPageTextEditItem::setColor(const QColor& color)
+void MenuPageTextEditItem::setColor(const Color& color)
 {
    mColor = color;
 }
 
-void MenuPageTextEditItem::setOutlineColor(const QColor& outlineColor)
+void MenuPageTextEditItem::setOutlineColor(const Color& outlineColor)
 {
    mOutlineColor = outlineColor;
 }
 
-const QColor& MenuPageTextEditItem::getColor() const
+const Color& MenuPageTextEditItem::getColor() const
 {
    return mColor;
 }

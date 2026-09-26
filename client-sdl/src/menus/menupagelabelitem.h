@@ -3,8 +3,8 @@
 // base
 #include "menupageitem.h"
 
-// Qt
-#include <QColor>
+// math
+#include "math/color.h"
 
 // forward declarations
 class BitmapFont;
@@ -38,7 +38,7 @@ public slots:
 
    void setMaxChars(int maxChars);
 
-   void setColor(const QColor& color);
+   void setColor(const Color& color);
 
    void setAlpha(int alpha);
 
@@ -61,7 +61,7 @@ protected:
 
    float mScale;
 
-   QColor mColor;
+   Color mColor;
 
    int mAlpha;
 

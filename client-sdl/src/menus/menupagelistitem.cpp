@@ -138,7 +138,7 @@ bool MenuPageListItem::isHighlightingEnabled() const
    \param overrideAlpha \c true if alpha is overriden
    \param outlineColor item's outline color
 */
-void MenuPageListItem::appendItem(const QString& text, const QColor& color, bool overrideAlpha, const QColor& outlineColor)
+void MenuPageListItem::appendItem(const QString& text, const Color& color, bool overrideAlpha, const Color& outlineColor)
 {
    // get a item instance
    MenuPageListItemElement* element = itemInstance();

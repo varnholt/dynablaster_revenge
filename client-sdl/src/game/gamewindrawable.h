@@ -11,8 +11,9 @@
 
 #include <string>
 
-#include <QColor>
 #include <QObject>
+
+#include "math/color.h"
 
 class BitmapFont;
 class BlurFilter;
@@ -39,8 +40,8 @@ public:
    void setVisible(bool visible);
    void animate(float time);
 
-   void setColor(const QColor& color);
-   const QColor& getColor();
+   void setColor(const Color& color);
+   const Color& getColor();
 
    void setColorEnum(Constants::Color color);
    Constants::Color getColorEnum() const;
@@ -82,7 +83,7 @@ private:
    void drawSceneToFramebuffer(float alpha);
    void drawPsdContents(float alpha);
 
-   QColor mColor;
+   Color mColor;
    Constants::Color mColorEnum;
    std::string mWinnerName;
 

@@ -98,7 +98,7 @@ void MenuPageEditableComboBoxItem::addTextEdit(const QString& key, MenuPageTextE
    \param overrideAlpha \c true if alpha is overriden
    \param outlineColor item's outline color
 */
-void MenuPageEditableComboBoxItem::appendItem(const QString& item, const QColor& color, bool overrideAlpha, const QColor& outlineColor)
+void MenuPageEditableComboBoxItem::appendItem(const QString& item, const Color& color, bool overrideAlpha, const Color& outlineColor)
 {
    MenuPageListItem::appendItem(item, color, overrideAlpha, outlineColor);
    updateClipperBounds();

@@ -33,7 +33,7 @@ void MenuPageListItemElement::initialize()
 
 void MenuPageListItemElement::draw(float x, float y, float opacity)
 {
-   const QColor& rgb = getColor();
+   const Color& rgb = getColor();
    mFont->setColor(rgb.red() / 255.0f, rgb.green() / 255.0f, rgb.blue() / 255.0f, opacity);
 
    // draw item data

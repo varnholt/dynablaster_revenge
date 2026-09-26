@@ -4,8 +4,8 @@
 #include "framework/frametimer.h"
 #include "menupageitem.h"
 
-// Qt
-#include <QColor>
+// math
+#include "math/color.h"
 
 #include <vector>
 
@@ -81,9 +81,9 @@ public:
    //! append an item to the list
    virtual void appendItem(
       const QString& item,
-      const QColor& color = QColor("#FFFFFF"),
+      const Color& color = Color("#FFFFFF"),
       bool overrideAlpha = false,
-      const QColor& outlineColor = QColor()
+      const Color& outlineColor = Color()
    );
 
    //! clear all items from the list

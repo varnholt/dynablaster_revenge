@@ -94,7 +94,7 @@ MenuPageItem* MenuPage::processLabel(PSDLayer* layer, QString layerName)
    int fontYOffset = mSettings->value(fontYOffsetKey).toInt();
    int maxChars = mSettings->value(maxCharsKey).toInt();
    float scale = mSettings->value(scaleKey).toFloat();
-   QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
+   Color color = Color(mSettings->value(colorKey, "#FFFFFF").toString().toStdString());
    int alpha = mSettings->value(alphaKey, 255).toInt();
 
    // set label properties
@@ -137,7 +137,7 @@ MenuPageItem* MenuPage::processLineEdit(PSDLayer* layer, QString layerName)
    int fieldWidth = mSettings->value(fieldWidthKey).toInt();
    int maxLength = mSettings->value(fieldMaxLength).toInt();
    float scale = mSettings->value(scaleKey).toFloat();
-   QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
+   Color color = Color(mSettings->value(colorKey, "#FFFFFF").toString().toStdString());
    int alpha = mSettings->value(alphaKey, 255).toInt();
 
    // set lineedit properties
@@ -867,7 +867,7 @@ MenuPageItem* MenuPage::processEditableComboBox(PSDLayer* layer, QString layerNa
       int fieldWidth = mSettings->value(fieldWidthKey).toInt();
       int maxLength = mSettings->value(fieldMaxLength).toInt();
       float scale = mSettings->value(scaleKey).toFloat();
-      QColor color = QColor(mSettings->value(colorKey, "#FFFFFF").toString());
+      Color color = Color(mSettings->value(colorKey, "#FFFFFF").toString().toStdString());
       int alpha = mSettings->value(alphaKey, 255).toInt();
 
       // set lineedit properties

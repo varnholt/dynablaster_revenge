@@ -1152,19 +1152,16 @@ void GameSettings::StyleSettings::deserialize()
    }
    else
    {
-      bool keyOk = false;
-
       for (const auto& entry : deserializeMap)
       {
-         Constants::Color key = static_cast<Constants::Color>(entry.first.toInt(&keyOk));
-         QColor value(entry.second);
-
-         if (keyOk)
+         try
          {
-            mPlayerColors.insert(
-               key,
-               value
-            );
+            Constants::Color key = static_cast<Constants::Color>(std::stoi(entry.first.toStdString()));
+            Color value(entry.second.toStdString());
+            mPlayerColors.insert({key, value});
+         }
+         catch (const std::exception&)
+         {
          }
       }
    }
@@ -1175,16 +1172,11 @@ void GameSettings::StyleSettings::deserialize()
 
 void GameSettings::StyleSettings::initializeIndividualColor()
 {
-   QMap<Constants::Color, QColor>::const_iterator i = mPlayerColors.constBegin();
-
-   QRgb rgb;
-   while (i != mPlayerColors.constEnd())
+   for (const auto& entry : mPlayerColors)
    {
-      rgb = i.value().rgb();
+      uint32_t rgb = entry.second.rgb();
 
-      // cout << i.key() << ": " << i.value() << endl;
-
-      switch (i.key())
+      switch (entry.first)
       {
          case Constants::ColorWhite:
             mColorWhite = rgb;
@@ -1217,8 +1209,6 @@ void GameSettings::StyleSettings::initializeIndividualColor()
             mColorOrange = rgb;
             break;
       }
-
-      ++i;
    }
 }
 
@@ -1227,68 +1217,60 @@ void GameSettings::StyleSettings::serialize()
 {
    SettingsMap serializeMap;
 
-   QMapIterator<Constants::Color, QColor> i(mPlayerColors);
-   while (i.hasNext())
+   for (const auto& entry : mPlayerColors)
    {
-      i.next();
-      serializeMap[QString("%1").arg(i.key())] = i.value().name();
+      serializeMap[QString::number(static_cast<int>(entry.first))] = QString::fromStdString(entry.second.name());
    }
 
    setValue("style/colormap", serializeMap);
 }
 
 
-QColor GameSettings::StyleSettings::getColor(Constants::Color playerColor) const
+Color GameSettings::StyleSettings::getColor(Constants::Color playerColor) const
 {
-   QColor color;
+   Color color;
 
    switch (playerColor)
    {
       case Constants::ColorWhite:
-         color = mColorWhite;
+         color = Color(mColorWhite);
          break;
       case Constants::ColorBlack:
-         color = mColorBlack;
+         color = Color(mColorBlack);
          break;
       case Constants::ColorRed:
-         color = mColorRed;
+         color = Color(mColorRed);
          break;
       case Constants::ColorGreen:
-         color = mColorGreen;
+         color = Color(mColorGreen);
          break;
       case Constants::ColorBlue:
-         color = mColorBlue;
+         color = Color(mColorBlue);
          break;
       case Constants::ColorGrey:
-         color = mColorGrey;
+         color = Color(mColorGrey);
          break;
       case Constants::ColorYellow:
-         color = mColorYellow;
+         color = Color(mColorYellow);
          break;
       case Constants::ColorPurple:
-         color = mColorPurple;
+         color = Color(mColorPurple);
          break;
       case Constants::ColorCyan:
-         color = mColorCyan;
+         color = Color(mColorCyan);
          break;
       case Constants::ColorOrange:
-         color = mColorOrange;
+         color = Color(mColorOrange);
          break;
    }
-
-//   QMap<Constants::Color, QColor>::const_iterator iter =
-//      mPlayerColors.constFind(playerColor);
-//
-//   if (iter != mPlayerColors.constEnd())
-//      color = iter.value();
 
    return color;
 }
 
 
-QRgb GameSettings::StyleSettings::getRgb(Constants::Color playerColor) const
+uint32_t GameSettings::StyleSettings::getRgb(Constants::Color playerColor) const
 {
-   QRgb rgb = Constants::ColorBlack;
+   uint32_t rgb = Constants::ColorBlack;
 
    switch (playerColor)
    {
@@ -1330,16 +1312,16 @@ QRgb GameSettings::StyleSettings::getRgb(Constants::Color playerColor) const
 
 void GameSettings::StyleSettings::initDefaultMap()
 {
-   mPlayerColors.insert(Constants::ColorWhite,  QColor("#ffffff"));
-   mPlayerColors.insert(Constants::ColorBlack,  QColor("#0e0e0e"));
-   mPlayerColors.insert(Constants::ColorRed,    QColor("#ff1b1b"));
-   mPlayerColors.insert(Constants::ColorGreen,  QColor("#51fb07"));
-   mPlayerColors.insert(Constants::ColorBlue,   QColor("#0072ff"));
-   mPlayerColors.insert(Constants::ColorGrey,   QColor("#51fb07"));
-   mPlayerColors.insert(Constants::ColorYellow, QColor("#8c8c8c"));
-   mPlayerColors.insert(Constants::ColorPurple, QColor("#fdba02"));
-   mPlayerColors.insert(Constants::ColorCyan,   QColor("#00e5ff"));
-   mPlayerColors.insert(Constants::ColorOrange, QColor("#ff6000"));
+   mPlayerColors.insert({Constants::ColorWhite,  Color("#ffffff")});
+   mPlayerColors.insert({Constants::ColorBlack,  Color("#0e0e0e")});
+   mPlayerColors.insert({Constants::ColorRed,    Color("#ff1b1b")});
+   mPlayerColors.insert({Constants::ColorGreen,  Color("#51fb07")});
+   mPlayerColors.insert({Constants::ColorBlue,   Color("#0072ff")});
+   mPlayerColors.insert({Constants::ColorGrey,   Color("#51fb07")});
+   mPlayerColors.insert({Constants::ColorYellow, Color("#8c8c8c")});
+   mPlayerColors.insert({Constants::ColorPurple, Color("#fdba02")});
+   mPlayerColors.insert({Constants::ColorCyan,   Color("#00e5ff")});
+   mPlayerColors.insert({Constants::ColorOrange, Color("#ff6000")});
 }
 
 

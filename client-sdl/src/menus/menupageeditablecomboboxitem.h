@@ -36,9 +36,9 @@ public:
    //! append an item to the list
    void appendItem(
       const QString& item,
-      const QColor& color = QColor("#FFFFFF"),
+      const Color& color = Color("#FFFFFF"),
       bool overrideAlpha = false,
-      const QColor& outlineColor = QColor()
+      const Color& outlineColor = Color()
    );
 
 protected:

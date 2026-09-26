@@ -55,7 +55,7 @@ void MenuPageLabelItem::setMaxChars(int maxChars)
    mMaxChars = maxChars;
 }
 
-void MenuPageLabelItem::setColor(const QColor& color)
+void MenuPageLabelItem::setColor(const Color& color)
 {
    mColor = color;
 }

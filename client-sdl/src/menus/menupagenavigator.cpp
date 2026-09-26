@@ -511,7 +511,7 @@ void MenuPageNavigator::updateLoungePlayerList(std::map<int, PlayerInfo*>* playe
       if (winsItem)
       {
          winsItem->setText(QString("%1").arg(entry.score));
-         winsItem->setColor(QColor(counter <= 3 ? "#fbfe00" : "#3b7d9d"));
+         winsItem->setColor(Color(counter <= 3 ? "#fbfe00" : "#3b7d9d"));
          winsItem->setVisible(true);
       }
 
@@ -564,11 +564,11 @@ void MenuPageNavigator::addLoungeMessage(int senderId, const QString& message)
       nick = message.left(nickEnd);
 
    const Constants::Color playerColor = BombermanClient::getInstance()->getColor(senderId);
-   QColor color = GameSettings::getInstance()->getStyleSettings()->getColor(playerColor);
-   const QColor outlineColor(0, 0, 0, 255);
+   Color color = GameSettings::getInstance()->getStyleSettings()->getColor(playerColor);
+   const Color outlineColor(0, 0, 0, 255);
 
    if (playerColor == Constants::ColorBlack)
-      color = QColor(128, 128, 128, 255);
+      color = Color(128, 128, 128, 255);
 
    const std::vector<QString> lines = WordWrap::wrap(message, sayItem->getFieldWidth());
 
