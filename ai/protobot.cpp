@@ -31,7 +31,6 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QStringList>
 #include <QTime>
 
 // std
