@@ -160,7 +160,7 @@ void MenuPageListItem::appendItem(const QString& text, const QColor& color, bool
    element->initialize();
 
    // add item to list
-   mElements << element;
+   mElements.push_back(element);
 
    // reinit table bounds
    updateTableBounds();
@@ -471,7 +471,7 @@ PSDLayer* MenuPageListItem::bindRowTexture(int row, float& u, float& v, float& s
  */
 void MenuPageListItem::drawText()
 {
-   foreach (MenuPageListItemElement* element, mElements)
+   for (MenuPageListItemElement* element : mElements)
    {
       float opacity = (element->isFocussed() || element->isActive() || element->isOverrideAlphaActive()) ? 1.0f : 0.5882f;
 
@@ -515,7 +515,7 @@ void MenuPageListItem::drawRows()
    // draw rows
    int rowToggle = 0;
    int row = 0;
-   foreach (MenuPageListItemElement* element, mElements)
+   for (MenuPageListItemElement* element : mElements)
    {
       Array<Vertex> boundingRect = element->getBoundingRectVertices(mLayerActive->getLeft(), mLayerActive->getTop() + mY);
 
@@ -843,7 +843,7 @@ void MenuPageListItem::mousePressed(int /*x*/, int y)
 //-----------------------------------------------------------------------------
 /*!
  */
-QList<MenuPageListItemElement*>* MenuPageListItem::getElements() const
+std::vector<MenuPageListItemElement*>* MenuPageListItem::getElements() const
 {
    return &mElements;
 }

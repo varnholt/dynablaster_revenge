@@ -6,7 +6,7 @@
 #include "menupagebuttonitem.h"
 
 // static
-QMap<QString, MenuPageTextEditItem*> MenuPageEditableComboBoxItem::sMapTextEdits;
+std::map<QString, MenuPageTextEditItem*> MenuPageEditableComboBoxItem::sMapTextEdits;
 
 //-----------------------------------------------------------------------------
 /*!
@@ -88,7 +88,7 @@ void MenuPageEditableComboBoxItem::setVisible(bool visible)
 */
 void MenuPageEditableComboBoxItem::addTextEdit(const QString& key, MenuPageTextEditItem* item)
 {
-   sMapTextEdits.insert(key, item);
+   sMapTextEdits[key] = item;
 }
 
 //-----------------------------------------------------------------------------

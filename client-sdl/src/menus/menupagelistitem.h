@@ -6,7 +6,8 @@
 
 // Qt
 #include <QColor>
-#include <QList>
+
+#include <vector>
 
 class Clipper;
 class MenuPageListItemElement;
@@ -48,7 +49,7 @@ public:
    void setRowHeight(int height);
 
    //! getter for list item elements
-   QList<MenuPageListItemElement*>* getElements() const;
+   std::vector<MenuPageListItemElement*>* getElements() const;
 
    //! getter for element at i
    MenuPageListItemElement* getElementAt(int i) const;
@@ -209,7 +210,7 @@ protected:
    Clipper* mClipper;
 
    //! list of items
-   mutable QList<MenuPageListItemElement*> mElements;
+   mutable std::vector<MenuPageListItemElement*> mElements;
 
    //! time elapsed used for scrolling animation
    FrameTimer mElapsed;

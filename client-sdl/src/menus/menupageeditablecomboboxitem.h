@@ -49,5 +49,5 @@ protected:
    MenuPageTextEditItem* mTextEditItem;
 
    //! map of labels by id
-   static QMap<QString, MenuPageTextEditItem*> sMapTextEdits;
+   static std::map<QString, MenuPageTextEditItem*> sMapTextEdits;
 };

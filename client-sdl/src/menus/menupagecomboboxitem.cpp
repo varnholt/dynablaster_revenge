@@ -12,9 +12,9 @@
 #include <cstring>
 
 // init static maps
-QMap<QString, MenuPageComboBoxItem*> MenuPageComboBoxItem::sMapComboBoxes;
-QMap<QString, MenuPageLabelItem*> MenuPageComboBoxItem::sMapLabels;
-QMap<QString, MenuPageButtonItem*> MenuPageComboBoxItem::sMapButtons;
+std::map<QString, MenuPageComboBoxItem*> MenuPageComboBoxItem::sMapComboBoxes;
+std::map<QString, MenuPageLabelItem*> MenuPageComboBoxItem::sMapLabels;
+std::map<QString, MenuPageButtonItem*> MenuPageComboBoxItem::sMapButtons;
 
 MenuPageComboBoxItem::MenuPageComboBoxItem()
     : mVisibleAnimationTime(0.0), mInvisibleAnimationTime(0.0), mButtonItem(0), mLabelItem(0), mQuadVertexBuffer(0)
@@ -186,17 +186,17 @@ void MenuPageComboBoxItem::dropDownEnabled(bool /*enabled*/)
 
 void MenuPageComboBoxItem::addComboBox(const QString& key, MenuPageComboBoxItem* item)
 {
-   sMapComboBoxes.insert(key, item);
+   sMapComboBoxes[key] = item;
 }
 
 void MenuPageComboBoxItem::addButton(const QString& key, MenuPageButtonItem* item)
 {
-   sMapButtons.insert(key, item);
+   sMapButtons[key] = item;
 }
 
 void MenuPageComboBoxItem::addLabel(const QString& key, MenuPageLabelItem* item)
 {
-   sMapLabels.insert(key, item);
+   sMapLabels[key] = item;
 }
 
 void MenuPageComboBoxItem::linkComboBoxToButton(const QString& buttonKey, const QString& comboBoxKey)
@@ -245,12 +245,10 @@ MenuPageButtonItem* MenuPageComboBoxItem::getButtonItem(const QString& name)
 {
    MenuPageButtonItem* button = 0;
 
-   QMap<QString, MenuPageButtonItem*>::iterator it;
-
-   it = sMapButtons.find(name);
+   auto it = sMapButtons.find(name);
    if (it != sMapButtons.end())
    {
-      button = it.value();
+      button = it->second;
    }
 
    return button;

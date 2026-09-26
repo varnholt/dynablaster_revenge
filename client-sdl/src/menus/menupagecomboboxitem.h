@@ -3,8 +3,7 @@
 // base
 #include "menupagelistitem.h"
 
-// Qt
-#include <QMap>
+#include <map>
 
 // forward declarations
 class MenuPageButtonItem;
@@ -145,11 +144,11 @@ protected:
    unsigned int mQuadVertexBuffer;
 
    //! map of comboboxes by id
-   static QMap<QString, MenuPageComboBoxItem*> sMapComboBoxes;
+   static std::map<QString, MenuPageComboBoxItem*> sMapComboBoxes;
 
    //! map of buttons by id
-   static QMap<QString, MenuPageButtonItem*> sMapButtons;
+   static std::map<QString, MenuPageButtonItem*> sMapButtons;
 
    //! map of labels by id
-   static QMap<QString, MenuPageLabelItem*> sMapLabels;
+   static std::map<QString, MenuPageLabelItem*> sMapLabels;
 };
