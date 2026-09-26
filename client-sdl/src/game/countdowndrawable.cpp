@@ -12,8 +12,7 @@
 #define FADE_FACTOR 0.009f
 
 CountdownDrawable::CountdownDrawable(RenderDevice* dev)
-   : QObject(),
-     Drawable(dev),
+   : Drawable(dev),
      mTimeLeft(0),
      mAnimationStartTime(-1.0f),
      mAnimationActive(false),
@@ -25,11 +24,7 @@ CountdownDrawable::CountdownDrawable(RenderDevice* dev)
    mFilename = "data/menus/countdown.psd";
 }
 
-CountdownDrawable::~CountdownDrawable()
-{
-   qDeleteAll(mPsdLayers);
-   mPsdLayers.clear();
-}
+CountdownDrawable::~CountdownDrawable() = default;
 
 void CountdownDrawable::initializeGL()
 {
@@ -84,8 +79,7 @@ void CountdownDrawable::drawCountdown()
    {
       if (mLayerAlphas[layerIndex] > 0.0f)
       {
-         PSDLayer* layer = mPsdLayers[layerIndex];
-         layer->render(0, 0, mLayerAlphas[layerIndex]);
+         mPsdLayers[layerIndex]->render(0, 0, mLayerAlphas[layerIndex]);
       }
    }
 }
@@ -120,14 +114,12 @@ void CountdownDrawable::cleanupGlParameters()
 
 void CountdownDrawable::initializeLayers()
 {
-   mPsd.load(qPrintable(mFilename));
+   mPsd.load(mFilename.c_str());
 
    // assign layers to menu page items
    for (int l = 0; l < mPsd.getLayerCount(); l++)
    {
-      PSDLayer* layer = new PSDLayer(mPsd.getLayer(l));
-
-      mPsdLayers << layer;
-      mLayerAlphas << 0.0f;
+      mPsdLayers.push_back(std::make_unique<PSDLayer>(mPsd.getLayer(l)));
+      mLayerAlphas.push_back(0.0f);
    }
 }

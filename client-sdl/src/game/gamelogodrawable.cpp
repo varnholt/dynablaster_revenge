@@ -246,7 +246,7 @@ void GameLogoDrawable::cleanupGlParameters()
 
 void GameLogoDrawable::initializeLayers()
 {
-   mPsd.load(mFilename.toStdString().c_str());
+   mPsd.load(mFilename.c_str());
 
    // assign layers to the two named pointers this class actually renders (see the header
    // comment - "earth"/"highlight" layers are still constructed here, matching the original 1:1,

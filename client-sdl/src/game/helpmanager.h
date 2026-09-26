@@ -6,7 +6,7 @@
 // Qt
 #include <QObject>
 
-#include "helpelement.h"
+#include "constants.h"
 
 class HelpManager : public QObject
 {

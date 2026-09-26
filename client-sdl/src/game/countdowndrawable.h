@@ -6,17 +6,16 @@
 
 #include "drawable.h"
 
-#include <QList>
-#include <QObject>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "image/psd.h"
 
 class PSDLayer;
 
-class CountdownDrawable : public QObject, public Drawable
+class CountdownDrawable : public Drawable
 {
-   Q_OBJECT
-
 public:
    CountdownDrawable(RenderDevice* dev);
    virtual ~CountdownDrawable();
@@ -25,7 +24,6 @@ public:
    void paintGL();
    void animate(float time);
 
-public slots:
    void countdown(int left);
 
 protected:
@@ -35,9 +33,9 @@ protected:
    void cleanupGlParameters();
 
    PSD mPsd;
-   QList<PSDLayer*> mPsdLayers;
-   QList<float> mLayerAlphas;
-   QString mFilename;
+   std::vector<std::unique_ptr<PSDLayer>> mPsdLayers;
+   std::vector<float> mLayerAlphas;
+   std::string mFilename;
 
    int mTimeLeft;
    float mAnimationStartTime;

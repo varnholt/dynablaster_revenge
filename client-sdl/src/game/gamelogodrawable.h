@@ -20,8 +20,6 @@
 #include "math/vector.h"
 #include "tools/array.h"
 
-#include <QString>
-
 #include <string>
 
 class PSDLayer;
@@ -110,7 +108,7 @@ protected:
    PSD mPsd;
 
    //! filename to load from
-   QString mFilename;
+   std::string mFilename;
 
    //! font texture
    PSDLayer* mLayerDynablaster;

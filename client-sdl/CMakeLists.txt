@@ -167,12 +167,6 @@ set(DYNABLASTER_AI_SOURCES
 # excluded here rather than "namespaced apart".
 list(FILTER DYNABLASTER_ENGINE_SOURCES EXCLUDE REGEX "engine/helper/chunk\\.(cpp|h)$")
 
-# FilestreamRunnable (a QRunnable-based background file loader) hits an MSVC/Qt-AUTOMOC header
-# ordering issue (<cstring>'s using-declarations conflicting) unrelated to the renderer work, and
-# nothing on the current critical path uses it - only plain FileStream does. Excluded until
-# someone actually needs it.
-list(FILTER DYNABLASTER_ENGINE_SOURCES EXCLUDE REGEX "filestreamrunnable\\.(cpp|h)$")
-
 # cartoonshading, glowring, gouraudshading, logoreflection and shadowvolume were never in the
 # legacy client.pro SOURCES list either - dead, unmaintained material classes (gouraudshading's
 # render() doesn't even compile against the current Material::Buffer, for instance). Excluded
@@ -297,8 +291,6 @@ add_library(dynablaster_core STATIC
     src/game/gamesettings.h
     src/game/gamestatemachine.cpp
     src/game/gamestatemachine.h
-    src/game/helpelement.cpp
-    src/game/helpelement.h
     src/game/helpmanager.cpp
     src/game/helpmanager.h
     src/game/mapitemanimation.cpp
