@@ -20,13 +20,7 @@
 PositionInterpolation::PositionInterpolation(QObject *parent) :
    QObject(parent)
 {
-   mTimer.setObjectName("interpolation");
-   connect(
-      &mTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(update())
-   );
+   mTimer.timeoutSignal.connect([this]() { update(); });
 
    connect(
       GameStateMachine::getInstance(),

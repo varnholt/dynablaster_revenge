@@ -3,6 +3,7 @@
 #include "frametimer.h"
 #include "tools/singleton.h"
 
+#include <functional>
 #include <unordered_set>
 
 class TimerHandler : public Singleton<TimerHandler>
@@ -16,7 +17,7 @@ public:
 
    void update();
 
-   static void singleShot(float ms, QObject* receiver, const char* recvSlot);
+   static void singleShot(float ms, std::function<void()> callback);
 
 private:
    std::unordered_set<FrameTimer*> mTimers;

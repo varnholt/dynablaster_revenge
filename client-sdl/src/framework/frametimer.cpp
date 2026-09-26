@@ -2,22 +2,12 @@
 #include "globaltime.h"
 #include "timerhandler.h"
 
-FrameTimer::FrameTimer() : QObject(), mStarted(false), mSingleShot(false), mStartTime(0.0f), mInterval(0.0f), mDelete(false)
-{
-}
-
-FrameTimer::FrameTimer(QObject* parent)
-    : QObject(parent), mStarted(false), mSingleShot(false), mStartTime(0.0f), mInterval(0.0f), mDelete(false)
+FrameTimer::FrameTimer() : mStarted(false), mSingleShot(false), mStartTime(0.0f), mInterval(0.0f), mDelete(false)
 {
 }
 
 FrameTimer::FrameTimer(const FrameTimer& other)
-    : QObject(),
-      mStarted(other.mStarted),
-      mSingleShot(other.mSingleShot),
-      mStartTime(other.mStartTime),
-      mInterval(other.mInterval),
-      mDelete(false)
+    : mStarted(other.mStarted), mSingleShot(other.mSingleShot), mStartTime(other.mStartTime), mInterval(other.mInterval), mDelete(false)
 {
    if (mStarted)
       TimerHandler::Instance()->addTimer(this);
@@ -130,7 +120,7 @@ bool FrameTimer::update()
       float curTime = GlobalTime::Instance()->getTime();
       if (curTime >= mStartTime + mInterval)
       {
-         emit timeout();
+         timeoutSignal();
          if (mSingleShot)
          {
             mStarted = false;

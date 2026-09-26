@@ -1089,7 +1089,7 @@ void GameDrawable::removePlayer(int id)
                if (!mWinAnimationStarted)
                {
                   mWinAnimationStarted = true;
-                  TimerHandler::singleShot(2000, this, SLOT(playWinAnimation()));
+                  TimerHandler::singleShot(2000, [this]() { playWinAnimation(); });
                }
             }
          }

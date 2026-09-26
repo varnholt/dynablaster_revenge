@@ -12,7 +12,8 @@ TimerHandler::~TimerHandler()
    {
       FrameTimer* timer = *it;
       it = mTimers.erase(it);
-      timer->deleteLater();
+      if (timer->mDelete)
+         delete timer;
    }
 }
 
@@ -49,12 +50,12 @@ void TimerHandler::update()
    }
 }
 
-void TimerHandler::singleShot(float ms, QObject* receiver, const char* recvSlot)
+void TimerHandler::singleShot(float ms, std::function<void()> callback)
 {
    FrameTimer* timer = new FrameTimer();
    timer->setSingleShot(true);
    timer->setInterval(ms);
    timer->mDelete = true;
-   timer->connect(timer, SIGNAL(timeout()), receiver, recvSlot);
+   timer->timeoutSignal.connect(std::move(callback));
    timer->start();
 }

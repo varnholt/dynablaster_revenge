@@ -34,6 +34,12 @@ public:
       _slots.erase(std::remove_if(_slots.begin(), _slots.end(), [id](const auto& entry) { return entry.first == id; }), _slots.end());
    }
 
+   //! drops every subscriber - mirrors Qt's blanket QObject::disconnect() on the sender side
+   void disconnectAll()
+   {
+      _slots.clear();
+   }
+
    void operator()(Args... args) const
    {
       // iterate a copy - a slot disconnecting another subscriber (or itself, via a deferred

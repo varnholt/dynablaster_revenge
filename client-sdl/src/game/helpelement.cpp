@@ -26,12 +26,7 @@ HelpElement::HelpElement(
    mDelayElapsed(false),
    mDelayTimerActive(false)
 {
-   connect(
-      &mTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(timeout())
-   );
+   mTimer.timeoutSignal.connect([this]() { timeout(); });
 }
 
 
@@ -47,11 +42,7 @@ void HelpElement::startDelayTime()
 {
    if (!mDelayTimerActive)
    {
-      TimerHandler::singleShot(
-         mDelay,
-         this,
-         SLOT(delayTimeout())
-      );
+      TimerHandler::singleShot(mDelay, [this]() { delayTimeout(); });
 
       mDelayTimerActive = true;
    }

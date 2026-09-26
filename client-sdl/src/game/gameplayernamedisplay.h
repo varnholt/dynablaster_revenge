@@ -6,6 +6,8 @@
 #include "math/vector.h"
 #include "render/texture.h"
 
+#include <QObject>
+
 #include <map>
 #include <string>
 #include <vector>

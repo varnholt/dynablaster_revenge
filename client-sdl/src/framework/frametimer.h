@@ -1,14 +1,11 @@
 #pragma once
 
-#include <QObject>
+#include "signal.h"
 
-class FrameTimer : public QObject
+class FrameTimer
 {
-   Q_OBJECT
-
 public:
    FrameTimer();
-   FrameTimer(QObject* parent);
    FrameTimer(const FrameTimer& other);
    ~FrameTimer();
 
@@ -35,10 +32,8 @@ public:
 
    void setSingleShot(bool singleShot);
 
-signals:
-   void timeout();
+   Signal<> timeoutSignal;
 
-public:
    bool mStarted;
    bool mSingleShot;
    float mStartTime;

@@ -9,7 +9,7 @@ GameMessage::GameMessage(QObject* parent) : QObject(parent), mSenderId(-1), mRec
 {
    mTime = FrameTimer::currentTime();
 
-   TimerHandler::singleShot(sDisplayTime, this, SIGNAL(expired()));
+   TimerHandler::singleShot(sDisplayTime, [this]() { emit expired(); });
 }
 
 void GameMessage::operator=(const GameMessage& message)
@@ -31,7 +31,7 @@ GameMessage::GameMessage(const GameMessage& message) : QObject(message.parent())
    mReceiverName = message.mReceiverName;
    mSenderName = message.mSenderName;
 
-   TimerHandler::singleShot(sDisplayTime, this, SIGNAL(expired()));
+   TimerHandler::singleShot(sDisplayTime, [this]() { emit expired(); });
 }
 
 void GameMessage::setMessage(const std::string& message)
