@@ -1,13 +1,13 @@
 #ifndef IMAGEPOOL_H
 #define IMAGEPOOL_H
 
-#include <QDateTime>
-#include <QFileInfoList>
-#include <QString>
 #include "image.h"
 #include "tools/singleton.h"
 
-#include <map>
+#include <QObject>
+
+#include <string>
+#include <unordered_map>
 
 class ImagePool : public QObject, public Singleton<ImagePool>
 {
@@ -24,13 +24,8 @@ public:
 signals:
    void updateImage(Image*);
 
-private slots:
-   void refresh();
-
 private:
-   QDateTime getFileDate(const QFileInfoList& list, const QString& filename) const;
-
-   std::map<QString, Image*> mPool;
+   std::unordered_map<std::string, Image*> mPool;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QHash>
+#include <string>
+#include <unordered_map>
 
 template <class Item>
 class Pool
@@ -19,7 +20,7 @@ public:
    bool add(const char* id, Item* item);
 
 private:
-   QHash<QString, Item*> mData;
+   std::unordered_map<std::string, Item*> mData;
 };
 
 //! construct empty pool
@@ -32,23 +33,20 @@ Pool<Item>::Pool()
 template <class Item>
 Pool<Item>::~Pool()
 {
-   typename QHash<QString, Item*>::Iterator it;
-   while (!mData.isEmpty())
+   for (auto& [id, item] : mData)
    {
-      it = mData.begin();
-      Item* item = it.value();
-      mData.erase(it);
       delete item;
    }
+   mData.clear();
 }
 
 //! get item from pool with given "id"
 template <class Item>
 Item* Pool<Item>::get(const char* id) const
 {
-   typename QHash<QString, Item*>::ConstIterator it = mData.constFind(QString(id));
-   if (it != mData.constEnd())
-      return it.value();
+   auto it = mData.find(id);
+   if (it != mData.end())
+      return it->second;
    else
       return 0;
 }
@@ -58,10 +56,10 @@ template <class Item>
 bool Pool<Item>::add(const char* id, Item* item)
 {
    bool result = false;
-   typename QHash<QString, Item*>::ConstIterator it = mData.constFind(QString(id));
-   if (it == mData.constEnd())
+   auto it = mData.find(id);
+   if (it == mData.end())
    {
-      mData.insert(QString(id), item);
+      mData.insert({std::string(id), item});
       result = true;
    }
    return result;

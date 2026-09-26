@@ -6,7 +6,8 @@
 #include "tools/array.h"
 #include "tools/singleton.h"
 
-#include <map>
+#include <string>
+#include <unordered_map>
 
 class Image;
 
@@ -39,7 +40,7 @@ private slots:
    void updateImage(Image*);
 
 private:
-   std::map<QString, Texture> mPool;
+   std::unordered_map<std::string, Texture> mPool;
    Array<unsigned int> mRemoval;
    bool mBlock;
    unsigned int mMemory;

@@ -40,7 +40,7 @@ Texture TexturePool::getTexture(const char* filename, int flags)
       {
          Image* image = new Image(filename);
          Texture texture = getTexture(image, flags);
-         mPool[QString(filename)] = texture;
+         mPool[std::string(filename)] = texture;
          delete image;
          return texture;
       }
@@ -78,10 +78,8 @@ void TexturePool::remove(const Texture& texture)
    mBlock = true;
    bool found = false;
    // remove from pool
-   std::map<QString, Texture>::iterator it;
-   for (it = mPool.begin(); it != mPool.end();)
+   for (auto it = mPool.begin(); it != mPool.end();)
    {
-      // const QString& fileName= it->first;
       const Texture& pool = it->second;
       if (pool.getTexture() == texture.getTexture())
       {
