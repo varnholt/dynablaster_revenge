@@ -31,8 +31,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui)
 
 include(FetchContent)
 
-set(SDL_SHARED ON CACHE BOOL "" FORCE)
-set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
@@ -54,8 +54,7 @@ FetchContent_MakeAvailable(minimp3)
 
 # networking for the client<->server protocol. Not yet linked into any target; the
 # socket-handling rewrite lands separately.
-set(SDLNET_SHARED ON CACHE BOOL "" FORCE)
-set(SDLNET_STATIC OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     SDL3_net
@@ -409,8 +408,6 @@ foreach(dynablaster_target dynablaster_sdl dynablaster_sdl_harness)
     if(WIN32)
         add_custom_command(TARGET ${dynablaster_target} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:SDL3::SDL3>
-                $<TARGET_FILE:SDL3_net::SDL3_net>
                 $<TARGET_FILE:Qt6::Core>
                 $<TARGET_FILE:Qt6::Gui>
                 $<TARGET_FILE_DIR:${dynablaster_target}>
