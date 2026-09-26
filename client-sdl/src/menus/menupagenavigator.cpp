@@ -4,8 +4,8 @@
 #include "game/gamesettings.h"
 #include "game/soundmanager.h"
 #include "game/wordwrap.h"
-#include "levels/level.h"
 #include "gameinformation.h"
+#include "levels/level.h"
 
 #include "hosthistory.h"
 #include "menu.h"
@@ -119,7 +119,9 @@ void logUnhandled(const QString& page, const QString& action)
       return;
 
    if (needsBrowser(action))
-      qDebug("MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", qPrintable(page), qPrintable(action));
+      qDebug(
+         "MenuPageNavigator: page=%s action=%s needs opening an external browser (not implemented)", qPrintable(page), qPrintable(action)
+      );
    // else: not a real menu action (e.g. an editablecombobox's own internal layer-name emission) -
    // the real GameMenuWorkflow doesn't log these either, so neither do we.
 }
@@ -140,28 +142,21 @@ MenuPageNavigator::MenuPageNavigator(QObject* parent) : QObject(parent)
    // BombermanClient must already be constructed+initialize()'d by main.cpp before this runs -
    // getInstance() doesn't self-construct (matches the real client/src/game/bombermanclientgui.cpp
    // construction order).
-   connect(BombermanClient::getInstance(), SIGNAL(loginResponse(bool)), this, SLOT(onLoginResponse(bool)));
-   connect(BombermanClient::getInstance(), SIGNAL(createGameResponse(bool, int, bool)), this, SLOT(onCreateGameResponse(bool, int, bool)));
-   connect(BombermanClient::getInstance(), SIGNAL(joinGameResponse(bool)), this, SLOT(onJoinGameResponse(bool)));
-   connect(BombermanClient::getInstance(), SIGNAL(gameStarted()), this, SLOT(onGameStarted()));
+   BombermanClient::getInstance()->loginResponseSignal.connect([this](bool granted) { onLoginResponse(granted); });
+   BombermanClient::getInstance()->createGameResponseSignal.connect([this](bool granted, int gameId, bool owner)
+                                                                    { onCreateGameResponse(granted, gameId, owner); });
+   BombermanClient::getInstance()->joinGameResponseSignal.connect([this](bool success) { onJoinGameResponse(success); });
+   BombermanClient::getInstance()->gameStartedSignal.connect([this]() { onGameStarted(); });
 
    // matches GameMenuInterfaceLounge's constructor connection - keeps the lounge's player rows
    // (nick/wins/rank/owner-icon) live-updated whenever the player set changes (join/leave/bot
    // added). Without this, bots that join after the lounge page is already showing never appear.
-   connect(
-      BombermanClient::getInstance(),
-      SIGNAL(playerInfoMapUpdated(QMap<int, PlayerInfo*>*)),
-      this,
-      SLOT(onPlayerInfoMapUpdated(QMap<int, PlayerInfo*>*))
-   );
+   BombermanClient::getInstance()->playerInfoMapUpdatedSignal.connect([this](QMap<int, PlayerInfo*>* infoMap)
+                                                                      { onPlayerInfoMapUpdated(infoMap); });
 
    // matches GameMenuWorkflow's own connection to BombermanClient::messageReceived - lounge chat.
-   connect(
-      BombermanClient::getInstance(),
-      SIGNAL(messageReceived(int, QString, bool)),
-      this,
-      SLOT(onMessageReceived(int, QString, bool))
-   );
+   BombermanClient::getInstance()->messageReceivedSignal.connect([this](int senderId, const QString& message, bool finished)
+                                                                 { onMessageReceived(senderId, message, finished); });
 
    // matches MenuWorkflow::initialize() calling deserializeLoginData() once at startup - the
    // main menu is already the current page by construction time (no pageChanged() fires for it
@@ -454,11 +449,7 @@ void MenuPageNavigator::updateLoungePlayerList(QMap<int, PlayerInfo*>* playerInf
    for (PlayerInfo* info : *playerInfo)
       scoreList.append({info, static_cast<int>(info->getOverallStats().getWins())});
 
-   std::sort(
-      scoreList.begin(),
-      scoreList.end(),
-      [](const ScoreEntry& a, const ScoreEntry& b) { return a.score > b.score; }
-   );
+   std::sort(scoreList.begin(), scoreList.end(), [](const ScoreEntry& a, const ScoreEntry& b) { return a.score > b.score; });
 
    // initially hide all rows
    for (int i = 1; i <= 10; i++)
@@ -700,10 +691,9 @@ void MenuPageNavigator::initializeCreateGameOptions()
       mCreateGamePagesInitialized.insert(page);
    }
 
-   GameSettings::CreateGameSettings* cgs =
-      BombermanClient::getInstance()->isSinglePlayer()
-         ? GameSettings::getInstance()->getCreateGameSettingsSingle()
-         : GameSettings::getInstance()->getCreateGameSettingsMulti();
+   GameSettings::CreateGameSettings* cgs = BombermanClient::getInstance()->isSinglePlayer()
+                                              ? GameSettings::getInstance()->getCreateGameSettingsSingle()
+                                              : GameSettings::getInstance()->getCreateGameSettingsMulti();
 
    timeCombo->setValue(QString("%1").arg(cgs->getDuration()));
    maxPlayersCombo->setValue(QString("%1").arg(cgs->getMaxPlayers()));
@@ -883,10 +873,9 @@ void MenuPageNavigator::createGame()
 
    const Constants::Dimension dimension = (maxPlayers <= 5) ? Constants::Dimension13x11 : Constants::Dimension19x17;
 
-   GameSettings::CreateGameSettings* cgs =
-      BombermanClient::getInstance()->isSinglePlayer()
-         ? GameSettings::getInstance()->getCreateGameSettingsSingle()
-         : GameSettings::getInstance()->getCreateGameSettingsMulti();
+   GameSettings::CreateGameSettings* cgs = BombermanClient::getInstance()->isSinglePlayer()
+                                              ? GameSettings::getInstance()->getCreateGameSettingsSingle()
+                                              : GameSettings::getInstance()->getCreateGameSettingsMulti();
 
    cgs->setGameName(gameName);
    cgs->setLevelIndex(levelIndex);
@@ -903,6 +892,16 @@ void MenuPageNavigator::createGame()
    cgs->serialize();
 
    BombermanClient::getInstance()->createGame(
-      gameName, levelDirName, rounds, durationSeconds, maxPlayers, extraBombs, extraFlames, extraSpeedUps, extraKicks, extraSkulls, dimension
+      gameName,
+      levelDirName,
+      rounds,
+      durationSeconds,
+      maxPlayers,
+      extraBombs,
+      extraFlames,
+      extraSpeedUps,
+      extraKicks,
+      extraSkulls,
+      dimension
    );
 }

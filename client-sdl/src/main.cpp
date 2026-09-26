@@ -263,11 +263,7 @@ int main(int argc, char** argv)
       Qt::QueuedConnection
    );
    QObject::connect(
-      &menuDrawable,
-      SIGNAL(pageChanged(QString)),
-      SoundManager::getInstance(),
-      SLOT(playSoundMouseClick(QString)),
-      Qt::QueuedConnection
+      &menuDrawable, SIGNAL(pageChanged(QString)), SoundManager::getInstance(), SLOT(playSoundMouseClick(QString)), Qt::QueuedConnection
    );
 
    // GameDrawable (Phase 5, see project memory) - the real in-game rendering (map/players/bombs/
@@ -302,46 +298,69 @@ int main(int argc, char** argv)
    // client<->game wiring - mirrors client/src/game/bombermanclientgui.cpp's
    // BombermanClientGui::initConnections() (only the connections relevant to what's actually
    // ported here; chat/stats/rounds/music-player/joystick wiring is still out of scope).
-   QObject::connect(&bombermanClient, SIGNAL(loadLevel(QString)), &gameDrawable, SLOT(loadLevel(QString)));
+   // BombermanClient's own signals - migrated to Signal<> (see project_full_qt_removal_scope
+   // memory's dual-signal transition plan). The Qt signal is still dual-emitted from
+   // bombermanclient.cpp until every consumer has moved.
    QObject::connect(&gameDrawable, SIGNAL(levelLoaded(QString)), &bombermanClient, SLOT(levelLoaded(QString)));
-   QObject::connect(&bombermanClient, SIGNAL(shakeBlock(MapItem*)), &gameDrawable, SLOT(shakeBlock(MapItem*)));
-   QObject::connect(&bombermanClient, SIGNAL(setPlayerPosition(int,float,float,float)), &gameDrawable, SLOT(setPlayerPosition(int,float,float,float)));
-   QObject::connect(&bombermanClient, SIGNAL(setPlayerSpeed(int,float,float,float)), &gameDrawable, SLOT(setPlayerSpeed(int,float,float,float)));
-   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setPlayerPosition(int,float,float,float)), &gameDrawable, SLOT(setPlayerPosition(int,float,float,float)));
-   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setPlayerSpeed(int,float,float,float)), &gameDrawable, SLOT(setPlayerSpeed(int,float,float,float)));
-   QObject::connect(bombermanClient.getPositionInterpolation(), SIGNAL(setMapItemPosition(MapItem*,float,float,float)), &gameDrawable, SLOT(setMapItemPosition(MapItem*,float,float,float)));
-   QObject::connect(&bombermanClient, SIGNAL(removeMapItem(MapItem*)), bombermanClient.getPositionInterpolation(), SLOT(removeMapItem(MapItem*)));
-   QObject::connect(&bombermanClient, SIGNAL(playfieldScale(float,float)), &gameDrawable, SLOT(setPlayfieldScale(float,float)));
-   QObject::connect(&bombermanClient, SIGNAL(playfieldSize(int,int)), &gameDrawable, SLOT(setPlayfieldSize(int,int)));
+   bombermanClient.loadLevelSignal.connect([&](const QString& level) { gameDrawable.loadLevel(level); });
+   bombermanClient.shakeBlockSignal.connect([&](MapItem* item) { gameDrawable.shakeBlock(item); });
+   bombermanClient.setPlayerPositionSignal.connect([&](int id, float x, float y, float ang)
+                                                   { gameDrawable.setPlayerPosition(id, x, y, ang); });
+   bombermanClient.setPlayerSpeedSignal.connect([&](int id, float x, float y, float ang) { gameDrawable.setPlayerSpeed(id, x, y, ang); });
+   QObject::connect(
+      bombermanClient.getPositionInterpolation(),
+      SIGNAL(setPlayerPosition(int, float, float, float)),
+      &gameDrawable,
+      SLOT(setPlayerPosition(int, float, float, float))
+   );
+   QObject::connect(
+      bombermanClient.getPositionInterpolation(),
+      SIGNAL(setPlayerSpeed(int, float, float, float)),
+      &gameDrawable,
+      SLOT(setPlayerSpeed(int, float, float, float))
+   );
+   QObject::connect(
+      bombermanClient.getPositionInterpolation(),
+      SIGNAL(setMapItemPosition(MapItem*, float, float, float)),
+      &gameDrawable,
+      SLOT(setMapItemPosition(MapItem*, float, float, float))
+   );
+   bombermanClient.removeMapItemSignal.connect([&](MapItem* item) { bombermanClient.getPositionInterpolation()->removeMapItem(item); });
+   bombermanClient.playfieldScaleSignal.connect([&](float x, float y) { gameDrawable.setPlayfieldScale(x, y); });
+   bombermanClient.playfieldSizeSignal.connect([&](int width, int height) { gameDrawable.setPlayfieldSize(width, height); });
    QObject::connect(&gameDrawable, SIGNAL(keyPressed(QKeyEvent*)), &bombermanClient, SLOT(keyPressed(QKeyEvent*)));
    QObject::connect(&gameDrawable, SIGNAL(keyReleased(QKeyEvent*)), &bombermanClient, SLOT(keyReleased(QKeyEvent*)));
-   QObject::connect(&bombermanClient, SIGNAL(createMapItem(MapItem*)), &gameDrawable, SLOT(createMapItem(MapItem*)));
-   QObject::connect(&bombermanClient, SIGNAL(removeMapItem(MapItem*)), &gameDrawable, SLOT(removeMapItem(MapItem*)));
-   QObject::connect(&bombermanClient, SIGNAL(destroyMapItem(MapItem*,float)), &gameDrawable, SLOT(destroyMapItem(MapItem*,float)));
-   QObject::connect(&bombermanClient, SIGNAL(addPlayer(int,QString,Constants::Color)), &gameDrawable, SLOT(addPlayer(int,QString,Constants::Color)));
-   QObject::connect(&bombermanClient, SIGNAL(removePlayer(int)), &gameDrawable, SLOT(removePlayer(int)));
-   QObject::connect(&bombermanClient, SIGNAL(extraRemoved(int,int,bool,Constants::ExtraType,int)), &gameDrawable, SLOT(extraRemoved(int,int,bool,Constants::ExtraType,int)));
-   QObject::connect(&bombermanClient, SIGNAL(detonation(int,int,int,int,int,int,float)), &gameDrawable, SLOT(addDetonation(int,int,int,int,int,int,float)));
-   QObject::connect(&bombermanClient, SIGNAL(playerInfected(int,Constants::SkullType,int,int,int)), &gameDrawable, SLOT(playerInfected(int,Constants::SkullType,int,int,int)));
-   QObject::connect(&bombermanClient, SIGNAL(playerId(int)), &gameDrawable, SLOT(setPlayerId(int)));
-   QObject::connect(&bombermanClient, SIGNAL(countdown(int)), &countdownDrawable, SLOT(countdown(int)));
-   QObject::connect(
-      &bombermanClient,
-      SIGNAL(messageReceived(int, QString, bool)),
-      &gameMessagingDrawable,
-      SLOT(messageReceived(int, QString, bool))
-   );
+   bombermanClient.createMapItemSignal.connect([&](MapItem* item) { gameDrawable.createMapItem(item); });
+   bombermanClient.removeMapItemSignal.connect([&](MapItem* item) { gameDrawable.removeMapItem(item); });
+   bombermanClient.destroyMapItemSignal.connect([&](MapItem* item, float flameCount) { gameDrawable.destroyMapItem(item, flameCount); });
+   bombermanClient.addPlayerSignal.connect([&](int id, const QString& nick, Constants::Color color)
+                                           { gameDrawable.addPlayer(id, nick, color); });
+   bombermanClient.removePlayerSignal.connect([&](int id) { gameDrawable.removePlayer(id); });
+   bombermanClient.extraRemovedSignal.connect([&](int x, int y, bool destroyed, Constants::ExtraType extra, int playerId)
+                                              { gameDrawable.extraRemoved(x, y, destroyed, extra, playerId); });
+   bombermanClient.detonationSignal.connect([&](int x, int y, int up, int down, int left, int right, float intense)
+                                            { gameDrawable.addDetonation(x, y, up, down, left, right, intense); });
+   bombermanClient.playerInfectedSignal.connect([&](int id, Constants::SkullType skull, int infectorId, int extraX, int extraY)
+                                                { gameDrawable.playerInfected(id, skull, infectorId, extraX, extraY); });
+   bombermanClient.playerIdSignal.connect([&](int id) { gameDrawable.setPlayerId(id); });
+   bombermanClient.countdownSignal.connect([&](int left) { countdownDrawable.countdown(left); });
+   bombermanClient.messageReceivedSignal.connect([&](int senderId, const QString& message, bool finished)
+                                                 { gameMessagingDrawable.messageReceived(senderId, message, finished); });
 
    // menu<->game visibility switch - matches GameView::showGame()/showMenu() exactly (minus the
    // still-deferred GameStatsDrawable/MusicPlayerDrawable/GameHelpDrawable).
-   QObject::connect(&bombermanClient, &BombermanClient::showGame, [&]() {
-      menuDrawable.setVisible(false);
-      logoDrawable.setVisible(false);
-      menuCursor.setVisible(false);
-      gameDrawable.setVisible(true);
-      gameMessagingDrawable.setVisible(true);
-   });
-   auto showMenuAgain = [&]() {
+   bombermanClient.showGameSignal.connect(
+      [&]()
+      {
+         menuDrawable.setVisible(false);
+         logoDrawable.setVisible(false);
+         menuCursor.setVisible(false);
+         gameDrawable.setVisible(true);
+         gameMessagingDrawable.setVisible(true);
+      }
+   );
+   auto showMenuAgain = [&]()
+   {
       gameDrawable.setVisible(false);
       gameMessagingDrawable.setVisible(false);
       countdownDrawable.setVisible(false);
@@ -349,21 +368,19 @@ int main(int argc, char** argv)
       logoDrawable.setVisible(true);
       menuCursor.setVisible(true);
    };
-   QObject::connect(&bombermanClient, &BombermanClient::showMenu, showMenuAgain);
+   bombermanClient.showMenuSignal.connect(showMenuAgain);
    // matches GameView::showMenuWithDelay(): a round ending naturally shows the win/trophy screen
    // first (GameWinDrawable, still rendered on top of the - now blurred - game scene), only
    // switching to the menu once its own fade-out sequence finishes. showMenu() above (early
    // leave/ESC, no valid game id) stays an immediate switch - matches GameWinDrawable's own
    // isGameIdValid() gate, which skips showing itself in exactly that case.
-   QObject::connect(&bombermanClient, &BombermanClient::gameStopped, [&]() {
-      QTimer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain);
-   });
+   bombermanClient.gameStoppedSignal.connect([&]() { QTimer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain); });
    // pageChangeRequest is a protected slot (see the navigator wiring above) - invokeMethod goes
    // through Qt's meta-object system, bypassing C++ access control the same way the string-based
    // SIGNAL/SLOT connects elsewhere in this file already do.
-   QObject::connect(&bombermanClient, &BombermanClient::showMainMenu, [&]() {
-      QMetaObject::invokeMethod(&menuDrawable, "pageChangeRequest", Q_ARG(QString, QString("data/menus/mainmenu.psd")));
-   });
+   bombermanClient.showMainMenuSignal.connect(
+      [&]() { QMetaObject::invokeMethod(&menuDrawable, "pageChangeRequest", Q_ARG(QString, QString("data/menus/mainmenu.psd"))); }
+   );
 
    // matches BombermanClientGui's own startup sequence (SoundManager::getInstance()->
    // startPlaylist(), called once real init is done) - background music.

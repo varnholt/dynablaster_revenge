@@ -6,8 +6,8 @@
 
 #include "bombermanclient.h"
 #include "gamestatemachine.h"
-#include "menus/psdlayer.h"
 #include "menus/fontpool.h"
+#include "menus/psdlayer.h"
 #include "wordwrap.h"
 
 #include "constants.h"
@@ -50,7 +50,7 @@ GameMessagingDrawable::GameMessagingDrawable(RenderDevice* dev)
 {
    mFilename = "data/game/messaging_bar.psd";
 
-   connect(BombermanClient::getInstance(), SIGNAL(gameStarted()), this, SLOT(disableIngameMessaging()));
+   BombermanClient::getInstance()->gameStartedSignal.connect([this]() { disableIngameMessaging(); });
    connect(GameStateMachine::getInstance(), SIGNAL(stateChanged()), this, SLOT(gameStateChanged()));
 }
 
@@ -319,9 +319,7 @@ void GameMessagingDrawable::drawText(bool drawUserInput)
    // the legacy 5-pass glTranslatef offset trick (4 black outline passes at +-1px, then a real
    // pass) becomes 5 real push()/pop() brackets with a translated world matrix - GLES3 has no
    // matrix stack to abuse for this, but the effect is identical.
-   const float offsets[5][3] = {
-      {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.75f, 0.0f, 0.0f}
-   };
+   const float offsets[5][3] = {{0.0f, -1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.75f, 0.0f, 0.0f}};
 
    for (int f = 0; f < 5; f++)
    {
@@ -501,8 +499,8 @@ void GameMessagingDrawable::drawCursor()
    glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
 
    const float quad[] = {
-      left, top, -1.0f, 0.0f, 0.0f, right, top, -1.0f, 1.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f,
-      left, top, -1.0f, 0.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f, left, bottom, -1.0f, 0.0f, 1.0f,
+      left, top, -1.0f, 0.0f, 0.0f, right, top,    -1.0f, 1.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f,
+      left, top, -1.0f, 0.0f, 0.0f, right, bottom, -1.0f, 1.0f, 1.0f, left,  bottom, -1.0f, 0.0f, 1.0f,
    };
 
    if (mCursorVertexBuffer == 0)

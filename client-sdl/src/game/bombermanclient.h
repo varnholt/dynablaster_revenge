@@ -9,6 +9,7 @@
 
 // shared
 #include "packetstreambuffer.h"
+#include "signal.h"
 
 // game
 #include "gameinformation.h"
@@ -144,119 +145,46 @@ public:
    //! check if main menu is active
    bool isMainMenuActive() const;
 
-signals:
+public:
+   // Signal<> replacements for BombermanClient's former Qt signals (see
+   // project_full_qt_removal_scope memory) - every external connect() site now uses these.
 
-   // visualization
+   Signal<int, float, float, float> setPlayerPositionSignal;
+   Signal<int, float, float, float> setPlayerSpeedSignal;
+   Signal<MapItem*> createMapItemSignal;
+   Signal<MapItem*> removeMapItemSignal;
+   Signal<MapItem*, float> destroyMapItemSignal;
+   Signal<int, int, int, int, int, int, float> detonationSignal;
+   Signal<int, const QString&, Constants::Color> addPlayerSignal;
+   Signal<int> removePlayerSignal;
+   Signal<int> playerIdSignal;
+   Signal<float, float> playfieldScaleSignal;
+   Signal<int, int> playfieldSizeSignal;
+   Signal<const QString&> loadLevelSignal;
+   Signal<MapItem*> shakeBlockSignal;
+   Signal<int, Constants::SkullType, int, int, int> playerInfectedSignal;
+   Signal<> connectedSignal;
+   Signal<> disconnectedSignal;
+   Signal<bool> loginResponseSignal;
+   Signal<bool, int, bool> createGameResponseSignal;
+   Signal<bool> joinGameResponseSignal;
+   Signal<> gameStartedSignal;
+   Signal<> gameStoppedSignal;
+   Signal<int, const QString&, bool> messageReceivedSignal;
+   Signal<int> countdownSignal;
+   Signal<QMap<int, PlayerInfo*>*> playerInfoMapUpdatedSignal;
+   Signal<> showGameSignal;
+   Signal<> showMenuSignal;
+   Signal<> showMainMenuSignal;
+   Signal<int, int, bool, Constants::ExtraType, int> extraRemovedSignal;
 
-   void zoomIn(bool state);
-   void zoomOut(bool state);
-
-   //! signal player position
-   void setPlayerPosition(int id, float x, float y, float ang);
-
-   //! signal player speed
-   void setPlayerSpeed(int id, float x, float y, float ang);
-
-   //! signal mapitem creation
-   void createMapItem(MapItem* item);
-
-   //! signal mapitem removal
-   void removeMapItem(MapItem* item);
-
-   //! signal mapitem destruction
-   void destroyMapItem(MapItem* item, float flameCount);
-
-   //! signal detonation
-   void detonation(int x, int y, int up, int down, int left, int right, float intense);
-
-   //! signal add player
-   void addPlayer(int, const QString&, Constants::Color);
-
-   //! signal remove player
-   void removePlayer(int);
-
-   //! signal game list update
-   void gamesListUpdated(const QList<GameInformation>&);
-
-   //! signal our player id
-   void playerId(int id);
-
-   //! communicate playfield scale
-   void playfieldScale(float scaleX, float scaleY);
-
-   //! communicate playfield size
-   void playfieldSize(int width, int height);
-
-   //! signal map item movement
-   void moveMapItem(MapItem* item, Constants::Direction, float speed, int x, int y);
-
-   //! signal level loading
-   void loadLevel(const QString& level);
-
-   //! signal a block shake
-   void shakeBlock(MapItem* item);
-
-   //! signal a player was infected
-   void playerInfected(int id, Constants::SkullType, int infectorId, int extraX, int extraY);
-
-   //! play rumble effect if possible
-   void rumble(float intensity, int ms);
-
-   // game workflow and menus
-
-   //! connected to server
-   void connected();
-
-   //! disconnected from server
-   void disconnected();
-
-   //! login response
-   void loginResponse(bool);
-
-   //! create game response
-   void createGameResponse(bool success, int gameId, bool owner);
-
-   //! join game response
-   void joinGameResponse(bool);
-
-   //! game start response
-   void gameStarted();
-
-   //! game stopped response
-   void gameStopped();
-
-   //! message received
-   void messageReceived(int senderId, const QString& message, bool finished);
-
-   //! time left during coutdown
-   void countdown(int left);
-
-   //! list of players updated
-   void playerInfoMapUpdated(QMap<int, PlayerInfo*>*);
-
-   //! show the game
-   void showGame();
-
-   //! show the menu
-   void showMenu();
-
-   //! show the main menu
-   void showMainMenu();
-
-   //! extra has been removed
-   void extraRemoved(int x, int y, bool destroyed, Constants::ExtraType extra, int playerId = -1);
-
-   // game stats
-
-   //! server time changed
-   void timeChanged(int, int);
-
-   //! player's score changed
-   void scoreChanged(int);
-
-   // server
-
-   void hosting(bool);
+   Signal<bool> zoomInSignal;
+   Signal<bool> zoomOutSignal;
+   Signal<MapItem*, Constants::Direction, float, int, int> moveMapItemSignal;
+   Signal<const QList<GameInformation>&> gamesListUpdatedSignal;
+   Signal<float, int> rumbleSignal;
+   Signal<int, int> timeChangedSignal;
+   Signal<bool> hostingSignal;
 
 public slots:
 
