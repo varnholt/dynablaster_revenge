@@ -1,61 +1,60 @@
 #include "wordwrap.h"
 
+#include "stringutils.h"
+
 
 
 //-----------------------------------------------------------------------------
 /*!
    \param line line to wrap
-   \param allowedCharsPerLine allowed chars per line
+   \param allowed_chars_per_line allowed chars per line
    \return wrapped lines
 */
-std::vector<QString> WordWrap::wrap(
-   const QString &line,
-   int allowedCharsPerLine
-)
+std::vector<std::string> WordWrap::wrap(const std::string& line, int allowed_chars_per_line)
 {
-   QString trimmed = line.trimmed();
-   std::vector<QString> result;
+   const std::string trimmed = StringUtils::trim(line);
+   std::vector<std::string> split = StringUtils::split(trimmed, ' ');
 
-   QStringList split = trimmed.split(" ");
-
-   QString tmpLine;
-   QString nextWord;
-
-   // chuck large chunks
-   for (int i = 0; i < split.length(); i++)
+   // chop large chunks
+   for (size_t i = 0; i < split.size(); i++)
    {
-      QString test = split.at(i);
+      const std::string test = split[i];
 
-      if (test.length() > allowedCharsPerLine)
+      if (static_cast<int>(test.size()) > allowed_chars_per_line)
       {
-         QString a = test.left(allowedCharsPerLine);
-         QString b = test.mid(allowedCharsPerLine + 1);
+         const std::string a = test.substr(0, static_cast<size_t>(allowed_chars_per_line));
+         const std::string b = test.substr(static_cast<size_t>(allowed_chars_per_line) + 1);
 
-         split.removeAt(i);
-         split.insert(i, a);
-         split.insert(i + 1, b);
+         split.erase(split.begin() + static_cast<long>(i));
+         split.insert(split.begin() + static_cast<long>(i), a);
+         split.insert(split.begin() + static_cast<long>(i) + 1, b);
       }
    }
 
-   // iterate through every word
-   for (int i = 0; i < split.size(); i++)
-   {
-      nextWord = split.at(i);
+   std::vector<std::string> result;
+   std::string tmp_line;
 
-      if (tmpLine.size() + nextWord.length() + 1 < allowedCharsPerLine)
+   // iterate through every word
+   for (size_t i = 0; i < split.size(); i++)
+   {
+      const std::string& next_word = split[i];
+
+      if (static_cast<int>(tmp_line.size() + next_word.size() + 1) < allowed_chars_per_line)
       {
-         tmpLine.append(" ");
-         tmpLine.append(nextWord);
+         tmp_line.append(" ");
+         tmp_line.append(next_word);
       }
       else
       {
-         result.push_back(tmpLine.trimmed());
-         tmpLine = nextWord;
+         result.push_back(StringUtils::trim(tmp_line));
+         tmp_line = next_word;
       }
    }
 
-   if (!tmpLine.isEmpty())
-      result.push_back(tmpLine.trimmed());
+   if (!tmp_line.empty())
+   {
+      result.push_back(StringUtils::trim(tmp_line));
+   }
 
    return result;
 }

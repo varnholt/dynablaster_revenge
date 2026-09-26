@@ -69,7 +69,11 @@ void GameMessagingDrawable::messageReceived(int /*senderId*/, const QString& tex
 
       if (typingFinished)
       {
-         std::vector<QString> lines = WordWrap::wrap(text, CLIENT_MESSAGE_TEXT_MAXIMUM);
+         std::vector<QString> lines;
+         for (const auto& lineStd : WordWrap::wrap(text.toStdString(), CLIENT_MESSAGE_TEXT_MAXIMUM))
+         {
+            lines.push_back(QString::fromStdString(lineStd));
+         }
 
          // prepend nick to other lines if available
          QStringList processedLines;
