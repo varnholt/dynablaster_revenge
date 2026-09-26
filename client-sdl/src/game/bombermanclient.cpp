@@ -76,7 +76,6 @@ BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
       mBombReleased(true),
       mSocket(nullptr),
       mAddress(nullptr),
-      mPollTimer(nullptr),
       mBlockSize(0),
       mId(-1),
       mGameId(-1),
@@ -108,11 +107,8 @@ BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
  */
 void BombermanClient::initialize()
 {
-   mPollTimer = new QTimer(this);
-
-   connect(mPollTimer, SIGNAL(timeout()), this, SLOT(poll()));
-
-   mPollTimer->start(16);
+   mPollTimer.timeoutSignal.connect([this]() { poll(); });
+   mPollTimer.start(16);
 
    // interpolation
    connect(
@@ -2118,7 +2114,7 @@ void BombermanClient::host()
       if (mServer->isListening())
       {
          // Server and BombermanClient are both poll-based now, so there's no reason left to
-         // run the embedded server on its own thread - it ticks via its own QTimer on this
+         // run the embedded server on its own thread - it ticks via its own Timer on this
          // (the main) thread, same as before, just without the moveToThread() hop.
          mServer->startPolling();
 

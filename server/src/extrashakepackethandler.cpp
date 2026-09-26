@@ -2,7 +2,6 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QTimer>
 
 // server
 #include "game.h"
@@ -18,24 +17,17 @@
 ExtraShakePacketHandler::ExtraShakePacketHandler(QObject *parent) :
     QObject(parent)
 {
-   mCheckTimer = new QTimer(this);
-   mCheckTimer->setInterval(SERVER_SHAKE_CHECK_INTERVAL);
-
-   connect(
-      mCheckTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(check())
-   );
+   mCheckTimer.setInterval(SERVER_SHAKE_CHECK_INTERVAL);
+   mCheckTimer.timeoutSignal.connect([this]() { check(); });
 }
 
 
 void ExtraShakePacketHandler::setEnabled(bool enabled)
 {
    if (enabled)
-      mCheckTimer->start();
+      mCheckTimer.start();
    else
-      mCheckTimer->stop();
+      mCheckTimer.stop();
 }
 
 

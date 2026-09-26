@@ -23,7 +23,7 @@ BombMapItem::BombMapItem(int playerId, int flames, int id, int x, int y)
       mShadowedItem(0),
       mIgniterId(-1)
 {
-   connect(&mTimer, SIGNAL(timeout()), this, SLOT(explodeActive()));
+   mTimer.timeoutSignal.connect([this]() { explodeActive(); });
 
    mTimer.start(getTickTime());
 }
@@ -96,8 +96,17 @@ void BombMapItem::kick()
       // fewer-args-fills-defaults connect() behavior - replicate the same defaults explicitly.
       mAnimation->stoppedSignal.connect([this]() { kickAnimationSignal(Constants::DirectionUnknown, 0.0f); });
 
-      // notify animation when bomb exploded
-      connect(&mTimer, SIGNAL(timeout()), mAnimation, SLOT(readyToExplode()));
+      // notify animation when bomb exploded - reads mAnimation live (not a captured snapshot)
+      // so QPointer's auto-null still protects against mAnimation being destroyed later
+      mTimer.timeoutSignal.connect(
+         [this]()
+         {
+            if (mAnimation)
+            {
+               mAnimation->readyToExplode();
+            }
+         }
+      );
 
       // and notify map item back when animation reached the center of a field
       mAnimation->explodeSignal.connect([this]() { explodeDelayed(); });

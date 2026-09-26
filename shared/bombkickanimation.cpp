@@ -11,15 +11,14 @@
 #include <math.h>
 #include <cstdint>
 
-// Qt
-#include <QTimer>
+#include <algorithm>
 
 // defines
 #define BOMB_MOVE_SPEED 3.0f
 #define BOMB_EXPLODE_EPSILON 0.2f
 
 // static
-QList<BombKickAnimation*> BombKickAnimation::sAnimations;
+std::vector<BombKickAnimation*> BombKickAnimation::sAnimations;
 
 //-----------------------------------------------------------------------------
 /*!
@@ -27,7 +26,6 @@ QList<BombKickAnimation*> BombKickAnimation::sAnimations;
 */
 BombKickAnimation::BombKickAnimation(QObject* parent)
     : QObject(parent),
-      mTimer(nullptr),
       mFactor(BOMB_MOVE_SPEED),
       mDirection(Constants::DirectionUnknown),
       mX(0.0f),
@@ -37,13 +35,8 @@ BombKickAnimation::BombKickAnimation(QObject* parent)
       mBombMapItem(nullptr),
       mColliding(false)
 {
-   mTimer = new QTimer(this);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-   mTimer->setTimerType(Qt::PreciseTimer);
-#endif
-   mTimer->setInterval(1000 / SERVER_HEARTBEAT_IN_HZ);
-
-   connect(mTimer, SIGNAL(timeout()), this, SLOT(updatePosition()));
+   mTimer.setInterval(1000 / SERVER_HEARTBEAT_IN_HZ);
+   mTimer.timeoutSignal.connect([this]() { updatePosition(); });
 
    addAnimation(this);
 }
@@ -76,7 +69,7 @@ void BombKickAnimation::addDestroyCallback(std::function<void()> callback)
 void BombKickAnimation::deleteAll()
 {
    while (!sAnimations.empty())
-      delete sAnimations.first();
+      delete sAnimations.front();
 }
 
 //-----------------------------------------------------------------------------
@@ -88,8 +81,8 @@ void BombKickAnimation::start()
 
    unmapBomb();
 
-   if (!mTimer->isActive())
-      mTimer->start();
+   if (!mTimer.isActive())
+      mTimer.start();
 
    startedSignal(getDirection(), getStepSize());
 }
@@ -378,7 +371,7 @@ void BombKickAnimation::updatePosition()
 
       // no more updates required, just wait until this
       // object instance is deleted when bomb explodes
-      mTimer->stop();
+      mTimer.stop();
    }
 }
 
@@ -547,7 +540,7 @@ void BombKickAnimation::addAnimation(BombKickAnimation* animation)
 */
 void BombKickAnimation::removeAnimation(BombKickAnimation* animation)
 {
-   sAnimations.removeOne(animation);
+   sAnimations.erase(std::remove(sAnimations.begin(), sAnimations.end(), animation), sAnimations.end());
 }
 
 //-----------------------------------------------------------------------------

@@ -29,6 +29,11 @@ void Timer::setInterval(int milliseconds)
    _interval = std::chrono::milliseconds(milliseconds);
 }
 
+int Timer::interval() const
+{
+   return static_cast<int>(_interval.count());
+}
+
 void Timer::start()
 {
    _start_time = std::chrono::steady_clock::now();

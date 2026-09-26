@@ -20,6 +20,7 @@ public:
    Timer& operator=(const Timer&) = delete;
 
    void setInterval(int milliseconds);
+   int interval() const;
    void start();
    void start(int milliseconds);
    void stop();

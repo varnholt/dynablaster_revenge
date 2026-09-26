@@ -9,8 +9,6 @@
 
 #include <map>
 
-class QTimer;
-
 class ImagePool : public QObject, public Singleton<ImagePool>
 {
    Q_OBJECT
@@ -33,7 +31,6 @@ private:
    QDateTime getFileDate(const QFileInfoList& list, const QString& filename) const;
 
    std::map<QString, Image*> mPool;
-   QTimer* mRefresh;
 };
 
 #endif

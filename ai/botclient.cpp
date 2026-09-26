@@ -84,7 +84,6 @@ BotClient::BotClient(QObject* parent)
     : QObject(parent),
       mSocket(0),
       mAddress(nullptr),
-      mPollTimer(nullptr),
       mConnected(false),
       mBlockSize(0),
       mBot(0),
@@ -121,11 +120,8 @@ BotClient::~BotClient()
  */
 void BotClient::initialize()
 {
-   mPollTimer = new QTimer(this);
-
-   connect(mPollTimer, SIGNAL(timeout()), this, SLOT(poll()));
-
-   mPollTimer->start(16);
+   mPollTimer.timeoutSignal.connect([this]() { poll(); });
+   mPollTimer.start(16);
 
    // init auto join/start
    initializeAutoJoinStart();

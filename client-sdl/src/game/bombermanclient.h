@@ -4,11 +4,11 @@
 // qt
 #include <QColor>
 #include <QObject>
-#include <QTimer>
 
 // shared
 #include "packetstreambuffer.h"
 #include "signal.h"
+#include "timer.h"
 
 #include <map>
 #include <unordered_map>
@@ -397,7 +397,7 @@ private:
    NET_Address* mAddress;
 
    //! drives poll() once per tick
-   QTimer* mPollTimer;
+   Timer mPollTimer;
 
    //! incoming byte buffer
    PacketStreamBuffer mBuffer;

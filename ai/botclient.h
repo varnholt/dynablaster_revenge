@@ -8,12 +8,12 @@
 #include <QObject>
 #include <QQueue>
 #include <QTime>
-#include <QTimer>
 
 // shared
 #include "gameinformation.h"
 #include "packetstreambuffer.h"
 #include "serverconfiguration.h"
+#include "timer.h"
 
 #include <vector>
 
@@ -298,7 +298,7 @@ private:
    NET_Address* mAddress;
 
    //! drives poll() once per tick
-   QTimer* mPollTimer;
+   Timer mPollTimer;
 
    //! incoming byte buffer
    PacketStreamBuffer mBuffer;

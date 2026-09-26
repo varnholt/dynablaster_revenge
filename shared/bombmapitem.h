@@ -8,7 +8,9 @@
 // Qt
 #include <QObject>
 #include <QPointer>
-#include <QTimer>
+
+// shared
+#include "timer.h"
 
 // forward declarations
 class BombKickAnimation;
@@ -114,7 +116,7 @@ protected slots:
 
 protected:
    //! bomb's timer
-   QTimer mTimer;
+   Timer mTimer;
 
    //! bomb owner
    int8_t mPlayerId;

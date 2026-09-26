@@ -3,7 +3,6 @@
 
 // Qt
 #include <QObject>
-#include <QTimer>
 
 // ai
 #include "botoption.h"
@@ -13,6 +12,7 @@
 #include "point.h"
 #include "serverconfiguration.h"
 #include "signal.h"
+#include "timer.h"
 
 #include <deque>
 
@@ -211,7 +211,7 @@ protected:
    int mId;
 
    //! ticks tick() at the same ~100ms cadence the old QThread loop's msleep(100) had
-   QTimer* mTickTimer;
+   Timer mTickTimer;
 
    //! current walk direction
    int mBotKeysPressed;

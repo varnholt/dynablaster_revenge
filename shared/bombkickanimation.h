@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "point.h"
 #include "signal.h"
+#include "timer.h"
 
 #include <functional>
 #include <unordered_map>
@@ -17,7 +18,6 @@
 class BombMapItem;
 class Map;
 class MapItem;
-class QTimer;
 
 class BombKickAnimation : public QObject
 {
@@ -150,7 +150,7 @@ protected:
    void updateCollisions();
 
    //! animation update timer
-   QTimer* mTimer;
+   Timer mTimer;
 
    //! intensity factor
    float mFactor;
@@ -182,7 +182,7 @@ protected:
    // inter-bomb-collisions
 
    //! list of kick animations
-   static QList<BombKickAnimation*> sAnimations;
+   static std::vector<BombKickAnimation*> sAnimations;
 
    //! bomb is colliding with another bomb
    bool mColliding;

@@ -35,7 +35,6 @@
 #include <QCoreApplication>
 #include <QKeyEvent>
 #include <QObject>
-#include <QTimer>
 
 #include <SDL3/SDL.h>
 #include <SDL3_net/SDL_net.h>
@@ -167,11 +166,10 @@ int main(int argc, char** argv)
       return 1;
    }
 
-   // Server (server/src/server.h, copied in as-is from the old client's embedded server - see
-   // client.pro's own ../server/src SOURCES) needs a running Qt event loop for its QTimer-driven
-   // poll() to ever fire - there was no QCoreApplication anywhere in this port before now.
-   // Constructed once, pumped once per frame below (processEvents()) rather than handing control
-   // to qApp->exec(), since SDL already owns the main loop here.
+   // still needed for deleteLater() and any other lingering Qt-Core internals (Server's and
+   // BombermanClient's own poll() are now Timer-driven, see Timer::update() below). Constructed
+   // once, pumped once per frame below (processEvents()) rather than handing control to
+   // qApp->exec(), since SDL already owns the main loop here.
    QCoreApplication qtApp(argc, argv);
 
    // BombermanClient (client/src/game/bombermanclient.cpp, copied in as-is - see project memory,
@@ -375,7 +373,7 @@ int main(int argc, char** argv)
    // switching to the menu once its own fade-out sequence finishes. showMenu() above (early
    // leave/ESC, no valid game id) stays an immediate switch - matches GameWinDrawable's own
    // isGameIdValid() gate, which skips showing itself in exactly that case.
-   bombermanClient.gameStoppedSignal.connect([&]() { QTimer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain); });
+   bombermanClient.gameStoppedSignal.connect([&]() { Timer::singleShot(SHOW_WINNER_TIME_SUM, showMenuAgain); });
    // pageChangeRequest is a protected slot (see the navigator wiring above) - invokeMethod goes
    // through Qt's meta-object system, bypassing C++ access control the same way the string-based
    // SIGNAL/SLOT connects elsewhere in this file already do.

@@ -3,7 +3,9 @@
 
 // Qt
 #include <QObject>
-#include <QTimer>
+
+// shared
+#include "timer.h"
 
 // forward declarations
 class Map;
@@ -63,7 +65,7 @@ protected:
    bool mEnabled;
 
    //! spawn timer
-   QTimer mSpawnTimer;
+   Timer mSpawnTimer;
 
    //! game's map
    Map* mMap;

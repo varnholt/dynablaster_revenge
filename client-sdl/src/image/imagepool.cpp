@@ -1,13 +1,8 @@
 #include "imagepool.h"
 #include <QDir>
-#include <QTimer>
 
-ImagePool::ImagePool() : mRefresh(0)
+ImagePool::ImagePool()
 {
-   mRefresh = new QTimer(this);
-   //   connect(mRefresh, SIGNAL(timeout()), this, SLOT(refresh()));
-   //   mRefresh->setInterval(1000);
-   //   mRefresh->start();
 }
 
 ImagePool::~ImagePool()

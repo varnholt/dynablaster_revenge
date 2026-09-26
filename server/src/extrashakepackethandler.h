@@ -3,9 +3,11 @@
 
 #include <QObject>
 
+// shared
+#include "timer.h"
+
 // forward declarations
 class Game;
-class QTimer;
 
 
 class ExtraShakePacketHandler : public QObject
@@ -35,7 +37,7 @@ protected:
 
    Game* mGame;
 
-   QTimer* mCheckTimer;
+   Timer mCheckTimer;
 };
 
 #endif // SHAKEPACKETHANDLER_H

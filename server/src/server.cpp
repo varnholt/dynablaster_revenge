@@ -42,7 +42,7 @@ Server* Server::sInstance = nullptr;
 /*!
    constructor
 */
-Server::Server() : mNetServer(nullptr), mPollTimer(nullptr), mPlayerId(0)
+Server::Server() : mNetServer(nullptr), mPlayerId(0)
 {
    sInstance = this;
 
@@ -66,9 +66,7 @@ Server::Server() : mNetServer(nullptr), mPollTimer(nullptr), mPlayerId(0)
 
    // check for incoming connections and incoming data once per tick - not started here,
    // see startPolling()
-   mPollTimer = new QTimer(this);
-
-   connect(mPollTimer, SIGNAL(timeout()), this, SLOT(poll()));
+   mPollTimer.timeoutSignal.connect([this]() { poll(); });
 }
 
 //-----------------------------------------------------------------------------
@@ -77,7 +75,7 @@ Server::Server() : mNetServer(nullptr), mPollTimer(nullptr), mPlayerId(0)
 */
 void Server::startPolling()
 {
-   mPollTimer->start(16);
+   mPollTimer.start(16);
 }
 
 //-----------------------------------------------------------------------------

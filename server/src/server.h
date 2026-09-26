@@ -2,7 +2,6 @@
 #define SERVER_H
 
 #include <QObject>
-#include <QTimer>
 #include <QMap>
 #include <QList>
 
@@ -11,6 +10,7 @@
 #include "packet.h"
 #include "packetstreambuffer.h"
 #include "serverconfiguration.h"
+#include "timer.h"
 
 // forward declarations
 class Game;
@@ -46,9 +46,7 @@ public:
 
 public slots:
 
-   //! start the poll timer - call once this object is running on its final thread
-   //! (BombermanClient::host() moves it to a worker thread after construction; a QTimer
-   //! started before that move keeps ticking against the wrong thread's event dispatcher)
+   //! start the poll timer
    void startPolling();
 
 
@@ -115,7 +113,7 @@ private:
    NET_Server* mNetServer;
 
    //! drives poll() once per tick
-   QTimer* mPollTimer;
+   Timer mPollTimer;
 
    //! per-connection incoming byte buffer
    QMap<NET_StreamSocket*, PacketStreamBuffer*> mSocketBuffers;

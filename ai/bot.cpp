@@ -29,7 +29,6 @@ Bot::Bot(QObject* parent)
       mXField(0.0f),
       mYField(0.0f),
       mId(-1),
-      mTickTimer(nullptr),
       mBotKeysPressed(0),
       mDecisionRequired(false),
       mActionRequired(false),
@@ -51,11 +50,10 @@ Bot::~Bot()
  */
 void Bot::startTicking()
 {
-   if (!mTickTimer)
+   if (!mTickTimer.isActive())
    {
-      mTickTimer = new QTimer(this);
-      connect(mTickTimer, &QTimer::timeout, this, &Bot::tick);
-      mTickTimer->start(100);
+      mTickTimer.timeoutSignal.connect([this]() { tick(); });
+      mTickTimer.start(100);
    }
 }
 
