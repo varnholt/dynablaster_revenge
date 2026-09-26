@@ -1,5 +1,9 @@
 #include "botmap.h"
 
+#include <format>
+#include <string>
+#include <vector>
+
 // Qt
 #include <QRandomGenerator>
 #include <QStringList>
@@ -263,7 +267,7 @@ void BotMap::createMapItem(MapItem *item)
    if (item->getType() == MapItem::Extra)
    {
       ExtraMapItem* extra = (ExtraMapItem*)item;
-      QString extraName;
+      std::string extraName;
 
       switch (extra->getExtraType())
       {
@@ -361,7 +365,7 @@ void BotMap::resetTraversedMap()
 */
 void BotMap::debugDirections(const QList<Constants::Direction> &list)
 {
-   QString line;
+   std::string line;
 
    foreach (Constants::Direction dir, list)
    {
@@ -384,7 +388,7 @@ void BotMap::debugDirections(const QList<Constants::Direction> &list)
       }
    }
 
-   qDebug("%s", qPrintable(line));
+   qDebug("%s", line.c_str());
 }
 
 
@@ -1015,11 +1019,11 @@ int BotMap::getExtraStoneCountAroundPoint(
 */
 void BotMap::debugTraversedMatrix()
 {
-   QStringList lines;
+   std::vector<std::string> lines;
 
    for (int yi = 0; yi < getHeight(); yi++)
    {
-      QString line = QString("%1 ").arg(QString::number(yi, 16));
+      std::string line = std::format("{:x} ", yi);
 
       for (int xi = 0; xi < getWidth(); xi++)
       {
@@ -1028,11 +1032,19 @@ void BotMap::debugTraversedMatrix()
          );
       }
 
-      lines << line;
+      lines.push_back(line);
+   }
+
+   std::string joined;
+   for (const auto& line : lines)
+   {
+      if (!joined.empty())
+         joined += '\n';
+      joined += line;
    }
 
    qDebug(" 0123456789abc");
-   qDebug("%s\n", qPrintable(lines.join("\n")));
+   qDebug("%s\n", joined.c_str());
 }
 
 
@@ -1189,13 +1201,13 @@ bool BotMap::isPositionBlocked(int x, int y) const
 */
 void BotMap::debugMapItems()
 {
-   QStringList lines;
+   std::vector<std::string> lines;
    MapItem* item = 0;
-   QChar c;
+   char c = ' ';
 
    for (int yi = 0; yi < getHeight(); yi++)
    {
-      QString line;
+      std::string line;
 
       for (int xi = 0; xi < getWidth(); xi++)
       {
@@ -1224,17 +1236,23 @@ void BotMap::debugMapItems()
             }
          }
 
-         line.append(
-            QString("  %1|").arg(item ? c : ' ')
-         );
+         line += std::format("  {}|", item ? c : ' ');
       }
 
-      line.append(QString("%1 ").arg(QString::number(yi)));
+      line += std::format("{} ", yi);
 
-      lines << line;
+      lines.push_back(line);
    }
 
-   qDebug("%s", qPrintable(lines.join("\n")));
+   std::string joined;
+   for (const auto& l : lines)
+   {
+      if (!joined.empty())
+         joined += '\n';
+      joined += l;
+   }
+
+   qDebug("%s", joined.c_str());
    qDebug("  0|  1|  2|  3|  4|  5|  6|  7|  8|  9| 10| 11| 12|\n");
 }
 

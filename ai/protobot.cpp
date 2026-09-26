@@ -26,6 +26,9 @@
 // math
 #include <math.h>
 
+#include <format>
+#include <string>
+
 // Qt
 #include <QRandomGenerator>
 #include <QStringList>
@@ -1138,10 +1141,10 @@ void ProtoBot::debugScores()
 
    for (int yi = 0; yi < mBotMap->getHeight(); yi++)
    {
-      QString line;
+      std::string line;
       for (int xi = 0; xi < mBotMap->getWidth(); xi++)
       {
-         line.append(QString("%1").arg(getScore(xi, yi), 3));
+         line += std::format("{:>3}", getScore(xi, yi));
 
          // put >< around current field
          if (yi == getYField() && xi + 1 == getXField())
@@ -1152,7 +1155,7 @@ void ProtoBot::debugScores()
             line.append("|");
       }
 
-      qDebug("%s", qPrintable(line));
+      qDebug("%s", line.c_str());
    }
 
    qDebug("ProtoBot::debugScores(): end");

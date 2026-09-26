@@ -7,8 +7,9 @@
 // shared
 #include "mapitem.h"
 
-// Qt
-#include <QStringList>
+#include <format>
+#include <string>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 /*!
@@ -232,13 +233,13 @@ void AStarMap::debugPath(const std::vector<AStarNode*>& path)
    for (AStarNode* node : path)
       map[node->getY() * mWidth + node->getX()] = node;
 
-   QStringList lines;
+   std::vector<std::string> lines;
    MapItem* item = 0;
-   QChar c;
+   char c = ' ';
 
    for (int yi = 0; yi < getHeight(); yi++)
    {
-      QString line = QString("%1| ").arg(QString::number(yi, 16));
+      std::string line = std::format("{:x}| ", yi);
 
       for (int xi = 0; xi < getWidth(); xi++)
       {
@@ -278,15 +279,23 @@ void AStarMap::debugPath(const std::vector<AStarNode*>& path)
             }
          }
 
-         line.append(c);
+         line.push_back(c);
       }
 
-      lines << line;
+      lines.push_back(line);
+   }
+
+   std::string joined;
+   for (const auto& line : lines)
+   {
+      if (!joined.empty())
+         joined += '\n';
+      joined += line;
    }
 
    qDebug(" | 012345678901234567890123456789");
    qDebug(" +---------------");
-   qDebug("%s", qPrintable(lines.join("\n")));
+   qDebug("%s", joined.c_str());
    qDebug(" +---------------");
    qDebug(" | 012345678901234567890123456789");
 

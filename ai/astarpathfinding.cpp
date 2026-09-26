@@ -1,6 +1,9 @@
 // header
 #include "astarpathfinding.h"
 
+#include <format>
+#include <string>
+
 //-----------------------------------------------------------------------------
 /*!
  */
@@ -169,18 +172,16 @@ void AStarPathFinding::debugPath()
 */
 void AStarPathFinding::debugPathShort()
 {
-   QString pathString;
+   std::string pathString;
 
    for (AStarNode* node : mPath)
    {
-      QString point = QString("=> (%1; %2) ").arg(node->getX()).arg(node->getY());
-
-      pathString.append(point);
+      pathString += std::format("=> ({}; {}) ", node->getX(), node->getY());
    }
 
-   if (!pathString.isEmpty())
+   if (!pathString.empty())
    {
-      qDebug("AStarMap::debugPathSimplified: %s", qPrintable(pathString));
+      qDebug("AStarMap::debugPathSimplified: %s", pathString.c_str());
    }
    else
    {

@@ -1,11 +1,11 @@
 #ifndef PROTOBOTINSULTS_H
 #define PROTOBOTINSULTS_H
 
+#include <string>
+#include <vector>
+
 // Qt
 #include <QObject>
-#include <QString>
-
-#include <vector>
 
 class ProtoBotInsults : public QObject
 {
@@ -17,7 +17,7 @@ public:
    
 signals:
 
-   void sendMessage(const QString&);
+   void sendMessage(const std::string&);
 
    
 protected slots:
@@ -27,7 +27,7 @@ protected slots:
 
 protected:
 
-   std::vector<QString> mInsults;
+   std::vector<std::string> mInsults;
    
 };
 
