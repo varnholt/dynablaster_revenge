@@ -1,7 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <QElapsedTimer>
 #include <QList>
 #include <QMap>
 #include <QObject>
@@ -12,6 +11,7 @@
 // shared
 #include "constants.h"
 #include "creategamedata.h"
+#include "elapsedtimer.h"
 #include "gameinformation.h"
 #include "gameround.h"
 #include "packet.h"
@@ -398,7 +398,7 @@ private:
    Timer mGameTimeUpdateTimer;
 
    //! game time
-   QElapsedTimer mGameTime;
+   ElapsedTimer mGameTime;
 
    //! game duration
    int mDuration;
@@ -413,7 +413,7 @@ private:
    Timer mPreparationTimer;
 
    //! prepration time
-   QElapsedTimer mPreparationTime;
+   ElapsedTimer mPreparationTime;
 
    //! preparation counter
    int mPreparationCounter;
@@ -434,7 +434,7 @@ private:
    int mGamesPlayed;
 
    //! game synchronization time
-   QElapsedTimer mSynchronizationTime;
+   ElapsedTimer mSynchronizationTime;
 
    //! synchronization is active or not
    bool mSynchronizationActive;

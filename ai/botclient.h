@@ -2,7 +2,6 @@
 #define BOTCLIENT_H
 
 // Qt
-#include <QElapsedTimer>
 #include <QMap>
 #include <QMutex>
 #include <QObject>
@@ -10,6 +9,7 @@
 #include <QTime>
 
 // shared
+#include "elapsedtimer.h"
 #include "gameinformation.h"
 #include "packetstreambuffer.h"
 #include "serverconfiguration.h"
@@ -358,7 +358,7 @@ private:
    ServerConfiguration mServerConfiguration;
 
    //! time elapsed since last bomb
-   QElapsedTimer mBombTime;
+   ElapsedTimer mBombTime;
 
    //! walk counter
    int mWalkCount;

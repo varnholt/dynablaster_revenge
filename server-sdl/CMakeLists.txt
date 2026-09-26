@@ -61,6 +61,8 @@ set(DYNABLASTER_SHARED_SOURCES
     ../shared/creategameresponsepacket.h
     ../shared/detonationpacket.cpp
     ../shared/detonationpacket.h
+    ../shared/elapsedtimer.cpp
+    ../shared/elapsedtimer.h
     ../shared/errorpacket.cpp
     ../shared/errorpacket.h
     ../shared/extramapitem.cpp

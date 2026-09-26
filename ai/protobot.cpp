@@ -27,7 +27,6 @@
 #include <math.h>
 
 // Qt
-#include <QElapsedTimer>
 #include <QRandomGenerator>
 #include <QStringList>
 #include <QTime>
