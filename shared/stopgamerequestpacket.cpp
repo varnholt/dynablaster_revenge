@@ -2,11 +2,9 @@
 #include "stopgamerequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "StopGameRequest"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -14,26 +12,19 @@
 
    \param name game's name
 */
-StopGameRequestPacket::StopGameRequestPacket(
-   int id
-)
- : Packet(Packet::STOPGAMEREQUEST),
-   mId(id)
+StopGameRequestPacket::StopGameRequestPacket(int id) : Packet(Packet::STOPGAMEREQUEST), mId(id)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-StopGameRequestPacket::StopGameRequestPacket()
-   : Packet(Packet::STOPGAMEREQUEST)
+StopGameRequestPacket::StopGameRequestPacket() : Packet(Packet::STOPGAMEREQUEST)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -42,7 +33,6 @@ StopGameRequestPacket::StopGameRequestPacket()
 StopGameRequestPacket::~StopGameRequestPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -53,28 +43,25 @@ int StopGameRequestPacket::getId()
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void StopGameRequestPacket::enqueue(QDataStream & out)
+void StopGameRequestPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void StopGameRequestPacket::dequeue(QDataStream & in)
+void StopGameRequestPacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -83,10 +70,5 @@ void StopGameRequestPacket::dequeue(QDataStream & in)
 void StopGameRequestPacket::debug()
 {
    // debug output login response
-   qDebug(
-      "StopGameRequestPacket:debug: id: %d",
-      mId
-   );
+   qDebug("StopGameRequestPacket:debug: id: %d", mId);
 }
-
-

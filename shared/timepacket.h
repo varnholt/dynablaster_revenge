@@ -7,34 +7,30 @@
 // constants
 #include "constants.h"
 
-
 class TimePacket : public Packet
 {
-   public:
+public:
+   //! read constructor
+   TimePacket();
 
-      //! read constructor
-      TimePacket();
+   //! write constructor
+   TimePacket(int timeLeft);
 
-      //! write constructor
-      TimePacket(int timeLeft);
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for elapsed time
+   int getTimeLeft() const;
 
-     //! getter for elapsed time
-     int getTimeLeft() const;
-
-
-   private:
-
-      //! elapsed time in ms
-      int32_t mTimeLeft;
+private:
+   //! elapsed time in ms
+   int32_t mTimeLeft;
 };
 
-#endif // TIMEPACKET_H
+#endif  // TIMEPACKET_H

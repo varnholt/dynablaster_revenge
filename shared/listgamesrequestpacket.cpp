@@ -2,21 +2,17 @@
 #include "listgamesrequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "ListGameRequest"
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-ListGamesRequestPacket::ListGamesRequestPacket()
-   : Packet(Packet::LISTGAMESREQUEST)
+ */
+ListGamesRequestPacket::ListGamesRequestPacket() : Packet(Packet::LISTGAMESREQUEST)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -26,24 +22,21 @@ ListGamesRequestPacket::~ListGamesRequestPacket()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void ListGamesRequestPacket::enqueue(QDataStream & /*out*/)
+void ListGamesRequestPacket::enqueue(BinaryWriter& /*out*/)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void ListGamesRequestPacket::dequeue(QDataStream & /*in*/)
+void ListGamesRequestPacket::dequeue(BinaryReader& /*in*/)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -52,9 +45,5 @@ void ListGamesRequestPacket::dequeue(QDataStream & /*in*/)
 void ListGamesRequestPacket::debug()
 {
    // debug output login request
-   qDebug(
-      "ListGamesRequestPacket:debug: no members"
-   );
+   qDebug("ListGamesRequestPacket:debug: no members");
 }
-
-

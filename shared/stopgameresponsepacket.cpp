@@ -2,11 +2,9 @@
 #include "stopgameresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "StopGameResponse"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -14,30 +12,19 @@
 
    \param name game's name
 */
-StopGameResponsePacket::StopGameResponsePacket(
-   int id,
-   bool finished
-)
- : Packet(Packet::STOPGAMERESPONSE),
-   mId(id),
-   mFinished(finished)
+StopGameResponsePacket::StopGameResponsePacket(int id, bool finished) : Packet(Packet::STOPGAMERESPONSE), mId(id), mFinished(finished)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-StopGameResponsePacket::StopGameResponsePacket()
-   : Packet(Packet::STOPGAMERESPONSE),
-     mId(-1),
-     mFinished(false)
+StopGameResponsePacket::StopGameResponsePacket() : Packet(Packet::STOPGAMERESPONSE), mId(-1), mFinished(false)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -46,7 +33,6 @@ StopGameResponsePacket::StopGameResponsePacket()
 StopGameResponsePacket::~StopGameResponsePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -57,7 +43,6 @@ int StopGameResponsePacket::getId()
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return stopped flag
@@ -67,28 +52,25 @@ bool StopGameResponsePacket::isFinished()
    return mFinished;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void StopGameResponsePacket::enqueue(QDataStream & out)
+void StopGameResponsePacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mId << mFinished;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void StopGameResponsePacket::dequeue(QDataStream & in)
+void StopGameResponsePacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mId >> mFinished;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -97,11 +79,5 @@ void StopGameResponsePacket::dequeue(QDataStream & in)
 void StopGameResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "StopGameResponsePacket:debug: id: %d, all rounds finished: %d",
-      mId,
-      mFinished
-   );
+   qDebug("StopGameResponsePacket:debug: id: %d, all rounds finished: %d", mId, mFinished);
 }
-
-

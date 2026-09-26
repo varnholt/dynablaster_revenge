@@ -2,7 +2,6 @@
 #include "mapitemcreatedpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "MapItemCreated"
@@ -11,29 +10,20 @@
 /*!
    \param item mapitem
 */
-MapItemCreatedPacket::MapItemCreatedPacket(
-   MapItem *item,
-   int8_t creator
-)
-   : MapItemPacket(Packet::MAPITEMCREATED, item),
-     mAppearance(item->getAppearance()),
-     mPlayerId(creator)
+MapItemCreatedPacket::MapItemCreatedPacket(MapItem* item, int8_t creator)
+    : MapItemPacket(Packet::MAPITEMCREATED, item), mAppearance(item->getAppearance()), mPlayerId(creator)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-MapItemCreatedPacket::MapItemCreatedPacket()
-   : MapItemPacket(Packet::MAPITEMCREATED),
-     mAppearance(-1)
+MapItemCreatedPacket::MapItemCreatedPacket() : MapItemPacket(Packet::MAPITEMCREATED), mAppearance(-1)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -44,7 +34,6 @@ int32_t MapItemCreatedPacket::getAppearance() const
    return mAppearance;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return mapitem's creator
@@ -54,26 +43,24 @@ int8_t MapItemCreatedPacket::getPlayerId() const
    return mPlayerId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void MapItemCreatedPacket::enqueue(QDataStream & out)
+void MapItemCreatedPacket::enqueue(BinaryWriter& out)
 {
-	MapItemPacket::enqueue(out);
+   MapItemPacket::enqueue(out);
 
    // write members
    out << mAppearance;
    out << mPlayerId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void MapItemCreatedPacket::dequeue(QDataStream & in)
+void MapItemCreatedPacket::dequeue(BinaryReader& in)
 {
    MapItemPacket::dequeue(in);
 
@@ -82,7 +69,6 @@ void MapItemCreatedPacket::dequeue(QDataStream & in)
    in >> mPlayerId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    debug output of members
@@ -90,12 +76,5 @@ void MapItemCreatedPacket::dequeue(QDataStream & in)
 void MapItemCreatedPacket::debug()
 {
    // output packet members
-   qDebug(
-      "MapItemCreatedPacket: x: %d, y: %d, type: %d, appearance: %d",
-      getX(),
-      getY(),
-      getType(),
-      mAppearance
-   );
+   qDebug("MapItemCreatedPacket: x: %d, y: %d, type: %d, appearance: %d", getX(), getY(), getType(), mAppearance);
 }
-

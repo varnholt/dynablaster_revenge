@@ -3,39 +3,25 @@
 #include "mapitem.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "MapItem"
 
-
-MapItemPacket::MapItemPacket(Packet::TYPE type)
-   : Packet(type),
-     mX(0),
-     mY(0),
-     mUniqueId(-1),
-     mItemType(MapItem::Unknown)
+MapItemPacket::MapItemPacket(Packet::TYPE type) : Packet(type), mX(0), mY(0), mUniqueId(-1), mItemType(MapItem::Unknown)
 {
    mPacketName = PACKETNAME;
 }
 
-
-MapItemPacket::MapItemPacket(Packet::TYPE type, MapItem *item)
-   : Packet(type),
-     mX(item->getX()),
-     mY(item->getY()),
-     mUniqueId(item->getUniqueId()),
-     mItemType(item->getType())
+MapItemPacket::MapItemPacket(Packet::TYPE type, MapItem* item)
+    : Packet(type), mX(item->getX()), mY(item->getY()), mUniqueId(item->getUniqueId()), mItemType(item->getType())
 {
    mPacketName = PACKETNAME;
 }
-
 
 int MapItemPacket::getX() const
 {
    return mX;
 }
-
 
 int MapItemPacket::getY() const
 {
@@ -52,7 +38,7 @@ int MapItemPacket::getUniqueId() const
    return mUniqueId;
 }
 
-void MapItemPacket::enqueue(QDataStream & out)
+void MapItemPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << (int)mItemType;
@@ -61,24 +47,17 @@ void MapItemPacket::enqueue(QDataStream & out)
    out << mUniqueId;
 }
 
-
-void MapItemPacket::dequeue(QDataStream & in)
+void MapItemPacket::dequeue(BinaryReader& in)
 {
    // read members
    int32_t itemType = 0;
    in >> itemType;
    mItemType = (MapItem::ItemType)itemType;
 
-   in
-      >> mX
-      >> mY
-      >> mUniqueId;
+   in >> mX >> mY >> mUniqueId;
 }
-
 
 void MapItemPacket::debug()
 {
-   qDebug( "MapItemPacketPacket: x: %d, y: %d", mX, mY );
+   qDebug("MapItemPacketPacket: x: %d, y: %d", mX, mY);
 }
-
-

@@ -7,6 +7,7 @@
 #include "countdownpacket.h"
 #include "creategamerequestpacket.h"
 #include "creategameresponsepacket.h"
+#include "detonationpacket.h"
 #include "errorpacket.h"
 #include "extramapitem.h"
 #include "extramapitemcreatedpacket.h"
@@ -19,29 +20,29 @@
 #include "gamestatemachine.h"
 #include "gamestatspacket.h"
 #include "helpmanager.h"
-#include "keypacket.h"
 #include "joingamerequestpacket.h"
 #include "joingameresponsepacket.h"
+#include "keypacket.h"
 #include "leavegamerequestpacket.h"
 #include "leavegameresponsepacket.h"
 #include "levels/level.h"
 #include "listgamesrequestpacket.h"
 #include "listgamesresponsepacket.h"
-#include "positioninterpolation.h"
-#include "positionpacket.h"
+#include "loginrequestpacket.h"
+#include "loginresponsepacket.h"
 #include "mapitemcreatedpacket.h"
 #include "mapitemdestroyedpacket.h"
 #include "mapitemmovepacket.h"
 #include "mapitemremovedpacket.h"
+#include "math/vector.h"
 #include "messagepacket.h"
-#include "detonationpacket.h"
-#include "loginrequestpacket.h"
-#include "loginresponsepacket.h"
 #include "playerdisease.h"
 #include "playerinfectedpacket.h"
 #include "playerkilledpacket.h"
 #include "playerstats.h"
 #include "playersynchronizepacket.h"
+#include "positioninterpolation.h"
+#include "positionpacket.h"
 #include "soundmanager.h"
 #include "startgamerequestpacket.h"
 #include "startgameresponsepacket.h"
@@ -49,7 +50,6 @@
 #include "stopgameresponsepacket.h"
 #include "timepacket.h"
 #include "tools/stream.h"
-#include "math/vector.h"
 
 // ai
 #include "botfactory.h"
@@ -70,45 +70,34 @@
 // static variables
 BombermanClient* BombermanClient::mInstance = nullptr;
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
-   : mKeysPressed(0),
-     mBombReleased(true),
-     mSocket(nullptr),
-     mAddress(nullptr),
-     mPollTimer(nullptr),
-     mBlockSize(0),
-     mId(-1),
-     mGameId(-1),
-     mDead(true),
-     mConnected(false),
-     mLoginAfterConnect(false),
-     mServer(nullptr),
-     mPositionInterpolation(nullptr),
-     mIngameMessagingActive(false),
-     mMainMenuActive(false),
-     mBotFactory(nullptr)
+    : mKeysPressed(0),
+      mBombReleased(true),
+      mSocket(nullptr),
+      mAddress(nullptr),
+      mPollTimer(nullptr),
+      mBlockSize(0),
+      mId(-1),
+      mGameId(-1),
+      mDead(true),
+      mConnected(false),
+      mLoginAfterConnect(false),
+      mServer(nullptr),
+      mPositionInterpolation(nullptr),
+      mIngameMessagingActive(false),
+      mMainMenuActive(false),
+      mBotFactory(nullptr)
 {
    mInstance = this;
 
    mPositionInterpolation = new PositionInterpolation(this);
 
-   connect(
-      mPositionInterpolation,
-      SIGNAL(bounce()),
-      SoundManager::getInstance(),
-      SLOT(playSoundBombBounce())
-   );
+   connect(mPositionInterpolation, SIGNAL(bounce()), SoundManager::getInstance(), SLOT(playSoundBombBounce()));
 
-   connect(
-      GameStateMachine::getInstance(),
-      SIGNAL(stateChanged()),
-      this,
-      SLOT(gameStateChanged())
-   );
+   connect(GameStateMachine::getInstance(), SIGNAL(stateChanged()), this, SLOT(gameStateChanged()));
 
    mBotFactory = new BotFactory(this);
 
@@ -116,39 +105,32 @@ BombermanClient::BombermanClient(/*const QString& host, const QString& nick*/)
    initializePlayback();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::initialize()
 {
    mPollTimer = new QTimer(this);
 
-   connect(
-      mPollTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(poll())
-   );
+   connect(mPollTimer, SIGNAL(timeout()), this, SLOT(poll()));
 
    mPollTimer->start(16);
 
    // interpolation
    connect(
       this,
-      SIGNAL(moveMapItem(MapItem*,Constants::Direction,float,int,int)),
+      SIGNAL(moveMapItem(MapItem*, Constants::Direction, float, int, int)),
       mPositionInterpolation,
-      SLOT(moveMapItem(MapItem*,Constants::Direction,float,int,int))
+      SLOT(moveMapItem(MapItem*, Constants::Direction, float, int, int))
    );
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 BombermanClient::~BombermanClient()
 {
-   mInstance= nullptr;
+   mInstance = nullptr;
    clearPlayerInfoMap();
 
    if (mServer)
@@ -157,16 +139,14 @@ BombermanClient::~BombermanClient()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return singleton instance of client
 */
-BombermanClient *BombermanClient::getInstance()
+BombermanClient* BombermanClient::getInstance()
 {
    return mInstance;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -177,7 +157,6 @@ QList<GameInformation>* BombermanClient::getGames() const
    return &mGames;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param id game id
@@ -186,7 +165,6 @@ void BombermanClient::setGameId(int id)
 {
    mGameId = id;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -197,7 +175,6 @@ int BombermanClient::getGameId() const
    return mGameId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return \c true if game is valid
@@ -207,12 +184,11 @@ bool BombermanClient::isGameIdValid() const
    return getGameId() != -1;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game information
 */
-GameInformation *BombermanClient::getGameInformation(int id) const
+GameInformation* BombermanClient::getGameInformation(int id) const
 {
    GameInformation* gameInfo = nullptr;
 
@@ -228,7 +204,6 @@ GameInformation *BombermanClient::getGameInformation(int id) const
    return gameInfo;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game information
@@ -238,7 +213,6 @@ GameInformation* BombermanClient::getCurrentGameInformation() const
    return getGameInformation(getGameId());
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param id player id
@@ -247,7 +221,6 @@ void BombermanClient::setPlayerId(int id)
 {
    mId = id;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -275,7 +248,6 @@ bool BombermanClient::isPlayerOwner() const
    return owner;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param playerId player id
@@ -293,12 +265,11 @@ Constants::Color BombermanClient::getColor(int playerId) const
    return color;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to send
 */
-void BombermanClient::send(Packet *packet)
+void BombermanClient::send(Packet* packet)
 {
    packet->serialize();
 
@@ -307,7 +278,6 @@ void BombermanClient::send(Packet *packet)
       NET_WriteToStreamSocket(mSocket, packet->constData(), static_cast<int>(packet->size()));
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -318,20 +288,18 @@ void BombermanClient::setHost(const QString& host)
    mHost = host;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return host name
 */
-const QString &BombermanClient::getHost() const
+const QString& BombermanClient::getHost() const
 {
    return mHost;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::connectToServer()
 {
    mAddress = NET_ResolveHostname(qPrintable(getHost()));
@@ -342,10 +310,9 @@ void BombermanClient::connectToServer()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::clientConnect()
 {
    qDebug("BombermanClient::clientConnect()");
@@ -358,10 +325,9 @@ void BombermanClient::clientConnect()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::clientDisconnect()
 {
    if (isConnected())
@@ -385,15 +351,14 @@ void BombermanClient::clientDisconnect()
 
    qDebug() << QString("disconnected");
 
-   QMap<int,MapItem*>::Iterator it= mMapItems.begin();
-   while (it!= mMapItems.end())
+   QMap<int, MapItem*>::Iterator it = mMapItems.begin();
+   while (it != mMapItems.end())
    {
-      MapItem *item= *it;
-      it= mMapItems.erase(it);
+      MapItem* item = *it;
+      it = mMapItems.erase(it);
       delete item;
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -416,7 +381,6 @@ void BombermanClient::disconnectFromServer()
    clientDisconnect();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
   \param reason low-level failure reason, from SDL_GetError()
@@ -430,36 +394,32 @@ void BombermanClient::reportConnectionError(const char* reason)
       message += QString(" (%1)").arg(reason);
    }
 
-   HelpManager::getInstance()->addMessage(
-      "",
-      message,
-      Constants::HelpSeverityError
-   );
+   HelpManager::getInstance()->addMessage("", message, Constants::HelpSeverityError);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream
    \return true if sufficient data was received
 */
-bool BombermanClient::packetAvailable(QDataStream& in)
+bool BombermanClient::packetAvailable()
 {
    // blocksize not initialized yet
    if (mBlockSize == 0)
    {
       // not enough data to read blocksize?
-      if (mBuffer.bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
-        return false;
+      if (mBuffer.bytesAvailable() < sizeof(uint16_t))
+         return false;
 
-     // read blocksize
-      in >> mBlockSize;
+      // read blocksize
+      BinaryReader sizeReader = mBuffer.reader();
+      sizeReader >> mBlockSize;
+      mBuffer.consume(sizeReader.pos());
    }
 
    // enough data?
    return (mBuffer.bytesAvailable() >= mBlockSize);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -470,7 +430,6 @@ bool BombermanClient::isIngameMessagingActive() const
    return mIngameMessagingActive;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param active ingame messaging active flag
@@ -480,15 +439,13 @@ void BombermanClient::setIngameMessagingActive(bool active)
    mIngameMessagingActive = active;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::toggleIngameMessaging()
 {
    setIngameMessagingActive(!isIngameMessagingActive());
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -499,13 +456,12 @@ MapItem* BombermanClient::getMapItem(int id) const
 {
    MapItem* item = nullptr;
 
-   QMap<int,MapItem*>::ConstIterator it= mMapItems.constFind(id);
+   QMap<int, MapItem*>::ConstIterator it = mMapItems.constFind(id);
    if (it != mMapItems.constEnd())
       item = it.value();
 
    return item;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -523,10 +479,7 @@ void BombermanClient::processCreateGameResponse(Packet* packet)
 
    if (gameId > -1)
    {
-      qDebug(
-         "BombermanClient::data(): game %d created",
-         gameId
-      );
+      qDebug("BombermanClient::data(): game %d created", gameId);
 
       // update game information
       GameInformation* oldGameInformation = getGameInformation(gameId);
@@ -546,13 +499,8 @@ void BombermanClient::processCreateGameResponse(Packet* packet)
       qDebug("BombermanClient::data(): game create request failed");
    }
 
-   emit createGameResponse(
-      success,
-      gameId,
-      playerId == getPlayerId()
-   );
+   emit createGameResponse(success, gameId, playerId == getPlayerId());
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -563,7 +511,6 @@ void BombermanClient::addPlayerInfo(int id, PlayerInfo* info)
 {
    mPlayerInfo.insert(id, info);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -631,10 +578,7 @@ void BombermanClient::processJoinGameResponse(Packet* packet)
          }
 
          emit playfieldSize(width, height);
-         emit playfieldScale(
-            gameInformation->getMapScaleX(),
-            gameInformation->getMapScaleY()
-         );
+         emit playfieldScale(gameInformation->getMapScaleX(), gameInformation->getMapScaleY());
          emit loadLevel(gameInformation->getLevelName());
          emit joinGameResponse(true);
       }
@@ -642,14 +586,9 @@ void BombermanClient::processJoinGameResponse(Packet* packet)
    else if (response->getPlayerId() == getPlayerId())
    {
       // the player which did not successfully login was me!
-      HelpManager::getInstance()->addMessage(
-         "",
-         TEXT_ERROR_UNABLE_TO_JOIN,
-         Constants::HelpSeverityError
-      );
+      HelpManager::getInstance()->addMessage("", TEXT_ERROR_UNABLE_TO_JOIN, Constants::HelpSeverityError);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -664,10 +603,9 @@ void BombermanClient::levelLoaded(const QString& /*path*/)
    send(&packet);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::processListGameResponse(Packet* packet)
 {
    ListGamesResponsePacket* list = dynamic_cast<ListGamesResponsePacket*>(packet);
@@ -675,7 +613,7 @@ void BombermanClient::processListGameResponse(Packet* packet)
    // only update game(s) included in list
    if (list->isUpdate())
    {
-      foreach(GameInformation info, list->getGames())
+      foreach (GameInformation info, list->getGames())
       {
          *(getGameInformation(info.getId())) = info;
       }
@@ -690,14 +628,13 @@ void BombermanClient::processListGameResponse(Packet* packet)
    emit gamesListUpdated(mGames);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processLoginResponse(Packet* packet)
 {
-   LoginResponsePacket *login= dynamic_cast<LoginResponsePacket*>(packet);
+   LoginResponsePacket* login = dynamic_cast<LoginResponsePacket*>(packet);
 
    setPlayerId(login->getId());
 
@@ -706,14 +643,13 @@ void BombermanClient::processLoginResponse(Packet* packet)
    emit loginResponse(true);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processPlayerKilled(Packet* packet)
 {
-   PlayerKilledPacket *kill= dynamic_cast<PlayerKilledPacket*>(packet);
+   PlayerKilledPacket* kill = dynamic_cast<PlayerKilledPacket*>(packet);
 
    // inform game drawable about death
    emit removePlayer(kill->getPlayerId());
@@ -732,7 +668,6 @@ void BombermanClient::processPlayerKilled(Packet* packet)
    // play killed sample
    SoundManager::getInstance()->playSoundKilled();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -769,14 +704,13 @@ void BombermanClient::processPlayerInfected(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processDetonation(Packet* packet)
 {
-   DetonationPacket *det= dynamic_cast<DetonationPacket*>(packet);
+   DetonationPacket* det = dynamic_cast<DetonationPacket*>(packet);
 
    // Vector pos = Vector(det->getX(), det->getY(), 0.0);
    //
@@ -785,21 +719,12 @@ void BombermanClient::processDetonation(Packet* packet)
 
    SoundManager::getInstance()->playSoundBomb();
 
-   int intense= qMax<int>(det->getUp(), det->getDown());
-   intense= qMax<int>(intense, det->getLeft());
-   intense= qMax<int>(intense, det->getRight());
+   int intense = qMax<int>(det->getUp(), det->getDown());
+   intense = qMax<int>(intense, det->getLeft());
+   intense = qMax<int>(intense, det->getRight());
 
-   emit detonation(
-      det->getX(),
-      det->getY(),
-      det->getUp(),
-      det->getDown(),
-      det->getLeft(),
-      det->getRight(),
-      static_cast<float>(intense)
-   );
+   emit detonation(det->getX(), det->getY(), det->getUp(), det->getDown(), det->getLeft(), det->getRight(), static_cast<float>(intense));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -807,14 +732,10 @@ void BombermanClient::processDetonation(Packet* packet)
 */
 void BombermanClient::processError(Packet* packet)
 {
-   ErrorPacket* errorPacket= dynamic_cast<ErrorPacket*>(packet);
+   ErrorPacket* errorPacket = dynamic_cast<ErrorPacket*>(packet);
 
    // show error received from server
-   HelpManager::getInstance()->addMessage(
-      "",
-      errorPacket->getErrorMessage(),
-      Constants::HelpSeverityError
-   );
+   HelpManager::getInstance()->addMessage("", errorPacket->getErrorMessage(), Constants::HelpSeverityError);
 
    switch (errorPacket->getErrorType())
    {
@@ -835,7 +756,6 @@ void BombermanClient::processError(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param id player id
@@ -853,7 +773,6 @@ PlayerInfo* BombermanClient::getPlayerInfo(int id) const
    return pInfo;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param info current player info
@@ -867,11 +786,10 @@ void BombermanClient::setCurrentPlayerInfo(PlayerInfo* info)
 /*!
    \return player info ptr
 */
-PlayerInfo *BombermanClient::getCurrentPlayerInfo() const
+PlayerInfo* BombermanClient::getCurrentPlayerInfo() const
 {
    return mCurrentPlayerInfo;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -882,7 +800,6 @@ QList<PlayerInfo*> BombermanClient::getPlayerInfoList() const
    return mPlayerInfo.values();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return map of players
@@ -892,36 +809,32 @@ QMap<int, PlayerInfo*>* BombermanClient::getPlayerInfoMap() const
    return &mPlayerInfo;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return ptr to position interpolation
 */
-PositionInterpolation *BombermanClient::getPositionInterpolation() const
+PositionInterpolation* BombermanClient::getPositionInterpolation() const
 {
    return mPositionInterpolation;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \return current message
 */
-const QString &BombermanClient::getMessage() const
+const QString& BombermanClient::getMessage() const
 {
    return mMessage;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param message message to set
 */
-void BombermanClient::setMessage(const QString &message)
+void BombermanClient::setMessage(const QString& message)
 {
    mMessage = message;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -932,7 +845,6 @@ void BombermanClient::setConnected(bool connected)
    mConnected = connected;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return \c true if client is connected
@@ -941,7 +853,6 @@ bool BombermanClient::isConnected() const
 {
    return mConnected;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -952,7 +863,6 @@ bool BombermanClient::isHosting() const
    return mServer;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -961,40 +871,21 @@ void BombermanClient::processPosition(Packet* packet)
 {
    PositionPacket* posPacket = dynamic_cast<PositionPacket*>(packet);
 
-   PlayerInfo* playerInfo= getPlayerInfo( posPacket->getPlayerId() );
+   PlayerInfo* playerInfo = getPlayerInfo(posPacket->getPlayerId());
 
    if (playerInfo)
    {
-      playerInfo->setPosition(
-         posPacket->getX(),
-         posPacket->getY(),
-         posPacket->getAngle()
-      );
+      playerInfo->setPosition(posPacket->getX(), posPacket->getY(), posPacket->getAngle());
 
-      playerInfo->setPositionDelta(
-         posPacket->getDeltaX(),
-         posPacket->getDeltaY(),
-         posPacket->getAngleDelta()
-      );
+      playerInfo->setPositionDelta(posPacket->getDeltaX(), posPacket->getDeltaY(), posPacket->getAngleDelta());
 
       playerInfo->setDirections(posPacket->getDirections());
 
-      emit setPlayerPosition(
-         posPacket->getPlayerId(),
-         posPacket->getX(),
-         posPacket->getY(),
-         posPacket->getAngle()
-      );
+      emit setPlayerPosition(posPacket->getPlayerId(), posPacket->getX(), posPacket->getY(), posPacket->getAngle());
 
-      emit setPlayerSpeed(
-         posPacket->getPlayerId(),
-         posPacket->getDeltaX(),
-         posPacket->getDeltaY(),
-         posPacket->getAngleDelta()
-      );
+      emit setPlayerSpeed(posPacket->getPlayerId(), posPacket->getDeltaX(), posPacket->getDeltaY(), posPacket->getAngleDelta());
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1002,11 +893,10 @@ void BombermanClient::processPosition(Packet* packet)
 */
 void BombermanClient::processMapItemCreated(Packet* packet)
 {
-   MapItem *item = new MapItem(dynamic_cast<MapItemCreatedPacket*>(packet));
+   MapItem* item = new MapItem(dynamic_cast<MapItemCreatedPacket*>(packet));
    mMapItems.insert(item->getUniqueId(), item);
    emit createMapItem(item);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1015,17 +905,11 @@ void BombermanClient::processMapItemCreated(Packet* packet)
 void BombermanClient::processMapItemMove(Packet* packet)
 {
    MapItemMovePacket* movePacket = dynamic_cast<MapItemMovePacket*>(packet);
-   MapItem *item = getMapItem(movePacket->getMapItemId());
+   MapItem* item = getMapItem(movePacket->getMapItemId());
 
    if (item)
    {
-      emit moveMapItem(
-         item,
-         movePacket->getDirection(),
-         movePacket->getSpeed(),
-         movePacket->getNominalX(),
-         movePacket->getNominalY()
-      );
+      emit moveMapItem(item, movePacket->getDirection(), movePacket->getSpeed(), movePacket->getNominalX(), movePacket->getNominalY());
 
       // play kick sound
       if (movePacket->getSpeed() > 0.0f)
@@ -1033,20 +917,18 @@ void BombermanClient::processMapItemMove(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processExtraMapItemCreated(Packet* packet)
 {
-   ExtraMapItem *extra = new ExtraMapItem(dynamic_cast<ExtraMapItemCreatedPacket*>(packet));
+   ExtraMapItem* extra = new ExtraMapItem(dynamic_cast<ExtraMapItemCreatedPacket*>(packet));
    mMapItems.insert(extra->getUniqueId(), extra);
    emit createMapItem(extra);
 
    SoundManager::getInstance()->playSoundExtraRevealed();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1064,7 +946,7 @@ void BombermanClient::processGameStats(Packet* packet)
    PlayerInfo* info = nullptr;
 
    int i = 0;
-   foreach(int id, ids)
+   foreach (int id, ids)
    {
       QMap<int, PlayerInfo*>::const_iterator iter = mPlayerInfo.find(id);
 
@@ -1093,15 +975,14 @@ void BombermanClient::processGameStats(Packet* packet)
    emit playerInfoMapUpdated(&mPlayerInfo);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processExtraMapItemDestroyed(Packet* packet)
 {
-   MapItemDestroyedPacket *remove = dynamic_cast<MapItemDestroyedPacket*>(packet);
-   MapItem *item = getMapItem(remove->getUniqueId());
+   MapItemDestroyedPacket* remove = dynamic_cast<MapItemDestroyedPacket*>(packet);
+   MapItem* item = getMapItem(remove->getUniqueId());
 
    if (item)
    {
@@ -1113,15 +994,14 @@ void BombermanClient::processExtraMapItemDestroyed(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::processMapItemRemoved(Packet* packet)
 {
-   MapItemRemovedPacket *remove= dynamic_cast<MapItemRemovedPacket*>(packet);
-   MapItem *item= getMapItem(remove->getUniqueId());
+   MapItemRemovedPacket* remove = dynamic_cast<MapItemRemovedPacket*>(packet);
+   MapItem* item = getMapItem(remove->getUniqueId());
 
    if (item)
    {
@@ -1131,57 +1011,41 @@ void BombermanClient::processMapItemRemoved(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
 void BombermanClient::broadcastAddPlayerData()
 {
-   foreach (PlayerInfo *playerInfo, mPlayerInfo)
+   foreach (PlayerInfo* playerInfo, mPlayerInfo)
    {
       // reset killed flag
       playerInfo->setKilled(false);
 
       // tell game drawable about players in the game
-      emit addPlayer(
-         playerInfo->getId(),
-         playerInfo->getNick(),
-         playerInfo->getColor()
-      );
+      emit addPlayer(playerInfo->getId(), playerInfo->getNick(), playerInfo->getColor());
    }
 }
 
-
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::broadcastPlayerStartPositions()
 {
-   foreach (PlayerInfo *playerInfo, mPlayerInfo)
+   foreach (PlayerInfo* playerInfo, mPlayerInfo)
    {
-      emit setPlayerPosition(
-         playerInfo->getId(),
-         playerInfo->getX(),
-         playerInfo->getY(),
-         playerInfo->getAngle()
-      );
+      emit setPlayerPosition(playerInfo->getId(), playerInfo->getX(), playerInfo->getY(), playerInfo->getAngle());
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::processStartGameResponse(Packet* packet)
 {
    StartGameResponsePacket* response = dynamic_cast<StartGameResponsePacket*>(packet);
 
-   qDebug(
-      "BombermanClient::data: game %d started",
-      response->getId()
-   );
+   qDebug("BombermanClient::data: game %d started", response->getId());
 
    setIngameMessagingActive(false);
    GameStateMachine::getInstance()->setState(Constants::GameActive);
@@ -1201,7 +1065,6 @@ void BombermanClient::processStartGameResponse(Packet* packet)
    sendKeysPressedPacket();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -1210,11 +1073,7 @@ void BombermanClient::processStopGameResponse(Packet* packet)
 {
    StopGameResponsePacket* response = dynamic_cast<StopGameResponsePacket*>(packet);
 
-   qDebug(
-      "BombermanClient::data: game %d stopped, all rounds finished: %d",
-      response->getId(),
-      response->isFinished()
-   );
+   qDebug("BombermanClient::data: game %d stopped, all rounds finished: %d", response->getId(), response->isFinished());
 
    GameStateMachine::getInstance()->setState(Constants::GameStopped);
 
@@ -1230,7 +1089,6 @@ void BombermanClient::processStopGameResponse(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -1245,13 +1103,7 @@ void BombermanClient::processGameEvent(Packet* packet)
       {
          SoundManager::getInstance()->playSoundExtra();
 
-         emit extraRemoved(
-            response->getX(),
-            response->getY(),
-            false,
-            response->getExtraType(),
-            response->getPlayerId()
-         );
+         emit extraRemoved(response->getX(), response->getY(), false, response->getExtraType(), response->getPlayerId());
 
          // rumble just a little on extra collect
          if (response->getPlayerId() == getPlayerId())
@@ -1262,12 +1114,7 @@ void BombermanClient::processGameEvent(Packet* packet)
 
       case GameEventPacket::ExtraDestroyed:
       {
-         emit extraRemoved(
-            response->getX(),
-            response->getY(),
-            true,
-            response->getExtraType()
-         );
+         emit extraRemoved(response->getX(), response->getY(), true, response->getExtraType());
 
          break;
       }
@@ -1278,7 +1125,6 @@ void BombermanClient::processGameEvent(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -1287,25 +1133,17 @@ void BombermanClient::processMessage(Packet* packet)
 {
    MessagePacket* messagePacket = dynamic_cast<MessagePacket*>(packet);
 
-   emit messageReceived(
-      messagePacket->getSenderId(),
-      messagePacket->getMessage(),
-      messagePacket->isTypingFinished()
-   );
+   emit messageReceived(messagePacket->getSenderId(), messagePacket->getMessage(), messagePacket->isTypingFinished());
 
    if (messagePacket->isTypingFinished())
    {
       // omit broadcast messages
-      if (
-            messagePacket->getSenderId() != -1
-         && messagePacket->getSenderId() != getPlayerId()
-      )
+      if (messagePacket->getSenderId() != -1 && messagePacket->getSenderId() != getPlayerId())
       {
          SoundManager::getInstance()->playSoundMessageReceived();
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1315,13 +1153,13 @@ void BombermanClient::processTime(Packet* packet)
 {
    TimePacket* timePacket = dynamic_cast<TimePacket*>(packet);
 
-/*
-   qDebug(
-      "BombermanClient::data: server time: %s, left: %d",
-      qPrintable(packet->getTimestamp().toString()),
-      timePacket->getTimeLeft()
-   );
-*/
+   /*
+      qDebug(
+         "BombermanClient::data: server time: %s, left: %d",
+         qPrintable(packet->getTimestamp().toString()),
+         timePacket->getTimeLeft()
+      );
+   */
 
    GameInformation* gameInformation = getCurrentGameInformation();
 
@@ -1335,13 +1173,9 @@ void BombermanClient::processTime(Packet* packet)
          SoundManager::getInstance()->playSoundHurryUp();
       }
 
-      emit timeChanged(
-         timeLeft,
-         duration
-      );
+      emit timeChanged(timeLeft, duration);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1355,10 +1189,7 @@ void BombermanClient::processCountdown(Packet* packet)
 
    int timeLeft = countdownPacket->getTimeLeft();
 
-   qDebug(
-      "BombermanClient::processCountdown: left: %d",
-      timeLeft
-   );
+   qDebug("BombermanClient::processCountdown: left: %d", timeLeft);
 
    // sync tick
    if (timeLeft == SERVER_PREPARATION_TIME + SERVER_PREPARATION_SYNC_TIME - 1)
@@ -1383,7 +1214,6 @@ void BombermanClient::processCountdown(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -1392,7 +1222,7 @@ void BombermanClient::processPacket(Packet* packet)
 {
    if (packet)
    {
-      switch(packet->getType())
+      switch (packet->getType())
       {
          case Packet::COUNTDOWN:
          {
@@ -1450,8 +1280,8 @@ void BombermanClient::processPacket(Packet* packet)
 
          case Packet::LISTGAMESRESPONSE:
          {
-             processListGameResponse(packet);
-             break;
+            processListGameResponse(packet);
+            break;
          }
 
          case Packet::LOGINRESPONSE:
@@ -1567,7 +1397,6 @@ void BombermanClient::processPacket(Packet* packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
@@ -1590,12 +1419,12 @@ void BombermanClient::readData()
       return;
    }
 
-   QDataStream& in = mBuffer.stream();
-
-   while (packetAvailable(in))
+   while (packetAvailable())
    {
       // block was read completely
+      BinaryReader in = mBuffer.reader();
       Packet* packet = Packet::deserialize(in);
+      mBuffer.consume(in.pos());
 
       processPacket(packet);
 
@@ -1604,7 +1433,6 @@ void BombermanClient::readData()
 
    mBuffer.compact();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1664,32 +1492,24 @@ void BombermanClient::poll()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param event keypressed event
 */
 void BombermanClient::keyPressed(QKeyEvent* event)
 {
-   GameSettings::ControllerSettings* controllerSettings =
-      GameSettings::getInstance()->getControllerSettings();
+   GameSettings::ControllerSettings* controllerSettings = GameSettings::getInstance()->getControllerSettings();
 
-   bool controlKey =
-         event->key() == controllerSettings->getUpKey()
-      || event->key() == controllerSettings->getDownKey()
-      || event->key() == controllerSettings->getLeftKey()
-      || event->key() == controllerSettings->getRightKey()
-      || event->key() == controllerSettings->getBombKey()
-      || event->key() == controllerSettings->getZoomInKey()
-      || event->key() == controllerSettings->getZoomOutKey()
-      || event->key() == controllerSettings->getStartKey();
+   bool controlKey = event->key() == controllerSettings->getUpKey() || event->key() == controllerSettings->getDownKey() ||
+                     event->key() == controllerSettings->getLeftKey() || event->key() == controllerSettings->getRightKey() ||
+                     event->key() == controllerSettings->getBombKey() || event->key() == controllerSettings->getZoomInKey() ||
+                     event->key() == controllerSettings->getZoomOutKey() || event->key() == controllerSettings->getStartKey();
 
    if ((controlKey && !event->isAutoRepeat()) || !controlKey)
    {
       processKeyPressed(event->key());
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1701,32 +1521,30 @@ void BombermanClient::keyReleased(QKeyEvent* event)
       processKeyReleased(event->key());
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::releaseAllKeys()
 {
-    if (mKeysPressed != 0)
-    {
-       // next bomb may be dropped
-       mBombReleased = true;
-       mKeysPressed = 0;
+   if (mKeysPressed != 0)
+   {
+      // next bomb may be dropped
+      mBombReleased = true;
+      mKeysPressed = 0;
 
-       // send key changes
-       processKeyReleased(0);
-    }
+      // send key changes
+      processKeyReleased(0);
+   }
 }
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::clearPlayerInfoMap()
 {
    qDeleteAll(mPlayerInfo);
    mPlayerInfo.clear();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1736,7 +1554,6 @@ void BombermanClient::removePlayerInfo(int id)
 {
    delete mPlayerInfo.take(id);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1769,12 +1586,11 @@ void BombermanClient::processLeaveGameResponse(Packet* packet)
       SoundManager::getInstance()->playSoundPlayerLeft();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param packet packet to process
 */
-void BombermanClient::processExtraShake(Packet *packet)
+void BombermanClient::processExtraShake(Packet* packet)
 {
    ExtraShakePacket* shakePacket = dynamic_cast<ExtraShakePacket*>(packet);
 
@@ -1787,10 +1603,9 @@ void BombermanClient::processExtraShake(Packet *packet)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::sendKeysPressedPacket()
 {
    // build keypacket
@@ -1799,10 +1614,9 @@ void BombermanClient::sendKeysPressedPacket()
    send(&kPacket);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::removeBombKeyFlag()
 {
    // in any case remove the bomb key from the key combination
@@ -1811,7 +1625,6 @@ void BombermanClient::removeBombKeyFlag()
       mKeysPressed &= ~Constants::KeyBomb;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param key key to process
@@ -1819,10 +1632,7 @@ void BombermanClient::removeBombKeyFlag()
 */
 void BombermanClient::processKeyPressed(int key)
 {
-   if (
-         key == Qt::Key_Return
-      || key == Qt::Key_Enter
-   )
+   if (key == Qt::Key_Return || key == Qt::Key_Enter)
    {
       if (GameStateMachine::getInstance()->getState() == Constants::GameActive)
       {
@@ -1885,8 +1695,7 @@ void BombermanClient::processKeyPressed(int key)
    {
       bool moved = false;
 
-      GameSettings::ControllerSettings* controllerSettings =
-         GameSettings::getInstance()->getControllerSettings();
+      GameSettings::ControllerSettings* controllerSettings = GameSettings::getInstance()->getControllerSettings();
 
       if (key == controllerSettings->getUpKey())
       {
@@ -1908,10 +1717,9 @@ void BombermanClient::processKeyPressed(int key)
          mKeysPressed |= Constants::KeyRight;
          moved = true;
       }
-      else if (
-            key == controllerSettings->getBombKey()
-         // || key == Qt::Key_Space
-         // || key == Qt::Key_Control
+      else if (key == controllerSettings->getBombKey()
+               // || key == Qt::Key_Space
+               // || key == Qt::Key_Control
       )
       {
          // TODO: verify if omitting the bombrelease flag is alright
@@ -1940,11 +1748,9 @@ void BombermanClient::processKeyPressed(int key)
    }
 }
 
-
 void BombermanClient::processKeyReleased(int key)
 {
-   GameSettings::ControllerSettings* controllerSettings =
-      GameSettings::getInstance()->getControllerSettings();
+   GameSettings::ControllerSettings* controllerSettings = GameSettings::getInstance()->getControllerSettings();
 
    if (key == controllerSettings->getUpKey())
    {
@@ -1971,10 +1777,9 @@ void BombermanClient::processKeyReleased(int key)
    {
       emit zoomIn(false);
    }
-   else if (
-         key == controllerSettings->getBombKey()
-      // || key == Qt::Key_Space
-      // || key == Qt::Key_Control
+   else if (key == controllerSettings->getBombKey()
+            // || key == Qt::Key_Space
+            // || key == Qt::Key_Control
    )
    {
       // next bomb may be dropped
@@ -1982,36 +1787,36 @@ void BombermanClient::processKeyReleased(int key)
       mKeysPressed &= ~Constants::KeyBomb;
    }
 
-      /*
-         switch (key)
+   /*
+      switch (key)
+      {
+         case Qt::Key_Up:
+            mKeysPressed &= ~Constants::KeyUp;
+            break;
+
+         case Qt::Key_Down:
+            mKeysPressed &= ~Constants::KeyDown;
+            break;
+
+         case Qt::Key_Left:
+            mKeysPressed &= ~Constants::KeyLeft;
+            break;
+
+         case Qt::Key_Right:
+            mKeysPressed &= ~Constants::KeyRight;
+            break;
+
+         case Qt::Key_Control:
          {
-            case Qt::Key_Up:
-               mKeysPressed &= ~Constants::KeyUp;
-               break;
-
-            case Qt::Key_Down:
-               mKeysPressed &= ~Constants::KeyDown;
-               break;
-
-            case Qt::Key_Left:
-               mKeysPressed &= ~Constants::KeyLeft;
-               break;
-
-            case Qt::Key_Right:
-               mKeysPressed &= ~Constants::KeyRight;
-               break;
-
-            case Qt::Key_Control:
-            {
-               // next bomb may be dropped
-               mBombReleased = true;
-               mKeysPressed &= ~Constants::KeyBomb;
-            }
-
-            default:
-               break;
+            // next bomb may be dropped
+            mBombReleased = true;
+            mKeysPressed &= ~Constants::KeyBomb;
          }
-      */
+
+         default:
+            break;
+      }
+   */
 
    if (!mDead)
    {
@@ -2022,18 +1827,16 @@ void BombermanClient::processKeyReleased(int key)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::debugKeyboardInput()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::resetClientState()
 {
    setConnected(false);
@@ -2043,10 +1846,9 @@ void BombermanClient::resetClientState()
    emit loginResponse(false);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::resetGameData()
 {
    foreach (PlayerInfo* p, mPlayerInfo)
@@ -2059,7 +1861,6 @@ void BombermanClient::resetGameData()
 
    GameStateMachine::getInstance()->setState(Constants::GameStopped);
 }
-
 
 /*
    server workflow
@@ -2081,7 +1882,6 @@ void BombermanClient::resetGameData()
 
 */
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param nick nick to use
@@ -2094,15 +1894,13 @@ void BombermanClient::login(const QString& nick)
    send(&login);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::stopGame()
 {
    stopGame(getGameId());
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2113,37 +1911,26 @@ void BombermanClient::setNick(const QString& nick)
    mNick = nick;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player's nick
 */
-const QString &BombermanClient::getNick() const
+const QString& BombermanClient::getNick() const
 {
    return mNick;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param message message to send
    \param receiverId id of the message receiver
 */
-void BombermanClient::sendMessage(
-   const QString& message,
-   bool finishedTyping,
-   int receiverId
-)
+void BombermanClient::sendMessage(const QString& message, bool finishedTyping, int receiverId)
 {
    if (!finishedTyping)
       setMessage(message);
 
-   MessagePacket packet(
-      -1,
-      message,
-      finishedTyping,
-      receiverId
-   );
+   MessagePacket packet(-1, message, finishedTyping, receiverId);
 
    send(&packet);
 
@@ -2154,43 +1941,27 @@ void BombermanClient::sendMessage(
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::listGames()
 {
-   if (
-         isConnected()
-      && (GameStateMachine::getInstance()->getState() != Constants::GameActive)
-   )
+   if (isConnected() && (GameStateMachine::getInstance()->getState() != Constants::GameActive))
    {
       ListGamesRequestPacket packet;
       send(&packet);
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::createGameAutomatic()
 {
    createGame(
-      "coding",
-      Level::getLevelDirectoryName(Level::LevelCastle),
-      1,
-      1800,
-      10,
-      true,
-      true,
-      true,
-      true,
-      true,
-      Constants::Dimension13x11
+      "coding", Level::getLevelDirectoryName(Level::LevelCastle), 1, 1800, 10, true, true, true, true, true, Constants::Dimension13x11
    );
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2210,8 +1981,7 @@ void BombermanClient::createGame(
    Constants::Dimension dimension
 )
 {
-   bool dryRun =
-      GameSettings::getInstance()->getDevelopmentSettings()->isDryRunEnabled();
+   bool dryRun = GameSettings::getInstance()->getDevelopmentSettings()->isDryRunEnabled();
 
    if (dryRun)
       rounds = 999;
@@ -2233,16 +2003,14 @@ void BombermanClient::createGame(
    send(&packet);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::joinGame(int game)
 {
    JoinGameRequestPacket packet(game);
    send(&packet);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2256,7 +2024,6 @@ void BombermanClient::startGame(int game)
    send(&packet);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param game game to stop
@@ -2267,25 +2034,20 @@ void BombermanClient::stopGame(int game)
    send(&request);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::setLoginAfterConnect(bool loginAfterConnect)
 {
    mLoginAfterConnect = loginAfterConnect;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param host host to use
    \param nick nick to use
 */
-void BombermanClient::loginRequest(
-   const QString& host,
-   const QString& nick
-)
+void BombermanClient::loginRequest(const QString& host, const QString& nick)
 {
    const QString previousHost = getHost();
    const bool connectedOrConnecting = (mSocket != nullptr) || (mAddress != nullptr);
@@ -2295,15 +2057,10 @@ void BombermanClient::loginRequest(
 
    // we first have to disconnect from the current server
    // because its hostname obviously differs from ours
-   if (
-         connectedOrConnecting
-      && previousHost.toLower() != host.toLower()
-   )
+   if (connectedOrConnecting && previousHost.toLower() != host.toLower())
    {
       qDebug(
-         "BombermanClient::loginRequest: connect to another host: %s -> %s",
-         qPrintable(previousHost.toLower()),
-         qPrintable(host.toLower())
+         "BombermanClient::loginRequest: connect to another host: %s -> %s", qPrintable(previousHost.toLower()), qPrintable(host.toLower())
       );
 
       setConnected(false);
@@ -2325,29 +2082,26 @@ void BombermanClient::loginRequest(
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::leaveGameRequest()
 {
    LeaveGameRequestPacket packet(getGameId(), getPlayerId());
    send(&packet);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::gameListRequest()
 {
    listGames();
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::host()
 {
    if (!mServer)
@@ -2361,12 +2115,7 @@ void BombermanClient::host()
          // Server's poll QTimer must be started on the thread it will actually run on -
          // starting it before moveToThread() leaves it ticking against this (the wrong)
          // thread's event dispatcher, so it never fires once moved.
-         connect(
-            thread,
-            SIGNAL(started()),
-            mServer,
-            SLOT(startPolling())
-         );
+         connect(thread, SIGNAL(started()), mServer, SLOT(startPolling()));
 
          mServer->moveToThread(thread);
          thread->start();
@@ -2375,11 +2124,7 @@ void BombermanClient::host()
       }
       else
       {
-         HelpManager::getInstance()->addMessage(
-            "",
-            TEXT_ERROR_UNABLE_TO_BIND,
-            Constants::HelpSeverityError
-         );
+         HelpManager::getInstance()->addMessage("", TEXT_ERROR_UNABLE_TO_BIND, Constants::HelpSeverityError);
 
          delete thread;
          delete mServer;
@@ -2388,10 +2133,9 @@ void BombermanClient::host()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::initializeBots()
 {
    if (isPlayerOwner())
@@ -2411,41 +2155,21 @@ void BombermanClient::initializeBots()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::initializePlayback()
 {
-   bool recording =
-      GameSettings::getInstance()->getDevelopmentSettings()->isGameRecordingEnabled();
+   bool recording = GameSettings::getInstance()->getDevelopmentSettings()->isGameRecordingEnabled();
 
-   GamePlayback::getInstance()->setRecording(
-      recording
-   );
+   GamePlayback::getInstance()->setRecording(recording);
 
-   connect(
-      GamePlayback::getInstance(),
-      SIGNAL(playBack(Packet*)),
-      this,
-      SLOT(processPacket(Packet*))
-   );
+   connect(GamePlayback::getInstance(), SIGNAL(playBack(Packet*)), this, SLOT(processPacket(Packet*)));
 
-   connect(
-      GamePlayback::getInstance(),
-      SIGNAL(finished()),
-      this,
-      SLOT(playbackFinished())
-   );
+   connect(GamePlayback::getInstance(), SIGNAL(finished()), this, SLOT(playbackFinished()));
 
-   connect(
-      this,
-      SIGNAL(playerId(int)),
-      GamePlayback::getInstance(),
-      SLOT(setPlayerId(int))
-   );
+   connect(this, SIGNAL(playerId(int)), GamePlayback::getInstance(), SLOT(setPlayerId(int)));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2480,7 +2204,6 @@ QList<QString> BombermanClient::getLocalIps() const
    return ips;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return \c true if game is single player
@@ -2494,7 +2217,6 @@ bool BombermanClient::isSinglePlayer() const
    return singlePlayer;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game mode
@@ -2504,20 +2226,18 @@ Constants::GameMode BombermanClient::getGameMode() const
    return mGameMode;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param mode game mode
 */
-void BombermanClient::setGameMode(const Constants::GameMode &mode)
+void BombermanClient::setGameMode(const Constants::GameMode& mode)
 {
    mGameMode = mode;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::playbackFinished()
 {
    leaveGameRequest();
@@ -2526,10 +2246,9 @@ void BombermanClient::playbackFinished()
    resetGameData();
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void BombermanClient::gameStateChanged()
 {
    if (GameStateMachine::getInstance()->getState() == Constants::GameStopped)
@@ -2537,7 +2256,6 @@ void BombermanClient::gameStateChanged()
       setIngameMessagingActive(false);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2566,7 +2284,6 @@ void BombermanClient::idle(bool idle)
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param active when main menu is active
@@ -2575,7 +2292,6 @@ void BombermanClient::setMainMenuActive(bool active)
 {
    mMainMenuActive = active;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2598,15 +2314,10 @@ void BombermanClient::showIps()
 
          // and show them
          QString ipText = tr("your ips are;%1").arg(tmpList.join(";"));
-         HelpManager::getInstance()->addMessage(
-            "",
-            ipText,
-            Constants::HelpSeverityNotification
-         );
+         HelpManager::getInstance()->addMessage("", ipText, Constants::HelpSeverityNotification);
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -2616,5 +2327,3 @@ bool BombermanClient::isMainMenuActive() const
 {
    return mMainMenuActive;
 }
-
-

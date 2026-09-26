@@ -1,15 +1,16 @@
 // header
 #include "serverconfiguration.h"
 
+// shared
+#include "binaryreader.h"
+#include "binarywriter.h"
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-ServerConfiguration::ServerConfiguration()
- : mBombTickTime(0)
+ */
+ServerConfiguration::ServerConfiguration() : mBombTickTime(0)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -20,7 +21,6 @@ void ServerConfiguration::setBombTickTime(int time)
    mBombTickTime = time;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return bomb tick time
@@ -30,25 +30,23 @@ int ServerConfiguration::getBombTickTime() const
    return mBombTickTime;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream out
    \param config server configuration reference
 */
-QDataStream& operator<<(QDataStream& out, const ServerConfiguration& config)
+BinaryWriter& operator<<(BinaryWriter& out, const ServerConfiguration& config)
 {
    out << config.getBombTickTime();
    return out;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream in
    \param config server configuration reference
 */
-QDataStream& operator>>(QDataStream& in, ServerConfiguration& config)
+BinaryReader& operator>>(BinaryReader& in, ServerConfiguration& config)
 {
    int bombTickTime = 0;
 
@@ -58,4 +56,3 @@ QDataStream& operator>>(QDataStream& in, ServerConfiguration& config)
 
    return in;
 }
-

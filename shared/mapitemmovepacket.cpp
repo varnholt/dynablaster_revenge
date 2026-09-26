@@ -2,7 +2,6 @@
 #include "mapitemmovepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "MapItemMove"
@@ -16,39 +15,21 @@
    \param yPos player y position
    \param angle optional rotation angle
 */
-MapItemMovePacket::MapItemMovePacket(
-   int id,
-   float speed,
-   Constants::Direction dir,
-   int nominalX,
-   int nominalY
-)
- : Packet(Packet::MAPITEMMOVE),
-   mMapItemId(id),
-   mSpeed(speed),
-   mDirection(dir),
-   mNominalX(nominalX),
-   mNominalY(nominalY)
+MapItemMovePacket::MapItemMovePacket(int id, float speed, Constants::Direction dir, int nominalX, int nominalY)
+    : Packet(Packet::MAPITEMMOVE), mMapItemId(id), mSpeed(speed), mDirection(dir), mNominalX(nominalX), mNominalY(nominalY)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
 MapItemMovePacket::MapItemMovePacket()
-   : Packet(Packet::MAPITEMMOVE),
-     mMapItemId(0),
-     mSpeed(0.0),
-     mDirection(Constants::DirectionUnknown),
-     mNominalX(0),
-     mNominalY(0)
+    : Packet(Packet::MAPITEMMOVE), mMapItemId(0), mSpeed(0.0), mDirection(Constants::DirectionUnknown), mNominalX(0), mNominalY(0)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -57,7 +38,6 @@ MapItemMovePacket::MapItemMovePacket()
 MapItemMovePacket::~MapItemMovePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -68,7 +48,6 @@ float MapItemMovePacket::getSpeed() const
    return mSpeed;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return mapitem direction
@@ -77,7 +56,6 @@ Constants::Direction MapItemMovePacket::getDirection() const
 {
    return mDirection;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -88,7 +66,6 @@ int MapItemMovePacket::getNominalX() const
    return mNominalX;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return nominal y
@@ -97,7 +74,6 @@ int MapItemMovePacket::getNominalY() const
 {
    return mNominalY;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -108,12 +84,11 @@ int MapItemMovePacket::getMapItemId()
    return mMapItemId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void MapItemMovePacket::enqueue(QDataStream & out)
+void MapItemMovePacket::enqueue(BinaryWriter& out)
 {
    // write player id
    out << mMapItemId;
@@ -123,25 +98,18 @@ void MapItemMovePacket::enqueue(QDataStream & out)
    out << mNominalY;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void MapItemMovePacket::dequeue(QDataStream & in)
+void MapItemMovePacket::dequeue(BinaryReader& in)
 {
    int8_t direction = 0;
 
-   in
-      >> mMapItemId
-      >> mSpeed
-      >> direction
-      >> mNominalX
-      >> mNominalY;
+   in >> mMapItemId >> mSpeed >> direction >> mNominalX >> mNominalY;
 
    mDirection = (Constants::Direction)direction;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -150,13 +118,5 @@ void MapItemMovePacket::dequeue(QDataStream & in)
 void MapItemMovePacket::debug()
 {
    // output player id and x, y
-   qDebug(
-      "MapItemMovePacket: unique id: %d, speed: %f, nominal: %d, %d",
-      mMapItemId,
-      mSpeed,
-      mNominalX,
-      mNominalY
-   );
+   qDebug("MapItemMovePacket: unique id: %d, speed: %f, nominal: %d, %d", mMapItemId, mSpeed, mNominalX, mNominalY);
 }
-
-

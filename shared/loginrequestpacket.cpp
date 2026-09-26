@@ -2,11 +2,9 @@
 #include "loginrequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "LoginRequest"
-
 
 /*!----------------------------------------------------------------------------
    write constructor
@@ -14,28 +12,18 @@
    \param nickName player's nick
    \param col player's color
 */
-LoginRequestPacket::LoginRequestPacket(
-   const QString& nickName,
-   bool bot
-)
- : Packet(Packet::LOGINREQUEST),
-   mNick(nickName),
-   mBot(bot)
+LoginRequestPacket::LoginRequestPacket(const QString& nickName, bool bot) : Packet(Packet::LOGINREQUEST), mNick(nickName), mBot(bot)
 {
    mPacketName = PACKETNAME;
 }
-
 
 /*!----------------------------------------------------------------------------
    read constructor
 */
-LoginRequestPacket::LoginRequestPacket()
-   : Packet(Packet::LOGINREQUEST),
-     mBot(false)
+LoginRequestPacket::LoginRequestPacket() : Packet(Packet::LOGINREQUEST), mBot(false)
 {
    mPacketName = PACKETNAME;
 }
-
 
 /*!----------------------------------------------------------------------------
    destructor
@@ -44,15 +32,13 @@ LoginRequestPacket::~LoginRequestPacket()
 {
 }
 
-
 /*!----------------------------------------------------------------------------
    \return player's nickname
 */
-const QString &LoginRequestPacket::getNick() const
+const QString& LoginRequestPacket::getNick() const
 {
    return mNick;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -63,28 +49,25 @@ bool LoginRequestPacket::isBot() const
    return mBot;
 }
 
-
 /*!----------------------------------------------------------------------------
    \param out datastream to write members to
 */
-void LoginRequestPacket::enqueue(QDataStream & out)
+void LoginRequestPacket::enqueue(BinaryWriter& out)
 {
    // write player's name
    out << mNick;
    out << mBot;
 }
 
-
 /*!----------------------------------------------------------------------------
    \param in datastream read members from
 */
-void LoginRequestPacket::dequeue(QDataStream & in)
+void LoginRequestPacket::dequeue(BinaryReader& in)
 {
    // read player's nick and color
    in >> mNick;
    in >> mBot;
 }
-
 
 /*!----------------------------------------------------------------------------
    debug output of members
@@ -92,11 +75,5 @@ void LoginRequestPacket::dequeue(QDataStream & in)
 void LoginRequestPacket::debug()
 {
    // debug output login request
-   qDebug(
-      "LoginRequestPacket:loginrequest: player: %s, bot: %d",
-      qPrintable(mNick),
-      mBot
-   );
+   qDebug("LoginRequestPacket:loginrequest: player: %s, bot: %d", qPrintable(mNick), mBot);
 }
-
-

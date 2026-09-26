@@ -2,57 +2,44 @@
 #include "playersynchronizepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "PlayerSynchronize"
 
+//-----------------------------------------------------------------------------
+/*!
+   \param process process to sync
+*/
+PlayerSynchronizePacket::PlayerSynchronizePacket() : Packet(Packet::PLAYERSYNCHRONIZEPACKET), mSynchronizeProcess(Invalid)
+{
+   mPacketName = PACKETNAME;
+}
 
 //-----------------------------------------------------------------------------
 /*!
    \param process process to sync
 */
-PlayerSynchronizePacket::PlayerSynchronizePacket()
- : Packet(Packet::PLAYERSYNCHRONIZEPACKET),
-   mSynchronizeProcess(Invalid)
+PlayerSynchronizePacket::PlayerSynchronizePacket(PlayerSynchronizePacket::SynchronizeProcess process)
+    : Packet(Packet::PLAYERSYNCHRONIZEPACKET), mSynchronizeProcess(process)
 {
    mPacketName = PACKETNAME;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-   \param process process to sync
-*/
-PlayerSynchronizePacket::PlayerSynchronizePacket(
-    PlayerSynchronizePacket::SynchronizeProcess process
-)
- : Packet(Packet::PLAYERSYNCHRONIZEPACKET),
-   mSynchronizeProcess(process)
-{
-   mPacketName = PACKETNAME;
-}
-
-
-//-----------------------------------------------------------------------------
-/*!
-*/
+ */
 PlayerSynchronizePacket::~PlayerSynchronizePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param process synchronize process
 */
-void PlayerSynchronizePacket::setSynchronizeProcess(
-   PlayerSynchronizePacket::SynchronizeProcess process
-)
+void PlayerSynchronizePacket::setSynchronizeProcess(PlayerSynchronizePacket::SynchronizeProcess process)
 {
    mSynchronizeProcess = process;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -63,22 +50,20 @@ PlayerSynchronizePacket::SynchronizeProcess PlayerSynchronizePacket::getSynchron
    return mSynchronizeProcess;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void PlayerSynchronizePacket::enqueue(QDataStream & out)
+void PlayerSynchronizePacket::enqueue(BinaryWriter& out)
 {
    out << (uint8_t)getSynchronizeProcess();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void PlayerSynchronizePacket::dequeue(QDataStream & in)
+void PlayerSynchronizePacket::dequeue(BinaryReader& in)
 {
    uint8_t process = 0;
 
@@ -87,16 +72,10 @@ void PlayerSynchronizePacket::dequeue(QDataStream & in)
    setSynchronizeProcess((SynchronizeProcess)process);
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void PlayerSynchronizePacket::debug()
 {
-   qDebug(
-      "PlayerSynchronizePacket::debug(): process: %d",
-      getSynchronizeProcess()
-   );
+   qDebug("PlayerSynchronizePacket::debug(): process: %d", getSynchronizeProcess());
 }
-
-

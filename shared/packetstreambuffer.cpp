@@ -1,50 +1,46 @@
 #include "packetstreambuffer.h"
 
-
-//-----------------------------------------------------------------------------
-PacketStreamBuffer::PacketStreamBuffer()
-{
-   mDevice.setBuffer(&mBuffer);
-   mDevice.open(QIODevice::ReadWrite);
-
-   mStream.setDevice(&mDevice);
-   mStream.setVersion(QDataStream::Qt_4_6);
-}
-
+#include <cstring>
 
 //-----------------------------------------------------------------------------
 /*!
    \param data raw bytes just read from the transport
    \param length number of bytes in \c data
 */
-void PacketStreamBuffer::append(const char* data, qint64 length)
+void PacketStreamBuffer::append(const char* data, size_t length)
 {
-   mBuffer.append(data, static_cast<qsizetype>(length));
+   const auto offset = mBuffer.size();
+   mBuffer.resize(offset + length);
+   std::memcpy(mBuffer.data() + offset, data, length);
 }
-
 
 //-----------------------------------------------------------------------------
-qint64 PacketStreamBuffer::bytesAvailable() const
+size_t PacketStreamBuffer::bytesAvailable() const
 {
-   return mBuffer.size() - mDevice.pos();
+   return mBuffer.size() - mPos;
 }
-
 
 //-----------------------------------------------------------------------------
-QDataStream& PacketStreamBuffer::stream()
+BinaryReader PacketStreamBuffer::reader() const
 {
-   return mStream;
+   return BinaryReader(mBuffer.data() + mPos, mBuffer.size() - mPos);
 }
 
+//-----------------------------------------------------------------------------
+/*!
+   \param bytes number of bytes a caller's reader() actually consumed
+*/
+void PacketStreamBuffer::consume(size_t bytes)
+{
+   mPos += bytes;
+}
 
 //-----------------------------------------------------------------------------
 void PacketStreamBuffer::compact()
 {
-   const auto pos = mDevice.pos();
-
-   if (pos > 0)
+   if (mPos > 0)
    {
-      mBuffer.remove(0, static_cast<qsizetype>(pos));
-      mDevice.seek(0);
+      mBuffer.erase(mBuffer.begin(), mBuffer.begin() + static_cast<std::ptrdiff_t>(mPos));
+      mPos = 0;
    }
 }

@@ -2,45 +2,33 @@
 #include "playerinfectedpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "PlayerInfected"
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
-PlayerInfectedPacket::PlayerInfectedPacket(
-   int32_t playerId,
-   Constants::SkullType type
-)
-   : Packet(Packet::PLAYERINFECTEDPACKET),
-     mPlayerId(playerId),
-     mSkullType(type),
-     mInfectorId(-1),
-     mExtraPosX(0),
-     mExtraPosY(0)
+ */
+PlayerInfectedPacket::PlayerInfectedPacket(int32_t playerId, Constants::SkullType type)
+    : Packet(Packet::PLAYERINFECTEDPACKET), mPlayerId(playerId), mSkullType(type), mInfectorId(-1), mExtraPosX(0), mExtraPosY(0)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
 PlayerInfectedPacket::PlayerInfectedPacket()
-   : Packet(Packet::PLAYERINFECTEDPACKET),
-     mPlayerId(0),
-     mSkullType(Constants::SkullAutofire),
-     mInfectorId(-1),
-     mExtraPosX(0),
-     mExtraPosY(0)
+    : Packet(Packet::PLAYERINFECTEDPACKET),
+      mPlayerId(0),
+      mSkullType(Constants::SkullAutofire),
+      mInfectorId(-1),
+      mExtraPosX(0),
+      mExtraPosY(0)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -48,9 +36,8 @@ PlayerInfectedPacket::PlayerInfectedPacket()
 */
 int32_t PlayerInfectedPacket::getPlayerId() const
 {
-    return mPlayerId;
+   return mPlayerId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -61,12 +48,11 @@ Constants::SkullType PlayerInfectedPacket::getSkullType() const
    return mSkullType;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void PlayerInfectedPacket::enqueue(QDataStream & out)
+void PlayerInfectedPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mPlayerId;
@@ -76,26 +62,19 @@ void PlayerInfectedPacket::enqueue(QDataStream & out)
    out << mExtraPosY;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void PlayerInfectedPacket::dequeue(QDataStream & in)
+void PlayerInfectedPacket::dequeue(BinaryReader& in)
 {
    int32_t skull = 0;
 
    // read members
-   in
-      >> mPlayerId
-      >> skull
-      >> mInfectorId
-      >> mExtraPosX
-      >> mExtraPosY;
+   in >> mPlayerId >> skull >> mInfectorId >> mExtraPosX >> mExtraPosY;
 
    mSkullType = (Constants::SkullType)skull;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -104,14 +83,8 @@ void PlayerInfectedPacket::dequeue(QDataStream & in)
 void PlayerInfectedPacket::debug()
 {
    // output packet members
-   qDebug(
-      "PlayerInfectedPacket: player: %d, skull type: %d",
-      mPlayerId,
-      mSkullType
-   );
+   qDebug("PlayerInfectedPacket: player: %d, skull type: %d", mPlayerId, mSkullType);
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -122,7 +95,6 @@ uint8_t PlayerInfectedPacket::getExtraPosY() const
    return mExtraPosY;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
   \return x position of extra
@@ -131,7 +103,6 @@ uint8_t PlayerInfectedPacket::getExtraPosX() const
 {
    return mExtraPosX;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -144,7 +115,6 @@ void PlayerInfectedPacket::setExtraPos(uint8_t x, uint8_t y)
    mExtraPosY = y;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return infector id
@@ -154,14 +124,11 @@ int32_t PlayerInfectedPacket::getInfectorId() const
    return mInfectorId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param value infector id
 */
-void PlayerInfectedPacket::setInfectorId(const int32_t &value)
+void PlayerInfectedPacket::setInfectorId(const int32_t& value)
 {
    mInfectorId = value;
 }
-
-

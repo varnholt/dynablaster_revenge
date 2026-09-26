@@ -5,36 +5,31 @@
 
 class ExtraShakePacket : public Packet
 {
-   public:
+public:
+   //! write constructor
+   ExtraShakePacket(int uniqueId);
 
-      //! write constructor
-      ExtraShakePacket(int uniqueId);
+   //! read constructor
+   ExtraShakePacket();
 
-      //! read constructor
-      ExtraShakePacket();
+   //! destructor
+   virtual ~ExtraShakePacket();
 
-      //! destructor
-      virtual ~ExtraShakePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for item unique id
+   int getMapItemUniqueId() const;
 
-      //! getter for item unique id
-      int getMapItemUniqueId() const;
-
-
-   private:
-
-      //! unique id
-      int mMapItemUniqueId;
+private:
+   //! unique id
+   int mMapItemUniqueId;
 };
 
-#endif // ExtraShakePacket_H
-
-
+#endif  // ExtraShakePacket_H

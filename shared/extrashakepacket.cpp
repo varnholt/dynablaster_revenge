@@ -2,7 +2,6 @@
 #include "extrashakepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "ExtraShake"
@@ -13,25 +12,19 @@
 
    \param uniqueId unique id
 */
-ExtraShakePacket::ExtraShakePacket(int uniqueId)
- : Packet(Packet::EXTRASHAKE),
-   mMapItemUniqueId(uniqueId)
+ExtraShakePacket::ExtraShakePacket(int uniqueId) : Packet(Packet::EXTRASHAKE), mMapItemUniqueId(uniqueId)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-ExtraShakePacket::ExtraShakePacket()
-   : Packet(Packet::EXTRASHAKE),
-     mMapItemUniqueId(0)
+ExtraShakePacket::ExtraShakePacket() : Packet(Packet::EXTRASHAKE), mMapItemUniqueId(0)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -40,7 +33,6 @@ ExtraShakePacket::ExtraShakePacket()
 ExtraShakePacket::~ExtraShakePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -51,26 +43,23 @@ int ExtraShakePacket::getMapItemUniqueId() const
    return mMapItemUniqueId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void ExtraShakePacket::enqueue(QDataStream & out)
+void ExtraShakePacket::enqueue(BinaryWriter& out)
 {
    out << mMapItemUniqueId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void ExtraShakePacket::dequeue(QDataStream & in)
+void ExtraShakePacket::dequeue(BinaryReader& in)
 {
    in >> mMapItemUniqueId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -78,10 +67,5 @@ void ExtraShakePacket::dequeue(QDataStream & in)
 */
 void ExtraShakePacket::debug()
 {
-   qDebug(
-      "ExtraShakePacket: unique id: %d",
-      mMapItemUniqueId
-   );
+   qDebug("ExtraShakePacket: unique id: %d", mMapItemUniqueId);
 }
-
-

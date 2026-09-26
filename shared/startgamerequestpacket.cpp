@@ -2,11 +2,9 @@
 #include "startgamerequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "StartGameRequest"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -14,26 +12,19 @@
 
    \param name game's name
 */
-StartGameRequestPacket::StartGameRequestPacket(
-   int id
-)
- : Packet(Packet::STARTGAMEREQUEST),
-   mId(id)
+StartGameRequestPacket::StartGameRequestPacket(int id) : Packet(Packet::STARTGAMEREQUEST), mId(id)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-StartGameRequestPacket::StartGameRequestPacket()
-   : Packet(Packet::STARTGAMEREQUEST)
+StartGameRequestPacket::StartGameRequestPacket() : Packet(Packet::STARTGAMEREQUEST)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -42,7 +33,6 @@ StartGameRequestPacket::StartGameRequestPacket()
 StartGameRequestPacket::~StartGameRequestPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -53,28 +43,25 @@ int StartGameRequestPacket::getId()
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void StartGameRequestPacket::enqueue(QDataStream & out)
+void StartGameRequestPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void StartGameRequestPacket::dequeue(QDataStream & in)
+void StartGameRequestPacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -83,10 +70,5 @@ void StartGameRequestPacket::dequeue(QDataStream & in)
 void StartGameRequestPacket::debug()
 {
    // debug output login response
-   qDebug(
-      "StartGameRequestPacket:debug: id: %d",
-      mId
-   );
+   qDebug("StartGameRequestPacket:debug: id: %d", mId);
 }
-
-

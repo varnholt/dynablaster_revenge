@@ -8,41 +8,37 @@
 
 class StopGameResponsePacket : public Packet
 {
+public:
+   //! write constructor, -1 if not accepted
+   StopGameResponsePacket(int id, bool finished);
 
-   public:
+   //! read constructor
+   StopGameResponsePacket();
 
-      //! write constructor, -1 if not accepted
-      StopGameResponsePacket(int id, bool finished);
+   //! destructor
+   virtual ~StopGameResponsePacket();
 
-      //! read constructor
-      StopGameResponsePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~StopGameResponsePacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game id
+   int getId();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for stopped flag
+   bool isFinished();
 
-      //! getter for game id
-      int getId();
+private:
+   //! game id
+   int32_t mId;
 
-      //! getter for stopped flag
-      bool isFinished();
-
-
-   private:
-
-      //! game id
-      int32_t mId;
-
-      //! finished flag
-      bool mFinished;
+   //! finished flag
+   bool mFinished;
 };
 
-#endif // STOPGAMERESPONSEPACKET_H
+#endif  // STOPGAMERESPONSEPACKET_H

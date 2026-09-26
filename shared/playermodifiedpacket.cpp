@@ -2,34 +2,26 @@
 #include "playermodifiedpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "PlayerModified"
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-PlayerModifiedPacket::PlayerModifiedPacket(
-   Constants::Color color
-)
-   : Packet(Packet::PLAYERMODIFIED),
-     mColor(color)
+ */
+PlayerModifiedPacket::PlayerModifiedPacket(Constants::Color color) : Packet(Packet::PLAYERMODIFIED), mColor(color)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-PlayerModifiedPacket::PlayerModifiedPacket()
-   : Packet(Packet::PLAYERMODIFIED)
+PlayerModifiedPacket::PlayerModifiedPacket() : Packet(Packet::PLAYERMODIFIED)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -40,28 +32,25 @@ Constants::Color PlayerModifiedPacket::getColor() const
    return (Constants::Color)mColor;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void PlayerModifiedPacket::enqueue(QDataStream & out)
+void PlayerModifiedPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mColor;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void PlayerModifiedPacket::dequeue(QDataStream & in)
+void PlayerModifiedPacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mColor;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -70,9 +59,5 @@ void PlayerModifiedPacket::dequeue(QDataStream & in)
 void PlayerModifiedPacket::debug()
 {
    // output packet members
-   qDebug(
-      "PlayerModifiedPacket: player color: %d",
-      mColor
-   );
+   qDebug("PlayerModifiedPacket: player color: %d", mColor);
 }
-

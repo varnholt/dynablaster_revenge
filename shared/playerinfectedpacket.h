@@ -9,26 +9,21 @@
 
 class PlayerInfectedPacket : public Packet
 {
-
 public:
+   //! constructor
+   PlayerInfectedPacket();
 
-    //! constructor
-    PlayerInfectedPacket();
+   //! write constructor
+   PlayerInfectedPacket(int32_t playerId, Constants::SkullType type);
 
-    //! write constructor
-    PlayerInfectedPacket(
-       int32_t playerId,
-       Constants::SkullType type
-    );
+   //! debugs the member variables
+   void debug();
 
-    //! debugs the member variables
-    void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-    //! enqueues the member variables to datastream
-    void enqueue(QDataStream&);
-
-    //! dequeues the member variables from datastream
-    void dequeue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
    //! getter for player id
    int32_t getPlayerId() const;
@@ -40,7 +35,7 @@ public:
    int32_t getInfectorId() const;
 
    //! setter for infector id
-   void setInfectorId(const int32_t &value);
+   void setInfectorId(const int32_t& value);
 
    //! setter for extra position
    void setExtraPos(uint8_t x, uint8_t y);
@@ -51,9 +46,7 @@ public:
    //! getter for extra position y
    uint8_t getExtraPosY() const;
 
-
 private:
-
    //! player id
    int32_t mPlayerId;
 
@@ -70,4 +63,4 @@ private:
    uint8_t mExtraPosY;
 };
 
-#endif // PLAYERINFECTEDPACKET_H
+#endif  // PLAYERINFECTEDPACKET_H

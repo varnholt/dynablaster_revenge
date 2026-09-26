@@ -30,562 +30,506 @@ class BombermanClient : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   BombermanClient(/*const QString& host, const QString& nick*/);
 
-      //! constructor
-      BombermanClient(/*const QString& host, const QString& nick*/);
+   //! destructor
+   virtual ~BombermanClient();
 
-      //! destructor
-      virtual ~BombermanClient();
+   //! static getter for singleton instance
+   static BombermanClient* getInstance();
 
-      //! static getter for singleton instance
-      static BombermanClient* getInstance();
+   //! initialize client
+   void initialize();
 
-      //! initialize client
-      void initialize();
+   //! setter for hostname to connect to
+   void setHost(const QString& host);
 
-      //! setter for hostname to connect to
-      void setHost(const QString& host);
+   //! getter for hostname to connect to
+   const QString& getHost() const;
 
-      //! getter for hostname to connect to
-      const QString& getHost() const;
+   //! setter for nickname to use in login
+   void setNick(const QString& nick);
 
-      //! setter for nickname to use in login
-      void setNick(const QString& nick);
+   //! getter for nickname to use in login
+   const QString& getNick() const;
 
-      //! getter for nickname to use in login
-      const QString& getNick() const;
+   //! connect to server
+   void connectToServer();
 
-      //! connect to server
-      void connectToServer();
+   //! immediate login after connecting to server
+   void setLoginAfterConnect(bool loginAfterConnect);
 
-      //! immediate login after connecting to server
-      void setLoginAfterConnect(bool loginAfterConnect);
+   //! getter for list of games
+   QList<GameInformation>* getGames() const;
 
-      //! getter for list of games
-      QList<GameInformation>* getGames() const;
+   //! setter for game id
+   void setGameId(int id);
 
-      //! setter for game id
-      void setGameId(int id);
+   //! getter for game id
+   int getGameId() const;
 
-      //! getter for game id
-      int getGameId() const;
+   //! check if game id is valid
+   bool isGameIdValid() const;
 
-      //! check if game id is valid
-      bool isGameIdValid() const;
+   //! getter for game information
+   GameInformation* getGameInformation(int id) const;
 
-      //! getter for game information
-      GameInformation* getGameInformation(int id) const;
+   //! getter for current game information
+   GameInformation* getCurrentGameInformation() const;
 
-      //! getter for current game information
-      GameInformation* getCurrentGameInformation() const;
+   //! setter for player id
+   void setPlayerId(int);
 
-      //! setter for player id
-      void setPlayerId(int);
+   //! getter for player id
+   int getPlayerId() const;
 
-      //! getter for player id
-      int getPlayerId() const;
+   //! is player game owner
+   bool isPlayerOwner() const;
 
-      //! is player game owner
-      bool isPlayerOwner() const;
+   //! getter for player color by player id
+   Constants::Color getColor(int playerId) const;
 
-      //! getter for player color by player id
-      Constants::Color getColor(int playerId) const;
+   //! get list of players
+   QList<PlayerInfo*> getPlayerInfoList() const;
 
-      //! get list of players
-      QList<PlayerInfo*> getPlayerInfoList() const;
+   //! get map of player
+   QMap<int, PlayerInfo*>* getPlayerInfoMap() const;
 
-      //! get map of player
-      QMap<int, PlayerInfo*>* getPlayerInfoMap() const;
+   //! add player info to map
+   void addPlayerInfo(int id, PlayerInfo* info);
 
-      //! add player info to map
-      void addPlayerInfo(int id, PlayerInfo* info);
+   //! remove player info
+   void removePlayerInfo(int id);
 
-      //! remove player info
-      void removePlayerInfo(int id);
+   //! get info object for given player id
+   PlayerInfo* getPlayerInfo(int id) const;
 
-      //! get info object for given player id
-      PlayerInfo* getPlayerInfo(int id) const;
+   //! getter for position interpolation
+   PositionInterpolation* getPositionInterpolation() const;
 
-      //! getter for position interpolation
-      PositionInterpolation* getPositionInterpolation() const;
+   //! setter for current player info
+   void setCurrentPlayerInfo(PlayerInfo* info);
 
-      //! setter for current player info
-      void setCurrentPlayerInfo(PlayerInfo* info);
+   //! getter for current player info
+   PlayerInfo* getCurrentPlayerInfo() const;
 
-      //! getter for current player info
-      PlayerInfo* getCurrentPlayerInfo() const;
+   //! getter for message
+   const QString& getMessage() const;
 
-      //! getter for message
-      const QString& getMessage() const;
+   //! setter for message
+   void setMessage(const QString& message);
 
-      //! setter for message
-      void setMessage(const QString& message);
+   //! setter for connected state
+   void setConnected(bool connected);
 
-      //! setter for connected state
-      void setConnected(bool connected);
+   //! check if client is connected
+   bool isConnected() const;
 
-      //! check if client is connected
-      bool isConnected() const;
+   //! check if we're hosting games
+   bool isHosting() const;
 
-      //! check if we're hosting games
-      bool isHosting() const;
+   //! getter for single/multi player mode
+   bool isSinglePlayer() const;
 
-      //! getter for single/multi player mode
-      bool isSinglePlayer() const;
+   //! getter for game mode
+   Constants::GameMode getGameMode() const;
 
-      //! getter for game mode
-      Constants::GameMode getGameMode() const;
+   //! setter for game mode
+   void setGameMode(const Constants::GameMode& mode);
 
-      //! setter for game mode
-      void setGameMode(const Constants::GameMode &mode);
+   // communicate with menus
 
+   //! check if main menu is active
+   bool isMainMenuActive() const;
 
-      // communicate with menus
+signals:
 
-      //! check if main menu is active
-      bool isMainMenuActive() const;
+   // visualization
 
+   void zoomIn(bool state);
+   void zoomOut(bool state);
 
-   signals:
+   //! signal player position
+   void setPlayerPosition(int id, float x, float y, float ang);
 
-      // visualization
+   //! signal player speed
+   void setPlayerSpeed(int id, float x, float y, float ang);
 
-      void zoomIn(bool state);
-      void zoomOut(bool state);
+   //! signal mapitem creation
+   void createMapItem(MapItem* item);
 
-      //! signal player position
-      void setPlayerPosition(int id, float x, float y, float ang);
+   //! signal mapitem removal
+   void removeMapItem(MapItem* item);
 
-      //! signal player speed
-      void setPlayerSpeed(int id, float x, float y, float ang);
+   //! signal mapitem destruction
+   void destroyMapItem(MapItem* item, float flameCount);
 
-      //! signal mapitem creation
-      void createMapItem(MapItem *item);
+   //! signal detonation
+   void detonation(int x, int y, int up, int down, int left, int right, float intense);
 
-      //! signal mapitem removal
-      void removeMapItem(MapItem *item);
+   //! signal add player
+   void addPlayer(int, const QString&, Constants::Color);
 
-      //! signal mapitem destruction
-      void destroyMapItem(MapItem *item, float flameCount);
+   //! signal remove player
+   void removePlayer(int);
 
-      //! signal detonation
-      void detonation(
-         int x,
-         int y,
-         int up,
-         int down,
-         int left,
-         int right,
-         float intense
-      );
+   //! signal game list update
+   void gamesListUpdated(const QList<GameInformation>&);
 
-      //! signal add player
-      void addPlayer(int, const QString&, Constants::Color);
+   //! signal our player id
+   void playerId(int id);
 
-      //! signal remove player
-      void removePlayer(int);
+   //! communicate playfield scale
+   void playfieldScale(float scaleX, float scaleY);
 
-      //! signal game list update
-      void gamesListUpdated(const QList<GameInformation>&);
+   //! communicate playfield size
+   void playfieldSize(int width, int height);
 
-      //! signal our player id
-      void playerId(int id);
+   //! signal map item movement
+   void moveMapItem(MapItem* item, Constants::Direction, float speed, int x, int y);
 
-      //! communicate playfield scale
-      void playfieldScale(float scaleX, float scaleY);
+   //! signal level loading
+   void loadLevel(const QString& level);
 
-      //! communicate playfield size
-      void playfieldSize(int width, int height);
+   //! signal a block shake
+   void shakeBlock(MapItem* item);
 
-      //! signal map item movement
-      void moveMapItem(
-         MapItem *item,
-         Constants::Direction,
-         float speed,
-         int x,
-         int y
-      );
+   //! signal a player was infected
+   void playerInfected(int id, Constants::SkullType, int infectorId, int extraX, int extraY);
 
-      //! signal level loading
-      void loadLevel(const QString& level);
+   //! play rumble effect if possible
+   void rumble(float intensity, int ms);
 
-      //! signal a block shake
-      void shakeBlock(MapItem* item);
+   // game workflow and menus
 
-      //! signal a player was infected
-      void playerInfected(
-         int id,
-         Constants::SkullType,
-         int infectorId,
-         int extraX,
-         int extraY
-      );
+   //! connected to server
+   void connected();
 
-      //! play rumble effect if possible
-      void rumble(float intensity, int ms);
+   //! disconnected from server
+   void disconnected();
 
+   //! login response
+   void loginResponse(bool);
 
-      // game workflow and menus
+   //! create game response
+   void createGameResponse(bool success, int gameId, bool owner);
 
-      //! connected to server
-      void connected();
+   //! join game response
+   void joinGameResponse(bool);
 
-      //! disconnected from server
-      void disconnected();
+   //! game start response
+   void gameStarted();
 
-      //! login response
-      void loginResponse(bool);
+   //! game stopped response
+   void gameStopped();
 
-      //! create game response
-      void createGameResponse(
-         bool success,
-         int gameId,
-         bool owner
-      );
+   //! message received
+   void messageReceived(int senderId, const QString& message, bool finished);
 
-      //! join game response
-      void joinGameResponse(bool);
+   //! time left during coutdown
+   void countdown(int left);
 
-      //! game start response
-      void gameStarted();
+   //! list of players updated
+   void playerInfoMapUpdated(QMap<int, PlayerInfo*>*);
 
-      //! game stopped response
-      void gameStopped();
+   //! show the game
+   void showGame();
 
-      //! message received
-      void messageReceived(
-         int senderId,
-         const QString& message,
-         bool finished
-      );
+   //! show the menu
+   void showMenu();
 
-      //! time left during coutdown
-      void countdown(int left);
+   //! show the main menu
+   void showMainMenu();
 
-      //! list of players updated
-      void playerInfoMapUpdated(QMap<int, PlayerInfo*>*);
+   //! extra has been removed
+   void extraRemoved(int x, int y, bool destroyed, Constants::ExtraType extra, int playerId = -1);
 
-      //! show the game
-      void showGame();
+   // game stats
 
-      //! show the menu
-      void showMenu();
+   //! server time changed
+   void timeChanged(int, int);
 
-      //! show the main menu
-      void showMainMenu();
+   //! player's score changed
+   void scoreChanged(int);
 
-      //! extra has been removed
-      void extraRemoved(
-         int x,
-         int y,
-         bool destroyed,
-         Constants::ExtraType extra,
-         int playerId = -1
-      );
+   // server
 
+   void hosting(bool);
 
-      // game stats
+public slots:
 
-      //! server time changed
-      void timeChanged(int, int);
+   // key event handlers
 
-      //! player's score changed
-      void scoreChanged(int);
+   //! process key pressed event handed from gui
+   void keyPressed(QKeyEvent*);
 
+   //! process key released event handed from gui
+   void keyReleased(QKeyEvent*);
 
-      // server
+   //! release all keys
+   void releaseAllKeys();
 
-      void hosting(bool);
+   //! process key pressed (not given as key event)
+   void processKeyPressed(int key);
 
+   //! process key released
+   void processKeyReleased(int key);
 
-   public slots:
+   // game workflow
 
-      // key event handlers
+   //! try to log in
+   void login(const QString& nick = tr("developer"));
 
-      //! process key pressed event handed from gui
-      void keyPressed(QKeyEvent*);
+   //! ask the server to stop the game
+   void stopGame();
 
-      //! process key released event handed from gui
-      void keyReleased(QKeyEvent*);
+   //! list games
+   void listGames();
 
-      //! release all keys
-      void releaseAllKeys();
+   //! create a game
+   void createGame(
+      const QString& name,
+      const QString& level,
+      int rounds,
+      int duration,
+      int maxPlayers,
+      bool extraBombEnabled,
+      bool extraFlameEnabled,
+      bool extraSpeedupEnabled,
+      bool extraKickEnabled,
+      bool extraSkullsEnabled,
+      Constants::Dimension dimension
+   );
 
-      //! process key pressed (not given as key event)
-      void processKeyPressed(int key);
+   //! automatically create a game
+   void createGameAutomatic();
 
-      //! process key released
-      void processKeyReleased(int key);
+   //! join a game
+   void joinGame(int game = 1);
 
+   //! start a game
+   void startGame(int game = 1);
 
-      // game workflow
+   //! stop a game
+   void stopGame(int game);
 
-      //! try to log in
-      void login(const QString& nick = tr("developer"));
+   //! send a message to others
+   void sendMessage(const QString& message, bool finishedTyping, int receiverId = -1);
 
-      //! ask the server to stop the game
-      void stopGame();
+   //! host a game
+   void host();
 
-      //! list games
-      void listGames();
+   //! initialize bots
+   void initializeBots();
 
-      //! create a game
-      void createGame(
-         const QString& name,
-         const QString& level,
-         int rounds,
-         int duration,
-         int maxPlayers,
-         bool extraBombEnabled,
-         bool extraFlameEnabled,
-         bool extraSpeedupEnabled,
-         bool extraKickEnabled,
-         bool extraSkullsEnabled,
-         Constants::Dimension dimension
-      );
+   // functions for communication from or to the menu
 
-      //! automatically create a game
-      void createGameAutomatic();
+   //! process login request
+   void loginRequest(const QString& host, const QString& nick);
 
-      //! join a game
-      void joinGame(int game = 1);
+   //! game list request
+   void gameListRequest();
 
-      //! start a game
-      void startGame(int game = 1);
+   //! request leave game
+   void leaveGameRequest();
 
-      //! stop a game
-      void stopGame(int game);
+   //! player is idle
+   void idle(bool idle);
 
-      //! send a message to others
-      void sendMessage(
-         const QString& message,
-         bool finishedTyping,
-         int receiverId = -1
-      );
+   //! level loaded
+   void levelLoaded(const QString& path);
 
-      //! host a game
-      void host();
+   //! menu page changed
+   void setMainMenuActive(bool active);
 
-      //! initialize bots
-      void initializeBots();
+   //! show ip addresses
+   void showIps();
 
+private slots:
 
-      // functions for communication from or to the menu
+   //! poll for connection progress and incoming data, once per tick
+   void poll();
 
-      //! process login request
-      void loginRequest(
-         const QString& host,
-         const QString& nick
-      );
+   //! connect client
+   void clientConnect();
 
-      //! game list request
-      void gameListRequest();
+   //! disconnect client
+   void clientDisconnect();
 
-      //! request leave game
-      void leaveGameRequest();
+   //! process a packet
+   void processPacket(Packet* packet);
 
-      //! player is idle
-      void idle(bool idle);
+   //! demo mode is finished
+   void playbackFinished();
 
-      //! level loaded
-      void levelLoaded(const QString& path);
+   //! game state changed
+   void gameStateChanged();
 
-      //! menu page changed
-      void setMainMenuActive(bool active);
+   //! clear list with player info
+   void clearPlayerInfoMap();
 
-      //! show ip addresses
-      void showIps();
+private:
+   void processCreateGameResponse(Packet* packet);
+   void processJoinGameResponse(Packet* packet);
+   void processListGameResponse(Packet* packet);
+   void processLoginResponse(Packet* packet);
+   void processPlayerKilled(Packet* packet);
+   void processPlayerInfected(Packet* packet);
+   void processDetonation(Packet* packet);
+   void processError(Packet* packet);
+   void processPosition(Packet* packet);
+   void processMapItemCreated(Packet* packet);
+   void processMapItemMove(Packet* packet);
+   void processExtraMapItemCreated(Packet* packet);
+   void processGameStats(Packet* packet);
+   void processExtraMapItemDestroyed(Packet* packet);
+   void processMapItemRemoved(Packet* packet);
+   void processStartGameResponse(Packet* packet);
+   void processStopGameResponse(Packet* packet);
+   void processGameEvent(Packet* packet);
+   void processMessage(Packet* packet);
+   void processTime(Packet* packet);
+   void processCountdown(Packet* packet);
+   void processLeaveGameResponse(Packet* packet);
+   void processExtraShake(Packet* packet);
 
+   //! send a packet
+   void send(Packet* packet);
 
-   private slots:
+   //! check for packets
+   bool packetAvailable();
 
-      //! poll for connection progress and incoming data, once per tick
-      void poll();
+   //! read and dispatch all available data from the socket
+   void readData();
 
-      //! connect client
-      void clientConnect();
+   //! tear down whatever connection attempt or connection is in progress
+   void disconnectFromServer();
 
-      //! disconnect client
-      void clientDisconnect();
+   //! show a generic connection-failure message to the user
+   void reportConnectionError(const char* reason);
 
-      //! process a packet
-      void processPacket(Packet* packet);
+   //! get mapitem by mapitem id
+   MapItem* getMapItem(int id) const;
 
-      //! demo mode is finished
-      void playbackFinished();
+   //! broadcast data about added players
+   void broadcastAddPlayerData();
 
-      //! game state changed
-      void gameStateChanged();
+   //! broadcast player start positions
+   void broadcastPlayerStartPositions();
 
-      //! clear list with player info
-      void clearPlayerInfoMap();
+   //! send current keys pressed
+   void sendKeysPressedPacket();
 
+   //! remove bomb key flag from key pressed combination
+   void removeBombKeyFlag();
 
-   private:
+   // ingame messaging
 
-      void processCreateGameResponse(Packet* packet);
-      void processJoinGameResponse(Packet* packet);
-      void processListGameResponse(Packet* packet);
-      void processLoginResponse(Packet* packet);
-      void processPlayerKilled(Packet* packet);
-      void processPlayerInfected(Packet* packet);
-      void processDetonation(Packet* packet);
-      void processError(Packet* packet);
-      void processPosition(Packet* packet);
-      void processMapItemCreated(Packet* packet);
-      void processMapItemMove(Packet* packet);
-      void processExtraMapItemCreated(Packet* packet);
-      void processGameStats(Packet* packet);
-      void processExtraMapItemDestroyed(Packet* packet);
-      void processMapItemRemoved(Packet* packet);
-      void processStartGameResponse(Packet* packet);
-      void processStopGameResponse(Packet* packet);
-      void processGameEvent(Packet* packet);
-      void processMessage(Packet* packet);
-      void processTime(Packet* packet);
-      void processCountdown(Packet *packet);
-      void processLeaveGameResponse(Packet* packet);
-      void processExtraShake(Packet* packet);
+   //! getter for ingame messaging flag
+   bool isIngameMessagingActive() const;
 
-      //! send a packet
-      void send(Packet *packet);
+   //! setter for ingame messaging flag
+   void setIngameMessagingActive(bool active);
 
-      //! check for packets
-      bool packetAvailable(QDataStream& source);
+   //! toggle ingame messaging
+   void toggleIngameMessaging();
 
-      //! read and dispatch all available data from the socket
-      void readData();
+   //! debug keyboard input
+   void debugKeyboardInput();
 
-      //! tear down whatever connection attempt or connection is in progress
-      void disconnectFromServer();
+   //! reset client after disonnect or error
+   void resetGameData();
 
-      //! show a generic connection-failure message to the user
-      void reportConnectionError(const char* reason);
+   //! reset client state
+   void resetClientState();
 
-      //! get mapitem by mapitem id
-      MapItem* getMapItem(int id) const;
+   //! init playback
+   void initializePlayback();
 
-      //! broadcast data about added players
-      void broadcastAddPlayerData();
+   //! list network devices
+   QList<QString> getLocalIps() const;
 
-      //! broadcast player start positions
-      void broadcastPlayerStartPositions();
+   // members
 
-      //! send current keys pressed
-      void sendKeysPressedPacket();
+   //! keys currently pressed
+   int mKeysPressed;
 
-      //! remove bomb key flag from key pressed combination
-      void removeBombKeyFlag();
+   //! flag indicating bomb key was released
+   bool mBombReleased;
 
+   //! stream socket to server, null unless connected or connecting
+   NET_StreamSocket* mSocket;
 
-      // ingame messaging
+   //! host address pending resolution, null once resolved (or if not resolving)
+   NET_Address* mAddress;
 
-      //! getter for ingame messaging flag
-      bool isIngameMessagingActive() const;
+   //! drives poll() once per tick
+   QTimer* mPollTimer;
 
-      //! setter for ingame messaging flag
-      void setIngameMessagingActive(bool active);
+   //! incoming byte buffer
+   PacketStreamBuffer mBuffer;
 
-      //! toggle ingame messaging
-      void toggleIngameMessaging();
+   //! blocksize of packet which is received from server
+   uint16_t mBlockSize;
 
-      //! debug keyboard input
-      void debugKeyboardInput();
+   //! player id
+   int mId;
 
-      //! reset client after disonnect or error
-      void resetGameData();
+   //! game id
+   int mGameId;
 
-      //! reset client state
-      void resetClientState();
+   //! player alive
+   bool mDead;
 
-      //! init playback
-      void initializePlayback();
+   //! map items
+   QMap<int, MapItem*> mMapItems;
 
-      //! list network devices
-      QList<QString> getLocalIps() const;
+   //! host name
+   QString mHost;
 
+   //! nick name
+   QString mNick;
 
-      // members
+   //! list of games available
+   mutable QList<GameInformation> mGames;
 
-      //! keys currently pressed
-      int mKeysPressed;
+   //! connected flag
+   bool mConnected;
 
-      //! flag indicating bomb key was released
-      bool mBombReleased;
+   //! login is requested after connect to host
+   bool mLoginAfterConnect;
 
-      //! stream socket to server, null unless connected or connecting
-      NET_StreamSocket* mSocket;
+   //! server
+   Server* mServer;
 
-      //! host address pending resolution, null once resolved (or if not resolving)
-      NET_Address* mAddress;
+   //! ingame message to send
+   QString mMessage;
 
-      //! drives poll() once per tick
-      QTimer* mPollTimer;
+   //! map id <-> player info object
+   mutable QMap<int, PlayerInfo*> mPlayerInfo;
 
-      //! incoming byte buffer
-      PacketStreamBuffer mBuffer;
+   //! current player info
+   QPointer<PlayerInfo> mCurrentPlayerInfo;
 
-      //! blocksize of packet which is received from server
-      uint16_t mBlockSize;
+   //! getter for client singleton
+   static BombermanClient* mInstance;
 
-      //! player id
-      int mId;
+   //! position interpolation
+   PositionInterpolation* mPositionInterpolation;
 
-      //! game id
-      int mGameId;
+   //! typing activated
+   bool mIngameMessagingActive;
 
-      //! player alive
-      bool mDead;
+   //! main menu active
+   bool mMainMenuActive;
 
-      //! map items
-      QMap<int,MapItem*> mMapItems;
+   //! bot factory
+   BotFactory* mBotFactory;
 
-      //! host name
-      QString mHost;
-
-      //! nick name
-      QString mNick;
-
-      //! list of games available
-      mutable QList<GameInformation> mGames;
-
-      //! connected flag
-      bool mConnected;
-
-      //! login is requested after connect to host
-      bool mLoginAfterConnect;
-
-      //! server
-      Server* mServer;
-
-      //! ingame message to send
-      QString mMessage;
-
-      //! map id <-> player info object
-      mutable QMap<int, PlayerInfo*> mPlayerInfo;
-
-      //! current player info
-      QPointer<PlayerInfo> mCurrentPlayerInfo;
-
-      //! getter for client singleton
-      static BombermanClient* mInstance;
-
-      //! position interpolation
-      PositionInterpolation* mPositionInterpolation;
-
-      //! typing activated
-      bool mIngameMessagingActive;
-
-      //! main menu active
-      bool mMainMenuActive;
-
-      //! bot factory
-      BotFactory* mBotFactory;
-
-      //! game mode
-      Constants::GameMode mGameMode;
+   //! game mode
+   Constants::GameMode mGameMode;
 };
 
 #endif
-

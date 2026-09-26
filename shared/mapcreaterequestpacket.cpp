@@ -2,7 +2,6 @@
 #include "mapcreaterequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "MapCreateRequest"
@@ -25,28 +24,25 @@ MapCreateRequestPacket::MapCreateRequestPacket(
    int extraFlameCount,
    const QList<QPoint>& startPositions
 )
- : Packet(Packet::MAPCREATEREQUEST),
-   mWidth(width),
-   mHeight(height),
-   mStoneCount(stoneCount),
-   mExtraBombCount(extraBombCount),
-   mExtraFlameCount(extraFlameCount),
-   mStartPositions(startPositions)
+    : Packet(Packet::MAPCREATEREQUEST),
+      mWidth(width),
+      mHeight(height),
+      mStoneCount(stoneCount),
+      mExtraBombCount(extraBombCount),
+      mExtraFlameCount(extraFlameCount),
+      mStartPositions(startPositions)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-MapCreateRequestPacket::MapCreateRequestPacket()
-   : Packet(Packet::MAPCREATEREQUEST)
+MapCreateRequestPacket::MapCreateRequestPacket() : Packet(Packet::MAPCREATEREQUEST)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -56,12 +52,11 @@ MapCreateRequestPacket::~MapCreateRequestPacket()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void MapCreateRequestPacket::enqueue(QDataStream & out)
+void MapCreateRequestPacket::enqueue(BinaryWriter& out)
 {
    out << mWidth;
    out << mHeight;
@@ -71,22 +66,14 @@ void MapCreateRequestPacket::enqueue(QDataStream & out)
    out << mStartPositions;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void MapCreateRequestPacket::dequeue(QDataStream & in)
+void MapCreateRequestPacket::dequeue(BinaryReader& in)
 {
-   in
-      >> mWidth
-      >> mHeight
-      >> mStoneCount
-      >> mExtraBombCount
-      >> mExtraFlameCount
-      >> mStartPositions;
+   in >> mWidth >> mHeight >> mStoneCount >> mExtraBombCount >> mExtraFlameCount >> mStartPositions;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -104,5 +91,3 @@ void MapCreateRequestPacket::debug()
       mExtraFlameCount
    );
 }
-
-

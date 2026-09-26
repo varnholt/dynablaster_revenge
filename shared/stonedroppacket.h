@@ -5,46 +5,37 @@
 
 class StoneDropPacket : public Packet
 {
-   public:
+public:
+   //! write constructor
+   StoneDropPacket(int8_t x, int8_t y);
 
-      //! write constructor
-      StoneDropPacket(
-         int8_t x,
-         int8_t y
-      );
+   //! read constructor
+   StoneDropPacket();
 
-      //! read constructor
-      StoneDropPacket();
+   //! destructor
+   virtual ~StoneDropPacket();
 
-      //! destructor
-      virtual ~StoneDropPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for stone x position
+   int8_t getX() const;
 
+   //! getter for stone y position
+   int8_t getY() const;
 
-      //! getter for stone x position
-      int8_t getX() const;
+private:
+   //! x position
+   int8_t mX;
 
-      //! getter for stone y position
-      int8_t getY() const;
-
-
-   private:
-
-      //! x position
-      int8_t mX;
-
-      //! y position
-      int8_t mY;
+   //! y position
+   int8_t mY;
 };
 
-#endif // STONEDROPPACKET_H
-
-
+#endif  // STONEDROPPACKET_H

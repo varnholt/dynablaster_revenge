@@ -9,17 +9,9 @@
 
 class JoinGameResponsePacket : public Packet
 {
-
 public:
-
    //! write constructor
-   JoinGameResponsePacket(
-      bool success,
-      int32_t gameid,
-      int32_t id,
-      const QString& nick,
-      Constants::Color color
-   );
+   JoinGameResponsePacket(bool success, int32_t gameid, int32_t id, const QString& nick, Constants::Color color);
 
    //! read constructor
    JoinGameResponsePacket();
@@ -31,10 +23,10 @@ public:
    void debug();
 
    //! enqueues the member variables to datastream
-   void enqueue(QDataStream&);
+   void enqueue(BinaryWriter&);
 
    //! dequeues the member variables from datastream
-   void dequeue(QDataStream&);
+   void dequeue(BinaryReader&);
 
    //! setter for the game id
    void setGameId(int32_t id);
@@ -60,9 +52,7 @@ public:
    //! getter for player color
    Constants::Color getColor() const;
 
-
 private:
-
    //! successfully joined
    bool mSuccess;
 
@@ -80,4 +70,3 @@ private:
 };
 
 #endif
-

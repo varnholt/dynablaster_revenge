@@ -9,16 +9,9 @@
 
 class LoginResponsePacket : public Packet
 {
-
 public:
-
    //! write constructor
-   LoginResponsePacket(
-      bool broadcasted,
-      int32_t id,
-      const QString& nick,
-      const ServerConfiguration& serverConfig
-   );
+   LoginResponsePacket(bool broadcasted, int32_t id, const QString& nick, const ServerConfiguration& serverConfig);
 
    //! read constructor
    LoginResponsePacket();
@@ -30,10 +23,10 @@ public:
    void debug();
 
    //! enqueues the member variables to datastream
-   void enqueue(QDataStream&);
+   void enqueue(BinaryWriter&);
 
    //! dequeues the member variables from datastream
-   void dequeue(QDataStream&);
+   void dequeue(BinaryReader&);
 
    //! setter for the id
    void setId(int32_t id);
@@ -50,9 +43,7 @@ public:
    //! getter for server configuration
    const ServerConfiguration& getServerConfiguration() const;
 
-
 private:
-
    //! individual allowance or broadcast packet
    bool mBroadcast;
 
@@ -64,8 +55,6 @@ private:
 
    //! server configuration data
    ServerConfiguration mServerConfiguration;
-
 };
 
 #endif
-

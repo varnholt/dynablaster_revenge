@@ -1,15 +1,18 @@
 #ifndef PACKET_H
 #define PACKET_H
 
-#include <QByteArray>
+#include <cstdint>
+#include <vector>
+
+#include <QString>
 #include <QTime>
 
+#include "binaryreader.h"
+#include "binarywriter.h"
 
-class Packet : public QByteArray
+class Packet : public std::vector<uint8_t>
 {
-
 public:
-
    //! packet types available
    enum TYPE
    {
@@ -65,16 +68,16 @@ public:
    void serialize();
 
    //! deserializes a packet
-   static Packet* deserialize(QDataStream&);
+   static Packet* deserialize(BinaryReader&);
 
    //! debug function
    virtual void debug() = 0;
 
    //! enqueue member variables
-   virtual void enqueue(QDataStream&) = 0;
+   virtual void enqueue(BinaryWriter&) = 0;
 
    //! dequeue member variables
-   virtual void dequeue(QDataStream&) = 0;
+   virtual void dequeue(BinaryReader&) = 0;
 
    //! getter for packet size
    int16_t getSize();
@@ -91,9 +94,10 @@ public:
    //! getter for packet name
    const QString& getPacketName() const;
 
+   //! raw byte pointer, kept for existing socket-write call sites
+   const char* constData() const;
 
 protected:
-
    //! packet size
    int16_t mPacketSize;
 

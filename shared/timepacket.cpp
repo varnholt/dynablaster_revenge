@@ -2,34 +2,26 @@
 #include "timepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "Time"
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-TimePacket::TimePacket(
-   int left
-)
-   : Packet(Packet::TIME),
-     mTimeLeft(left)
+ */
+TimePacket::TimePacket(int left) : Packet(Packet::TIME), mTimeLeft(left)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-TimePacket::TimePacket()
-   : Packet(Packet::TIME)
+TimePacket::TimePacket() : Packet(Packet::TIME)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -40,28 +32,25 @@ int TimePacket::getTimeLeft() const
    return mTimeLeft;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void TimePacket::enqueue(QDataStream & out)
+void TimePacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mTimeLeft;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void TimePacket::dequeue(QDataStream & in)
+void TimePacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mTimeLeft;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -70,9 +59,5 @@ void TimePacket::dequeue(QDataStream & in)
 void TimePacket::debug()
 {
    // output packet members
-   qDebug(
-      "TimePacket: game time left: %d",
-      mTimeLeft
-   );
+   qDebug("TimePacket: game time left: %d", mTimeLeft);
 }
-

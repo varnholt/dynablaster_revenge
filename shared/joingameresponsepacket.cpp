@@ -2,7 +2,6 @@
 #include "joingameresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "JoinGameResponse"
@@ -13,38 +12,21 @@
 
    \param nickName player's nick
 */
-JoinGameResponsePacket::JoinGameResponsePacket(
-   bool success,
-   int32_t gameId,
-   int32_t playerId,
-   const QString& nick,
-   Constants::Color color
-)
- : Packet(Packet::JOINGAMERESPONSE),
-   mSuccess(success),
-   mGameId(gameId),
-   mPlayerId(playerId),
-   mNick(nick),
-   mColor(color)
+JoinGameResponsePacket::JoinGameResponsePacket(bool success, int32_t gameId, int32_t playerId, const QString& nick, Constants::Color color)
+    : Packet(Packet::JOINGAMERESPONSE), mSuccess(success), mGameId(gameId), mPlayerId(playerId), mNick(nick), mColor(color)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
 JoinGameResponsePacket::JoinGameResponsePacket()
- : Packet(Packet::JOINGAMERESPONSE),
-   mSuccess(false),
-   mGameId(-1),
-   mPlayerId(-1),
-   mColor(Constants::ColorWhite)
+    : Packet(Packet::JOINGAMERESPONSE), mSuccess(false), mGameId(-1), mPlayerId(-1), mColor(Constants::ColorWhite)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -53,7 +35,6 @@ JoinGameResponsePacket::JoinGameResponsePacket()
 JoinGameResponsePacket::~JoinGameResponsePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -64,7 +45,6 @@ void JoinGameResponsePacket::setPlayerId(int32_t tmpId)
    mPlayerId = tmpId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player's id
@@ -73,7 +53,6 @@ int32_t JoinGameResponsePacket::getPlayerId() const
 {
    return mPlayerId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -84,7 +63,6 @@ void JoinGameResponsePacket::setGameId(int32_t id)
    mGameId = id;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game's id
@@ -94,42 +72,29 @@ int32_t JoinGameResponsePacket::getGameId() const
    return mGameId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void JoinGameResponsePacket::enqueue(QDataStream & out)
+void JoinGameResponsePacket::enqueue(BinaryWriter& out)
 {
    // write player data
-   out
-      << mSuccess
-      << mGameId
-      << mPlayerId
-      << mNick
-      << (int32_t)mColor;
+   out << mSuccess << mGameId << mPlayerId << mNick << (int32_t)mColor;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void JoinGameResponsePacket::dequeue(QDataStream & in)
+void JoinGameResponsePacket::dequeue(BinaryReader& in)
 {
    int32_t color = 0;
 
    // read player data
-   in
-      >> mSuccess
-      >> mGameId
-      >> mPlayerId
-      >> mNick
-      >> color;
+   in >> mSuccess >> mGameId >> mPlayerId >> mNick >> color;
 
    mColor = (Constants::Color)color;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -138,15 +103,8 @@ void JoinGameResponsePacket::dequeue(QDataStream & in)
 void JoinGameResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "JoinGameResponsePacket:loginresponse: game: %d, player: %d (%s)",
-      mGameId,
-      mPlayerId,
-      (mSuccess) ? "accepted" : "denied"
-   );
+   qDebug("JoinGameResponsePacket:loginresponse: game: %d, player: %d (%s)", mGameId, mPlayerId, (mSuccess) ? "accepted" : "denied");
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -166,7 +124,6 @@ bool JoinGameResponsePacket::isSuccessful() const
    return mSuccess;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param color player color
@@ -176,7 +133,6 @@ void JoinGameResponsePacket::setColor(Constants::Color color)
    mColor = color;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return player color
@@ -185,4 +141,3 @@ Constants::Color JoinGameResponsePacket::getColor() const
 {
    return mColor;
 }
-

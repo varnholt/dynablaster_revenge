@@ -39,6 +39,10 @@ FetchContent_MakeAvailable(SDL3_net)
 set(DYNABLASTER_SHARED_SOURCES
     ../shared/blockmapitem.cpp
     ../shared/blockmapitem.h
+    ../shared/binaryreader.cpp
+    ../shared/binaryreader.h
+    ../shared/binarywriter.cpp
+    ../shared/binarywriter.h
     ../shared/bombkickanimation.cpp
     ../shared/bombkickanimation.h
     ../shared/bombmapitem.cpp

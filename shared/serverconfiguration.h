@@ -1,29 +1,27 @@
 #ifndef SERVERCONFIGURATION_H
 #define SERVERCONFIGURATION_H
 
-#include <QDataStream>
+class BinaryWriter;
+class BinaryReader;
 
 class ServerConfiguration
 {
-   public:
+public:
+   //! constructor
+   ServerConfiguration();
 
-      //! constructor
-      ServerConfiguration();
+   //! setter for bomb tick time
+   void setBombTickTime(int time);
 
-      //! setter for bomb tick time
-      void setBombTickTime(int time);
+   //! getter for bomb tick time
+   int getBombTickTime() const;
 
-      //! getter for bomb tick time
-      int getBombTickTime() const;
-
-
-   protected:
-
-      //! bomb tick time
-      int mBombTickTime;
+protected:
+   //! bomb tick time
+   int mBombTickTime;
 };
 
-QDataStream& operator<<(QDataStream& out, const ServerConfiguration& config);
-QDataStream& operator>>(QDataStream& in, ServerConfiguration& config);
+BinaryWriter& operator<<(BinaryWriter& out, const ServerConfiguration& config);
+BinaryReader& operator>>(BinaryReader& in, ServerConfiguration& config);
 
-#endif // SERVERCONFIGURATION_H
+#endif  // SERVERCONFIGURATION_H

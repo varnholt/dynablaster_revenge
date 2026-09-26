@@ -9,40 +9,34 @@ class ExtraMapItem;
 
 class ExtraMapItemCreatedPacket : public MapItemCreatedPacket
 {
+public:
+   //! write constructor
+   ExtraMapItemCreatedPacket(ExtraMapItem*);
 
-   public:
+   //! read constructor
+   ExtraMapItemCreatedPacket();
 
-      //! write constructor
-      ExtraMapItemCreatedPacket(ExtraMapItem*);
+   //! enqueues the member variables to datastream
+   virtual void enqueue(BinaryWriter&);
 
-      //! read constructor
-      ExtraMapItemCreatedPacket();
+   //! dequeues the member variables from datastream
+   virtual void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      virtual void enqueue(QDataStream&);
+   //! getter for extra type
+   int32_t getExtraType() const;
 
-      //! dequeues the member variables from datastream
-      virtual void dequeue(QDataStream&);
+   //! setter for different skull sides
+   void setSkullFaces(const QList<Constants::SkullType>& faces);
 
-      //! getter for extra type
-      int32_t getExtraType() const;
+   //! getter for skull sides
+   QList<Constants::SkullType> getSkullFaces() const;
 
-      //! setter for different skull sides
-      void setSkullFaces(const QList<Constants::SkullType>& faces);
+private:
+   //! extra type
+   int32_t mExtraType;
 
-      //! getter for skull sides
-      QList<Constants::SkullType> getSkullFaces() const;
-
-
-   private:
-
-      //! extra type
-      int32_t mExtraType;
-
-      //! skull sides
-      QList<Constants::SkullType> mSkullFaces;
+   //! skull sides
+   QList<Constants::SkullType> mSkullFaces;
 };
 
-#endif // EXTRAMAPITEMCREATEDPACKET_H
-
-
+#endif  // EXTRAMAPITEMCREATEDPACKET_H

@@ -8,24 +8,21 @@
 
 class ListGamesRequestPacket : public Packet
 {
+public:
+   //! constructor
+   ListGamesRequestPacket();
 
-   public:
+   //! destructor
+   virtual ~ListGamesRequestPacket();
 
-      //! constructor
-      ListGamesRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~ListGamesRequestPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
-
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
-
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 };
 
-#endif // LISTGAMESREQUESTPACKET_H
+#endif  // LISTGAMESREQUESTPACKET_H

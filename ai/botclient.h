@@ -24,367 +24,348 @@ class BotPlayerInfo;
 struct NET_Address;
 struct NET_StreamSocket;
 
-
 class BotClient : public QObject
 {
    Q_OBJECT
 
-   public:
+public:
+   //! constructor
+   BotClient(QObject* parent = 0);
 
-      //! constructor
-      BotClient(QObject *parent = 0);
+   //! destructor
+   virtual ~BotClient();
 
-      //! destructor
-      virtual ~BotClient();
+   //! initialize bot client
+   void initialize();
 
-      //! initialize bot client
-      void initialize();
+   //! connect to server
+   void connectToServer();
 
-      //! connect to server
-      void connectToServer();
+   void initializeAutoJoinStart();
 
-      void initializeAutoJoinStart();
+   //! setter for host name
+   void setHost(const QString& host);
 
-      //! setter for host name
-      void setHost(const QString& host);
+   //! setter for nickname to use in login
+   void setNick(const QString& nick);
 
-      //! setter for nickname to use in login
-      void setNick(const QString& nick);
+   //! setter for bot
+   void setBot(Bot* bot);
 
-      //! setter for bot
-      void setBot(Bot* bot);
+   //! setter for bot map
+   void setBotMap(BotMap* map);
 
-      //! setter for bot map
-      void setBotMap(BotMap* map);
+   //! setter for autojoin
+   void setAutoJoin(bool enabled);
 
-      //! setter for autojoin
-      void setAutoJoin(bool enabled);
+   //! setter for autostart
+   void setAutoStart(bool enabled);
 
-      //! setter for autostart
-      void setAutoStart(bool enabled);
+   //! setter for game id
+   void setGameId(int id);
 
-      //! setter for game id
-      void setGameId(int id);
+   //! getter for game id
+   int getGameId() const;
 
-      //! getter for game id
-      int getGameId() const;
+   //! get info object for given player id
+   BotPlayerInfo* getPlayerInfo(int id) const;
 
-      //! get info object for given player id
-      BotPlayerInfo* getPlayerInfo(int id) const;
+   //! get a list of players
+   QList<BotPlayerInfo*> getPlayerInfoList() const;
 
-      //! get a list of players
-      QList<BotPlayerInfo*> getPlayerInfoList() const;
+   //! getter for the map of players
+   QMap<int, BotPlayerInfo*>* getPlayerInfoMap();
 
-      //! getter for the map of players
-      QMap<int, BotPlayerInfo *> *getPlayerInfoMap();
+   //! setter for server configuration
+   void setServerConfiguration(const ServerConfiguration&);
 
-      //! setter for server configuration
-      void setServerConfiguration(const ServerConfiguration&);
+   //! getter for server configuration
+   const ServerConfiguration& getServerConfiguration() const;
 
-      //! getter for server configuration
-      const ServerConfiguration& getServerConfiguration() const;
+   //! getter for delta x
+   float getDeltaX() const;
 
-      //! getter for delta x
-      float getDeltaX() const;
+   //! setter for delta x
+   void setDeltaX(float value);
 
-      //! setter for delta x
-      void setDeltaX(float value);
+   //! getter for delta y
+   float getDeltaY() const;
 
-      //! getter for delta y
-      float getDeltaY() const;
-
-      //! setter for delta y
-      void setDeltaY(float value);
-
+   //! setter for delta y
+   void setDeltaY(float value);
 
 signals:
 
-      //! player logged in
-      void updatePlayerId(int id);
+   //! player logged in
+   void updatePlayerId(int id);
 
-      //! a map item has been created
-      void mapItemCreated(MapItem *item);
+   //! a map item has been created
+   void mapItemCreated(MapItem* item);
 
-      //! a map item has been removed
-      void mapItemRemoved(MapItem *item);
+   //! a map item has been removed
+   void mapItemRemoved(MapItem* item);
 
-      //! bomb placed
-      // void bombPlaced(int playerId, int x, int y, int flames);
+   //! bomb placed
+   // void bombPlaced(int playerId, int x, int y, int flames);
 
-      //! game selected
-      void gameSelected();
+   //! game selected
+   void gameSelected();
 
-      //! game started
-      void gameStarted();
+   //! game started
+   void gameStarted();
 
-      //! update player position
-      void updatePlayerPosition(int id, float x, float y, float ang);
+   //! update player position
+   void updatePlayerPosition(int id, float x, float y, float ang);
 
-      //! update player speed
-      void updatePlayerSpeed(int id, float x, float y, float ang);
+   //! update player speed
+   void updatePlayerSpeed(int id, float x, float y, float ang);
 
-      //! bot shall be removed
-      void remove();
+   //! bot shall be removed
+   void remove();
 
-      //! extra shake
-      void extraShake(int id);
+   //! extra shake
+   void extraShake(int id);
 
-      //! mark temporary hazardous
-      void markHazardousTemporary(int x, int y, int millis, int fieldCount = 0);
+   //! mark temporary hazardous
+   void markHazardousTemporary(int x, int y, int millis, int fieldCount = 0);
 
-      //! make hazardous temp for bomb kicks
-      void bombKicked(
-         int startX,
-         int startY,
-         Constants::Direction,
-         int flames
-      );
+   //! make hazardous temp for bomb kicks
+   void bombKicked(int startX, int startY, Constants::Direction, int flames);
 
+public slots:
 
-   public slots:
+   //! send walk packet
+   void walk(int8_t);
 
-      //! send walk packet
-      void walk(int8_t);
+   //! drop a bomb
+   void bomb();
 
-      //! drop a bomb
-      void bomb();
+   //! send a message to others
+   void sendMessage(const QString& message, bool finishedTyping = true, int receiverId = -1);
 
-      //! send a message to others
-      void sendMessage(
-         const QString& message,
-         bool finishedTyping = true,
-         int receiverId = -1
-      );
+   //! delete obsolete items
+   void deleteObsoleteMapItems();
 
-      //! delete obsolete items
-      void deleteObsoleteMapItems();
+private slots:
 
+   //! poll for connection progress and incoming data, once per tick
+   void poll();
 
-   private slots:
+   //! connect client
+   void clientConnect();
 
-      //! poll for connection progress and incoming data, once per tick
-      void poll();
+   //! disconnect client
+   void clientDisconnect();
 
-      //! connect client
-      void clientConnect();
+   //! login
+   void login();
 
-      //! disconnect client
-      void clientDisconnect();
+   //! select game
+   void selectGame();
 
-      //! login
-      void login();
+   //! join a game
+   void joinGame();
 
-      //! select game
-      void selectGame();
+   //! start game
+   void startGame();
 
-      //! join a game
-      void joinGame();
+   // packet handlers
 
-      //! start game
-      void startGame();
+   //! login response
+   void processLoginResponse(Packet* p);
 
+   //! join game response
+   void processJoinGameResponse(Packet* p);
 
-      // packet handlers
+   //! leave game response
+   void processLeaveGameResponse(Packet* p);
 
-      //! login response
-      void processLoginResponse(Packet *p);
+   //! process position packet
+   void processPosition(Packet* packet);
 
-      //! join game response
-      void processJoinGameResponse(Packet *p);
+   //! a map item has been created
+   void processMapItemCreated(Packet* packet);
 
-      //! leave game response
-      void processLeaveGameResponse(Packet* p);
+   //! a map item has been destroyed
+   void processMapItemRemoved(Packet* packet);
 
-      //! process position packet
-      void processPosition(Packet *packet);
+   //! a map item is moved (kicked)
+   void processMapItemMove(Packet* packet);
 
-      //! a map item has been created
-      void processMapItemCreated(Packet* packet);
+   //! an extra map item has been created
+   void processExtraMapItemCreated(Packet* packet);
 
-      //! a map item has been destroyed
-      void processMapItemRemoved(Packet* packet);
+   //! an extra map item has been destroyed
+   void processMapItemDestroyed(Packet* packet);
 
-      //! a map item is moved (kicked)
-      void processMapItemMove(Packet* packet);
+   //! game was started
+   void processStartGameResponse(Packet* packet);
 
-      //! an extra map item has been created
-      void processExtraMapItemCreated(Packet* packet);
+   //! game event received
+   void processGameEvent(Packet* packet);
 
-      //! an extra map item has been destroyed
-      void processMapItemDestroyed(Packet* packet);
+   //! player infected packet received
+   void processPlayerInfected(Packet* packet);
 
-      //! game was started
-      void processStartGameResponse(Packet *packet);
+   //! player killed packet received
+   void processPlayerKilled(Packet* packet);
 
-      //! game event received
-      void processGameEvent(Packet *packet);
+   //! game stopped
+   void processStopGameResponse(Packet* packet);
 
-      //! player infected packet received
-      void processPlayerInfected(Packet* packet);
+   //! list games
+   void processListGameResponse(Packet* packet);
 
-      //! player killed packet received
-      void processPlayerKilled(Packet* packet);
+   //! process countdown
+   void processCountdown(Packet* packet);
 
-      //! game stopped
-      void processStopGameResponse(Packet* packet);
+   //! process extra shake
+   void processExtraShake(Packet* packet);
 
-      //! list games
-      void processListGameResponse(Packet* packet);
+   //! setter for game joined flag
+   void setGameJoined(bool joined);
 
-      //! process countdown
-      void processCountdown(Packet* packet);
+   //! getter for game joined flag
+   bool isGameJoined() const;
 
-      //! process extra shake
-      void processExtraShake(Packet* packet);
+   //! setter for player speed
+   void setSpeed(float speed);
 
-      //! setter for game joined flag
-      void setGameJoined(bool joined);
+   //! getter for player speed
+   float getSpeed() const;
 
-      //! getter for game joined flag
-      bool isGameJoined() const;
+   //! getter for player id
+   int getPlayerId() const;
 
-      //! setter for player speed
-      void setSpeed(float speed);
+private:
+   //! queue delete item
+   void queueObsoleteItem(MapItem* item);
 
-      //! getter for player speed
-      float getSpeed() const;
+   //! clear obsolete items
+   void clearObsoleteItems();
 
-      //! getter for player id
-      int getPlayerId() const;
+   //! getter for map item by id
+   MapItem* getMapItem(int id) const;
 
+   //! add a map item
+   void addMapItem(MapItem* mapItem);
 
-   private:
+   //! remove a map item
+   void removeMapItem(MapItem* mapItem);
 
-      //! queue delete item
-      void queueObsoleteItem(MapItem* item);
+   //! send a packet
+   void send(Packet* packet);
 
-      //! clear obsolete items
-      void clearObsoleteItems();
+   //! check for packets
+   bool packetAvailable();
 
-      //! getter for map item by id
-      MapItem* getMapItem(int id) const;
+   //! read and dispatch all available data from the socket
+   void readData();
 
-      //! add a map item
-      void addMapItem(MapItem* mapItem);
+   //! create a new map
+   void createMap(Constants::Dimension dimensions);
 
-      //! remove a map item
-      void removeMapItem(MapItem* mapItem);
+   //! initialize a bot map
+   void initBotMap(int width, int height);
 
-      //! send a packet
-      void send(Packet *packet);
+   //! getter for bot ptr
+   Bot* getBot() const;
 
-      //! check for packets
-      bool packetAvailable(QDataStream& source);
+   //! reset bot
+   void resetBot();
 
-      //! read and dispatch all available data from the socket
-      void readData();
+   //! track a bug
+   void bugTrack1();
 
-      //! create a new map
-      void createMap(Constants::Dimension dimensions);
+   //! getter for walk count
+   int getWalkCount() const;
 
-      //! initialize a bot map
-      void initBotMap(int width, int height);
+   //! increase walk count
+   void increaseWalkCount();
 
-      //! getter for bot ptr
-      Bot* getBot() const;
+   //! reset walk count
+   void resetWalkCount();
 
-      //! reset bot
-      void resetBot();
+   //! mapitem mutex
+   mutable QMutex mMutex;
 
-      //! track a bug
-      void bugTrack1();
+   //! stream socket to server, null unless connected or connecting
+   NET_StreamSocket* mSocket;
 
-      //! getter for walk count
-      int getWalkCount() const;
+   //! host address pending resolution, null once resolved (or if not resolving)
+   NET_Address* mAddress;
 
-      //! increase walk count
-      void increaseWalkCount();
+   //! drives poll() once per tick
+   QTimer* mPollTimer;
 
-      //! reset walk count
-      void resetWalkCount();
+   //! incoming byte buffer
+   PacketStreamBuffer mBuffer;
 
+   //! host name
+   QString mHost;
 
-      //! mapitem mutex
-      mutable QMutex mMutex;
+   //! nick name
+   QString mNick;
 
-      //! stream socket to server, null unless connected or connecting
-      NET_StreamSocket* mSocket;
+   //! connected flag
+   bool mConnected;
 
-      //! host address pending resolution, null once resolved (or if not resolving)
-      NET_Address* mAddress;
+   //! expected block size of current packet
+   uint16_t mBlockSize;
 
-      //! drives poll() once per tick
-      QTimer* mPollTimer;
+   //! bot
+   Bot* mBot;
 
-      //! incoming byte buffer
-      PacketStreamBuffer mBuffer;
+   //! botmap
+   BotMap* mBotMap;
 
-      //! host name
-      QString mHost;
+   //! game id to join
+   int mGameId;
 
-      //! nick name
-      QString mNick;
+   //! automatically join game
+   bool mAutoJoin;
 
-      //! connected flag
-      bool mConnected;
+   //! automatically start game
+   bool mAutoStart;
 
-      //! expected block size of current packet
-      uint16_t mBlockSize;
+   //! player id
+   int mPlayerId;
 
-      //! bot
-      Bot* mBot;
+   //! map items
+   QMap<int, MapItem*> mMapItems;
 
-      //! botmap
-      BotMap* mBotMap;
+   //! map id <-> player info object
+   QMap<int, BotPlayerInfo*> mPlayerInfo;
 
-      //! game id to join
-      int mGameId;
+   //! bot's keyboard keys pressed
+   int mKeysPressed;
 
-      //! automatically join game
-      bool mAutoJoin;
+   //! list of games available
+   mutable QList<GameInformation> mGames;
 
-      //! automatically start game
-      bool mAutoStart;
+   //! true if game was succesfully joined
+   bool mGameJoined;
 
-      //! player id
-      int mPlayerId;
+   //! current speed
+   float mSpeed;
 
-      //! map items
-      QMap<int,MapItem*> mMapItems;
+   //! queue of items to be deleted later
+   QQueue<MapItem*> mObsoleteMapItems;
 
-      //! map id <-> player info object
-      QMap<int, BotPlayerInfo*> mPlayerInfo;
+   //! server configuration
+   ServerConfiguration mServerConfiguration;
 
-      //! bot's keyboard keys pressed
-      int mKeysPressed;
+   //! time elapsed since last bomb
+   QElapsedTimer mBombTime;
 
-      //! list of games available
-      mutable QList<GameInformation> mGames;
+   //! walk counter
+   int mWalkCount;
 
-      //! true if game was succesfully joined
-      bool mGameJoined;
+   //! delta x
+   float mDeltaX;
 
-      //! current speed
-      float mSpeed;
-
-      //! queue of items to be deleted later
-      QQueue<MapItem*> mObsoleteMapItems;
-
-      //! server configuration
-      ServerConfiguration mServerConfiguration;
-
-      //! time elapsed since last bomb
-      QElapsedTimer mBombTime;
-
-      //! walk counter
-      int mWalkCount;
-
-      //! delta x
-      float mDeltaX;
-
-      //! delta y
-      float mDeltaY;
+   //! delta y
+   float mDeltaY;
 };
 
-#endif // BOTCLIENT_H
-
+#endif  // BOTCLIENT_H

@@ -36,25 +36,17 @@
 // static variables
 Server* Server::sInstance = nullptr;
 
-
 //-----------------------------------------------------------------------------
 /*!
    constructor
 */
-Server::Server()
-   : mNetServer(nullptr),
-     mPollTimer(nullptr),
-     mPlayerId(0)
+Server::Server() : mNetServer(nullptr), mPollTimer(nullptr), mPlayerId(0)
 {
    sInstance = this;
 
    initServerConfiguration();
 
-   qDebug(
-      "Server::Server: Dynablaster Revenge Server - v%s, rev. %s",
-      SERVER_VERSION,
-      SERVER_REVISION
-   );
+   qDebug("Server::Server: Dynablaster Revenge Server - v%s, rev. %s", SERVER_VERSION, SERVER_REVISION);
 
    qDebug("Server::Server: binding to port %d..", SERVER_PORT);
 
@@ -63,10 +55,7 @@ Server::Server()
 
    if (!mNetServer)
    {
-      qDebug(
-         "Server::Server: Dynablaster Revenge Server: Unable to start the server: %s.",
-         SDL_GetError()
-      );
+      qDebug("Server::Server: Dynablaster Revenge Server: Unable to start the server: %s.", SDL_GetError());
    }
    else
    {
@@ -77,14 +66,8 @@ Server::Server()
    // see startPolling()
    mPollTimer = new QTimer(this);
 
-   connect(
-      mPollTimer,
-      SIGNAL(timeout()),
-      this,
-      SLOT(poll())
-   );
+   connect(mPollTimer, SIGNAL(timeout()), this, SLOT(poll()));
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -94,7 +77,6 @@ void Server::startPolling()
 {
    mPollTimer->start(16);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -110,19 +92,17 @@ Server::~Server()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return server instance
 */
-Server *Server::getInstance()
+Server* Server::getInstance()
 {
    if (!sInstance)
       new Server();
 
    return sInstance;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -133,52 +113,44 @@ bool Server::isListening() const
    return mNetServer != nullptr;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    get socket for player id
    \param playerId player id
 */
-NET_StreamSocket* Server::getPlayerSocket( int playerId )
+NET_StreamSocket* Server::getPlayerSocket(int playerId)
 {
    QMap<NET_StreamSocket*, Player*>::ConstIterator it;
-   for (it= mPlayerSockets.constBegin(); it!= mPlayerSockets.constEnd(); it++)
+   for (it = mPlayerSockets.constBegin(); it != mPlayerSockets.constEnd(); it++)
    {
-      Player* player= it.value();
+      Player* player = it.value();
       if (player && player->getId() == playerId)
          return it.key();
    }
    return nullptr;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return reference to server configuration
 */
-const ServerConfiguration &Server::getServerConfiguration() const
+const ServerConfiguration& Server::getServerConfiguration() const
 {
    return mServerConfiguration;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 void Server::initServerConfiguration()
 {
    // init config
-   QSettings settings (
-      SERVER_CONFIG_FILE_SERVER,
-      QSettings::IniFormat
-   );
+   QSettings settings(SERVER_CONFIG_FILE_SERVER, QSettings::IniFormat);
 
-   int bombTickTime =
-      settings.value("tick_count", SERVER_BOMB_TICKTIME_DEFAULT).toInt();
+   int bombTickTime = settings.value("tick_count", SERVER_BOMB_TICKTIME_DEFAULT).toInt();
 
    mServerConfiguration.setBombTickTime(bombTickTime);
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -220,7 +192,6 @@ void Server::acceptConnections()
    }
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    poll for new connections and incoming data, once per tick
@@ -237,7 +208,6 @@ void Server::poll()
       readSocket(socket);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -266,7 +236,6 @@ void Server::sendPacket(NET_StreamSocket* socket, Packet* packet)
    delete packet;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param tcpSocket sender socket
@@ -286,17 +255,13 @@ void Server::processStartGameRequest(NET_StreamSocket* tcpSocket, Packet* packet
    {
       Game* game = iter.value();
 
-      if (
-            mPlayerSockets[tcpSocket]->getId()
-         == game->getCreator()->getId()
-      )
+      if (mPlayerSockets[tcpSocket]->getId() == game->getCreator()->getId())
       {
          // game->prepareGame();
          game->startSynchronization();
       }
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -313,8 +278,7 @@ void Server::processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
    {
       Game* game = iter.value();
 
-      QMap<NET_StreamSocket*, Player*>::const_iterator socketIter =
-         mPlayerSockets.constFind(tcpSocket);
+      QMap<NET_StreamSocket*, Player*>::const_iterator socketIter = mPlayerSockets.constFind(tcpSocket);
 
       if (socketIter != mPlayerSockets.constEnd())
       {
@@ -322,14 +286,9 @@ void Server::processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 
          if (game->joinGame(player, tcpSocket))
          {
-            game->broadcastMessage(
-               tr("%1 joined the game").arg(player->getNick())
-            );
+            game->broadcastMessage(tr("%1 joined the game").arg(player->getNick()));
 
-            mSocketGameMapping.insert(
-               tcpSocket,
-               game
-            );
+            mSocketGameMapping.insert(tcpSocket, game);
 
             // if the game is currently running, inform the player that the
             // game has been started
@@ -338,19 +297,12 @@ void Server::processJoinGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
       }
       else
       {
-         JoinGameResponsePacket* response = new JoinGameResponsePacket(
-            false,
-            game->getId(),
-            -1,
-            "fuck off",
-            Constants::ColorWhite
-         );
+         JoinGameResponsePacket* response = new JoinGameResponsePacket(false, game->getId(), -1, "fuck off", Constants::ColorWhite);
 
          sendPacket(tcpSocket, response);
       }
    }
 }
-
 
 void Server::processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packet)
 {
@@ -371,15 +323,13 @@ void Server::processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packe
 
    if (request->getSynchronizeProcess() == PlayerSynchronizePacket::LevelLoaded)
    {
-      QMap<NET_StreamSocket*, Game*>::const_iterator iter =
-         mSocketGameMapping.constFind(tcpSocket);
+      QMap<NET_StreamSocket*, Game*>::const_iterator iter = mSocketGameMapping.constFind(tcpSocket);
 
       if (iter != mSocketGameMapping.constEnd())
       {
          Game* game = iter.value();
 
-         QMap<NET_StreamSocket*, Player*>::const_iterator socketIter =
-            mPlayerSockets.constFind(tcpSocket);
+         QMap<NET_StreamSocket*, Player*>::const_iterator socketIter = mPlayerSockets.constFind(tcpSocket);
 
          if (socketIter != mPlayerSockets.constEnd())
          {
@@ -387,16 +337,11 @@ void Server::processPlayerSynchronize(NET_StreamSocket* tcpSocket, Packet* packe
 
             player->setLoadingSynchronized(true);
 
-            qDebug("Server::processPlayerSynchronize: game: %d player: '%s'",
-               game->getId(),
-               qPrintable(player->getNick())
-            );
+            qDebug("Server::processPlayerSynchronize: game: %d player: '%s'", game->getId(), qPrintable(player->getNick()));
          }
       }
    }
 }
-
-
 
 void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
@@ -421,12 +366,7 @@ void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
       player->setBot(request->isBot());
 
       // send login acceptance directly back to sender
-      LoginResponsePacket* singleResponse = new LoginResponsePacket(
-         false,
-         player->getId(),
-         player->getNick(),
-         getServerConfiguration()
-      );
+      LoginResponsePacket* singleResponse = new LoginResponsePacket(false, player->getId(), player->getNick(), getServerConfiguration());
 
       sendPacket(tcpSocket, singleResponse);
 
@@ -438,7 +378,6 @@ void Server::processLoginRequest(NET_StreamSocket* tcpSocket, Packet* packet)
    }
 }
 
-
 void Server::processListGamesRequest(NET_StreamSocket* tcpSocket)
 {
    // ListGamesRequestPacket* request = (ListGamesRequestPacket*)packet;
@@ -446,30 +385,26 @@ void Server::processListGamesRequest(NET_StreamSocket* tcpSocket)
 
    foreach (Game* game, mGames)
    {
-
-//      GameInformation(
-//         game->getId(),
-//         game->getPlayerCount(),
-//         game->getMaximumPlayerCount(),
-//         game->getName(),
-//         game->getLevelName(),
-//         game->getCreator()->getId(),
-//         game->getMapDimension(),
-//         game->getExtras(),
-//         game->getDuration(),
-//         game->getRoundsPlayed()
-//      )
+      //      GameInformation(
+      //         game->getId(),
+      //         game->getPlayerCount(),
+      //         game->getMaximumPlayerCount(),
+      //         game->getName(),
+      //         game->getLevelName(),
+      //         game->getCreator()->getId(),
+      //         game->getMapDimension(),
+      //         game->getExtras(),
+      //         game->getDuration(),
+      //         game->getRoundsPlayed()
+      //      )
 
       games.append(game->getGameInformation());
    }
 
-   ListGamesResponsePacket* response = new ListGamesResponsePacket(
-      games
-   );
+   ListGamesResponsePacket* response = new ListGamesResponsePacket(games);
 
    sendPacket(tcpSocket, response);
 }
-
 
 void Server::processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packet)
 {
@@ -486,12 +421,7 @@ void Server::processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packe
    game->setCreator(player);
    game->getGameRound()->setCount(request->getData().mRounds);
 
-   connect(
-      game,
-      SIGNAL(forceLeaveGame(NET_StreamSocket*)),
-      this,
-      SLOT(processPlayerLeavesGame(NET_StreamSocket*))
-   );
+   connect(game, SIGNAL(forceLeaveGame(NET_StreamSocket*)), this, SLOT(processPlayerLeavesGame(NET_StreamSocket*)));
 
    // autocorrect duplicate game names
    correctDuplicateGameName(game);
@@ -502,31 +432,22 @@ void Server::processCreateGameRequest(NET_StreamSocket* tcpSocket, Packet* packe
    // initialize game
    game->initialize();
 
-   CreateGameResponsePacket* response =
-      new CreateGameResponsePacket(
-         game->getGameInformation()
-      );
+   CreateGameResponsePacket* response = new CreateGameResponsePacket(game->getGameInformation());
 
    sendPacket(tcpSocket, response);
 }
 
-
 void Server::processGamePacket(NET_StreamSocket* tcpSocket, Packet* packet)
 {
-   QMap<NET_StreamSocket*, Game*>::const_iterator iter =
-      mSocketGameMapping.constFind(tcpSocket);
+   QMap<NET_StreamSocket*, Game*>::const_iterator iter = mSocketGameMapping.constFind(tcpSocket);
 
    // if the socket already joined a game, let the
    // according game instance handle the communication
    if (iter != mSocketGameMapping.constEnd())
    {
-      iter.value()->processPacket(
-         tcpSocket,
-         packet
-      );
+      iter.value()->processPacket(tcpSocket, packet);
    }
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -569,8 +490,6 @@ void Server::readSocket(NET_StreamSocket* tcpSocket)
       return;
    }
 
-   QDataStream& in = buffer->stream();
-
    while (true)
    {
       uint16_t blockSize = mPacketSizes[tcpSocket];
@@ -578,14 +497,16 @@ void Server::readSocket(NET_StreamSocket* tcpSocket)
       // blocksize not initialized yet
       if (blockSize == 0)
       {
-         if (buffer->bytesAvailable() < static_cast<int32_t>(sizeof(uint16_t)))
+         if (buffer->bytesAvailable() < sizeof(uint16_t))
          {
             // qDebug("Server::readSocket(): cannot read packet size, packet too small");
             break;
          }
 
-         in >> blockSize;
-         mPacketSizes[tcpSocket]=blockSize;
+         BinaryReader sizeReader = buffer->reader();
+         sizeReader >> blockSize;
+         buffer->consume(sizeReader.pos());
+         mPacketSizes[tcpSocket] = blockSize;
       }
 
       // wait for more data
@@ -595,16 +516,18 @@ void Server::readSocket(NET_StreamSocket* tcpSocket)
       }
 
       // reset expected blocksize
-      mPacketSizes[tcpSocket]=0;
+      mPacketSizes[tcpSocket] = 0;
 
       // block was read completely
+      BinaryReader in = buffer->reader();
       Packet* packet = Packet::deserialize(in);
+      buffer->consume(in.pos());
 
       if (packet)
       {
          // packet->debug();
 
-         switch(packet->getType())
+         switch (packet->getType())
          {
             case Packet::CREATEGAMEREQUEST:
             {
@@ -673,7 +596,6 @@ void Server::readSocket(NET_StreamSocket* tcpSocket)
    buffer->compact();
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    socket failed or the remote end dropped - clean up and destroy it
@@ -686,7 +608,7 @@ void Server::disconnectSocket(NET_StreamSocket* tcpSocket)
    processPlayerLeavesGame(tcpSocket);
 
    // delete player
-   Player* player= mPlayerSockets.take(tcpSocket);
+   Player* player = mPlayerSockets.take(tcpSocket);
 
    // inform server ui that player disconnected
    if (player)
@@ -699,7 +621,6 @@ void Server::disconnectSocket(NET_StreamSocket* tcpSocket)
 
    NET_DestroyStreamSocket(tcpSocket);
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -721,27 +642,17 @@ void Server::processBroadcastLeaveGameResponse(Player* player, Game* game)
          qPrintable(player->getNick())
       );
 
-      sendPacket(
-         i.key(),
-         new LeaveGameResponsePacket(
-            game->getId(),
-            player->getId()
-         )
-      );
+      sendPacket(i.key(), new LeaveGameResponsePacket(game->getId(), player->getId()));
    }
 }
-
 
 //----------------------------------------------------------------------------
 /*!
    \param socket player's socket
 */
-void Server::processPlayerLeavesGame(
-   NET_StreamSocket* tcpSocket
-)
+void Server::processPlayerLeavesGame(NET_StreamSocket* tcpSocket)
 {
-   QMap<NET_StreamSocket*, Game*>::const_iterator iter =
-      mSocketGameMapping.constFind(tcpSocket);
+   QMap<NET_StreamSocket*, Game*>::const_iterator iter = mSocketGameMapping.constFind(tcpSocket);
 
    // remove player from game
    if (iter != mSocketGameMapping.constEnd())
@@ -759,43 +670,34 @@ void Server::processPlayerLeavesGame(
       mSocketGameMapping.remove(tcpSocket);
 
       // if game is empty, delete game
-      if (
-            game->getPlayerCount() == 0
-         || game->getPlayerCount() == game->getBotCount()
-      )
+      if (game->getPlayerCount() == 0 || game->getPlayerCount() == game->getBotCount())
       {
          processRemoveAllBots(game->getId());
          processRemoveGame(game->getId());
       }
       else
       {
-         game->broadcastMessage(
-            tr("%1 left the game").arg(player->getNick())
-         );
+         game->broadcastMessage(tr("%1 left the game").arg(player->getNick()));
 
          if (player == game->getCreator())
          {
             // 1) pass owner flag
             QList<Player*> players = game->getPlayers();
 
-            foreach(Player* tmpPlayer, players)
+            foreach (Player* tmpPlayer, players)
             {
                if (!tmpPlayer->isBot())
                {
                   game->setCreator(tmpPlayer);
-                  game->broadcastMessage(
-                     tr("%1 is the new game owner").arg(tmpPlayer->getNick())
-                  );
+                  game->broadcastMessage(tr("%1 is the new game owner").arg(tmpPlayer->getNick()));
                   break;
                }
             }
 
             // 2) notify players about new owner
-            foreach(Player* tmpPlayer, players)
+            foreach (Player* tmpPlayer, players)
             {
-               processListGamesRequest(
-                  game->getPlayerSockets()->key(tmpPlayer)
-               );
+               processListGamesRequest(game->getPlayerSockets()->key(tmpPlayer));
             }
          }
 
@@ -811,14 +713,11 @@ void Server::processPlayerLeavesGame(
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param game game to remove
 */
-void Server::processRemoveGame(
-   int gameId
-)
+void Server::processRemoveGame(int gameId)
 {
    Game* game = mGames.take(gameId);
 
@@ -828,7 +727,6 @@ void Server::processRemoveGame(
       game->deleteLater();
    }
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -856,13 +754,7 @@ void Server::processRemoveAllBots(int gameId)
          if (tcpSocket)
          {
             // notify bot: "you're out"
-            sendPacket(
-               tcpSocket,
-               new LeaveGameResponsePacket(
-                  gameId,
-                  player->getId()
-               )
-            );
+            sendPacket(tcpSocket, new LeaveGameResponsePacket(gameId, player->getId()));
 
             // remove socket from socket<->game-mapping
             mSocketGameMapping.remove(tcpSocket);
@@ -871,12 +763,11 @@ void Server::processRemoveAllBots(int gameId)
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param game game to check for duplicate names
 */
-void Server::correctDuplicateGameName(Game *newGame)
+void Server::correctDuplicateGameName(Game* newGame)
 {
    bool changed = false;
 
@@ -890,7 +781,7 @@ void Server::correctDuplicateGameName(Game *newGame)
    {
       duplicate = false;
 
-      foreach(Game* game, mGames)
+      foreach (Game* game, mGames)
       {
          if (game->getName() == correctedGameName)
          {
@@ -903,9 +794,7 @@ void Server::correctDuplicateGameName(Game *newGame)
       {
          changed = true;
 
-         correctedGameName = QString("%1 #%2")
-            .arg(gameName)
-            .arg(iteration + 1);
+         correctedGameName = QString("%1 #%2").arg(gameName).arg(iteration + 1);
 
          iteration++;
       }
@@ -918,13 +807,12 @@ void Server::correctDuplicateGameName(Game *newGame)
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param nick player nick
    \return corrected player nick
 */
-QString Server::correctDuplicatePlayerName(const QString &nick)
+QString Server::correctDuplicatePlayerName(const QString& nick)
 {
    QString correctedNick = nick;
 
@@ -949,14 +837,11 @@ QString Server::correctDuplicatePlayerName(const QString &nick)
 
       if (duplicate)
       {
-         correctedNick = QString("%1%2")
-            .arg(nick)
-            .arg(iteration + 1);
+         correctedNick = QString("%1%2").arg(nick).arg(iteration + 1);
 
          iteration++;
       }
-   }
-   while (duplicate);
+   } while (duplicate);
 
    return correctedNick;
 }

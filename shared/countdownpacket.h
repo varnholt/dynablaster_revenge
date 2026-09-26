@@ -5,35 +5,31 @@
 
 class CountdownPacket : public Packet
 {
+public:
+   //! write constructor
+   CountdownPacket(int timeLeft);
 
-   public:
+   //! read constructor
+   CountdownPacket();
 
-      //! write constructor
-      CountdownPacket(int timeLeft);
+   //! destructor
+   virtual ~CountdownPacket();
 
-      //! read constructor
-      CountdownPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~CountdownPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for remaining time
+   int getTimeLeft();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-      //! getter for remaining time
-      int getTimeLeft();
-
-
-   private:
-
-      //! countdown
-      int8_t mTimeLeft;
+private:
+   //! countdown
+   int8_t mTimeLeft;
 };
 
-#endif // COUNTDOWNPACKET_H
+#endif  // COUNTDOWNPACKET_H

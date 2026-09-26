@@ -10,50 +10,42 @@
 #include <QList>
 #include <QString>
 
-
 class ListGamesResponsePacket : public Packet
 {
+public:
+   //! write constructor
+   ListGamesResponsePacket(const QList<GameInformation>& games, bool update = false);
 
-   public:
+   //! read constructor
+   ListGamesResponsePacket();
 
-      //! write constructor
-      ListGamesResponsePacket(
-         const QList<GameInformation>& games,
-         bool update = false
-      );
+   //! destructor
+   virtual ~ListGamesResponsePacket();
 
-      //! read constructor
-      ListGamesResponsePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~ListGamesResponsePacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game name
+   const QList<GameInformation> getGames();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! setter for update flag
+   void setUpdate(bool update);
 
-      //! getter for game name
-      const QList<GameInformation> getGames();
+   //! getter for update flag
+   bool isUpdate() const;
 
-      //! setter for update flag
-      void setUpdate(bool update);
+private:
+   //! game's name
+   QList<GameInformation> mGames;
 
-      //! getter for update flag
-      bool isUpdate() const;
-
-
-   private:
-
-      //! game's name
-      QList<GameInformation> mGames;
-
-      //! update game information
-      bool mUpdate;
+   //! update game information
+   bool mUpdate;
 };
 
-#endif // LISTGAMESRESPONSEPACKET_H
+#endif  // LISTGAMESRESPONSEPACKET_H

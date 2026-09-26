@@ -7,34 +7,30 @@
 // constants
 #include "constants.h"
 
-
 class PlayerModifiedPacket : public Packet
 {
-   public:
+public:
+   //! read constructor
+   PlayerModifiedPacket();
 
-      //! read constructor
-      PlayerModifiedPacket();
+   //! write constructor
+   PlayerModifiedPacket(Constants::Color color);
 
-      //! write constructor
-      PlayerModifiedPacket(Constants::Color color);
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for elapsed time
+   Constants::Color getColor() const;
 
-     //! getter for elapsed time
-     Constants::Color getColor() const;
-
-
-   private:
-
-      //! player color
-      int32_t mColor;
+private:
+   //! player color
+   int32_t mColor;
 };
 
-#endif // PLAYERMODIFIEDPACKET_H
+#endif  // PLAYERMODIFIEDPACKET_H

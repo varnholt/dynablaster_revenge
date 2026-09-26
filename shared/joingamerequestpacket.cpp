@@ -2,7 +2,6 @@
 #include "joingamerequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "JoinGameRequest"
@@ -13,26 +12,19 @@
 
    \param name game's name
 */
-JoinGameRequestPacket::JoinGameRequestPacket(
-   int id
-)
- : Packet(Packet::JOINGAMEREQUEST),
-   mId(id)
+JoinGameRequestPacket::JoinGameRequestPacket(int id) : Packet(Packet::JOINGAMEREQUEST), mId(id)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-JoinGameRequestPacket::JoinGameRequestPacket()
-   : Packet(Packet::JOINGAMEREQUEST)
+JoinGameRequestPacket::JoinGameRequestPacket() : Packet(Packet::JOINGAMEREQUEST)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -41,7 +33,6 @@ JoinGameRequestPacket::JoinGameRequestPacket()
 JoinGameRequestPacket::~JoinGameRequestPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -52,28 +43,25 @@ int JoinGameRequestPacket::getId()
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void JoinGameRequestPacket::enqueue(QDataStream & out)
+void JoinGameRequestPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void JoinGameRequestPacket::dequeue(QDataStream & in)
+void JoinGameRequestPacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -82,10 +70,5 @@ void JoinGameRequestPacket::dequeue(QDataStream & in)
 void JoinGameRequestPacket::debug()
 {
    // debug output login response
-   qDebug(
-      "JoinGameRequestPacket:debug: id: %d",
-      mId
-   );
+   qDebug("JoinGameRequestPacket:debug: id: %d", mId);
 }
-
-

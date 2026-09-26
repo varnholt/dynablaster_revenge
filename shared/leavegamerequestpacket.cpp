@@ -2,37 +2,26 @@
 #include "leavegamerequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "LeaveGameRequest"
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-LeaveGameRequestPacket::LeaveGameRequestPacket()
-   : Packet(Packet::LEAVEGAMEREQUEST),
-     mGameId(-1),
-     mPlayerId(-1)
+ */
+LeaveGameRequestPacket::LeaveGameRequestPacket() : Packet(Packet::LEAVEGAMEREQUEST), mGameId(-1), mPlayerId(-1)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
-*/
-LeaveGameRequestPacket::LeaveGameRequestPacket(
-   int32_t gameId,
-   int32_t playerId
-)
-   : Packet(Packet::LEAVEGAMEREQUEST),
-     mGameId(gameId),
-     mPlayerId(playerId)
+ */
+LeaveGameRequestPacket::LeaveGameRequestPacket(int32_t gameId, int32_t playerId)
+    : Packet(Packet::LEAVEGAMEREQUEST), mGameId(gameId), mPlayerId(playerId)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -42,32 +31,25 @@ LeaveGameRequestPacket::~LeaveGameRequestPacket()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void LeaveGameRequestPacket::enqueue(QDataStream& out)
+void LeaveGameRequestPacket::enqueue(BinaryWriter& out)
 {
    // write player data
-   out
-      << mGameId
-      << mPlayerId;
+   out << mGameId << mPlayerId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void LeaveGameRequestPacket::dequeue(QDataStream& in)
+void LeaveGameRequestPacket::dequeue(BinaryReader& in)
 {
    // read player data
-   in
-      >> mGameId
-      >> mPlayerId;
+   in >> mGameId >> mPlayerId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -76,11 +58,8 @@ void LeaveGameRequestPacket::dequeue(QDataStream& in)
 void LeaveGameRequestPacket::debug()
 {
    // debug output login request
-   qDebug(
-      "LeaveGameRequestPacket:debug: no members"
-   );
+   qDebug("LeaveGameRequestPacket:debug: no members");
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -91,7 +70,6 @@ void LeaveGameRequestPacket::setPlayerId(int32_t tmpId)
    mPlayerId = tmpId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player's id
@@ -100,7 +78,6 @@ int32_t LeaveGameRequestPacket::getPlayerId() const
 {
    return mPlayerId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -111,7 +88,6 @@ void LeaveGameRequestPacket::setGameId(int32_t id)
    mGameId = id;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game's id
@@ -120,5 +96,3 @@ int32_t LeaveGameRequestPacket::getGameId() const
 {
    return mGameId;
 }
-
-

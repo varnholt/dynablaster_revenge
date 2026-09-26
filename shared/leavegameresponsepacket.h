@@ -8,55 +8,45 @@
 
 class LeaveGameResponsePacket : public Packet
 {
+public:
+   //! constructor
+   LeaveGameResponsePacket();
 
-   public:
+   //! constructor
+   LeaveGameResponsePacket(int32_t gameId, int32_t playerId);
 
-      //! constructor
-      LeaveGameResponsePacket();
+   //! destructor
+   virtual ~LeaveGameResponsePacket();
 
-      //! constructor
-      LeaveGameResponsePacket(
-         int32_t gameId,
-         int32_t playerId
-      );
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~LeaveGameResponsePacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   // getters and setters
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! setter for the game id
+   void setGameId(int32_t id);
 
+   //! getter for the game id
+   int32_t getGameId() const;
 
-      // getters and setters
+   //! setter for the player id
+   void setPlayerId(int32_t id);
 
-      //! setter for the game id
-      void setGameId(int32_t id);
+   //! getter for the player id
+   int32_t getPlayerId() const;
 
-      //! getter for the game id
-      int32_t getGameId() const;
+protected:
+   //! game's id
+   int32_t mGameId;
 
-      //! setter for the player id
-      void setPlayerId(int32_t id);
-
-      //! getter for the player id
-      int32_t getPlayerId() const;
-
-
-   protected:
-
-      //! game's id
-      int32_t mGameId;
-
-      //! player's
-      int32_t mPlayerId;
-
-
+   //! player's
+   int32_t mPlayerId;
 };
 
-#endif // LeaveGameResponsePacket_H
+#endif  // LeaveGameResponsePacket_H

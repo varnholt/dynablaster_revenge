@@ -8,36 +8,31 @@
 
 class StartGameRequestPacket : public Packet
 {
+public:
+   //! write constructor
+   StartGameRequestPacket(int id);
 
-   public:
+   //! read constructor
+   StartGameRequestPacket();
 
-      //! write constructor
-      StartGameRequestPacket(int id);
+   //! destructor
+   virtual ~StartGameRequestPacket();
 
-      //! read constructor
-      StartGameRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~StartGameRequestPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game id
+   int getId();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-      //! getter for game id
-      int getId();
-
-
-   private:
-
-      //! game id
-      int32_t mId;
-
+private:
+   //! game id
+   int32_t mId;
 };
 
-#endif // STARTGAMEREQUESTPACKET_H
+#endif  // STARTGAMEREQUESTPACKET_H

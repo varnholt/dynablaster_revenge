@@ -2,11 +2,9 @@
 #include "startgameresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "StartGameResponse"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -14,30 +12,19 @@
 
    \param name game's name
 */
-StartGameResponsePacket::StartGameResponsePacket(
-   int id,
-   bool started
-)
- : Packet(Packet::STARTGAMERESPONSE),
-   mId(id),
-   mStarted(started)
+StartGameResponsePacket::StartGameResponsePacket(int id, bool started) : Packet(Packet::STARTGAMERESPONSE), mId(id), mStarted(started)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-StartGameResponsePacket::StartGameResponsePacket()
-   : Packet(Packet::STARTGAMERESPONSE),
-     mId(-1),
-     mStarted(false)
+StartGameResponsePacket::StartGameResponsePacket() : Packet(Packet::STARTGAMERESPONSE), mId(-1), mStarted(false)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -46,7 +33,6 @@ StartGameResponsePacket::StartGameResponsePacket()
 StartGameResponsePacket::~StartGameResponsePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -57,8 +43,6 @@ int StartGameResponsePacket::getId()
    return mId;
 }
 
-
-
 //-----------------------------------------------------------------------------
 /*!
    \return game's id
@@ -68,28 +52,25 @@ bool StartGameResponsePacket::isStarted()
    return mStarted;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void StartGameResponsePacket::enqueue(QDataStream & out)
+void StartGameResponsePacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mId << mStarted;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void StartGameResponsePacket::dequeue(QDataStream & in)
+void StartGameResponsePacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mId >> mStarted;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -98,11 +79,5 @@ void StartGameResponsePacket::dequeue(QDataStream & in)
 void StartGameResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "StartGameResponsePacket:debug: id: %d, started: %d",
-      mId,
-      mStarted
-   );
+   qDebug("StartGameResponsePacket:debug: id: %d, started: %d", mId, mStarted);
 }
-
-

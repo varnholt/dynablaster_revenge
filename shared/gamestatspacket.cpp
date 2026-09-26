@@ -2,7 +2,6 @@
 #include "gamestatspacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "GameStats"
@@ -12,37 +11,26 @@
    \param message message to send
    \param receiverId id of the receiver
 */
-GameStatsPacket::GameStatsPacket(
-   const QList<int>& ids,
-   const QList<PlayerStats>& overallStats,
-   const QList<PlayerStats>& roundStats
-)
- : Packet(Packet::GAMESTATS),
-   mPlayerIds(ids),
-   mOverallStats(overallStats),
-   mRoundStats(roundStats)
+GameStatsPacket::GameStatsPacket(const QList<int>& ids, const QList<PlayerStats>& overallStats, const QList<PlayerStats>& roundStats)
+    : Packet(Packet::GAMESTATS), mPlayerIds(ids), mOverallStats(overallStats), mRoundStats(roundStats)
 {
    mPacketName = PACKETNAME;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
-GameStatsPacket::GameStatsPacket()
-   : Packet(Packet::GAMESTATS)
+ */
+GameStatsPacket::GameStatsPacket() : Packet(Packet::GAMESTATS)
 {
    mPacketName = PACKETNAME;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 GameStatsPacket::~GameStatsPacket()
 {
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -53,7 +41,6 @@ QList<PlayerStats> GameStatsPacket::getOverallStats() const
    return mOverallStats;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return round game stats
@@ -62,7 +49,6 @@ QList<PlayerStats> GameStatsPacket::getRoundStats() const
 {
    return mRoundStats;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -73,45 +59,36 @@ QList<int> GameStatsPacket::getPlayerIds() const
    return mPlayerIds;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void GameStatsPacket::enqueue(QDataStream & out)
+void GameStatsPacket::enqueue(BinaryWriter& out)
 {
-   // write size - explicit int32_t cast: QList::size() returns qsizetype (8 bytes) in Qt6, but
-   // dequeue() below reads it back as a plain int (4 bytes) to match this wire format's
-   // QDataStream::Qt_4_6 version. Without the cast, the writer emits 8 bytes here while the
-   // reader only consumes 4, permanently desyncing the packet stream for every packet after this
-   // one - the exact "unknown packet received" flood/freeze bug.
+   // explicit int32_t cast: QList::size() returns qsizetype (8 bytes) in Qt6, but dequeue()
+   // below reads it back as a plain int (4 bytes) - a mismatch here desyncs the packet stream
+   // for every packet after this one.
    out << (int32_t)mOverallStats.size();
 
    // write list of ids
-   foreach(int id, mPlayerIds)
+   foreach (int id, mPlayerIds)
    {
       out << id;
    }
 
-   QList< QList<PlayerStats>* > statLists;
+   QList<QList<PlayerStats>*> statLists;
    statLists << &mOverallStats;
    statLists << &mRoundStats;
 
    // write overall stats
-   foreach(QList<PlayerStats>* list, statLists)
+   foreach (QList<PlayerStats>* list, statLists)
    {
-      foreach(PlayerStats stats, *list)
+      foreach (PlayerStats stats, *list)
       {
-         out
-            << stats.getWins()
-            << stats.getKills()
-            << stats.getDeaths()
-            << stats.getSurvivalTime()
-            << stats.getExtrasCollected();
+         out << stats.getWins() << stats.getKills() << stats.getDeaths() << stats.getSurvivalTime() << stats.getExtrasCollected();
       }
    }
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -119,11 +96,7 @@ void GameStatsPacket::enqueue(QDataStream & out)
    \param size list size
    \param list list to fill with values
 */
-void GameStatsPacket::dequeueStatsList(
-   QDataStream& in,
-   int size,
-   QList<PlayerStats>* list
-)
+void GameStatsPacket::dequeueStatsList(BinaryReader& in, int size, QList<PlayerStats>* list)
 {
    unsigned int wins = 0;
    unsigned int kills = 0;
@@ -135,12 +108,7 @@ void GameStatsPacket::dequeueStatsList(
    {
       PlayerStats stats;
 
-      in
-         >> wins
-         >> kills
-         >> deaths
-         >> survivalTime
-         >> extrasCollected;
+      in >> wins >> kills >> deaths >> survivalTime >> extrasCollected;
 
       stats.setWins(wins);
       stats.setKills(kills);
@@ -152,12 +120,11 @@ void GameStatsPacket::dequeueStatsList(
    }
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void GameStatsPacket::dequeue(QDataStream & in)
+void GameStatsPacket::dequeue(BinaryReader& in)
 {
    // read size
    int size = 0;
@@ -176,7 +143,6 @@ void GameStatsPacket::dequeue(QDataStream & in)
    dequeueStatsList(in, size, &mRoundStats);
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    debug output of members
@@ -184,9 +150,5 @@ void GameStatsPacket::dequeue(QDataStream & in)
 void GameStatsPacket::debug()
 {
    // debug message request
-   qDebug(
-      "GameStatsPacket:debug: "
-   );
+   qDebug("GameStatsPacket:debug: ");
 }
-
-

@@ -2,11 +2,9 @@
 #include "loginresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "LoginResponse"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -15,34 +13,20 @@
    \param nickName player's nick
    \param col player's color
 */
-LoginResponsePacket::LoginResponsePacket(
-   bool broadcast,
-   int32_t id,
-   const QString& nick,
-   const ServerConfiguration& serverConfig
-)
- : Packet(Packet::LOGINRESPONSE),
-   mBroadcast(broadcast),
-   mId(id),
-   mNick(nick),
-   mServerConfiguration(serverConfig)
+LoginResponsePacket::LoginResponsePacket(bool broadcast, int32_t id, const QString& nick, const ServerConfiguration& serverConfig)
+    : Packet(Packet::LOGINRESPONSE), mBroadcast(broadcast), mId(id), mNick(nick), mServerConfiguration(serverConfig)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-LoginResponsePacket::LoginResponsePacket()
-   : Packet(Packet::LOGINRESPONSE),
-     mBroadcast(false),
-     mId(-1)
+LoginResponsePacket::LoginResponsePacket() : Packet(Packet::LOGINRESPONSE), mBroadcast(false), mId(-1)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -51,7 +35,6 @@ LoginResponsePacket::LoginResponsePacket()
 LoginResponsePacket::~LoginResponsePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -62,7 +45,6 @@ void LoginResponsePacket::setId(int32_t tmpId)
    mId = tmpId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player's id
@@ -72,36 +54,25 @@ int32_t LoginResponsePacket::getId() const
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void LoginResponsePacket::enqueue(QDataStream & out)
+void LoginResponsePacket::enqueue(BinaryWriter& out)
 {
    // write player data
-   out
-      << mBroadcast
-      << mId
-      << mNick
-      << mServerConfiguration;
+   out << mBroadcast << mId << mNick << mServerConfiguration;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void LoginResponsePacket::dequeue(QDataStream & in)
+void LoginResponsePacket::dequeue(BinaryReader& in)
 {
    // read player data
-   in
-      >> mBroadcast
-      >> mId
-      >> mNick
-      >> mServerConfiguration;
+   in >> mBroadcast >> mId >> mNick >> mServerConfiguration;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -110,14 +81,8 @@ void LoginResponsePacket::dequeue(QDataStream & in)
 void LoginResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "LoginResponsePacket:loginresponse: player: %d (%s)",
-      mId,
-      (mId != -1) ? "accepted" : "denied"
-   );
+   qDebug("LoginResponsePacket:loginresponse: player: %d (%s)", mId, (mId != -1) ? "accepted" : "denied");
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -128,7 +93,6 @@ const QString& LoginResponsePacket::getNick() const
    return mNick;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return broadcast flag
@@ -138,12 +102,11 @@ bool LoginResponsePacket::isBroadcast() const
    return mBroadcast;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return reference to server configuration
 */
-const ServerConfiguration &LoginResponsePacket::getServerConfiguration() const
+const ServerConfiguration& LoginResponsePacket::getServerConfiguration() const
 {
    return mServerConfiguration;
 }

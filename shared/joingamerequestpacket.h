@@ -5,35 +5,31 @@
 
 class JoinGameRequestPacket : public Packet
 {
+public:
+   //! write constructor
+   JoinGameRequestPacket(int id);
 
-   public:
+   //! read constructor
+   JoinGameRequestPacket();
 
-      //! write constructor
-      JoinGameRequestPacket(int id);
+   //! destructor
+   virtual ~JoinGameRequestPacket();
 
-      //! read constructor
-      JoinGameRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~JoinGameRequestPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game id
+   int getId();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-      //! getter for game id
-      int getId();
-
-
-   private:
-
-      //! game's id
-      int8_t mId;
+private:
+   //! game's id
+   int8_t mId;
 };
 
-#endif // JOINGAMEREQUESTPACKET_H
+#endif  // JOINGAMEREQUESTPACKET_H

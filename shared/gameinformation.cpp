@@ -1,25 +1,27 @@
 // header
 #include "gameinformation.h"
 
+// shared
+#include "binaryreader.h"
+#include "binarywriter.h"
 
 //-----------------------------------------------------------------------------
 /*!
-*/
+ */
 GameInformation::GameInformation()
-   : mId(-1),
-     mPlayerCount(0),
-     mMaximumPlayerCount(0),
-     mCreatorId(-1),
-     mDimensions(Constants::DimensionInvalid),
-     mExtras(0),
-     mDuration(0),
-     mGamesPlayed(0),
-     mCurrentRound(0),
-     mRoundCount(0),
-     mSpawnExtras(false)
+    : mId(-1),
+      mPlayerCount(0),
+      mMaximumPlayerCount(0),
+      mCreatorId(-1),
+      mDimensions(Constants::DimensionInvalid),
+      mExtras(0),
+      mDuration(0),
+      mGamesPlayed(0),
+      mCurrentRound(0),
+      mRoundCount(0),
+      mSpawnExtras(false)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -52,22 +54,21 @@ GameInformation::GameInformation(
    int roundCount,
    bool spawnExtras
 )
-   : mId(id),
-     mPlayerCount(playerCount),
-     mMaximumPlayerCount(playerMaximumCount),
-     mGameName(gameName),
-     mLevelName(levelName),
-     mCreatorId(creatorId),
-     mDimensions(dimensions),
-     mExtras(extras),
-     mDuration(duration),
-     mGamesPlayed(roundsPlayed),
-     mCurrentRound(currentRound),
-     mRoundCount(roundCount),
-     mSpawnExtras(spawnExtras)
+    : mId(id),
+      mPlayerCount(playerCount),
+      mMaximumPlayerCount(playerMaximumCount),
+      mGameName(gameName),
+      mLevelName(levelName),
+      mCreatorId(creatorId),
+      mDimensions(dimensions),
+      mExtras(extras),
+      mDuration(duration),
+      mGamesPlayed(roundsPlayed),
+      mCurrentRound(currentRound),
+      mRoundCount(roundCount),
+      mSpawnExtras(spawnExtras)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -78,7 +79,6 @@ int GameInformation::getId() const
    return mId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player count
@@ -87,7 +87,6 @@ int GameInformation::getPlayerCount() const
 {
    return mPlayerCount;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -98,7 +97,6 @@ int GameInformation::getPlayerMaximumCount() const
    return mMaximumPlayerCount;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game name
@@ -107,7 +105,6 @@ const QString GameInformation::getGameName() const
 {
    return mGameName;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -118,7 +115,6 @@ const QString GameInformation::getLevelName() const
    return mLevelName;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game creator id
@@ -127,7 +123,6 @@ int GameInformation::getCreatorId() const
 {
    return mCreatorId;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -138,7 +133,6 @@ Constants::Dimension GameInformation::getMapDimensions() const
    return mDimensions;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param extras extras for this game
@@ -147,7 +141,6 @@ void GameInformation::setExtras(int extras)
 {
    mExtras = extras;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -158,7 +151,6 @@ int GameInformation::getExtras() const
    return mExtras;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param duration game duration
@@ -167,7 +159,6 @@ void GameInformation::setDuration(int duration)
 {
    mDuration = duration;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -178,7 +169,6 @@ int GameInformation::getDuration() const
    return mDuration;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param roundsPlayed number of gamesPlayed
@@ -188,7 +178,6 @@ void GameInformation::setGamesPlayed(int roundsPlayed)
    mGamesPlayed = roundsPlayed;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return games played
@@ -197,7 +186,6 @@ int GameInformation::getGamesPlayed() const
 {
    return mGamesPlayed;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -214,11 +202,11 @@ float GameInformation::getMapScaleX() const
          break;
 
       case Constants::Dimension19x17:
-         scale = 19.0f/13.0f;
+         scale = 19.0f / 13.0f;
          break;
 
       case Constants::Dimension25x21:
-         scale = 25.0f/13.0f;
+         scale = 25.0f / 13.0f;
          break;
 
       default:
@@ -227,7 +215,6 @@ float GameInformation::getMapScaleX() const
 
    return scale;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -244,11 +231,11 @@ float GameInformation::getMapScaleY() const
          break;
 
       case Constants::Dimension19x17:
-         scale = 17.0f/11.0f;
+         scale = 17.0f / 11.0f;
          break;
 
       case Constants::Dimension25x21:
-         scale = 21.0f/11.0f;
+         scale = 21.0f / 11.0f;
          break;
 
       default:
@@ -257,7 +244,6 @@ float GameInformation::getMapScaleY() const
 
    return scale;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -268,7 +254,6 @@ int GameInformation::getCurrentRound() const
    return mCurrentRound;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return round count
@@ -277,7 +262,6 @@ int GameInformation::getRoundCount() const
 {
    return mRoundCount;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -288,7 +272,6 @@ bool GameInformation::isSpawnExtrasEnabled() const
    return mSpawnExtras;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param value extra spawn enabled
@@ -298,13 +281,12 @@ void GameInformation::setSpawnExtrasEnabled(bool value)
    mSpawnExtras = value;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream out
    \param info gameinfo object to stream
 */
-QDataStream& operator<<(QDataStream& out, const GameInformation& info)
+BinaryWriter& operator<<(BinaryWriter& out, const GameInformation& info)
 {
    out << info.mId;
    out << info.mPlayerCount;
@@ -312,7 +294,7 @@ QDataStream& operator<<(QDataStream& out, const GameInformation& info)
    out << info.mGameName;
    out << info.mLevelName;
    out << info.mCreatorId;
-   out << (int)info.mDimensions;
+   out << (int32_t)info.mDimensions;
    out << info.mExtras;
    out << info.mDuration;
    out << info.mGamesPlayed;
@@ -322,15 +304,14 @@ QDataStream& operator<<(QDataStream& out, const GameInformation& info)
    return out;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream in
    \param info gameinfo object to stream
 */
-QDataStream& operator>>(QDataStream& in, GameInformation& info)
+BinaryReader& operator>>(BinaryReader& in, GameInformation& info)
 {
-   int dimensions = -1;
+   int32_t dimensions = -1;
 
    in >> info.mId;
    in >> info.mPlayerCount;
@@ -349,4 +330,3 @@ QDataStream& operator>>(QDataStream& in, GameInformation& info)
 
    return in;
 }
-

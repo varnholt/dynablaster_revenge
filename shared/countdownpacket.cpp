@@ -2,7 +2,6 @@
 #include "countdownpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "Countdown"
@@ -13,26 +12,19 @@
 
    \param name game's name
 */
-CountdownPacket::CountdownPacket(
-   int countdown
-)
- : Packet(Packet::COUNTDOWN),
-   mTimeLeft(countdown)
+CountdownPacket::CountdownPacket(int countdown) : Packet(Packet::COUNTDOWN), mTimeLeft(countdown)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-CountdownPacket::CountdownPacket()
-   : Packet(Packet::COUNTDOWN)
+CountdownPacket::CountdownPacket() : Packet(Packet::COUNTDOWN)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -41,7 +33,6 @@ CountdownPacket::CountdownPacket()
 CountdownPacket::~CountdownPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -52,28 +43,25 @@ int CountdownPacket::getTimeLeft()
    return mTimeLeft;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void CountdownPacket::enqueue(QDataStream & out)
+void CountdownPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mTimeLeft;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void CountdownPacket::dequeue(QDataStream & in)
+void CountdownPacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mTimeLeft;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -82,10 +70,5 @@ void CountdownPacket::dequeue(QDataStream & in)
 void CountdownPacket::debug()
 {
    // debug output login response
-   qDebug(
-      "CountdownPacket:debug: time left: %d",
-      mTimeLeft
-   );
+   qDebug("CountdownPacket:debug: time left: %d", mTimeLeft);
 }
-
-

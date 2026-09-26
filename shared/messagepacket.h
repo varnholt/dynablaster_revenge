@@ -5,59 +5,49 @@
 
 class MessagePacket : public Packet
 {
-   public:
+public:
+   //! write constructor
+   MessagePacket(int8_t senderId, const QString& message, bool finishedTyping, int8_t receiverId = -1);
 
-      //! write constructor
-      MessagePacket(
-         int8_t senderId,
-         const QString& message,
-         bool finishedTyping,
-         int8_t receiverId = -1
-      );
+   //! read constructor
+   MessagePacket();
 
-      //! read constructor
-      MessagePacket();
+   //! destructor
+   virtual ~MessagePacket();
 
-      //! destructor
-      virtual ~MessagePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for sender id
+   int8_t getSenderId() const;
 
-      //! getter for sender id
-      int8_t getSenderId() const;
+   //! getter for the message
+   QString getMessage() const;
 
-      //! getter for the message
-      QString getMessage() const;
+   //! getter for the receiver's id
+   int8_t getReceiverId() const;
 
-      //! getter for the receiver's id
-      int8_t getReceiverId() const;
+   //! getter for finished-typing flag
+   bool isTypingFinished() const;
 
-      //! getter for finished-typing flag
-      bool isTypingFinished() const;
+private:
+   //! sender id
+   int8_t mSenderId;
 
+   //! message to send
+   QString mMessage;
 
-   private:
+   //! receiver id
+   int8_t mReceiverId;
 
-      //! sender id
-      int8_t mSenderId;
-
-      //! message to send
-      QString mMessage;
-
-      //! receiver id
-      int8_t mReceiverId;
-
-      //! player finished typing
-      bool mFinishedTyping;
-
+   //! player finished typing
+   bool mFinishedTyping;
 };
 
-#endif // MESSAGEPACKET_H
-
+#endif  // MESSAGEPACKET_H

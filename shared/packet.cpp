@@ -1,9 +1,6 @@
 #include "packet.h"
 
-#include <QIODevice>
-
-// qt
-#include <QDataStream>
+#include <QDebug>
 
 // shared
 #include "bombpacket.h"
@@ -12,8 +9,8 @@
 #include "creategameresponsepacket.h"
 #include "detonationpacket.h"
 #include "errorpacket.h"
-#include "extrashakepacket.h"
 #include "extramapitemcreatedpacket.h"
+#include "extrashakepacket.h"
 #include "gameeventpacket.h"
 #include "gamestatspacket.h"
 #include "joingamerequestpacket.h"
@@ -47,28 +44,19 @@
 /*!
    read constructor
 */
-Packet::Packet()
-   : mPacketSize(0),
-     mPacketType(INVALID),
-     mPacketName("INVALID")
+Packet::Packet() : mPacketSize(0), mPacketType(INVALID), mPacketName("INVALID")
 {
    mTimestamp = QTime::currentTime();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    write constructor
 */
-Packet::Packet(
-   TYPE type
-)
-   : mPacketSize(0),
-     mPacketType(type)
+Packet::Packet(TYPE type) : mPacketSize(0), mPacketType(type)
 {
    mTimestamp = QTime::currentTime();
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -87,7 +75,6 @@ int16_t Packet::getSize()
    return mPacketSize;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return packet type
@@ -96,7 +83,6 @@ Packet::TYPE Packet::getType()
 {
    return mPacketType;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -107,16 +93,14 @@ const QTime Packet::getTimestamp()
    return mTimestamp;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param time new timestamp
 */
-void Packet::setTimeStamp(const QTime &time)
+void Packet::setTimeStamp(const QTime& time)
 {
    mTimestamp = time;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -127,6 +111,14 @@ const QString& Packet::getPacketName() const
    return mPacketName;
 }
 
+//-----------------------------------------------------------------------------
+/*!
+   \return raw pointer to the serialized packet bytes
+*/
+const char* Packet::constData() const
+{
+   return reinterpret_cast<const char*>(data());
+}
 
 //-----------------------------------------------------------------------------
 /*!
@@ -134,11 +126,11 @@ const QString& Packet::getPacketName() const
 */
 void Packet::serialize()
 {
-   // build outgoing data
-   QDataStream out(this, QIODevice::WriteOnly);
-   out.setVersion(QDataStream::Qt_4_6);
+   BinaryWriter out(*this);
 
-   // reserve 16 bits for the packet packetSize
+   const auto sizeOffset = out.pos();
+
+   // reserve 16 bits for the packet size
    out << (uint16_t)0;
 
    // write packet packetType
@@ -149,19 +141,17 @@ void Packet::serialize()
 
    enqueue(out);
 
-   // write the blocksize at the beginning of the bytearray
-   out.device()->seek(0);
-   out << (uint16_t)(size() - sizeof(uint16_t));
+   // patch in the blocksize now that the payload's length is known
+   out.patchUint16(sizeOffset, static_cast<uint16_t>(size() - sizeOffset - sizeof(uint16_t)));
 }
-
 
 /*!----------------------------------------------------------------------------
    deserialize a packet
 
-   \param in input datastream
+   \param in input reader, positioned right after the packet's size prefix
    \return a packet of the correct type with all member variables filled
 */
-Packet* Packet::deserialize(QDataStream& in)
+Packet* Packet::deserialize(BinaryReader& in)
 {
    int8_t pType;
 
@@ -299,4 +289,3 @@ Packet* Packet::deserialize(QDataStream& in)
 
    return packet;
 }
-

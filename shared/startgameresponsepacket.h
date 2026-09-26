@@ -8,41 +8,37 @@
 
 class StartGameResponsePacket : public Packet
 {
+public:
+   //! write constructor, -1 if not accepted
+   StartGameResponsePacket(int id, bool started);
 
-   public:
+   //! read constructor
+   StartGameResponsePacket();
 
-      //! write constructor, -1 if not accepted
-      StartGameResponsePacket(int id, bool started);
+   //! destructor
+   virtual ~StartGameResponsePacket();
 
-      //! read constructor
-      StartGameResponsePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~StartGameResponsePacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game id
+   int getId();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for game is started flag
+   bool isStarted();
 
-      //! getter for game id
-      int getId();
+private:
+   //! game id
+   int32_t mId;
 
-      //! getter for game is started flag
-      bool isStarted();
-
-
-   private:
-
-      //! game id
-      int32_t mId;
-
-      //! game was started
-      bool mStarted;
+   //! game was started
+   bool mStarted;
 };
 
-#endif // STARTGAMERESPONSEPACKET_H
+#endif  // STARTGAMERESPONSEPACKET_H

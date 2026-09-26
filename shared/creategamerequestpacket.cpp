@@ -2,11 +2,9 @@
 #include "creategamerequestpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "CreateGameReqest"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -27,7 +25,7 @@ CreateGameRequestPacket::CreateGameRequestPacket(
    bool extraSkullsEnabled,
    Constants::Dimension dimension
 )
- : Packet(Packet::CREATEGAMEREQUEST)
+    : Packet(Packet::CREATEGAMEREQUEST)
 {
    mPacketName = PACKETNAME;
 
@@ -44,13 +42,11 @@ CreateGameRequestPacket::CreateGameRequestPacket(
    mData.mDimension = dimension;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-CreateGameRequestPacket::CreateGameRequestPacket()
-   : Packet(Packet::CREATEGAMEREQUEST)
+CreateGameRequestPacket::CreateGameRequestPacket() : Packet(Packet::CREATEGAMEREQUEST)
 {
    mPacketName = PACKETNAME;
 
@@ -64,7 +60,6 @@ CreateGameRequestPacket::CreateGameRequestPacket()
    mData.mExtraSkullsEnabled = false;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    destructor
@@ -72,7 +67,6 @@ CreateGameRequestPacket::CreateGameRequestPacket()
 CreateGameRequestPacket::~CreateGameRequestPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -83,7 +77,6 @@ const QString CreateGameRequestPacket::getName()
    return mData.mName;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game's crate data
@@ -93,60 +86,43 @@ CreateGameData CreateGameRequestPacket::getData() const
    return mData;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void CreateGameRequestPacket::enqueue(QDataStream & out)
+void CreateGameRequestPacket::enqueue(BinaryWriter& out)
 {
    // write members
-   out
-      << mData.mName
-      << mData.mLevel
+   out << mData.mName << mData.mLevel
 
-      << mData.mRounds
-      << mData.mDuration
-      << mData.mMaxPlayers
+       << mData.mRounds << mData.mDuration << mData.mMaxPlayers
 
-      << mData.mExtraBombEnabled
-      << mData.mExtraFlameEnabled
-      << mData.mExtraSpeedupEnabled
-      << mData.mExtraKickEnabled
-      << mData.mExtraSkullsEnabled
+       << mData.mExtraBombEnabled << mData.mExtraFlameEnabled << mData.mExtraSpeedupEnabled << mData.mExtraKickEnabled
+       << mData.mExtraSkullsEnabled
 
-      << mData.mDimension;
+       << mData.mDimension;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void CreateGameRequestPacket::dequeue(QDataStream & in)
+void CreateGameRequestPacket::dequeue(BinaryReader& in)
 {
    int dimension = 0;
 
    // read members
-   in
-      >> mData.mName
-      >> mData.mLevel
+   in >> mData.mName >> mData.mLevel
 
-      >> mData.mRounds
-      >> mData.mDuration
-      >> mData.mMaxPlayers
+      >> mData.mRounds >> mData.mDuration >> mData.mMaxPlayers
 
-      >> mData.mExtraBombEnabled
-      >> mData.mExtraFlameEnabled
-      >> mData.mExtraSpeedupEnabled
-      >> mData.mExtraKickEnabled
-      >> mData.mExtraSkullsEnabled
+      >> mData.mExtraBombEnabled >> mData.mExtraFlameEnabled >> mData.mExtraSpeedupEnabled >> mData.mExtraKickEnabled >>
+      mData.mExtraSkullsEnabled
 
       >> dimension;
 
    mData.mDimension = (Constants::Dimension)dimension;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -181,5 +157,3 @@ void CreateGameRequestPacket::debug()
       mData.mDimension
    );
 }
-
-

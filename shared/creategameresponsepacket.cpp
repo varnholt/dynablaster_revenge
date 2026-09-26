@@ -2,7 +2,6 @@
 #include "creategameresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "CreateGameResponse"
@@ -13,26 +12,20 @@
 
    \param name game's name
 */
-CreateGameResponsePacket::CreateGameResponsePacket(
-   const GameInformation& gameInformation
-)
- : Packet(Packet::CREATEGAMERESPONSE),
-   mGameInformation(gameInformation)
+CreateGameResponsePacket::CreateGameResponsePacket(const GameInformation& gameInformation)
+    : Packet(Packet::CREATEGAMERESPONSE), mGameInformation(gameInformation)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-CreateGameResponsePacket::CreateGameResponsePacket()
-   : Packet(Packet::CREATEGAMERESPONSE)
+CreateGameResponsePacket::CreateGameResponsePacket() : Packet(Packet::CREATEGAMERESPONSE)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -42,38 +35,34 @@ CreateGameResponsePacket::~CreateGameResponsePacket()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return game information object
 */
-const GameInformation &CreateGameResponsePacket::getGameInformation() const
+const GameInformation& CreateGameResponsePacket::getGameInformation() const
 {
    return mGameInformation;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void CreateGameResponsePacket::enqueue(QDataStream & out)
+void CreateGameResponsePacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mGameInformation;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void CreateGameResponsePacket::dequeue(QDataStream & in)
+void CreateGameResponsePacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mGameInformation;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -82,11 +71,5 @@ void CreateGameResponsePacket::dequeue(QDataStream & in)
 void CreateGameResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "CreateGameResponsePacket:debug: id: %d, player id: %d",
-      mGameInformation.getId(),
-      mGameInformation.getCreatorId()
-   );
+   qDebug("CreateGameResponsePacket:debug: id: %d, player id: %d", mGameInformation.getId(), mGameInformation.getCreatorId());
 }
-
-

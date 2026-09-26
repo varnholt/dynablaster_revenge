@@ -5,44 +5,41 @@
 
 class PlayerSynchronizePacket : public Packet
 {
-   public:
+public:
+   //! packet can be used for multiple purposes
+   enum SynchronizeProcess
+   {
+      LevelLoaded,
+      Invalid
+   };
 
-      //! packet can be used for multiple purposes
-      enum SynchronizeProcess {
-         LevelLoaded,
-         Invalid
-      };
+   //! read constructor
+   PlayerSynchronizePacket();
 
-      //! read constructor
-      PlayerSynchronizePacket();
+   //! write constructor
+   PlayerSynchronizePacket(SynchronizeProcess process);
 
-      //! write constructor
-      PlayerSynchronizePacket(SynchronizeProcess process);
+   //! destructor
+   virtual ~PlayerSynchronizePacket();
 
-      //! destructor
-      virtual ~PlayerSynchronizePacket();
+   //! setter for synchronize process
+   void setSynchronizeProcess(SynchronizeProcess process);
 
-      //! setter for synchronize process
-      void setSynchronizeProcess(SynchronizeProcess process);
+   //! getter for synchronize process
+   SynchronizeProcess getSynchronizeProcess() const;
 
-      //! getter for synchronize process
-      SynchronizeProcess getSynchronizeProcess() const;
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-
-   protected:
-
-      //! synchronize process
-      SynchronizeProcess mSynchronizeProcess;
-
+protected:
+   //! synchronize process
+   SynchronizeProcess mSynchronizeProcess;
 };
 
-#endif // PLAYERSYNCHRONIZEPACKET_H
+#endif  // PLAYERSYNCHRONIZEPACKET_H

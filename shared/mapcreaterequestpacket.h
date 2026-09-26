@@ -8,56 +8,52 @@
 #include <QList>
 #include <QPoint>
 
-
 class MapCreateRequestPacket : public Packet
 {
-   public:
+public:
+   //! write constructor
+   MapCreateRequestPacket(
+      int width,
+      int height,
+      int stoneCount,
+      int extraBombCount,
+      int extraFlameCount,
+      const QList<QPoint>& startPositions
+   );
 
-      //! write constructor
-      MapCreateRequestPacket(
-         int width,
-         int height,
-         int stoneCount,
-         int extraBombCount,
-         int extraFlameCount,
-         const QList<QPoint>& startPositions
-      );
+   //! read constructor
+   MapCreateRequestPacket();
 
-      //! read constructor
-      MapCreateRequestPacket();
+   //! destructor
+   virtual ~MapCreateRequestPacket();
 
-      //! destructor
-      virtual ~MapCreateRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+private:
+   //! map width
+   int32_t mWidth;
 
+   //! map height
+   int32_t mHeight;
 
-   private:
+   //! number of stones
+   int32_t mStoneCount;
 
-      //! map width
-      int32_t mWidth;
+   //! number of bomb extras
+   int32_t mExtraBombCount;
 
-      //! map height
-      int32_t mHeight;
+   //! number of flame extras
+   int32_t mExtraFlameCount;
 
-      //! number of stones
-      int32_t mStoneCount;
-
-      //! number of bomb extras
-      int32_t mExtraBombCount;
-
-      //! number of flame extras
-      int32_t mExtraFlameCount;
-
-      //! player start positions
-      QList<QPoint> mStartPositions;
+   //! player start positions
+   QList<QPoint> mStartPositions;
 };
 
-#endif // MAPCREATEREQUESTPACKET_H
+#endif  // MAPCREATEREQUESTPACKET_H

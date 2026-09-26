@@ -2,7 +2,6 @@
 #include "messagepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "Message"
@@ -12,41 +11,26 @@
    \param message message to send
    \param receiverId id of the receiver
 */
-MessagePacket::MessagePacket(
-   int8_t senderId,
-   const QString& message,
-   bool finishedTyping,
-   int8_t receiverId
-)
- : Packet(Packet::MESSAGE),
-   mSenderId(senderId),
-   mMessage(message),
-   mReceiverId(receiverId),
-   mFinishedTyping(finishedTyping)
+MessagePacket::MessagePacket(int8_t senderId, const QString& message, bool finishedTyping, int8_t receiverId)
+    : Packet(Packet::MESSAGE), mSenderId(senderId), mMessage(message), mReceiverId(receiverId), mFinishedTyping(finishedTyping)
 {
    mPacketName = PACKETNAME;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
-MessagePacket::MessagePacket()
-   : Packet(Packet::MESSAGE),
-     mReceiverId(-1),
-     mFinishedTyping(true)
+ */
+MessagePacket::MessagePacket() : Packet(Packet::MESSAGE), mReceiverId(-1), mFinishedTyping(true)
 {
    mPacketName = PACKETNAME;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
-*/
+ */
 MessagePacket::~MessagePacket()
 {
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -66,7 +50,6 @@ int8_t MessagePacket::getReceiverId() const
    return mReceiverId;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \return \c true if typing is finished
@@ -76,12 +59,11 @@ bool MessagePacket::isTypingFinished() const
    return mFinishedTyping;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void MessagePacket::enqueue(QDataStream & out)
+void MessagePacket::enqueue(BinaryWriter& out)
 {
    // write sender id
    out << mSenderId;
@@ -96,20 +78,15 @@ void MessagePacket::enqueue(QDataStream & out)
    out << mFinishedTyping;
 }
 
-
 //----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void MessagePacket::dequeue(QDataStream & in)
+void MessagePacket::dequeue(BinaryReader& in)
 {
    // read message and receiver id
-   in >> mSenderId
-      >> mMessage
-      >> mReceiverId
-      >> mFinishedTyping;
+   in >> mSenderId >> mMessage >> mReceiverId >> mFinishedTyping;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -119,7 +96,6 @@ int8_t MessagePacket::getSenderId() const
 {
    return mSenderId;
 }
-
 
 //----------------------------------------------------------------------------
 /*!
@@ -137,5 +113,3 @@ void MessagePacket::debug()
       mFinishedTyping
    );
 }
-
-

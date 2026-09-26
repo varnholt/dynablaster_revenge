@@ -2,11 +2,9 @@
 #include "positionpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "Position"
-
 
 /*!----------------------------------------------------------------------------
    write constructor
@@ -15,50 +13,39 @@
    \param xPos player x position
    \param yPos player y position
 */
-PositionPacket::PositionPacket(
-   int8_t pId,
-   int8_t dirs,
-   float xPos,
-   float yPos,
-   float angle,
-   float xDelta,
-   float yDelta,
-   float angleDelta,
-   float speed
-)
- : Packet(Packet::POSITION),
-   mPlayerId(pId),
-   mDirections(dirs),
-   mX(xPos),
-   mY(yPos),
-   mDx(xDelta),
-   mDy(yDelta),
-   mAngle(angle),
-   mAngleDelta(angleDelta),
-   mSpeed(speed)
+PositionPacket::
+   PositionPacket(int8_t pId, int8_t dirs, float xPos, float yPos, float angle, float xDelta, float yDelta, float angleDelta, float speed)
+    : Packet(Packet::POSITION),
+      mPlayerId(pId),
+      mDirections(dirs),
+      mX(xPos),
+      mY(yPos),
+      mDx(xDelta),
+      mDy(yDelta),
+      mAngle(angle),
+      mAngleDelta(angleDelta),
+      mSpeed(speed)
 {
    mPacketName = PACKETNAME;
 }
-
 
 /*!----------------------------------------------------------------------------
    read constructor
 */
 PositionPacket::PositionPacket()
-   : Packet(Packet::POSITION),
-     mPlayerId(0),
-     mDirections(0),
-     mX(0.0f),
-     mY(0.0f),
-     mDx(0.0f),
-     mDy(0.0f),
-     mAngle(0.0f),
-     mAngleDelta(0.0f),
-     mSpeed(0.0f)
+    : Packet(Packet::POSITION),
+      mPlayerId(0),
+      mDirections(0),
+      mX(0.0f),
+      mY(0.0f),
+      mDx(0.0f),
+      mDy(0.0f),
+      mAngle(0.0f),
+      mAngleDelta(0.0f),
+      mSpeed(0.0f)
 {
    mPacketName = PACKETNAME;
 }
-
 
 /*!----------------------------------------------------------------------------
    destructor
@@ -66,7 +53,6 @@ PositionPacket::PositionPacket()
 PositionPacket::~PositionPacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -86,15 +72,12 @@ float PositionPacket::getDeltaX() const
    return mDx;
 }
 
-
 //-----------------------------------------------------------------------------
 //! set player's x delta
 void PositionPacket::setDeltaX(double deltax)
 {
-   mDx= deltax;
+   mDx = deltax;
 }
-
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -118,7 +101,7 @@ float PositionPacket::getDeltaY() const
 //! set player's y delta
 void PositionPacket::setDeltaY(double deltay)
 {
-   mDy= deltay;
+   mDy = deltay;
 }
 
 //-----------------------------------------------------------------------------
@@ -136,15 +119,14 @@ float PositionPacket::getAngle() const
 */
 float PositionPacket::getAngleDelta() const
 {
-    return mAngleDelta;
+   return mAngleDelta;
 }
-
 
 //-----------------------------------------------------------------------------
 //! set player's rotation delta
 void PositionPacket::setAngleDelta(float angleDelta)
 {
-   mAngleDelta= angleDelta;
+   mAngleDelta = angleDelta;
 }
 
 //-----------------------------------------------------------------------------
@@ -156,7 +138,6 @@ float PositionPacket::getSpeed() const
    return mSpeed;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \return player directions
@@ -165,7 +146,6 @@ int8_t PositionPacket::getDirections()
 {
    return mDirections;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -176,12 +156,11 @@ int8_t PositionPacket::getPlayerId()
    return mPlayerId;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void PositionPacket::enqueue(QDataStream & out)
+void PositionPacket::enqueue(BinaryWriter& out)
 {
    // write player id
    out << mPlayerId;
@@ -203,27 +182,16 @@ void PositionPacket::enqueue(QDataStream & out)
    // debug();
 }
 
-
 /*!----------------------------------------------------------------------------
    \param in datastream read members from
 */
-void PositionPacket::dequeue(QDataStream & in)
+void PositionPacket::dequeue(BinaryReader& in)
 {
    // read player id, x, y
-   in
-      >> mPlayerId
-      >> mDirections
-      >> mX
-      >> mY
-      >> mAngle
-      >> mDx
-      >> mDy
-      >> mAngleDelta
-      >> mSpeed;
+   in >> mPlayerId >> mDirections >> mX >> mY >> mAngle >> mDx >> mDy >> mAngleDelta >> mSpeed;
 
    // debug();
 }
-
 
 /*!----------------------------------------------------------------------------
    debug output of members
@@ -231,16 +199,5 @@ void PositionPacket::dequeue(QDataStream & in)
 void PositionPacket::debug()
 {
    // output player id and x, y
-   qDebug(
-      "PositionPacket: player id: %d, position: (%f, %f, %f)  dir: (%f,%f,%f)",
-      mPlayerId,
-      mX,
-      mY,
-      mAngle,
-      mDx,
-      mDy,
-      mAngleDelta
-   );
+   qDebug("PositionPacket: player id: %d, position: (%f, %f, %f)  dir: (%f,%f,%f)", mPlayerId, mX, mY, mAngle, mDx, mDy, mAngleDelta);
 }
-
-

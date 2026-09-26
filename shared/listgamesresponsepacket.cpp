@@ -2,11 +2,9 @@
 #include "listgamesresponsepacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "ListGameResponse"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -14,29 +12,20 @@
 
    \param name game's name
 */
-ListGamesResponsePacket::ListGamesResponsePacket(
-   const QList<GameInformation>& games,
-   bool update
-)
- : Packet(Packet::LISTGAMESRESPONSE),
-   mGames(games),
-   mUpdate(update)
+ListGamesResponsePacket::ListGamesResponsePacket(const QList<GameInformation>& games, bool update)
+    : Packet(Packet::LISTGAMESRESPONSE), mGames(games), mUpdate(update)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
-ListGamesResponsePacket::ListGamesResponsePacket()
-   : Packet(Packet::LISTGAMESRESPONSE),
-     mUpdate(false)
+ListGamesResponsePacket::ListGamesResponsePacket() : Packet(Packet::LISTGAMESRESPONSE), mUpdate(false)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -45,7 +34,6 @@ ListGamesResponsePacket::ListGamesResponsePacket()
 ListGamesResponsePacket::~ListGamesResponsePacket()
 {
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -56,7 +44,6 @@ const QList<GameInformation> ListGamesResponsePacket::getGames()
    return mGames;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param update update flag
@@ -65,7 +52,6 @@ void ListGamesResponsePacket::setUpdate(bool update)
 {
    mUpdate = update;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -76,30 +62,27 @@ bool ListGamesResponsePacket::isUpdate() const
    return mUpdate;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void ListGamesResponsePacket::enqueue(QDataStream & out)
+void ListGamesResponsePacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mUpdate;
    out << mGames;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void ListGamesResponsePacket::dequeue(QDataStream & in)
+void ListGamesResponsePacket::dequeue(BinaryReader& in)
 {
    // read members
    in >> mUpdate;
    in >> mGames;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -108,11 +91,5 @@ void ListGamesResponsePacket::dequeue(QDataStream & in)
 void ListGamesResponsePacket::debug()
 {
    // debug output login response
-   qDebug(
-      "ListGamesResponsePacket:debug: number of games sent: %d, update: %d",
-      mGames.size(),
-      isUpdate()
-   );
+   qDebug("ListGamesResponsePacket:debug: number of games sent: %d, update: %d", mGames.size(), isUpdate());
 }
-
-

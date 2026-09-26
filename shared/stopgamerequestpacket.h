@@ -8,36 +8,31 @@
 
 class StopGameRequestPacket : public Packet
 {
+public:
+   //! write constructor, -1 if not accepted
+   StopGameRequestPacket(int id);
 
-   public:
+   //! read constructor
+   StopGameRequestPacket();
 
-      //! write constructor, -1 if not accepted
-      StopGameRequestPacket(int id);
+   //! destructor
+   virtual ~StopGameRequestPacket();
 
-      //! read constructor
-      StopGameRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~StopGameRequestPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game id
+   int getId();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-      //! getter for game id
-      int getId();
-
-
-   private:
-
-      //! game id
-      int32_t mId;
-
+private:
+   //! game id
+   int32_t mId;
 };
 
-#endif // STOPGAMEREQUESTPACKET_H
+#endif  // STOPGAMEREQUESTPACKET_H

@@ -2,11 +2,9 @@
 #include "detonationpacket.h"
 
 // Qt
-#include <QDataStream>
 
 // defines
 #define PACKETNAME "Detonation"
-
 
 //-----------------------------------------------------------------------------
 /*!
@@ -26,42 +24,33 @@ DetonationPacket::DetonationPacket(
    int8_t fieldsRight,
    float intensity
 )
-   : Packet(Packet::DETONATION),
-     mX(x),
-     mY(y),
-     mFieldsUp(fieldsUp),
-     mFieldsDown(fieldsDown),
-     mFieldsLeft(fieldsLeft),
-     mFieldsRight(fieldsRight),
-     mIntensity(intensity)
+    : Packet(Packet::DETONATION),
+      mX(x),
+      mY(y),
+      mFieldsUp(fieldsUp),
+      mFieldsDown(fieldsDown),
+      mFieldsLeft(fieldsLeft),
+      mFieldsRight(fieldsRight),
+      mIntensity(intensity)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    read constructor
 */
 DetonationPacket::DetonationPacket()
-   : Packet(Packet::DETONATION),
-     mX(0),
-     mY(0),
-     mFieldsUp(0),
-     mFieldsDown(0),
-     mFieldsLeft(0),
-     mFieldsRight(0),
-     mIntensity(0.0f)
+    : Packet(Packet::DETONATION), mX(0), mY(0), mFieldsUp(0), mFieldsDown(0), mFieldsLeft(0), mFieldsRight(0), mIntensity(0.0f)
 {
    mPacketName = PACKETNAME;
 }
-
 
 //-----------------------------------------------------------------------------
 /*!
    \param out datastream to write members to
 */
-void DetonationPacket::enqueue(QDataStream & out)
+void DetonationPacket::enqueue(BinaryWriter& out)
 {
    // write members
    out << mX;
@@ -73,48 +62,39 @@ void DetonationPacket::enqueue(QDataStream & out)
    out << mIntensity;
 }
 
-
 //-----------------------------------------------------------------------------
 /*!
    \param in datastream read members from
 */
-void DetonationPacket::dequeue(QDataStream & in)
+void DetonationPacket::dequeue(BinaryReader& in)
 {
-
    // read members
-   in
-      >> mX
-      >> mY
-      >> mFieldsUp
-      >> mFieldsDown
-      >> mFieldsLeft
-      >> mFieldsRight
-      >> mIntensity;
+   in >> mX >> mY >> mFieldsUp >> mFieldsDown >> mFieldsLeft >> mFieldsRight >> mIntensity;
 }
 
 int32_t DetonationPacket::getX() const
 {
-	return mX;
+   return mX;
 }
 
 int32_t DetonationPacket::getY() const
 {
-	return mY;
+   return mY;
 }
 
 int8_t DetonationPacket::getUp() const
 {
-	return mFieldsUp;
+   return mFieldsUp;
 }
 
 int8_t DetonationPacket::getDown() const
 {
-	return mFieldsDown;
+   return mFieldsDown;
 }
 
 int8_t DetonationPacket::getLeft() const
 {
-	return mFieldsLeft;
+   return mFieldsLeft;
 }
 
 int8_t DetonationPacket::getRight() const
@@ -147,4 +127,3 @@ void DetonationPacket::debug()
       mIntensity
    );
 }
-

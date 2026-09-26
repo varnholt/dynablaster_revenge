@@ -13,49 +13,45 @@
 
 class CreateGameRequestPacket : public Packet
 {
+public:
+   //! write constructor
+   CreateGameRequestPacket(
+      const QString& name,
+      const QString& level,
+      int rounds,
+      int duration,
+      int maxPlayers,
+      bool extraBombEnabled,
+      bool extraFlameEnabled,
+      bool extraSpeedupEnabled,
+      bool extraKickEnabled,
+      bool extraSkullsEnabled,
+      Constants::Dimension dimension
+   );
 
-   public:
+   //! read constructor
+   CreateGameRequestPacket();
 
-      //! write constructor
-      CreateGameRequestPacket(
-         const QString& name,
-         const QString& level,
-         int rounds,
-         int duration,
-         int maxPlayers,
-         bool extraBombEnabled,
-         bool extraFlameEnabled,
-         bool extraSpeedupEnabled,
-         bool extraKickEnabled,
-         bool extraSkullsEnabled,
-         Constants::Dimension dimension
-      );
+   //! destructor
+   virtual ~CreateGameRequestPacket();
 
-      //! read constructor
-      CreateGameRequestPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~CreateGameRequestPacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game name
+   const QString getName();
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   //! getter for create game data
+   CreateGameData getData() const;
 
-      //! getter for game name
-      const QString getName();
-
-      //! getter for create game data
-      CreateGameData getData() const;
-
-
-   private:
-
-      CreateGameData mData;
+private:
+   CreateGameData mData;
 };
 
-#endif // CREATEGAMEREQUESTPACKET_H
+#endif  // CREATEGAMEREQUESTPACKET_H

@@ -5,15 +5,9 @@
 
 class BombPacket : public Packet
 {
-
 public:
-
    //! write constructor
-   BombPacket(
-      int8_t playerId,
-      uint8_t x,
-      uint8_t y
-   );
+   BombPacket(int8_t playerId, uint8_t x, uint8_t y);
 
    //! read constructor
    BombPacket();
@@ -25,10 +19,10 @@ public:
    void debug();
 
    //! enqueues the member variables to datastream
-   void enqueue(QDataStream&);
+   void enqueue(BinaryWriter&);
 
    //! dequeues the member variables from datastream
-   void dequeue(QDataStream&);
+   void dequeue(BinaryReader&);
 
    //! getter for player id
    int8_t getPlayerId();
@@ -39,9 +33,7 @@ public:
    //! getter for the bomb's y field position
    uint8_t getY();
 
-
 private:
-
    //! player id
    int8_t playerId;
 
@@ -50,8 +42,6 @@ private:
 
    //! the bomb's x field position
    uint8_t y;
-
 };
 
 #endif
-

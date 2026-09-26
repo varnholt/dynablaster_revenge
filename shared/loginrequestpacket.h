@@ -6,14 +6,9 @@
 
 class LoginRequestPacket : public Packet
 {
-
 public:
-
    //! write constructor
-   LoginRequestPacket(
-      const QString& mNick,
-      bool bot
-   );
+   LoginRequestPacket(const QString& mNick, bool bot);
 
    //! read constructor
    LoginRequestPacket();
@@ -25,10 +20,10 @@ public:
    void debug();
 
    //! enqueues the member variables to datastream
-   void enqueue(QDataStream&);
+   void enqueue(BinaryWriter&);
 
    //! dequeues the member variables from datastream
-   void dequeue(QDataStream&);
+   void dequeue(BinaryReader&);
 
    //! getter for player nick
    const QString& getNick() const;
@@ -36,9 +31,7 @@ public:
    //! getter for bot flag
    bool isBot() const;
 
-
 private:
-
    //! player nick
    QString mNick;
 
@@ -47,4 +40,3 @@ private:
 };
 
 #endif
-

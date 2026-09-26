@@ -7,26 +7,23 @@ class MapItem;
 
 class MapItemRemovedPacket : public MapItemPacket
 {
+public:
+   //! write constructor
+   MapItemRemovedPacket(MapItem* item);
 
-   public:
+   //! read constructor
+   MapItemRemovedPacket();
 
-      //! write constructor
-      MapItemRemovedPacket(MapItem *item);
+   //! debugs the member variables
+   virtual void debug();
 
-      //! read constructor
-      MapItemRemovedPacket();
+   //! enqueues the member variables to datastream
+   virtual void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      virtual void debug();
+   //! dequeues the member variables from datastream
+   virtual void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      virtual void enqueue(QDataStream&);
-
-      //! dequeues the member variables from datastream
-      virtual void dequeue(QDataStream&);
-
-
-   protected:
+protected:
 };
 
-#endif // MAPITEMREMOVEDPACKET_H
+#endif  // MAPITEMREMOVEDPACKET_H

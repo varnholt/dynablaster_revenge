@@ -3,12 +3,9 @@
 
 #include "packet.h"
 
-
 class PositionPacket : public Packet
 {
-
 public:
-
    //! write constructor
    PositionPacket(
       int8_t playerId,
@@ -32,11 +29,10 @@ public:
    void debug();
 
    //! enqueues the member variables to datastream
-   void enqueue(QDataStream&);
+   void enqueue(BinaryWriter&);
 
    //! dequeues the member variables from datastream
-   void dequeue(QDataStream&);
-
+   void dequeue(BinaryReader&);
 
    //! getter for player id
    int8_t getPlayerId();
@@ -74,7 +70,6 @@ public:
    void setAngleDelta(float angleDelta);
 
 private:
-
    //! player id
    int8_t mPlayerId;
 
@@ -104,4 +99,3 @@ private:
 };
 
 #endif
-

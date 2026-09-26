@@ -9,101 +9,90 @@
 
 class GameEventPacket : public Packet
 {
-   public:
+public:
+   //! events
+   enum GameEvent
+   {
+      Invalid,
+      BombExploded,
+      ExtraCollected,
+      ExtraDestroyed
+   };
 
-      //! events
-      enum GameEvent
-      {
-         Invalid,
-         BombExploded,
-         ExtraCollected,
-         ExtraDestroyed
-      };
+   //! write constructor
+   GameEventPacket(GameEvent event, float intensity = 1.0f, int x = -1, int y = -1);
 
-      //! write constructor
-      GameEventPacket(
-         GameEvent event,
-         float intensity = 1.0f,
-         int x = -1,
-         int y = -1
-      );
+   //! read constructor
+   GameEventPacket();
 
-      //! read constructor
-      GameEventPacket();
+   //! debugs the member variables
+   void debug();
 
-      //! debugs the member variables
-      void debug();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
+   // BombExplodedPacket
 
-      // BombExplodedPacket
+   //! getter for the game event
+   GameEvent getGameEvent() const;
 
-      //! getter for the game event
-      GameEvent getGameEvent() const;
+   //! getter for the event's intensity
+   float getIntensity() const;
 
-      //! getter for the event's intensity
-      float getIntensity() const;
+   // ExtraCollectedPacket
 
+   //! setter for player id
+   void setPlayerId(int32_t);
 
-      // ExtraCollectedPacket
+   //! setter for extra type
+   void setExtraType(Constants::ExtraType);
 
-      //! setter for player id
-      void setPlayerId(int32_t);
+   //! getter for player id
+   int32_t getPlayerId() const;
 
-      //! setter for extra type
-      void setExtraType(Constants::ExtraType);
+   //! getter for extra type
+   Constants::ExtraType getExtraType() const;
 
-      //! getter for player id
-      int32_t getPlayerId() const;
+   //! getter for x position
+   int getX() const;
 
-      //! getter for extra type
-      Constants::ExtraType getExtraType() const;
+   //! getter for y position
+   int getY() const;
 
-      //! getter for x position
-      int getX() const;
+private:
+   //! game event
+   GameEvent mEvent;
 
-      //! getter for y position
-      int getY() const;
+   // TODO: create 2 separate packets here
+   //
+   // - BombExplodedPacket
+   //   +- intensity
+   //
+   // - ExtraCollectedPacket
+   //   +- player id
+   //   +- extra type
 
+   //! effect intensity
+   float mIntensity;
 
-   private:
+   // ------- snip --------
 
-      //! game event
-      GameEvent mEvent;
+   // extra attributes for extra collected
 
-      // TODO: create 2 separate packets here
-      //
-      // - BombExplodedPacket
-      //   +- intensity
-      //
-      // - ExtraCollectedPacket
-      //   +- player id
-      //   +- extra type
+   //! player's id
+   int32_t mPlayerId;
 
+   //! extra that was collected
+   Constants::ExtraType mExtraType;
 
-      //! effect intensity
-      float mIntensity;
+   //! affected field x pos
+   int mX;
 
-      // ------- snip --------
-
-      // extra attributes for extra collected
-
-      //! player's id
-      int32_t mPlayerId;
-
-      //! extra that was collected
-      Constants::ExtraType mExtraType;
-
-      //! affected field x pos
-      int mX;
-
-      //! affected field y pos
-      int mY;
-
+   //! affected field y pos
+   int mY;
 };
 
-#endif // GAMEEVENTPACKET_H
+#endif  // GAMEEVENTPACKET_H

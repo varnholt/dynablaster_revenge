@@ -6,38 +6,34 @@
 
 class MapItemCreatedPacket : public MapItemPacket
 {
+public:
+   //! write constructor
+   MapItemCreatedPacket(MapItem*, int8_t creator = -1);
 
-   public:
+   //! read constructor
+   MapItemCreatedPacket();
 
-      //! write constructor
-      MapItemCreatedPacket(MapItem*, int8_t creator = -1);
+   //! debugs the member variables
+   virtual void debug();
 
-      //! read constructor
-      MapItemCreatedPacket();
+   //! enqueues the member variables to datastream
+   virtual void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      virtual void debug();
+   //! dequeues the member variables from datastream
+   virtual void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      virtual void enqueue(QDataStream&);
+   //! getter for the mapitem's appearance
+   int32_t getAppearance() const;
 
-      //! dequeues the member variables from datastream
-      virtual void dequeue(QDataStream&);
+   //! getter for mapitem's creator
+   int8_t getPlayerId() const;
 
-      //! getter for the mapitem's appearance
-      int32_t getAppearance() const;
+private:
+   //! the mapitem's appearance
+   int32_t mAppearance;
 
-      //! getter for mapitem's creator
-      int8_t getPlayerId() const;
-
-
-   private:
-
-      //! the mapitem's appearance
-      int32_t mAppearance;
-
-      //! the mapitem's creator
-      int8_t mPlayerId;
+   //! the mapitem's creator
+   int8_t mPlayerId;
 };
 
-#endif // MAPITEMCREATEDPACKET_H
+#endif  // MAPITEMCREATEDPACKET_H

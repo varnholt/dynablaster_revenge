@@ -10,35 +10,31 @@
 
 class CreateGameResponsePacket : public Packet
 {
+public:
+   //! write constructor
+   CreateGameResponsePacket(const GameInformation& gameInformation);
 
-   public:
+   //! read constructor
+   CreateGameResponsePacket();
 
-      //! write constructor
-      CreateGameResponsePacket(const GameInformation& gameInformation);
+   //! destructor
+   virtual ~CreateGameResponsePacket();
 
-      //! read constructor
-      CreateGameResponsePacket();
+   //! debugs the member variables
+   void debug();
 
-      //! destructor
-      virtual ~CreateGameResponsePacket();
+   //! enqueues the member variables to datastream
+   void enqueue(BinaryWriter&);
 
-      //! debugs the member variables
-      void debug();
+   //! dequeues the member variables from datastream
+   void dequeue(BinaryReader&);
 
-      //! enqueues the member variables to datastream
-      void enqueue(QDataStream&);
+   //! getter for game information
+   const GameInformation& getGameInformation() const;
 
-      //! dequeues the member variables from datastream
-      void dequeue(QDataStream&);
-
-      //! getter for game information
-      const GameInformation& getGameInformation() const;
-
-
-   private:
-
-      //! game information
-      GameInformation mGameInformation;
+private:
+   //! game information
+   GameInformation mGameInformation;
 };
 
-#endif // CREATEGAMERESPONSEPACKET_H
+#endif  // CREATEGAMERESPONSEPACKET_H
