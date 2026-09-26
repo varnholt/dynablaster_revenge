@@ -133,6 +133,8 @@ set(DYNABLASTER_SHARED_SOURCES
     ../shared/playerstats.h
     ../shared/playersynchronizepacket.cpp
     ../shared/playersynchronizepacket.h
+    ../shared/point.cpp
+    ../shared/point.h
     ../shared/positionpacket.cpp
     ../shared/positionpacket.h
     ../shared/serverconfiguration.cpp

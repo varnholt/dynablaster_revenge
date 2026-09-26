@@ -6,15 +6,16 @@
 #include <vector>
 
 #include <QList>
-#include <QPoint>
 #include <QString>
 #include <QTime>
+
+#include "point.h"
 
 // reads fixed-width, little-endian values back out of a byte buffer, mirroring
 // QDataStream's operator>> shape; a read past the end leaves the value untouched
 // and latches 'ok' to false instead of asserting, since packet bytes come off the
 // network and a truncated/malformed packet must fail gracefully, not crash. Also knows how
-// to read the handful of Qt types (QString/QPoint/QList<T>/QTime) packet fields still carry -
+// to read the handful of Qt types (QString/QList<T>/QTime) packet fields still carry -
 // those types themselves aren't going away in this pass, only QDataStream/QByteArray are.
 class BinaryReader
 {
@@ -35,7 +36,7 @@ public:
    BinaryReader& operator>>(bool& value);
    BinaryReader& operator>>(std::string& value);
    BinaryReader& operator>>(QString& value);
-   BinaryReader& operator>>(QPoint& value);
+   BinaryReader& operator>>(Point& value);
    BinaryReader& operator>>(QTime& value);
 
    template <typename T>

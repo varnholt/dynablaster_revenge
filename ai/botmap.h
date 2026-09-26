@@ -58,16 +58,16 @@ class BotMap : public QObject, public Map
       void updateReachableExtras();
 
       //! getter for reachable positions
-      const QList<QPoint> &getReachablePositions() const;
+      const QList<Point> &getReachablePositions() const;
 
       //! getter for reachable extras
-      const QList<QPoint>& getReachableExtras() const;
+      const QList<Point>& getReachableExtras() const;
 
       //! getter for reachable neighbor positions
-      QList<QPoint> getReachableNeighborPositions(int x, int y) const;
+      QList<Point> getReachableNeighborPositions(int x, int y) const;
 
       //! getter for reachable neighbor positions in randomized form
-      QList<QPoint> getReachableNeighborPositionsRandomized(int x, int y) const;
+      QList<Point> getReachableNeighborPositionsRandomized(int x, int y) const;
 
       //! number of stones neighbored to the given position
       int getStoneCountAroundPoint(int x, int y, int flameCount);
@@ -110,7 +110,7 @@ class BotMap : public QObject, public Map
          int x,
          int y,
          int flames,
-         const QList<QPoint>& enemies
+         const QList<Point>& enemies
       ) const;
 
       //! get bombs placed by player id
@@ -172,10 +172,10 @@ class BotMap : public QObject, public Map
       bool* mTraversedPositions;
 
       //! list of reachable positions
-      QList<QPoint> mReachablePositions;
+      QList<Point> mReachablePositions;
 
       //! list of reachable extra positions
-      QList<QPoint> mReachableExtras;
+      QList<Point> mReachableExtras;
 
       //! serialize member access
       mutable QMutex mMutex;

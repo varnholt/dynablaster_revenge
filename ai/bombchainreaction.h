@@ -6,10 +6,12 @@ class BotMap;
 
 // shared
 #include "botbombmapitem.h"
+#include "point.h"
 
 // Qt
-#include <QPoint>
-#include <QSet>
+#include <QList>
+
+#include <unordered_set>
 
 
 class BombChainReaction
@@ -43,7 +45,7 @@ class BombChainReaction
       void iterate(BotBombMapItem *item, QList<BotBombMapItem *> &items);
 
       //! visited items
-      QSet<BotBombMapItem*> mVisited;
+      std::unordered_set<BotBombMapItem*> mVisited;
 
       //! bot map
       BotMap* mBotMap;
@@ -52,7 +54,7 @@ class BombChainReaction
       ChainList mChain;
 
       //! direction vectors
-      QList<QPoint> mDirections;
+      QList<Point> mDirections;
 };
 
 #endif // BOMBCHAINREACTION_H

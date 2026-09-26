@@ -409,7 +409,7 @@ void BombKickAnimation::readyToExplode()
 */
 void BombKickAnimation::updatePlayerPosition(int id, float x, float y)
 {
-   mPlayerPositions[id] = QPoint(static_cast<int32_t>(floor(x)), static_cast<int32_t>(floor(y)));
+   mPlayerPositions[id] = Point(static_cast<int32_t>(floor(x)), static_cast<int32_t>(floor(y)));
 }
 
 //-----------------------------------------------------------------------------
@@ -418,7 +418,7 @@ void BombKickAnimation::updatePlayerPosition(int id, float x, float y)
 */
 void BombKickAnimation::removePlayerPosition(int id)
 {
-   mPlayerPositions.remove(id);
+   mPlayerPositions.erase(id);
 }
 
 //-----------------------------------------------------------------------------
@@ -477,8 +477,10 @@ bool BombKickAnimation::isMoveAllowed()
       {
          // if there is no blocking item, we still need to check for
          // player collisions
-         foreach (const QPoint& p, mPlayerPositions)
+         for (const auto& entry : mPlayerPositions)
          {
+            const Point& p = entry.second;
+
             if (p.x() == checkFieldX && p.y() == checkFieldY)
             {
                allowed = false;
@@ -503,8 +505,10 @@ bool BombKickAnimation::isMoveAllowed()
                // check if there's a player on the field the bomb is
                // at *this very moment*. if that is the case, well...
                // stop the animation.
-               foreach (const QPoint& p, mPlayerPositions)
+               for (const auto& entry : mPlayerPositions)
                {
+                  const Point& p = entry.second;
+
                   if (p.x() == fieldXPos && p.y() == fieldYPos)
                   {
                      allowed = false;

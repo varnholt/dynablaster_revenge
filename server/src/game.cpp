@@ -332,7 +332,7 @@ void Game::initializeMap()
    // 26x22 field: 32 extras
 
    // create default map
-   QList<QPoint> startPositions;
+   QList<Point> startPositions;
 
    if (mCreateGameData.mDimension == Constants::Dimension13x11)
    {
@@ -342,7 +342,7 @@ void Game::initializeMap()
       height = 11;
       stones = 60;
 
-      startPositions << QPoint(0, 0) << QPoint(12, 10) << QPoint(12, 0) << QPoint(0, 10) << QPoint(6, 5);
+      startPositions << Point(0, 0) << Point(12, 10) << Point(12, 0) << Point(0, 10) << Point(6, 5);
    }
 
    else if (mCreateGameData.mDimension == Constants::Dimension19x17)
@@ -353,13 +353,13 @@ void Game::initializeMap()
       height = 17;
       stones = 120;
 
-      startPositions << QPoint(0, 0) << QPoint(width - 1, height - 1) << QPoint(width - 1, 0) << QPoint(0, height - 1)
-                     << QPoint(0, 8)     // center left
-                     << QPoint(18, 8)    // center right
-                     << QPoint(6, 4)     // center quad top left
-                     << QPoint(12, 4)    // center quad top right
-                     << QPoint(6, 12)    // center quad bottom left
-                     << QPoint(12, 12);  // center quad bottom right
+      startPositions << Point(0, 0) << Point(width - 1, height - 1) << Point(width - 1, 0) << Point(0, height - 1)
+                     << Point(0, 8)     // center left
+                     << Point(18, 8)    // center right
+                     << Point(6, 4)     // center quad top left
+                     << Point(12, 4)    // center quad top right
+                     << Point(6, 12)    // center quad bottom left
+                     << Point(12, 12);  // center quad bottom right
    }
 
    else if (mCreateGameData.mDimension == Constants::Dimension25x21)
@@ -370,13 +370,13 @@ void Game::initializeMap()
       height = 21;
       stones = 140;
 
-      startPositions << QPoint(0, 0) << QPoint(width - 1, height - 1) << QPoint(width - 1, 0) << QPoint(0, height - 1)
-                     << QPoint(12, 0)    // center top
-                     << QPoint(12, 20)   // center bottom
-                     << QPoint(7, 6)     // center quad top left
-                     << QPoint(17, 6)    // center quad top right
-                     << QPoint(7, 14)    // center quad bottom left
-                     << QPoint(17, 14);  // center quad bottom right
+      startPositions << Point(0, 0) << Point(width - 1, height - 1) << Point(width - 1, 0) << Point(0, height - 1)
+                     << Point(12, 0)    // center top
+                     << Point(12, 20)   // center bottom
+                     << Point(7, 6)     // center quad top left
+                     << Point(17, 6)    // center quad top right
+                     << Point(7, 14)    // center quad bottom left
+                     << Point(17, 14);  // center quad bottom right
    }
 
    float valBombs = 0.0f;
@@ -493,7 +493,7 @@ void Game::initializePlayerStartPositions()
       currentPlayer->getPlayerRotation()->reset();
 
       // reposition player
-      QPoint startPosition = mMap->getStartPosition(startPositionIndex);
+      Point startPosition = mMap->getStartPosition(startPositionIndex);
       currentPlayer->setX(startPosition.x() + 0.5f);
       currentPlayer->setY(startPosition.y() + 0.5f);
 
@@ -2647,7 +2647,7 @@ bool Game::joinGame(Player* player, NET_StreamSocket* playerSocket)
 
          // init and broadcast the new player's start position
          // send the player's start position to everybody
-         QPoint startPosition = QPoint(mPlayers.size() - 1, 0);
+         Point startPosition = Point(mPlayers.size() - 1, 0);
 
          player->setX(startPosition.x() + 0.5);
          player->setY(startPosition.y() + 0.5);

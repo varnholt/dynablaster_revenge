@@ -129,7 +129,7 @@ BinaryReader& BinaryReader::operator>>(QString& value)
    return *this;
 }
 
-BinaryReader& BinaryReader::operator>>(QPoint& value)
+BinaryReader& BinaryReader::operator>>(Point& value)
 {
    int32_t x = 0;
    int32_t y = 0;

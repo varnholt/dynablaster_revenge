@@ -6,13 +6,14 @@
 #include <vector>
 
 #include <QList>
-#include <QPoint>
 #include <QString>
 #include <QTime>
 
+#include "point.h"
+
 // appends fixed-width, little-endian values to a growable byte buffer, mirroring
 // QDataStream's operator<< shape so packet enqueue() bodies barely change. Also knows how to
-// write the handful of Qt types (QString/QPoint/QList<T>/QTime) packet fields still carry -
+// write the handful of Qt types (QString/QList<T>/QTime) packet fields still carry -
 // those types themselves aren't going away in this pass, only QDataStream/QByteArray are.
 class BinaryWriter
 {
@@ -32,7 +33,7 @@ public:
    BinaryWriter& operator<<(bool value);
    BinaryWriter& operator<<(const std::string& value);
    BinaryWriter& operator<<(const QString& value);
-   BinaryWriter& operator<<(const QPoint& value);
+   BinaryWriter& operator<<(const Point& value);
    BinaryWriter& operator<<(const QTime& value);
 
    template <typename T>

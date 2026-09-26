@@ -14,21 +14,11 @@
 
 // Qt
 #include <QRandomGenerator>
-#include <QSet>
 
 // cmath
 #include <limits.h>
 
-//-----------------------------------------------------------------------------
-/*!
-   \param p point
-   \return qpoint hash
-*/
-inline uint qHash(const QPoint& p)
-{
-    return p.x() * 1000 + p.y();
-}
-
+#include <unordered_set>
 
 //-----------------------------------------------------------------------------
 /*!
@@ -170,18 +160,18 @@ void Map::initialize()
 */
 void Map::initializeTestMap()
 {
-   QList<QPoint> startPositions;
+   QList<Point> startPositions;
    startPositions
-      << QPoint(0,0)
-      << QPoint(12,10)
-      << QPoint(12,0)
-      << QPoint(0,10)
-      << QPoint(6,5);
+      << Point(0,0)
+      << Point(12,10)
+      << Point(12,0)
+      << Point(0,10)
+      << Point(6,5);
 
    setStartPositions(startPositions);
 
    MapItem* item = 0;
-   QPoint playerPosition;
+   Point playerPosition;
 
    for (int x = 0; x < mWidth; x++)
    {
@@ -254,7 +244,7 @@ int Map::getMaxPlayers()
 /*!
    \param player start positions
 */
-void Map::setStartPositions(const QList<QPoint>& positions)
+void Map::setStartPositions(const QList<Point>& positions)
 {
    mStartPositions = positions;
 }
@@ -264,7 +254,7 @@ void Map::setStartPositions(const QList<QPoint>& positions)
 /*!
    \return player's start position
 */
-QPoint Map::getStartPosition(int playerNumber)
+Point Map::getStartPosition(int playerNumber)
 {
    return mStartPositions.at(playerNumber);
 }
@@ -283,7 +273,7 @@ Map* Map::generateMap(
    int extraSpeedUpCount,
    int extraKickCount,
    int extraSkullCount,
-   const QList<QPoint>& startPositions
+   const QList<Point>& startPositions
 )
 {
    Map* map = 0;
@@ -301,7 +291,7 @@ Map* Map::generateMap(
    int freeStonesForStartPositions = 0;
    for (int p = 0; p < startPositions.size(); p++)
    {
-      QPoint playerPosition = startPositions.at(p);
+      Point playerPosition = startPositions.at(p);
 
       // center
       freeStonesForStartPositions++;
@@ -376,7 +366,7 @@ Map* Map::generateMap(
       map->setStartPositions(startPositions);
 
       MapItem* item = 0;
-      QPoint playerPosition;
+      Point playerPosition;
 
       int stonesPlaced = 0;
       int extraBombPlaced = 0;
@@ -390,8 +380,8 @@ Map* Map::generateMap(
       bool blocksStartPosition = false;
 
       // initiate blocked positions for those players that begin between 2 blocks
-      QSet<QPoint> blockedPositions;
-      foreach (const QPoint& p, startPositions)
+      std::unordered_set<Point> blockedPositions;
+      foreach (const Point& p, startPositions)
       {
          // uneven y positions are located between 2 fixed blocks
          if (p.y() % 2 == 1)
@@ -406,12 +396,12 @@ Map* Map::generateMap(
                +---+---+---+
             */
 
-            QPoint topLeft(    p.x() - 1, p.y() - 1);
-            QPoint topRight(   p.x() + 1, p.y() - 1);
-            QPoint bottomLeft( p.x() - 1, p.y() + 1);
-            QPoint bottomRight(p.x() + 1, p.y() + 1);
+            Point topLeft(    p.x() - 1, p.y() - 1);
+            Point topRight(   p.x() + 1, p.y() - 1);
+            Point bottomLeft( p.x() - 1, p.y() + 1);
+            Point bottomRight(p.x() + 1, p.y() + 1);
 
-            QList<QPoint> openPositions;
+            QList<Point> openPositions;
             openPositions << topLeft;
             openPositions << topRight;
             openPositions << bottomLeft;
@@ -422,7 +412,7 @@ Map* Map::generateMap(
             {
                int randIndex = QRandomGenerator::global()->bounded(4);
 
-               blockedPositions << openPositions.at(randIndex);
+               blockedPositions.insert(openPositions.at(randIndex));
             }
          }
       }
@@ -460,7 +450,7 @@ Map* Map::generateMap(
                   || (randX-1 == playerPosition.x() && randY+1 == playerPosition.y())
                   */
 
-                  || blockedPositions.contains(QPoint(randX, randY))
+                  || blockedPositions.contains(Point(randX, randY))
                )
                {
                   blocksStartPosition = true;
@@ -707,17 +697,17 @@ int Map::getManhattanLength(int x1, int y1, int x2, int y2)
    \param manhattanLength maximum manhattan length
    \return filtered list of points
 */
-QList<QPoint> Map::getManhattanFiltered(
-   const QPoint &pos,
-   const QList<QPoint>& points,
+QList<Point> Map::getManhattanFiltered(
+   const Point &pos,
+   const QList<Point>& points,
    int manhattanLengthMax,
    int manhattanLengthMin
 )
 {
-   QList<QPoint> filtered;
+   QList<Point> filtered;
 
-   QPoint diff;
-   foreach (const QPoint& p, points)
+   Point diff;
+   foreach (const Point& p, points)
    {
       diff = p - pos;
 

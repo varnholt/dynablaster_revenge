@@ -135,7 +135,7 @@ bool BotMap::isBombDropDeadly(
    int x,
    int y,
    int flames,
-   const QList<QPoint>& enemies
+   const QList<Point>& enemies
 ) const
 {
    bool deadly = false;
@@ -197,7 +197,7 @@ bool BotMap::isBombDropDeadly(
          else
          {
             // check if there's a player
-            if (enemies.contains(QPoint(posX, posY)))
+            if (enemies.contains(Point(posX, posY)))
             {
                // we'll just leave here with a positive result
                return true;
@@ -475,7 +475,7 @@ void BotMap::updateReachablePositions(int x, int y, int iteration)
             if (isTraversed(xi, yi))
             {
                // store reachable position
-               mReachablePositions.append(QPoint(xi, yi));
+               mReachablePositions.append(Point(xi, yi));
             }
          }
       }
@@ -574,7 +574,7 @@ void BotMap::updateReachablePositionsRandomized(int x, int y, int iteration)
             if (isTraversed(xi, yi))
             {
                // store reachable position
-               mReachablePositions.append(QPoint(xi, yi));
+               mReachablePositions.append(Point(xi, yi));
             }
          }
       }
@@ -598,7 +598,7 @@ void BotMap::updateReachableExtras()
    int x = 0;
    int y = 0;
    MapItem* item = 0;
-   foreach (const QPoint& p, mReachablePositions)
+   foreach (const Point& p, mReachablePositions)
    {
       x = p.x();
       y = p.y();
@@ -622,7 +622,7 @@ void BotMap::updateReachableExtras()
 /*!
    \return list of reachable points
 */
-const QList<QPoint>& BotMap::getReachablePositions() const
+const QList<Point>& BotMap::getReachablePositions() const
 {
    return mReachablePositions;
 }
@@ -632,7 +632,7 @@ const QList<QPoint>& BotMap::getReachablePositions() const
 /*!
    \return list of reachable extras
 */
-const QList<QPoint>& BotMap::getReachableExtras() const
+const QList<Point>& BotMap::getReachableExtras() const
 {
    return mReachableExtras;
 }
@@ -642,9 +642,9 @@ const QList<QPoint>& BotMap::getReachableExtras() const
 /*!
    \return list of reachable neighbor points
 */
-QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
+QList<Point> BotMap::getReachableNeighborPositions(int x, int y) const
 {
-   QList<QPoint> positions;
+   QList<Point> positions;
    MapItem* item = 0;
 
    if (x > 0)
@@ -656,7 +656,7 @@ QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
           || !item
       )
       {
-         positions.append(QPoint(x - 1, y));
+         positions.append(Point(x - 1, y));
       }
    }
 
@@ -669,7 +669,7 @@ QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
           || !item
       )
       {
-         positions.append(QPoint(x + 1, y));
+         positions.append(Point(x + 1, y));
       }
    }
 
@@ -682,7 +682,7 @@ QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
           || !item
       )
       {
-         positions.append(QPoint(x, y - 1));
+         positions.append(Point(x, y - 1));
       }
    }
 
@@ -695,7 +695,7 @@ QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
           || !item
       )
       {
-         positions.append(QPoint(x, y + 1));
+         positions.append(Point(x, y + 1));
       }
    }
 
@@ -707,9 +707,9 @@ QList<QPoint> BotMap::getReachableNeighborPositions(int x, int y) const
 /*!
    \return list of reachable neighbor points
 */
-QList<QPoint> BotMap::getReachableNeighborPositionsRandomized(int x, int y) const
+QList<Point> BotMap::getReachableNeighborPositionsRandomized(int x, int y) const
 {
-   QList<QPoint> positions;
+   QList<Point> positions;
    MapItem* item = 0;
 
    foreach (Constants::Direction dir, mDirectionsRandomized)
@@ -727,7 +727,7 @@ QList<QPoint> BotMap::getReachableNeighborPositionsRandomized(int x, int y) cons
                    || !item
                )
                {
-                  positions.append(QPoint(x, y - 1));
+                  positions.append(Point(x, y - 1));
                }
             }
 
@@ -745,7 +745,7 @@ QList<QPoint> BotMap::getReachableNeighborPositionsRandomized(int x, int y) cons
                    || !item
                )
                {
-                  positions.append(QPoint(x, y + 1));
+                  positions.append(Point(x, y + 1));
                }
             }
 
@@ -763,7 +763,7 @@ QList<QPoint> BotMap::getReachableNeighborPositionsRandomized(int x, int y) cons
                    || !item
                )
                {
-                  positions.append(QPoint(x - 1, y));
+                  positions.append(Point(x - 1, y));
                }
             }
 
@@ -781,7 +781,7 @@ QList<QPoint> BotMap::getReachableNeighborPositionsRandomized(int x, int y) cons
                    || !item
                )
                {
-                  positions.append(QPoint(x + 1, y));
+                  positions.append(Point(x + 1, y));
                }
             }
 
@@ -810,11 +810,11 @@ int* BotMap::getStonesToBeBombedMap()
 
    QList<BotBombMapItem *> bombs = getBombs();
 
-   QList<QPoint> dirs;
-   dirs << QPoint(0, -1);
-   dirs << QPoint(0, 1);
-   dirs << QPoint(-1, 0);
-   dirs << QPoint(1, 0);
+   QList<Point> dirs;
+   dirs << Point(0, -1);
+   dirs << Point(0, 1);
+   dirs << Point(-1, 0);
+   dirs << Point(1, 0);
 
    int x = 0;
    int y = 0;
@@ -827,7 +827,7 @@ int* BotMap::getStonesToBeBombedMap()
       x = bomb->getX();
       y = bomb->getY();
 
-      foreach (const QPoint& dir, dirs)
+      foreach (const Point& dir, dirs)
       {
          for (int i = 1; i <= bomb->getFlames(); i++)
          {

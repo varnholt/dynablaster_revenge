@@ -3,8 +3,6 @@
 
 // Qt
 #include <QObject>
-#include <QPoint>
-#include <QQueue>
 #include <QTimer>
 
 // ai
@@ -12,8 +10,11 @@
 
 // shared
 #include "constants.h"
+#include "point.h"
 #include "serverconfiguration.h"
 #include "signal.h"
+
+#include <deque>
 
 // forward declarations
 class BotMap;
@@ -233,7 +234,7 @@ protected:
    bool mPlayerPositionValid;
 
    //! store last few player positions
-   QQueue<QPoint> mPositionQueue;
+   std::deque<Point> mPositionQueue;
 
    // server related
 

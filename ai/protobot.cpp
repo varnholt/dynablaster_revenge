@@ -83,10 +83,10 @@ ProtoBot::ProtoBot()
       10 // randomize(0, 4)   // attack
    );
 
-   mDirections << QPoint(0, -1);
-   mDirections << QPoint(0, 1);
-   mDirections << QPoint(-1, 0);
-   mDirections << QPoint(1, 0);
+   mDirections << Point(0, -1);
+   mDirections << Point(0, 1);
+   mDirections << Point(-1, 0);
+   mDirections << Point(1, 0);
    // mInsults = new ProtoBotInsults(this);
 
    mBombChainReaction = new BombChainReaction();
@@ -451,18 +451,18 @@ void ProtoBot::bugTrack3()
 
    if (getIdleCounter() % 5)
    {
-      QPoint p(getXField(), getYField());
+      Point p(getXField(), getYField());
 
-      mLastPositions.enqueue(p);
+      mLastPositions.push_back(p);
 
       while (mLastPositions.size() > 100)
-         mLastPositions.dequeue();
+         mLastPositions.pop_front();
 
       if (mLastPositions.size() > 90)
       {
          bool diff = true;
-         QPoint prev = mLastPositions.first();
-         foreach(const QPoint& p, mLastPositions)
+         Point prev = mLastPositions.front();
+         foreach(const Point& p, mLastPositions)
          {
             if (
                   prev.x() != p.x()
@@ -528,7 +528,7 @@ void ProtoBot::increaseIdleCounter()
 */
 bool ProtoBot::isSafeEscapePossible()
 {
-   QList<QPoint> reachablePositionsFiltered =
+   QList<Point> reachablePositionsFiltered =
       reachablePositionsLeft(
          getXField(),
          getYField(),
@@ -540,7 +540,7 @@ bool ProtoBot::isSafeEscapePossible()
    // filter list of points again by manhattan length
    reachablePositionsFiltered =
       Map::getManhattanFiltered(
-         QPoint(getXField(), getYField()),
+         Point(getXField(), getYField()),
          reachablePositionsFiltered,
          MANHATTAN_LENGTH_MAX_ATTACK
       );
@@ -551,7 +551,7 @@ bool ProtoBot::isSafeEscapePossible()
    }
 
    bool foundSafeDropPos = false;
-   foreach (const QPoint& potentialSafePoint, reachablePositionsFiltered)
+   foreach (const Point& potentialSafePoint, reachablePositionsFiltered)
    {
       // score path to bomb drop position
       findPath(potentialSafePoint.x(), potentialSafePoint.y());
@@ -613,7 +613,7 @@ bool ProtoBot::isBombStonePossible()
 {
    int xField = getXField();
    int yField = getYField();
-   QPoint bombStonePosition = getBombStonePosition();
+   Point bombStonePosition = getBombStonePosition();
 
    bool atBombStonePosition = (
          xField == bombStonePosition.x()
@@ -671,7 +671,7 @@ void ProtoBot::markReachableFields()
 {
    setScore(getXField(), getYField(), 1);
 
-   foreach (const QPoint& p, mBotMap->getReachablePositions())
+   foreach (const Point& p, mBotMap->getReachablePositions())
    {
       setScore(
          p.x(),
@@ -702,7 +702,7 @@ void ProtoBot::markHazardousFields()
 
       setScore(x, y, -1);
 
-      foreach (const QPoint& dir, mDirections)
+      foreach (const Point& dir, mDirections)
       {
          // players infected with "small bomb" disease could have
          // only one flame..
@@ -784,7 +784,7 @@ void ProtoBot::updateRemainingBombTimes()
 
          setRemainingBombTime(x, y, min);
 
-         foreach (const QPoint& dir, mDirections)
+         foreach (const Point& dir, mDirections)
          {
             for (int i = 1; i <= item->getFlames(); i++)
             {
@@ -843,7 +843,7 @@ void ProtoBot::resetScores()
 /*!
    \return bomb stone position
 */
-QPoint ProtoBot::getBombStonePosition() const
+Point ProtoBot::getBombStonePosition() const
 {
    return mBombStonePosition;
 }
@@ -853,7 +853,7 @@ QPoint ProtoBot::getBombStonePosition() const
 /*!
    \param weightedPoint bomb stone position
 */
-void ProtoBot::setBombStonePosition(const QPoint& weightedPoint)
+void ProtoBot::setBombStonePosition(const Point& weightedPoint)
 {
    mBombStonePosition = weightedPoint;
 }
@@ -877,7 +877,7 @@ void ProtoBot::resetBombStonePosition()
 /*!
    \return previous bomb stone position
 */
-QPoint ProtoBot::getBombStonePositionPrevious() const
+Point ProtoBot::getBombStonePositionPrevious() const
 {
    return mBombStonePositionPrevious;
 }
@@ -887,7 +887,7 @@ QPoint ProtoBot::getBombStonePositionPrevious() const
 /*!
    \param previous previous bomb stone position
 */
-void ProtoBot::setBombStonePositionPrevious(const QPoint& previous)
+void ProtoBot::setBombStonePositionPrevious(const Point& previous)
 {
    mBombStonePositionPrevious = previous;
 }
@@ -1074,7 +1074,7 @@ void ProtoBot::scoreFields()
    /*
    if (mScoringCurrentHazardous)
    {
-      QList<QPoint> deadEnd = analyzeDeadEnd(mXField, mYField);
+      QList<Point> deadEnd = analyzeDeadEnd(mXField, mYField);
 
       if (!deadEnd.isEmpty())
       {
@@ -1176,15 +1176,15 @@ bool ProtoBot::updateEscapeScore()
    // those safe positions that end at a position an enemy
    // is already on should be avoided
    // this is done by just increasing the calculated path length
-   QList<QPoint> enemyPositions = getLivingEnemyPositions();
-   QList<QPoint> futureEnemyPositions = getLivingEnemyFuturePositions();
+   QList<Point> enemyPositions = getLivingEnemyPositions();
+   QList<Point> futureEnemyPositions = getLivingEnemyFuturePositions();
 
    int fieldSize = mBotMap->getWidth() * mBotMap->getHeight();
    int* enemies = new int[fieldSize];
 
    memset(enemies, 0, sizeof(int)*fieldSize);
 
-   foreach (const QPoint& e, enemyPositions)
+   foreach (const Point& e, enemyPositions)
    {
       // having an enemy on our escape path is something to avoid
       enemies[e.x() + mBotMap->getWidth() * e.y()] += 3;
@@ -1232,20 +1232,20 @@ bool ProtoBot::updateEscapeScore()
    // to *at least* the value the enemy positions have, both players will
    // follow each other until the time is up. that looks totally annoying
    // and surely does not help winning the game.
-   foreach (const QPoint& e, futureEnemyPositions)
+   foreach (const Point& e, futureEnemyPositions)
       enemies[e.x() + mBotMap->getWidth() * e.y()] += 2;
 
    // check if neighbour positions are safe before we're going to find an
    // escape path
-   QList<QPoint> neighbours =
+   QList<Point> neighbours =
       mBotMap->getReachableNeighborPositionsRandomized(
          getXField(),
          getYField()
       );
 
-   QList<Weighted<QPoint, int> > weightedPoints;
+   QList<Weighted<Point, int> > weightedPoints;
 
-   foreach (const QPoint& p, neighbours)
+   foreach (const Point& p, neighbours)
    {
       if (getScore(p.x(), p.y()) >= 0)
       {
@@ -1253,14 +1253,14 @@ bool ProtoBot::updateEscapeScore()
          escape = true;
 
          int enemyCount = enemies[p.x() + p.y() * mBotMap->getWidth()];
-         weightedPoints.append(Weighted<QPoint, int>(p, enemyCount));
+         weightedPoints.append(Weighted<Point, int>(p, enemyCount));
       }
    }
 
    if (escape)
    {
       std::sort(weightedPoints.begin(), weightedPoints.end());
-      QPoint best = weightedPoints.last().getObject();
+      Point best = weightedPoints.last().getObject();
 
       // make a copy of the computed path
       mBestEscapePath.clear();
@@ -1278,9 +1278,9 @@ bool ProtoBot::updateEscapeScore()
       //                            the bot will never survive the way there
       //
       // => if escape is true, then break
-      QList<QPoint> reachablePoints = mBotMap->getReachablePositions();
-      QList<QPoint> reachablePointsNear;
-      QList<QPoint> reachablePointsMedium;
+      QList<Point> reachablePoints = mBotMap->getReachablePositions();
+      QList<Point> reachablePointsNear;
+      QList<Point> reachablePointsMedium;
 
       // only work with reachable points within short and medium
       // distance, omit all the others
@@ -1288,31 +1288,31 @@ bool ProtoBot::updateEscapeScore()
       // to the current field
       reachablePointsNear =
          Map::getManhattanFiltered(
-            QPoint(mXField, mYField),
+            Point(mXField, mYField),
             reachablePoints,
             MANHATTAN_LENGTH_ESCAPE_NEAR_MAX
          );
 
       reachablePointsMedium =
          Map::getManhattanFiltered(
-            QPoint(mXField, mYField),
+            Point(mXField, mYField),
             reachablePoints,
             MANHATTAN_LENGTH_ESCAPE_MEDIUM_MIN,
             MANHATTAN_LENGTH_ESCAPE_MEDIUM_MAX
          );
 
-      QList< QList<QPoint> > reachablePointLists;
+      QList< QList<Point> > reachablePointLists;
       reachablePointLists << reachablePointsNear;
       reachablePointLists << reachablePointsMedium;
 
-      foreach(const QList<QPoint>& list, reachablePointLists)
+      foreach(const QList<Point>& list, reachablePointLists)
       {
          // if one group of reachable points delivered a suitable escape path
          // then abort here
          if (!escape)
          {
             // find shortest path to non-hazardous position within the reachable positions
-            foreach (const QPoint& p, list)
+            foreach (const Point& p, list)
             {
                // reachable fields get a score of 1, checking against 0 doesn't
                // matter though
@@ -1364,7 +1364,7 @@ bool ProtoBot::updateEscapeScore()
                         mBestEscapePath.clear();
 
                         foreach (AStarNode* node, mPathFinding.getPath())
-                           mBestEscapePath.prepend(QPoint(node->getX(), node->getY()));
+                           mBestEscapePath.prepend(Point(node->getX(), node->getY()));
 
                         // if only one field needs to be traversed this is most likely
                         // the best path we'll get
@@ -1392,7 +1392,7 @@ bool ProtoBot::updateEscapeScore()
 
    if (escape)
    {
-      foreach(const QPoint& p, mBestEscapePath)
+      foreach(const Point& p, mBestEscapePath)
       {
          // as only the neighbored fields are examined later, increase
          // the score with each field is not required here. it's only
@@ -1411,7 +1411,7 @@ bool ProtoBot::updateEscapeScore()
 
    //      if (mDebugEscapePaths)
    //      {
-   //         foreach(const QPoint& p, mBestEscapePath)
+   //         foreach(const Point& p, mBestEscapePath)
    //            escapePathString
    //               << QString("(%1, %2)")
    //                  .arg(p.x())
@@ -1446,7 +1446,7 @@ bool ProtoBot::updateEscapeScore()
 bool ProtoBot::updateExtraScore()
 {
    mBotMap->updateReachableExtras();
-   QList<QPoint> extraPoints;
+   QList<Point> extraPoints;
    int pathLength = 0;
    bool goodIdea = false;
 
@@ -1469,7 +1469,7 @@ bool ProtoBot::updateExtraScore()
       )
       {
          extraPoints.append(
-            QPoint(
+            Point(
                mMemory->getExtraPositionX(),
                mMemory->getExtraPositionY()
             )
@@ -1490,15 +1490,15 @@ bool ProtoBot::updateExtraScore()
 
       extraPoints =
          Map::getManhattanFiltered(
-            QPoint(getXField(), getYField()),
+            Point(getXField(), getYField()),
             extraPoints,
             MANHATTAN_LENGTH_MAX_EXTRAS
          );
    }
 
-   QList<QPoint> shortestExtraPath;
+   QList<Point> shortestExtraPath;
 
-   foreach(const QPoint& p, extraPoints)
+   foreach(const Point& p, extraPoints)
    {
       // check if the extra is "occupied" by an enemy
       if (!evaluateDeadEndSituation(p.x(), p.y()))
@@ -1509,7 +1509,7 @@ bool ProtoBot::updateExtraScore()
 
       if (pathLength > 0)
       {
-         QList<QPoint> points;
+         QList<Point> points;
 
          std::vector<AStarNode*> path = mPathFinding.getPath();
 
@@ -1520,7 +1520,7 @@ bool ProtoBot::updateExtraScore()
 
             foreach (AStarNode* node, path)
             {
-               QPoint p(node->getX(), node->getY());
+               Point p(node->getX(), node->getY());
                points << p;
             }
 
@@ -1560,7 +1560,7 @@ bool ProtoBot::updateExtraScore()
 
    for (int i = 0; i < shortestExtraPath.size(); i++)
    {
-      QPoint p = shortestExtraPath[i];
+      Point p = shortestExtraPath[i];
 
       // only multiply the score here; hazardous fields need to be
       // kept intact
@@ -1622,16 +1622,16 @@ int ProtoBot::getHazardousFieldCount(const std::vector<AStarNode*>& path) const
 /*!
    \return list of living enemies
 */
-QList<QPoint> ProtoBot::getLivingEnemyPositions() const
+QList<Point> ProtoBot::getLivingEnemyPositions() const
 {
    QList<BotPlayerInfo *> enemies = getEnemies();
 
-   QList<QPoint> enemyPositions;
+   QList<Point> enemyPositions;
 
    foreach (BotPlayerInfo* enemy, enemies)
    {
       if (!enemy->isKilled())
-        enemyPositions << QPoint(floor(enemy->getX()), floor(enemy->getY()));
+        enemyPositions << Point(floor(enemy->getX()), floor(enemy->getY()));
    }
 
    return enemyPositions;
@@ -1642,15 +1642,15 @@ QList<QPoint> ProtoBot::getLivingEnemyPositions() const
 /*!
    \return list of living enemies
 */
-QList<QPoint> ProtoBot::getLivingEnemyFuturePositions() const
+QList<Point> ProtoBot::getLivingEnemyFuturePositions() const
 {
    QList<BotPlayerInfo *> enemies = getEnemies();
-   QList<QPoint> enemyPositions;
+   QList<Point> enemyPositions;
 
    int x = 0;
    int y = 0;
 
-   QPoint current;
+   Point current;
    int8_t dirs = 0;
 
    foreach (BotPlayerInfo* enemy, enemies)
@@ -1662,7 +1662,7 @@ QList<QPoint> ProtoBot::getLivingEnemyFuturePositions() const
          y = 0;
 
          // read enemy directions
-         current = QPoint(floor(enemy->getX()), floor(enemy->getY()));
+         current = Point(floor(enemy->getX()), floor(enemy->getY()));
          dirs = enemy->getDirections();
 
          // apply enemy directions to current field
@@ -1690,7 +1690,7 @@ QList<QPoint> ProtoBot::getLivingEnemyFuturePositions() const
             && y >= 0 && y < mBotMap->getHeight()
          )
          {
-            QPoint future(x, y);
+            Point future(x, y);
             enemyPositions << future;
          }
       }
@@ -1735,8 +1735,8 @@ bool ProtoBot::updateBombStoneScore()
    // measureTime.start();
    int* stonesToBeBombed = mBotMap->getStonesToBeBombedMap();
    bool foundSafeDropPos = false;
-   QList<QPoint> reachablePoints = mBotMap->getReachablePositions();   
-   QPoint previousBombStonePos = getBombStonePositionPrevious();
+   QList<Point> reachablePoints = mBotMap->getReachablePositions();   
+   Point previousBombStonePos = getBombStonePositionPrevious();
 
    // do the same optimization as for the extras.. check the bot's memory
    // for an existing bomb stone position. if that position is reachable
@@ -1752,7 +1752,7 @@ bool ProtoBot::updateBombStoneScore()
             mPlayerInfo->getFlameCount()
          );
 
-      foreach (const QPoint& p, reachablePoints)
+      foreach (const Point& p, reachablePoints)
       {
          if (
                p.x() == mMemory->getBombStonePositionX()
@@ -1771,16 +1771,16 @@ bool ProtoBot::updateBombStoneScore()
 
    // collect points to be weighted
    int weightedIndex = 0;
-   QList<Weighted<QPoint, int> > weightedPoints;
+   QList<Weighted<Point, int> > weightedPoints;
 
    if (useMemoryPosition)
    {
-      QPoint p(
+      Point p(
          mMemory->getBombStonePositionX(),
          mMemory->getBombStonePositionY()
       );
 
-      Weighted<QPoint, int> weighted(p, mMemory->getBombStoneCount());
+      Weighted<Point, int> weighted(p, mMemory->getBombStoneCount());
       weightedPoints << weighted;
    }
    else
@@ -1788,7 +1788,7 @@ bool ProtoBot::updateBombStoneScore()
       // this is the default way to compute bomb stone positions
       // i.e. they way positions are computed without using the bot's
       // memory
-      foreach (const QPoint& p, reachablePoints)
+      foreach (const Point& p, reachablePoints)
       {
          int score =
             mBotMap->getStoneCountAroundPoint(
@@ -1834,7 +1834,7 @@ bool ProtoBot::updateBombStoneScore()
             }
 
             // store weighted point
-            Weighted<QPoint, int> weighted(p, score);
+            Weighted<Point, int> weighted(p, score);
             weightedPoints << weighted;
             weightedIndex++;
          }
@@ -1847,7 +1847,7 @@ bool ProtoBot::updateBombStoneScore()
    std::sort(weightedPoints.begin(), weightedPoints.end());
 
    // analyze current pos
-   QPoint current = QPoint(getXField(), getYField());
+   Point current = Point(getXField(), getYField());
 
    int currentScore =
       mBotMap->getStoneCountAroundPoint(
@@ -1856,7 +1856,7 @@ bool ProtoBot::updateBombStoneScore()
          mPlayerInfo->getFlameCount()
       );
 
-   Weighted<QPoint, int> weightedCurrent(current, currentScore);
+   Weighted<Point, int> weightedCurrent(current, currentScore);
 
    if (!weightedPoints.isEmpty())
    {
@@ -1872,8 +1872,8 @@ bool ProtoBot::updateBombStoneScore()
    // start with the best point and go to the last
    int flameSize = mPlayerInfo->getFlameCount();
 
-   QPoint weightedPoint;
-   Weighted<QPoint, int> weighted;
+   Point weightedPoint;
+   Weighted<Point, int> weighted;
    foreach(weighted, weightedPoints)
    {
       weightedPoint = weighted.getObject();
@@ -1898,7 +1898,7 @@ bool ProtoBot::updateBombStoneScore()
          // take ALL reachable positions and remove those that will be burned
          // by the bomb as soon it will have been placed. if there's just
          // ONE position left that we're able to find a path to, we're cool.
-         QList<QPoint> reachablePositionsFiltered =
+         QList<Point> reachablePositionsFiltered =
             reachablePositionsLeft(
                weightedPoint.x(),
                weightedPoint.y(),
@@ -1910,18 +1910,18 @@ bool ProtoBot::updateBombStoneScore()
          // point;
          // after doing that pick a limited number of points suited for
          // further inspection.
-         QList< Weighted<QPoint, int> > reachablePositionsByManhattanLength;
-         foreach (const QPoint& p, reachablePositionsFiltered)
+         QList< Weighted<Point, int> > reachablePositionsByManhattanLength;
+         foreach (const Point& p, reachablePositionsFiltered)
          {
             int manhattan = -(p - weightedPoint).manhattanLength();
-            reachablePositionsByManhattanLength << Weighted<QPoint, int>(p, manhattan);
+            reachablePositionsByManhattanLength << Weighted<Point, int>(p, manhattan);
          }
          std::sort(reachablePositionsByManhattanLength.begin(), reachablePositionsByManhattanLength.end());
          reachablePositionsFiltered.clear();
 
          int iterations = 0;
          int max = 30;
-         Weighted<QPoint, int> w;
+         Weighted<Point, int> w;
          foreach (w, reachablePositionsByManhattanLength)
          {
             reachablePositionsFiltered << w.getObject();
@@ -1936,7 +1936,7 @@ bool ProtoBot::updateBombStoneScore()
          // this 1st path-finding has just one purpose which is to
          // ensure there is a way to escape from the bomb-drop-position
          // in spe to the safe position (safePoint)
-         foreach (const QPoint& safePoint, reachablePositionsFiltered)
+         foreach (const Point& safePoint, reachablePositionsFiltered)
          {
             // score path to bomb drop position
             findPathFromTo(
@@ -2083,10 +2083,10 @@ bool ProtoBot::updateAttackScore()
    {
       // locate enemies
       mEnemyPositions = getLivingEnemyPositions();
-      QList<QPoint> reachablePoints = mBotMap->getReachablePositions();
-      QList<QPoint> reachableEnemies;
+      QList<Point> reachablePoints = mBotMap->getReachablePositions();
+      QList<Point> reachableEnemies;
 
-      foreach(const QPoint& reachable, reachablePoints)
+      foreach(const Point& reachable, reachablePoints)
       {
          if (mEnemyPositions.contains(reachable))
             reachableEnemies << reachable;
@@ -2098,7 +2098,7 @@ bool ProtoBot::updateAttackScore()
          int pathLength = 0;
 
          // find shortest path to enemy
-         QPoint enemyPosition;
+         Point enemyPosition;
          foreach (enemyPosition, reachableEnemies)
          {
             findPath(enemyPosition.x(), enemyPosition.y());
@@ -2119,12 +2119,12 @@ bool ProtoBot::updateAttackScore()
                // enemy right now
                if (pathLength == 0)
                {
-                  mBestAttackPath.append(QPoint(getXField(), getYField()));
+                  mBestAttackPath.append(Point(getXField(), getYField()));
                }
                else
                {
                   foreach (AStarNode* node, mPathFinding.getPath())
-                     mBestAttackPath.prepend(QPoint(node->getX(), node->getY()));
+                     mBestAttackPath.prepend(Point(node->getX(), node->getY()));
                }
 
                // if only one field needs to be traversed this is most likely
@@ -2141,7 +2141,7 @@ bool ProtoBot::updateAttackScore()
 
          if (!mBestAttackPath.isEmpty())
          {
-            foreach(const QPoint& p, mBestAttackPath)
+            foreach(const Point& p, mBestAttackPath)
             {
                // as only the neighbored fields are examined later, increase
                // the score with each field is not required here. it's only
@@ -2189,7 +2189,7 @@ bool ProtoBot::overrideFieldScore()
    {
       if (!mScoringBombStonePossible)
       {
-         QPoint bombStonePosition = getBombStonePosition();
+         Point bombStonePosition = getBombStonePosition();
 
          if (
                bombStonePosition.x() == xField
@@ -2215,7 +2215,7 @@ void ProtoBot::chooseNextField()
 
    // list reachable neighbor positions (up, down, left, right)
    // proper implementation: find shortest path to a save position!
-   QList<QPoint> neighbors =
+   QList<Point> neighbors =
       mBotMap->getReachableNeighborPositions(
          xField,
          yField
@@ -2231,7 +2231,7 @@ void ProtoBot::chooseNextField()
 
       // calculate the maximum score and add all neighbors with the
       // maximum score to the bestpoints
-      foreach (const QPoint& p, neighbors)
+      foreach (const Point& p, neighbors)
       {
          fieldScore = getScore(p.x(), p.y());
 
@@ -2245,8 +2245,8 @@ void ProtoBot::chooseNextField()
       // not sure if the "bestpoints" part is really needed
       // its purpose is to "keep on track" if there are more than one
       // points with the best score => just walk into the same direction
-      QList<QPoint> bestPoints;
-      foreach (const QPoint& p, neighbors)
+      QList<Point> bestPoints;
+      foreach (const Point& p, neighbors)
       {
          fieldScore = getScore(p.x(), p.y());
 
@@ -2541,20 +2541,20 @@ const QList<int> &ProtoBot::getExtraShakeIds() const
    \param reachablePositions reachable positions
    \return \c true if a bomb drop is safe
 */
-QList<QPoint> ProtoBot::reachablePositionsLeft(
+QList<Point> ProtoBot::reachablePositionsLeft(
    int x,
    int y,
    int flames,
-   const QList<QPoint> &reachablePositions
+   const QList<Point> &reachablePositions
 ) const
 {
    int dirX = 0;
    int dirY = 0;
 
-   QList<QPoint> copy = reachablePositions;
+   QList<Point> copy = reachablePositions;
 
    // filter those out that are hazardous
-   foreach (const QPoint& p, reachablePositions)
+   foreach (const Point& p, reachablePositions)
    {
       if (getScore(p.x(), p.y()) < 0)
       {
@@ -2598,7 +2598,7 @@ QList<QPoint> ProtoBot::reachablePositionsLeft(
          int posX = x + i * dirX;
          int posY = y + i * dirY;
 
-         copy.removeOne(QPoint(posX, posY));
+         copy.removeOne(Point(posX, posY));
       }
    }
 
@@ -3104,8 +3104,8 @@ bool ProtoBot::evaluateLongDistance(int& nextXField, int& nextYField) const
       // point to evaluate any further than here. if there's an enemy in
       // short distance and we do not plan to attack him, we might have
       // good reasons to do so => abort.
-      QList<QPoint> enemyPositions = getLivingEnemyPositions();
-      foreach (const QPoint& p, enemyPositions)
+      QList<Point> enemyPositions = getLivingEnemyPositions();
+      foreach (const Point& p, enemyPositions)
       {
          if (
              BotMap::getManhattanLength(
@@ -3373,7 +3373,7 @@ bool ProtoBot::updateLeastHazardousField()
    bool foundSomething = false;
 
    // all reachable fields must suck
-   QList<QPoint> reachable = mBotMap->getReachablePositions();
+   QList<Point> reachable = mBotMap->getReachablePositions();
 
    // the number of reachable fields must be pretty limited
    int reachableCount = reachable.size();
@@ -3383,7 +3383,7 @@ bool ProtoBot::updateLeastHazardousField()
    )
    {
       bool proceed = true;
-      foreach (const QPoint& p, reachable)
+      foreach (const Point& p, reachable)
       {
          if (getScore( p.x(), p.y()) >= 0)
          {
@@ -3395,11 +3395,11 @@ bool ProtoBot::updateLeastHazardousField()
       // if they all suck, choose the one that sucks least
       if (proceed)
       {
-         QPoint best;
+         Point best;
          int remaining = 0;
          int remainingTemp = 0;
 
-         foreach (const QPoint& p, reachable)
+         foreach (const Point& p, reachable)
          {
             remainingTemp = getRemainingBombTime(p.x(), p.y());
 
@@ -3457,20 +3457,20 @@ bool ProtoBot::updateLeastHazardousField()
    \param direction recursion direction
    \return list of points belonging to a "dead end"
 */
-QList<QPoint> ProtoBot::analyzeDeadEnd(
+QList<Point> ProtoBot::analyzeDeadEnd(
    int x,
    int y,
-   QPoint& end,
+   Point& end,
    int recursionDepth,
-   const QPoint& direction
+   const Point& direction
 ) const
 {
    recursionDepth++;
 
-   QList<QPoint> points;
+   QList<Point> points;
    int reachableNeighbours = 4;
-   QPoint openingDir1;
-   QPoint openingDir2;
+   Point openingDir1;
+   Point openingDir2;
    MapItem* item = 0;
    int xi = 0;
    int yi = 0;
@@ -3510,7 +3510,7 @@ QList<QPoint> ProtoBot::analyzeDeadEnd(
    */
 
    // examine current position
-   foreach (const QPoint& dir, mDirections)
+   foreach (const Point& dir, mDirections)
    {
       xi = x + dir.x();
       yi = y + dir.y();
@@ -3626,7 +3626,7 @@ QList<QPoint> ProtoBot::analyzeDeadEnd(
          // if that is the case, we can continue recursion into the direction
          if (pointingIntoSameDir && pointingBack)
          {
-            points << QPoint(x, y);
+            points << Point(x, y);
             points << analyzeDeadEnd(
                x + direction.x(),
                y + direction.y(),
@@ -3655,7 +3655,7 @@ QList<QPoint> ProtoBot::analyzeDeadEnd(
          if (points.size() > 1)
          {
             // add dead end's opening
-            QPoint other = points.at(1);
+            Point other = points.at(1);
 
             openingDir1.setX(
                (other.x() > end.x())
@@ -3676,7 +3676,7 @@ QList<QPoint> ProtoBot::analyzeDeadEnd(
 
          // "opening" goes to back
          points.push_back(
-            QPoint(
+            Point(
                end.x() + m * openingDir1.x(),
                end.y() + m * openingDir1.y()
             )
@@ -3697,20 +3697,20 @@ bool ProtoBot::evaluateDeadEndSituation(int x, int y)
 {
    bool safeToGoThere = true;
 
-   QPoint end;
-   QList<QPoint> points = analyzeDeadEnd(x, y, end);
+   Point end;
+   QList<Point> points = analyzeDeadEnd(x, y, end);
 
    // the position is actually located within a dead end
    if (!points.isEmpty())
    {
       // check if there's an enemy in the area around opening
-      QPoint opening = points.last();
+      Point opening = points.last();
       QList<BotPlayerInfo *> enemies = getEnemies();
       foreach (BotPlayerInfo* enemy, enemies)
       {
          if (!enemy->isKilled())
          {
-            QPoint e(
+            Point e(
                floor(enemy->getX()),
                floor(enemy->getY())
             );
@@ -3739,14 +3739,14 @@ void ProtoBot::markHazardousDeadEnds()
 
    bool markHazardous = false;
 
-   QPoint end;
-   QList<QPoint> points = analyzeDeadEnd(x, y, end);
+   Point end;
+   QList<Point> points = analyzeDeadEnd(x, y, end);
 
    // the position is actually located within a dead end
    if (!points.isEmpty())
    {
       // check if there's an enemy in the area around opening
-      QPoint opening = points.last();
+      Point opening = points.last();
       QList<BotPlayerInfo *> enemies = getEnemies();
 
       // the dead end is small (just 1 or 2 fields)
@@ -3756,7 +3756,7 @@ void ProtoBot::markHazardousDeadEnds()
          {
             if (!enemy->isKilled())
             {
-               QPoint e(
+               Point e(
                   floor(enemy->getX()),
                   floor(enemy->getY())
                );

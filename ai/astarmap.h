@@ -3,6 +3,7 @@
 
 // base
 #include "botmap.h"
+#include "point.h"
 
 #include <vector>
 
@@ -56,7 +57,7 @@ protected:
    void initMap();
 
    //! check if a point is traversable
-   bool isTraversable(const QPoint& p, bool regardStones);
+   bool isTraversable(const Point& p, bool regardStones);
 
    //! node map
    AStarNode** mNodeMap;

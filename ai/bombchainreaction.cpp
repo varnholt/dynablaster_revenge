@@ -75,7 +75,7 @@ void BombChainReaction::iterate(
    x = item->getX();
    y = item->getY();
 
-   foreach (const QPoint& dir, mDirections)
+   foreach (const Point& dir, mDirections)
    {
       for (int i = 1; i <= item->getFlames(); i++)
       {
@@ -124,10 +124,10 @@ void BombChainReaction::unitTest1()
 void BombChainReaction::initDirections()
 {
    mDirections.clear();
-   mDirections << QPoint(0, -1);
-   mDirections << QPoint(0, 1);
-   mDirections << QPoint(-1, 0);
-   mDirections << QPoint(1, 0);
+   mDirections << Point(0, -1);
+   mDirections << Point(0, 1);
+   mDirections << Point(-1, 0);
+   mDirections << Point(1, 0);
 }
 
 

@@ -6,7 +6,8 @@
 
 // Qt
 #include <QList>
-#include <QPoint>
+
+#include "point.h"
 
 class MapCreateRequestPacket : public Packet
 {
@@ -18,7 +19,7 @@ public:
       int stoneCount,
       int extraBombCount,
       int extraFlameCount,
-      const QList<QPoint>& startPositions
+      const QList<Point>& startPositions
    );
 
    //! read constructor
@@ -53,7 +54,7 @@ private:
    int32_t mExtraFlameCount;
 
    //! player start positions
-   QList<QPoint> mStartPositions;
+   QList<Point> mStartPositions;
 };
 
 #endif  // MAPCREATEREQUESTPACKET_H

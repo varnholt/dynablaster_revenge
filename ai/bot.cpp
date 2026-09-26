@@ -10,6 +10,8 @@
 // cmath
 #include <math.h>
 
+#include <unordered_set>
+
 // defines
 #define MIN_QUEUE_CHECK_SIZE 30
 
@@ -423,34 +425,24 @@ int8_t Bot::getBotKeysPressed() const
  */
 void Bot::updatePositionQueue()
 {
-   QPoint p(getXField(), getYField());
+   Point p(getXField(), getYField());
 
-   if (!mPositionQueue.isEmpty())
+   if (!mPositionQueue.empty())
    {
-      if (mPositionQueue.last() != p)
+      if (mPositionQueue.back() != p)
       {
-         mPositionQueue.enqueue(p);
+         mPositionQueue.push_back(p);
       }
 
       while (mPositionQueue.size() > MIN_QUEUE_CHECK_SIZE)
       {
-         mPositionQueue.dequeue();
+         mPositionQueue.pop_front();
       }
    }
    else
    {
-      mPositionQueue.enqueue(p);
+      mPositionQueue.push_back(p);
    }
-}
-
-//-----------------------------------------------------------------------------
-/*!
-   \param p point
-   \return qpoint hash
-*/
-inline uint qHash(const QPoint& p)
-{
-   return p.x() * 1000 + p.y();
 }
 
 //-----------------------------------------------------------------------------
@@ -463,9 +455,9 @@ bool Bot::isPositionQueueRecurrent() const
 
    if (mPositionQueue.size() >= MIN_QUEUE_CHECK_SIZE)
    {
-      QSet<QPoint> points;
+      std::unordered_set<Point> points;
 
-      foreach (const QPoint& p, mPositionQueue)
+      for (const Point& p : mPositionQueue)
       {
          points.insert(p);
       }

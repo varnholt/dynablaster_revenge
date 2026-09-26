@@ -101,7 +101,7 @@ BinaryWriter& BinaryWriter::operator<<(const QString& value)
    return *this;
 }
 
-BinaryWriter& BinaryWriter::operator<<(const QPoint& value)
+BinaryWriter& BinaryWriter::operator<<(const Point& value)
 {
    *this << static_cast<int32_t>(value.x());
    *this << static_cast<int32_t>(value.y());

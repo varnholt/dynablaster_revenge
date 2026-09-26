@@ -140,10 +140,10 @@ std::vector<AStarNode*> AStarMap::getNeighbors(int x, int y, bool regardStones)
 {
    std::vector<AStarNode*> list;
 
-   QPoint up(x, y - 1);
-   QPoint down(x, y + 1);
-   QPoint left(x - 1, y);
-   QPoint right(x + 1, y);
+   Point up(x, y - 1);
+   Point down(x, y + 1);
+   Point left(x - 1, y);
+   Point right(x + 1, y);
 
    if (up.y() >= 0)
    {
@@ -178,7 +178,7 @@ std::vector<AStarNode*> AStarMap::getNeighbors(int x, int y, bool regardStones)
   \param regardStones \c if stones are to be regarded
   \return true if point is traversable
 */
-bool AStarMap::isTraversable(const QPoint& point, bool regardStones)
+bool AStarMap::isTraversable(const Point& point, bool regardStones)
 {
    MapItem* item = 0;
    bool add = true;

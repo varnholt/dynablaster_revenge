@@ -2,7 +2,8 @@
 #define PATH_H
 
 #include <QList>
-#include <QPoint>
+
+#include "point.h"
 
 
 class Path
@@ -16,13 +17,13 @@ class Path
       void positionReached();
 
       //! setter for points
-      void setPoints(const QList<QPoint>&);
+      void setPoints(const QList<Point>&);
 
 
    protected:
 
       //! list of points
-      QList<QPoint> mPoints;
+      QList<Point> mPoints;
 
 };
 

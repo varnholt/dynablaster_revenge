@@ -3,10 +3,11 @@
 
 // Qt
 #include <QList>
-#include <QPoint>
 
 // clib
 #include <limits.h>
+
+#include "point.h"
 
 // forward declarations
 class MapItem;
@@ -60,10 +61,10 @@ class Map
       int getMaxPlayers();
 
       //! setter for the player start positions
-      void setStartPositions(const QList<QPoint>& positions);
+      void setStartPositions(const QList<Point>& positions);
 
       //! get the start position for the given player id
-      QPoint getStartPosition(int playerNumber);
+      Point getStartPosition(int playerNumber);
 
       //! generate a whole map
       static Map* generateMap(
@@ -75,7 +76,7 @@ class Map
          int extraSpeedUpCount,
          int extraKickCount,
          int extraSkullCount,
-         const QList<QPoint>& startPositions
+         const QList<Point>& startPositions
       );
 
       //! get a list of mapitem-created-packets for the current map
@@ -91,9 +92,9 @@ class Map
       static int getManhattanLength(int x1, int y1, int x2, int y2);
 
       //! filter list of points by given maximum manhattan length
-      static QList<QPoint> getManhattanFiltered(
-         const QPoint& pos,
-         const QList<QPoint>&,
+      static QList<Point> getManhattanFiltered(
+         const Point& pos,
+         const QList<Point>&,
          int manhattanLengthMax,
          int manhattanLengthMin = INT_MIN
       );
@@ -111,7 +112,7 @@ class Map
       MapItem** mMap;
 
       //! start positions
-      QList<QPoint> mStartPositions;
+      QList<Point> mStartPositions;
 };
 
 #endif

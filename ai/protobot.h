@@ -10,8 +10,10 @@
 // astar
 #include "astarpathfinding.h"
 
-// Qt
-#include <QPoint>
+// shared
+#include "point.h"
+
+#include <deque>
 
 // forward declarations
 class BombChainReaction;
@@ -248,20 +250,20 @@ class ProtoBot : public Bot
       bool isInfectionActive(Constants::SkullType skullType) const;
 
       //! get a list of enemy positions
-      QList<QPoint> getLivingEnemyPositions() const;
+      QList<Point> getLivingEnemyPositions() const;
 
       //! get a list of future enemy positions
-      QList<QPoint> getLivingEnemyFuturePositions() const;
+      QList<Point> getLivingEnemyFuturePositions() const;
 
       //! get a list of enemies
       QList<BotPlayerInfo *> getEnemies() const;
 
       //! check if a bomb drop is safe for ourself
-      QList<QPoint> reachablePositionsLeft(
+      QList<Point> reachablePositionsLeft(
          int x,
          int y,
          int flames,
-         const QList<QPoint>& reachablePositions
+         const QList<Point>& reachablePositions
       ) const;
 
       // transiteration functionality
@@ -297,16 +299,16 @@ class ProtoBot : public Bot
       // bool mTransiterateBusy;
 
       //! setter for bomb stone position
-      void setBombStonePosition(const QPoint &weightedPoint);
+      void setBombStonePosition(const Point &weightedPoint);
 
       //! getter for bomb stone position
-      QPoint getBombStonePosition() const;
+      Point getBombStonePosition() const;
 
       //! setter for bomb stone position
-      void setBombStonePositionPrevious(const QPoint &previous);
+      void setBombStonePositionPrevious(const Point &previous);
 
       //! getter for bomb stone position
-      QPoint getBombStonePositionPrevious() const;
+      Point getBombStonePositionPrevious() const;
 
       //! reset bomb stone position
       void resetBombStonePosition();
@@ -324,12 +326,12 @@ class ProtoBot : public Bot
       bool updateLeastHazardousField();
 
       //! check if a field is a dead end
-      QList<QPoint> analyzeDeadEnd(
+      QList<Point> analyzeDeadEnd(
          int x,
          int y,
-         QPoint& end,
+         Point& end,
          int recursionDepth = 0,
-         const QPoint& direction = QPoint()
+         const Point& direction = Point()
       ) const;
 
       //! evaluate dead end situation
@@ -358,10 +360,10 @@ class ProtoBot : public Bot
       AStarPathFinding mPathFinding;
 
       //! best path found
-      QList<QPoint> mBestEscapePath;
+      QList<Point> mBestEscapePath;
 
       //! best attack path
-      QList<QPoint> mBestAttackPath;
+      QList<Point> mBestAttackPath;
 
       //! score field
       int* mFieldScores; // [13 * 11];
@@ -373,16 +375,16 @@ class ProtoBot : public Bot
       int* mHazardousTemorary;
 
       //! bomb drop position
-      QPoint mBombStonePosition;
+      Point mBombStonePosition;
 
       //! previous bomb drop position
-      QPoint mBombStonePositionPrevious;
+      Point mBombStonePositionPrevious;
 
       //! attack bomb drop position
-      // QPoint mAttackBombDropPosition;
+      // Point mAttackBombDropPosition;
 
       //! list of possible attack bomb drop positions
-      // QList<QPoint> mAttackBombDropPositions;
+      // QList<Point> mAttackBombDropPositions;
 
       //! every bot has a character that defines the action's scores
       BotCharacter* mBotCharacter;
@@ -394,16 +396,16 @@ class ProtoBot : public Bot
       ProtoBotInsults* mInsults;
 
       //! list of enemy positions (updated by scoreForAttack)
-      QList<QPoint> mEnemyPositions;
+      QList<Point> mEnemyPositions;
 
       //! list of shake extras
       QList<int> mExtraShakeIds;
 
       //! direction vectors
-      QList<QPoint> mDirections;
+      QList<Point> mDirections;
 
       //! last target position
-      QPoint mLastTarget;
+      Point mLastTarget;
 
       //! bomb chain reaction evaluation
       BombChainReaction* mBombChainReaction;
@@ -414,7 +416,7 @@ class ProtoBot : public Bot
       //! idle counter
       int mIdle;
 
-      QQueue<QPoint> mLastPositions;
+      std::deque<Point> mLastPositions;
 
 
       // scoring

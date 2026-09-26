@@ -2,15 +2,15 @@
 #define BOMBKICKANIMATION_H
 
 // Qt
-#include <QMap>
 #include <QObject>
-#include <QPoint>
 
 // shared
 #include "constants.h"
+#include "point.h"
 #include "signal.h"
 
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 // forward declarations
@@ -174,7 +174,7 @@ protected:
    BombMapItem* mBombMapItem;
 
    //! player positions to collide with
-   QMap<int, QPoint> mPlayerPositions;
+   std::unordered_map<int, Point> mPlayerPositions;
 
    //! run in the destructor - see addDestroyCallback()
    std::vector<std::function<void()>> mDestroyCallbacks;
