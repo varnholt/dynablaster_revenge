@@ -60,8 +60,6 @@
 // qt
 #include <QDir>
 #include <QKeyEvent>
-#include <QThread>
-
 // SDL
 #include <SDL3_net/SDL_net.h>
 
@@ -133,10 +131,7 @@ BombermanClient::~BombermanClient()
    mInstance = nullptr;
    clearPlayerInfoMap();
 
-   if (mServer)
-   {
-      mServer->thread()->exit(0);
-   }
+   delete mServer;
 }
 
 //-----------------------------------------------------------------------------
@@ -2106,19 +2101,14 @@ void BombermanClient::host()
 {
    if (!mServer)
    {
-      QThread* thread = new QThread(this);
-
       mServer = new Server();
 
       if (mServer->isListening())
       {
-         // Server's poll QTimer must be started on the thread it will actually run on -
-         // starting it before moveToThread() leaves it ticking against this (the wrong)
-         // thread's event dispatcher, so it never fires once moved.
-         connect(thread, SIGNAL(started()), mServer, SLOT(startPolling()));
-
-         mServer->moveToThread(thread);
-         thread->start();
+         // Server and BombermanClient are both poll-based now, so there's no reason left to
+         // run the embedded server on its own thread - it ticks via its own QTimer on this
+         // (the main) thread, same as before, just without the moveToThread() hop.
+         mServer->startPolling();
 
          emit hosting(true);
       }
@@ -2126,7 +2116,6 @@ void BombermanClient::host()
       {
          HelpManager::getInstance()->addMessage("", TEXT_ERROR_UNABLE_TO_BIND, Constants::HelpSeverityError);
 
-         delete thread;
          delete mServer;
          mServer = nullptr;
       }
