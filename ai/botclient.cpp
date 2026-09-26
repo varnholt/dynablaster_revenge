@@ -899,15 +899,11 @@ void BotClient::processMapItemMove(Packet* packet)
 */
 MapItem* BotClient::getMapItem(int id) const
 {
-   mMutex.lock();
-
    MapItem* item = 0;
 
    QMap<int, MapItem*>::ConstIterator it = mMapItems.constFind(id);
    if (it != mMapItems.constEnd())
       item = it.value();
-
-   mMutex.unlock();
 
    return item;
 }
@@ -918,9 +914,7 @@ MapItem* BotClient::getMapItem(int id) const
 */
 void BotClient::addMapItem(MapItem* mapItem)
 {
-   mMutex.lock();
    mMapItems.insert(mapItem->getUniqueId(), mapItem);
-   mMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------
@@ -930,10 +924,8 @@ void BotClient::addMapItem(MapItem* mapItem)
 void BotClient::removeMapItem(MapItem* mapItem)
 {
    // delete item and take it from the mapitem-map
-   mMutex.lock();
    mMapItems.remove(mapItem->getUniqueId());
    mapItem->deleteLater();
-   mMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------
@@ -1448,9 +1440,7 @@ void BotClient::processExtraShake(Packet* packet)
 */
 void BotClient::queueObsoleteItem(MapItem* item)
 {
-   mMutex.lock();
    mObsoleteMapItems << item;
-   mMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------
@@ -1458,16 +1448,8 @@ void BotClient::queueObsoleteItem(MapItem* item)
  */
 void BotClient::clearObsoleteItems()
 {
-   mMutex.lock();
    mObsoleteMapItems.clear();
-   mMutex.unlock();
 }
-
-/*
-   deleteObsoleteMapItems is accessed by another thread, so every member
-   used in there is protected by a mutex in order to avoid race conditions
-
-*/
 
 //-----------------------------------------------------------------------------
 /*!
@@ -1475,9 +1457,7 @@ void BotClient::clearObsoleteItems()
 */
 void BotClient::deleteObsoleteMapItems()
 {
-   mMutex.lock();
    QQueue<MapItem*> items = mObsoleteMapItems;
-   mMutex.unlock();
 
    foreach (MapItem* item, items)
    {

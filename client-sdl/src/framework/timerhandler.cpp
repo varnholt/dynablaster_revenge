@@ -1,5 +1,4 @@
 #include "timerhandler.h"
-#include <QMutexLocker>
 
 TimerHandler::TimerHandler()
 {
@@ -7,7 +6,6 @@ TimerHandler::TimerHandler()
 
 TimerHandler::~TimerHandler()
 {
-   QMutexLocker lock(&mMutex);
    std::unordered_set<FrameTimer*>::iterator it;
    it = mTimers.begin();
    while (it != mTimers.end())
@@ -22,14 +20,12 @@ void TimerHandler::addTimer(FrameTimer* timer)
 {
    if (timer)
    {
-      QMutexLocker lock(&mMutex);
       mTimers.insert(timer);
    }
 }
 
 void TimerHandler::removeTimer(FrameTimer* timer)
 {
-   QMutexLocker lock(&mMutex);
    mTimers.erase(timer);
 }
 
@@ -42,17 +38,13 @@ void TimerHandler::update()
 
       if (timer && timer->update())
       {
-         mMutex.lock();
          it = mTimers.erase(it);
-         mMutex.unlock();
          if (timer->mDelete)
             delete timer;
       }
       else
       {
-         mMutex.lock();
          it++;
-         mMutex.unlock();
       }
    }
 }

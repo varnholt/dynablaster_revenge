@@ -3,7 +3,6 @@
 
 // Qt
 #include <QMap>
-#include <QMutex>
 #include <QObject>
 #include <QQueue>
 #include <QTime>
@@ -287,9 +286,6 @@ private:
 
    //! reset walk count
    void resetWalkCount();
-
-   //! mapitem mutex
-   mutable QMutex mMutex;
 
    //! stream socket to server, null unless connected or connecting
    NET_StreamSocket* mSocket;

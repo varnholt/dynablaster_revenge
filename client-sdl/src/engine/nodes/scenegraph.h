@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <QMutex>
 #include "node.h"
 #include "tools/array.h"
 
@@ -70,7 +69,6 @@ private:
    void setNodeStartIndex(int index);
 
 private:
-   mutable QMutex mMutex;
    Array<Node*> mNodes;          // array containing all nodes to avoid tree traversal
    Array<Material*> mMaterials;  // materials
    Camera* mCamera;              // camera (currently active)

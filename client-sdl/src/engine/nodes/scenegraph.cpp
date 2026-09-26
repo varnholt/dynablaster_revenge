@@ -14,7 +14,6 @@
 #include "gldevice.h"
 
 #include <math.h>
-#include <QMutexLocker>
 
 SceneGraph* SceneGraph::mInstance = 0;
 
@@ -56,13 +55,11 @@ void SceneGraph::setGlobalTransform(const Matrix& matrix)
 
 int SceneGraph::getMaterialStartIndex() const
 {
-   QMutexLocker lock(&mMutex);
    return mMaterialStartIndex;
 }
 
 void SceneGraph::setMaterialStartIndex(int index)
 {
-   QMutexLocker lock(&mMutex);
    mMaterialStartIndex = index;
 }
 
@@ -78,19 +75,16 @@ Material* SceneGraph::getMaterial(int index) const
 
 int SceneGraph::getNodeStartIndex() const
 {
-   QMutexLocker lock(&mMutex);
    return mNodeStartIndex;
 }
 
 void SceneGraph::setNodeStartIndex(int index)
 {
-   QMutexLocker lock(&mMutex);
    mNodeStartIndex = index;
 }
 
 const Array<Node*>& SceneGraph::nodeList() const
 {
-   QMutexLocker lock(&mMutex);
    return mNodes;
 }
 
@@ -103,33 +97,28 @@ int SceneGraph::getLastFrame() const
 // get number of nodes
 int SceneGraph::size()
 {
-   QMutexLocker lock(&mMutex);
    return mNodes.size();
 }
 
 void SceneGraph::addNode(Node* node)
 {
-   QMutexLocker lock(&mMutex);
    mNodes.add(node);
 }
 
 void SceneGraph::removeNode(Node* node)
 {
-   QMutexLocker lock(&mMutex);
    mNodes.remove(node);
 }
 
 // get node by index id
 Node* SceneGraph::getNode(int index)
 {
-   QMutexLocker lock(&mMutex);
    return mNodes.get(index);
 }
 
 // get node by index id
 Node* SceneGraph::getNode(const String& name)
 {
-   QMutexLocker lock(&mMutex);
    int num = mNodes.size();
    for (int i = 0; i < num; i++)
    {
@@ -143,14 +132,12 @@ Node* SceneGraph::getNode(const String& name)
 // get current camera node
 Node* SceneGraph::getCamera()
 {
-   QMutexLocker lock(&mMutex);
    return (Node*)mCamera;
 }
 
 // set n-th camera
 void SceneGraph::setCamera(Node* cam)
 {
-   QMutexLocker lock(&mMutex);
    if (cam && cam->id() != idCamera)
       cam = 0;
    mCamera = (Camera*)cam;
@@ -232,19 +219,16 @@ void SceneGraph::writeMaterials(Stream* stream)
 
 void SceneGraph::addMaterial(Material* mat)
 {
-   QMutexLocker lock(&mMutex);
    mMaterials.add(mat);
 }
 
 void SceneGraph::removeMaterial(Material* mat)
 {
-   QMutexLocker lock(&mMutex);
    mMaterials.remove(mat);
 }
 
 void SceneGraph::linkMaterials(Mesh* mesh)
 {
-   QMutexLocker lock(&mMutex);
    int num = mesh->getPartCount();
    for (int i = 0; i < num; i++)
    {
@@ -645,7 +629,6 @@ void SceneGraph::prepare()
 
 void SceneGraph::render(float frame, const Matrix& shake)
 {
-   QMutexLocker lock(&mMutex);
 
    //   glFinish();
 
@@ -719,6 +702,5 @@ void SceneGraph::render(float frame, const Matrix& shake)
 
 void SceneGraph::setFlags(int flags)
 {
-   QMutexLocker lock(&mMutex);
    mFlags = flags;
 }

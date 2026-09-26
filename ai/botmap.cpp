@@ -59,7 +59,6 @@ BotMap::~BotMap()
 */
 MapItem *BotMap::getItem(int x, int y) const
 {
-   QMutexLocker locker(&mMutex);
    return Map::getItem(x, y);
 }
 
@@ -72,7 +71,6 @@ MapItem *BotMap::getItem(int x, int y) const
 */
 void BotMap::setItem(int x, int y, MapItem * item)
 {
-   QMutexLocker locker(&mMutex);
    Map::setItem(x, y, item);
 }
 

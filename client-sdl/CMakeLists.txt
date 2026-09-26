@@ -17,11 +17,11 @@ if (MSVC)
     string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF")
 endif()
 
-# Material still derives from QObject (hot-reload via QFileSystemWatcher) and a couple of
-# QMap/QMutex uses survive in the ported engine core. That Qt dependency is intentionally kept
-# for now - see the phase split in README.md - and gets stripped in a later pass once the
-# renderer itself is fully off fixed-function GL. It will have to go before this can ever target
-# a Qt-less platform (e.g. Switch), which is the actual reason GLES3 was picked in the first place.
+# Material still derives from QObject, and QMap/QString/QList uses survive throughout the ported
+# engine core. That Qt dependency is intentionally kept for now - see the phase split in
+# README.md - and gets stripped in a later pass once the renderer itself is fully off
+# fixed-function GL. It will have to go before this can ever target a Qt-less platform (e.g.
+# Switch), which is the actual reason GLES3 was picked in the first place.
 #
 # The menu system additionally needs Qt6::Gui (QImage, QMouseEvent, QKeyEvent, QColor, ...) -
 # none of that is windowing-toolkit-specific, it's just Qt's basic value types for images/events,

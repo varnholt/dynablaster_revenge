@@ -8,7 +8,6 @@
 #include "constants.h"
 
 // Qt
-#include <QMutex>
 #include <QObject>
 #include <QGenericMatrix>
 
@@ -176,9 +175,6 @@ class BotMap : public QObject, public Map
 
       //! list of reachable extra positions
       QList<Point> mReachableExtras;
-
-      //! serialize member access
-      mutable QMutex mMutex;
 };
 
 #endif // BOTMAP_H
