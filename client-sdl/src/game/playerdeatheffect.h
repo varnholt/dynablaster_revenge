@@ -5,7 +5,8 @@
 
 #include "image/image.h"
 
-#include <QList>
+#include <memory>
+#include <vector>
 
 class DeathFlowFieldAnimation;
 class Material;
@@ -28,7 +29,7 @@ public:
    void render();
 
 private:
-   QList<DeathFlowFieldAnimation*> mFlowAnimations;
+   std::vector<std::unique_ptr<DeathFlowFieldAnimation>> mFlowAnimations;
 
    unsigned int mParticleTextureId;
    unsigned int mFlowFieldTextureId;

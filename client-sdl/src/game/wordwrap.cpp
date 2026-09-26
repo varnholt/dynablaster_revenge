@@ -8,13 +8,13 @@
    \param allowedCharsPerLine allowed chars per line
    \return wrapped lines
 */
-QList<QString> WordWrap::wrap(
+std::vector<QString> WordWrap::wrap(
    const QString &line,
    int allowedCharsPerLine
 )
 {
    QString trimmed = line.trimmed();
-   QList<QString> result;
+   std::vector<QString> result;
 
    QStringList split = trimmed.split(" ");
 
@@ -49,13 +49,13 @@ QList<QString> WordWrap::wrap(
       }
       else
       {
-         result.append(tmpLine.trimmed());
+         result.push_back(tmpLine.trimmed());
          tmpLine = nextWord;
       }
    }
 
    if (!tmpLine.isEmpty())
-      result.append(tmpLine.trimmed());
+      result.push_back(tmpLine.trimmed());
 
    return result;
 }

@@ -69,14 +69,14 @@ void GameMessagingDrawable::messageReceived(int /*senderId*/, const QString& tex
 
       if (typingFinished)
       {
-         QList<QString> lines = WordWrap::wrap(text, CLIENT_MESSAGE_TEXT_MAXIMUM);
+         std::vector<QString> lines = WordWrap::wrap(text, CLIENT_MESSAGE_TEXT_MAXIMUM);
 
          // prepend nick to other lines if available
          QStringList processedLines;
          QString message = lines.at(0);
          processedLines.push_back(message);
 
-         if (lines.length() > 1)
+         if (lines.size() > 1)
          {
             int startIndex = message.indexOf(":");
             if (startIndex != -1)

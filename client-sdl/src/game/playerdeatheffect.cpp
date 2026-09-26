@@ -80,7 +80,6 @@ PlayerDeathEffect::~PlayerDeathEffect()
 
 void PlayerDeathEffect::clear()
 {
-   qDeleteAll(mFlowAnimations);
    mFlowAnimations.clear();
 }
 
@@ -115,7 +114,7 @@ void PlayerDeathEffect::add(Material* material)
 
    material->getBoundingRect(min, max, proj);
 
-   DeathFlowFieldAnimation* animation = new DeathFlowFieldAnimation();
+   auto animation = std::make_unique<DeathFlowFieldAnimation>();
    animation->setCenter(center);
 
    animation->initialize(mDeferredBuffer, min, max);
@@ -135,7 +134,7 @@ void PlayerDeathEffect::add(Material* material)
 
    FrameBuffer::pop();
 
-   mFlowAnimations << animation;
+   mFlowAnimations.push_back(std::move(animation));
 }
 
 void PlayerDeathEffect::animate(float delta)
@@ -159,11 +158,10 @@ void PlayerDeathEffect::animate(float delta)
 
    for (auto it = mFlowAnimations.begin(); it != mFlowAnimations.end();)
    {
-      DeathFlowFieldAnimation* flow = *it;
+      DeathFlowFieldAnimation* flow = it->get();
       if (flow->isElapsed())
       {
          it = mFlowAnimations.erase(it);
-         delete flow;
       }
       else
       {
@@ -211,7 +209,7 @@ void PlayerDeathEffect::render()
    if (fb)
       sizeFactor = fb->getSizeFactor(1920.0f);
 
-   for (DeathFlowFieldAnimation* flow : mFlowAnimations)
+   for (const auto& flow : mFlowAnimations)
    {
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, flow->getColorMap());

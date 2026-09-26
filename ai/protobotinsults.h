@@ -2,10 +2,11 @@
 #define PROTOBOTINSULTS_H
 
 // Qt
-#include <QList>
 #include <QObject>
 #include <QString>
 #include <QTimer>
+
+#include <vector>
 
 class ProtoBotInsults : public QObject
 {
@@ -27,7 +28,7 @@ protected slots:
 
 protected:
 
-   QList<QString> mInsults;
+   std::vector<QString> mInsults;
    
 };
 

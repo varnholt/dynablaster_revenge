@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QList>
-
 #include "math/matrix.h"
+
+#include <memory>
+#include <vector>
 
 class Detonation;
 
@@ -51,5 +52,5 @@ private:
 
    unsigned int mBoxVertexBuffer;
 
-   QList<Detonation*> mDetonations;
+   std::vector<std::unique_ptr<Detonation>> mDetonations;
 };

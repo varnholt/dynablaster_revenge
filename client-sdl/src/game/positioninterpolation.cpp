@@ -12,6 +12,8 @@
 #include "mapitem.h"
 #include "framework/globaltime.h"
 
+#include <algorithm>
+
 #define MAP_ITEM_MOVE_EPSILON 0.05f
 
 
@@ -79,7 +81,7 @@ void PositionInterpolation::moveMapItem(
    {
       MapItemAnimation* animation = 0;
 
-      if (mMapItems.contains(item))
+      if (std::find(mMapItems.begin(), mMapItems.end(), item) != mMapItems.end())
       {
          animation = mMapItemAnimations[item];
          animation->reset();
@@ -99,7 +101,7 @@ void PositionInterpolation::moveMapItem(
          );
 
          // store item data
-         mMapItems.append(item);
+         mMapItems.push_back(item);
          mMapItemAnimations.insert(item, animation);
       }
    }
@@ -108,7 +110,9 @@ void PositionInterpolation::moveMapItem(
 
 void PositionInterpolation::removeMapItem(MapItem* item)
 {
-   mMapItems.removeOne(item);
+   auto it = std::find(mMapItems.begin(), mMapItems.end(), item);
+   if (it != mMapItems.end())
+      mMapItems.erase(it);
    delete mMapItemAnimations.take(item);
 }
 

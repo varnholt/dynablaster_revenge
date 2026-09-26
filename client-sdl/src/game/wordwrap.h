@@ -4,13 +4,15 @@
 // Qt
 #include <QStringList>
 
+#include <vector>
+
 
 class WordWrap
 {
 public:
 
    //! word wrap a line
-   static QList<QString> wrap(const QString& line, int allowedCharsPerLine);
+   static std::vector<QString> wrap(const QString& line, int allowedCharsPerLine);
 };
 
 #endif // WORDWRAP_H

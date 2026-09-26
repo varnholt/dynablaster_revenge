@@ -9,6 +9,8 @@
 #include "constants.h"
 #include "framework/frametimer.h"
 
+#include <vector>
+
 // forward declarations
 class BombermanClient;
 class MapItem;
@@ -79,7 +81,7 @@ class PositionInterpolation : public QObject
       FrameTimer mTimer;
 
       //! list of animated mapitems
-      QList<MapItem*> mMapItems;
+      std::vector<MapItem*> mMapItems;
 
       //! map mapitem <-> mapitemanimation
       QMap<MapItem*, MapItemAnimation*> mMapItemAnimations;

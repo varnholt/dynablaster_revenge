@@ -127,13 +127,7 @@ DetonationManager::~DetonationManager()
 
 void DetonationManager::clear()
 {
-   QList<Detonation*>::Iterator it;
-   for (it=mDetonations.begin(); it!=mDetonations.end(); )
-   {
-      Detonation *det= *it;
-      it= mDetonations.erase(it);
-      delete det;
-   }
+   mDetonations.clear();
 }
 
 void DetonationManager::init()
@@ -219,22 +213,21 @@ void DetonationManager::init()
 
 void DetonationManager::addDetonation(int x, int y, int top, int bottom, int left, int right)
 {
-   Detonation *det= new Detonation(x,y+1, left, right, top, bottom);
+   auto det = std::make_unique<Detonation>(x, y + 1, left, right, top, bottom);
    det->setStartTime(mTime);
-   mDetonations.append( det );
+   mDetonations.push_back(std::move(det));
 }
 
 void DetonationManager::update(float time)
 {
    mTime= time;
-   QList<Detonation*>::Iterator it;
+   std::vector<std::unique_ptr<Detonation>>::iterator it;
    for (it=mDetonations.begin(); it!=mDetonations.end(); )
    {
-      Detonation *det= *it;
+      Detonation *det= it->get();
       if (det->elapsed(time) > 2.0f)
       {
          it= mDetonations.erase(it);
-         delete det;
       }
       else
          it++;
@@ -364,7 +357,7 @@ void DetonationManager::drawExplosion(Detonation *det, float time)
 
 void DetonationManager::render()
 {
-   if (mDetonations.isEmpty())
+   if (mDetonations.empty())
       return;
 
    GLDevice* dev= static_cast<GLDevice*>(activeDevice);
@@ -389,9 +382,9 @@ void DetonationManager::render()
    glBindTexture(GL_TEXTURE_2D, mGradientMap);
    dev->bindSampler(mParamGradientMap, 1);
 
-   foreach (Detonation *det, mDetonations)
+   for (const auto& det : mDetonations)
    {
-      drawExplosion(det, mTime);
+      drawExplosion(det.get(), mTime);
    }
 
    dev->setShader(0);

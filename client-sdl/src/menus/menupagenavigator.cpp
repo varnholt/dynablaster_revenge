@@ -568,7 +568,7 @@ void MenuPageNavigator::addLoungeMessage(int senderId, const QString& message)
    if (playerColor == Constants::ColorBlack)
       color = QColor(128, 128, 128, 255);
 
-   const QStringList lines = WordWrap::wrap(message, sayItem->getFieldWidth());
+   const std::vector<QString> lines = WordWrap::wrap(message, sayItem->getFieldWidth());
 
    int i = 0;
    for (const QString& line : lines)
