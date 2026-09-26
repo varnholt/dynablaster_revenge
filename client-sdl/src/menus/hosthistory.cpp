@@ -1,11 +1,10 @@
 // header
 #include "hosthistory.h"
 
-// Qt
-#include <QFile>
-#include <QTextStream>
+#include "stringutils.h"
 
 #include <algorithm>
+#include <fstream>
 
 // defines
 #define HISTORY_FILE "history.dr"
@@ -24,18 +23,18 @@ HostHistory::HostHistory()
 /*!
    \param host host to add to list
 */
-void HostHistory::add(const QString &host)
+void HostHistory::add(const std::string& host)
 {
-   if (!host.isEmpty())
+   if (!host.empty())
    {
       deserialize();
 
-      std::vector<QString> hosts;
+      std::vector<std::string> hosts;
       hosts.push_back(host);
 
       // add all entries from the original host list (skip duplicates,
       // do not exceed max size)
-      for (const QString& tmpHost : mHosts)
+      for (const std::string& tmpHost : mHosts)
       {
          if (tmpHost != host)
          {
@@ -56,9 +55,9 @@ void HostHistory::add(const QString &host)
 /*!
    \return list of hosts
 */
-std::vector<QString> HostHistory::load(const QString& selected)
+std::vector<std::string> HostHistory::load(const std::string& selected)
 {
-   std::vector<QString> hosts;
+   std::vector<std::string> hosts;
 
    deserialize();
    hosts = mHosts;
@@ -75,13 +74,12 @@ std::vector<QString> HostHistory::load(const QString& selected)
 */
 void HostHistory::serialize()
 {
-   QFile file(HISTORY_FILE);
-   if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+   std::ofstream file(HISTORY_FILE);
+   if (file.is_open())
    {
-      QTextStream out(&file);
-      for (const QString& host : mHosts)
+      for (const std::string& host : mHosts)
       {
-         out << host << "\n";
+         file << host << "\n";
       }
    }
 }
@@ -94,17 +92,15 @@ void HostHistory::deserialize()
 {
    mHosts.clear();
 
-   QFile file(HISTORY_FILE);
-   if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+   std::ifstream file(HISTORY_FILE);
+   if (file.is_open())
    {
-      QTextStream in(&file);
-      while (!in.atEnd())
+      std::string line;
+      while (std::getline(file, line))
       {
-          QString line = in.readLine();
-
           if (
                std::find(mHosts.begin(), mHosts.end(), line) == mHosts.end()
-            && !line.trimmed().isEmpty()
+            && !StringUtils::trim(line).empty()
             && mHosts.size() < HISTORY_MAX_ENTRIES
           )
           {
@@ -113,4 +109,3 @@ void HostHistory::deserialize()
       }
    }
 }
-

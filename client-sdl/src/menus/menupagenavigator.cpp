@@ -608,9 +608,9 @@ void MenuPageNavigator::deserializeLoginData()
 
    const QString savedHost = GameSettings::getInstance()->getLoginSettings()->getHost();
 
-   const std::vector<QString> hosts = mHostHistory.load(savedHost);
-   for (const QString& host : hosts)
-      hostCombo->appendItem(host);
+   const std::vector<std::string> hosts = mHostHistory.load(savedHost.toStdString());
+   for (const auto& host : hosts)
+      hostCombo->appendItem(QString::fromStdString(host));
 
    if (nickItem)
       nickItem->setText(GameSettings::getInstance()->getLoginSettings()->getNick());
@@ -644,7 +644,7 @@ void MenuPageNavigator::updateLoginData()
    GameSettings::getInstance()->getLoginSettings()->setHost(host);
    GameSettings::getInstance()->getLoginSettings()->setNick(nick);
 
-   mHostHistory.add(host);
+   mHostHistory.add(host.toStdString());
 }
 
 void MenuPageNavigator::deserializeCreateGameData()
