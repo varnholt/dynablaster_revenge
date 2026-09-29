@@ -180,14 +180,3 @@ in order to see which keys work fine for you.
 - Q: Your bots could be improved in so many ways. Why don't you make
 them better?  
 A: They're not perfect by intention. It makes them more amiable :)
-
-
-# Contact
-
-All kind of bugreports, ideas and suggestions are greatly appreciated.      
-In order to contact us, please send a mail to:
-
-- matthias`[dot]`varnholt`[at]`gmail`[dot]`com or
-- hellfire`[at]`untergrund`[dot]`net or
-- dstarx64`[at]`gmail`[dot]`com
-
